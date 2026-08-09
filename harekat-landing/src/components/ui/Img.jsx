@@ -7,14 +7,14 @@ export default function Img({ src, alt="", className, imageClassName, groupHover
     return (
         <div
             className={cn(
-            'overflow-hidden rounded-lg relative group-hover:rotate-1 hover:rotate-1 transition-all duration-200 ease-standard',
-                className
+                'overflow-hidden rounded-lg relative group-hover:rotate-1 hover:rotate-1 transition-all duration-200 ease-standard',
             )}>
             <img
                 src={src}
                 alt={alt}
                 className={cn(
                     'object-cover',
+                    className,
                     imageClassName
                 )}
                 onMouseEnter={() => setIsHovered(true)}

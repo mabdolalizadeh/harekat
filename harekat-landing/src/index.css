@@ -399,6 +399,25 @@
     }
 }
 
+.marquee-scroll {
+    animation: marquee 150s linear infinite;
+}
+
+.marquee-item {
+    animation: marquee-item-in 0.55s ease-out both;
+}
+
+@keyframes marquee-item-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;

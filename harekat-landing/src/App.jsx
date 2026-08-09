@@ -1,5 +1,4 @@
 import Background from "./components/ui/Background.jsx";
-import sampleImage from './assets/sample.avif';
 
 export default function App() {
   return (
