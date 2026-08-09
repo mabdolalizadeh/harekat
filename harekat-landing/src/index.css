@@ -400,7 +400,11 @@
 }
 
 .marquee-scroll {
-    animation: marquee 150s linear infinite;
+    animation: marquee var(--marquee-speed, 150s) linear infinite;
+}
+
+.marquee-scroll:hover {
+    --marquee-speed: 200s;
 }
 
 .marquee-item {
