@@ -1,11 +1,10 @@
-import Background from "./components/ui/Background.jsx";
+import {Routes, Route} from 'react-router-dom'
+import Landing from "./pages/Landing.jsx";
 
 export default function App() {
   return (
-      <>
-        <Background className={'gap-5'}>
-
-        </Background>
-      </>
+      <Routes>
+          <Route path='/' element={<Landing />} />
+      </Routes>
   )
 }
