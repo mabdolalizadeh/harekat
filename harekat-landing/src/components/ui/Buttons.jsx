@@ -1,5 +1,5 @@
 import {cn} from "../../utils/cn.js";
-import {ArrowLeft} from "lucide-react";
+import {ArrowLeft, ArrowRight} from "lucide-react";
 
 export function PrimaryButton({ children, className, ...props }) {
     return (

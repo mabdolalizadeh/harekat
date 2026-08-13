@@ -1,15 +1,18 @@
 import TopBarLayout from "../layouts/TopBarLayout.jsx";
 import MainLayout from "../layouts/MainLayout.jsx";
+import {motion} from "motion/react";
 import Chip from "../components/ui/Chip.jsx";
 import Box from "../components/ui/Box.jsx";
-import {H1, H2} from "../components/ui/Headings.jsx";
+import {H1, H2, H3} from "../components/ui/Headings.jsx";
 import {ArrowButton} from "../components/ui/Buttons.jsx";
 import MarqueeLayout from "../layouts/MarqueeLayout.jsx";
 import {useNavigate} from "react-router-dom";
 import cameraImg from '../assets/marquee/black-camera-lens-brown-wooden-table.jpg';
 import lightImg from '../assets/marquee/bright-flashlight-beam-cutting-through-dark-background-with-dramatic-lighting-effect.jpg';
 import micImg from '../assets/marquee/closeup-shot-condenser-microphone-with-pop-filter-blurred.jpg'
+import editorImg from '../assets/marquee/empty-desk-equipped-with-mixing-console-music-recording-tools-home-studio.jpg';
 import codeImg from '../assets/marquee/side-shot-code-editor-using-react-js.jpg';
+import laptopImg from '../assets/marquee/woman-working-from-home-laptop.jpg';
 import Img from "../components/ui/Img.jsx";
 import {CourseCard} from "../components/contents/Cards.jsx";
 import aiImg from '../assets/courses/bwink_med_10_single_03.jpg';
@@ -20,6 +23,23 @@ import videoImg from '../assets/courses/1910.i309.028.F.m004.c7.cinema film prod
 import marketingImg from '../assets/courses/32718.jpg';
 import wordpressImg from '../assets/courses/4827607.jpg';
 import reactImg from '../assets/courses/side-shot-code-editor-using-react-js.jpg';
+
+const heroVariants = {
+    hidden: {opacity: 0},
+    visible: {
+        opacity: 1,
+        transition: {staggerChildren: 0.12, delayChildren: 0.15},
+    },
+};
+
+const heroItem = {
+    hidden: {opacity: 0, y: 24},
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {duration: 0.6, ease: [0.2, 0, 0, 1]},
+    },
+};
 
 const images = [cameraImg, lightImg, micImg, codeImg];
 
@@ -122,35 +142,40 @@ export default function Landing() {
             <TopBarLayout />
             {/*hero*/}
             <Box id={'hero'} className={'pt-16'}>
-                <div className={'flex flex-col items-center justify-center my-40 w-[50%] gap-8'}>
-                    <div><Chip>مدرسه هنر و مهارت</Chip></div>
-                    <div>
+                <motion.div
+                    className={'flex flex-col items-center justify-center my-40 w-[50%] gap-8'}
+                    variants={heroVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    <motion.div variants={heroItem}><Chip>مدرسه هنر و مهارت</Chip></motion.div>
+                    <motion.div variants={heroItem}>
                         <H1 className={'text-7xl text-center leading-tight'}>
                             اینجا فقط یاد<br />نمی‌گیری؛
                         </H1>
-                    </div>
-                    <div>
+                    </motion.div>
+                    <motion.div variants={heroItem}>
                         <H2 className={'text-xl text-center leading-tight'}>
                             حرکت مدیا جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.
                         </H2>
-                    </div>
-                    <div>
+                    </motion.div>
+                    <motion.div variants={heroItem}>
                         <div>
                             <ArrowButton onClick={() => navigate('/#courses')}>
                                 بریم شروع کنیم!
                             </ArrowButton>
                         </div>
-                    </div>
-                    <div className={'overflow-hidden'}>
+                    </motion.div>
+                    <motion.div variants={heroItem} className={'overflow-hidden'}>
                         <MarqueeLayout className={'mt-10'}>
                             {images.map((image, index) => (
-                                <div className={'overflow-hidden'} key={index}>
-                                    <Img src={image} className={'w-40 h-50'} groupHover={true}/>
+                                <div className={'overflow-hidden'}>
+                                    <Img src={image} key={index} className={'w-40 h-50'} groupHover={true}/>
                                 </div>
                             ))}
                         </MarqueeLayout>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             </Box>
 
             {/*courses*/}
@@ -163,9 +188,20 @@ export default function Landing() {
                 </H2>
 
                 {/*fix here*/}
-                <div className="grid grid-cols-4 gap-5 w-full">
-                    {courses.map((course) => (
-                        <div key={course.title}>
+                <motion.div
+                    className="grid grid-cols-4 gap-5 w-full"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.1 }}
+                >
+                    {courses.map((course, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: index * 0.08 }}
+                        >
                             <CourseCard
                                 title={course.title}
                                 imgSrc={course.imgSrc}
@@ -177,9 +213,9 @@ export default function Landing() {
                                 price={course.price}
                                 registrationStatus={course.registrationStatus}
                             />
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             </Box>
         </MainLayout>
     )
