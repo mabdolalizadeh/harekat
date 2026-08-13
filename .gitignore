@@ -12,6 +12,13 @@ build/
 .next/
 out/
 
+# Images
+**/*.jpg
+**/*.jpeg
+**/*.png
+**/*.webp
+**/*.avif
+
 # Logs
 *.log
 npm-debug.log*
