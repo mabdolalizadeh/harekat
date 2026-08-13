@@ -1,9 +1,7 @@
 import {cn} from "../../utils/cn.js";
 import {ArrowUpRight} from "lucide-react";
-import {useState} from "react";
 
 export default function Img({ src, alt="", className, imageClassName, groupHover=false, ...rest }) {
-    const [isHovered, setIsHovered] = useState(false);
     return (
         <div
             className={cn(
@@ -17,11 +15,9 @@ export default function Img({ src, alt="", className, imageClassName, groupHover
                     className,
                     imageClassName
                 )}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
                 {...rest}
             />
-            {isHovered && !groupHover &&
+            {!groupHover &&
                 <div
                 className={cn(
                     'absolute bg-black text-brand-400 rounded-full',

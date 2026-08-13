@@ -1,8 +1,7 @@
 import {cn} from "../../utils/cn.js";
 import Img from "../ui/Img.jsx";
 import {H1, H2, H3, P} from "../ui/Headings.jsx";
-import {motion} from "motion/react";
-import {ArrowUpRight, Plus} from "lucide-react";
+import {Plus} from "lucide-react";
 import {useState} from "react";
 import Box from "../ui/Box.jsx";
 import Chip from "../ui/Chip.jsx";
@@ -26,23 +25,19 @@ export function ContentCard({title, subtitle, className}) {
 }
 
 export function ImageCard({src, alt='', title, subtitle, className, photoHoverText='', ...props }) {
-    const [isHovered, setIsHovered] = useState(false);
     return (
-        <motion.div
-            whileHover={{ scale: 1.02 }}
+        <div
             className={cn(
                 'bg-ink-800 flex flex-col justify-center gap-5 p-2 rounded-lg w-81.5 hover:bg-brand-300/10',
                 'group',
                 'transition-all duration-200 ease-standard',
                 className
             )}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
             {...props}
         >
             <div className={'relative'}>
                 <Img src={src} alt={alt} groupHover={true} />
-                {isHovered &&
+                {photoHoverText &&
                     <div
                         className={cn(
                             'absolute bg-ink-900 py-1 px-2 text-white rounded-full',
@@ -62,7 +57,7 @@ export function ImageCard({src, alt='', title, subtitle, className, photoHoverTe
             >
                 {subtitle}
             </div>
-        </motion.div>
+        </div>
     )
 }
 
@@ -122,23 +117,19 @@ export function CourseCard({
     ...props
                            }) {
 
-    const [isHovered, setIsHovered] = useState(false);
     return (
-        <motion.div
-            whileHover={{ scale: 1.02 }}
+        <div
             className={cn(
                 'bg-ink-800 flex flex-col justify-center gap-4 p-2 rounded-lg w-100 hover:bg-brand-300/10',
                 'group',
                 'transition-all duration-200 ease-standard',
                 className
             )}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
             {...props}
         >
             <div className={'relative'}>
                 <Img src={imgSrc} groupHover={true} className={'h-52 w-full'} />
-                {isHovered &&
+                {category &&
                     <div
                         className={cn(
                             'absolute bg-ink-900 py-1 px-2 text-white rounded-full',
@@ -163,6 +154,6 @@ export function CourseCard({
             >
                 {teacher}
             </H3>
-        </motion.div>
+        </div>
     )
 }
