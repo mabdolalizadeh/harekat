@@ -18,7 +18,7 @@ export function H2({ children, className, ...props }) {
     return (
         <h2
             className={cn(
-                'text-[clamp(1.75rem,calc(4vw+1rem),3.25rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-balance',
+                'text-xl font-extrabold leading-[1.05] tracking-[-0.04em] text-balance',
                 className
             )}
             {...props}

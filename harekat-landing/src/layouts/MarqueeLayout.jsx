@@ -1,4 +1,4 @@
-
+ 
 export default function MarqueeLayout({
                                   children,
                                   repeat = 2,
@@ -10,7 +10,6 @@ export default function MarqueeLayout({
                               }) {
     const items = Array.isArray(children) ? children : [children];
     const group = Array.from({ length: repeat }, () => items).flat();
-    // duplicate the whole group once more so translateX(-50%) loops seamlessly
     const track = [...group, ...group];
 
     return (
@@ -32,10 +31,11 @@ export default function MarqueeLayout({
                 style={{
                     "--marquee-duration": `${speed}s`,
                     animationDirection: direction === "right" ? "reverse" : "normal",
+                    willChange: "transform",
                 }}
             >
                 {track.map((child, i) => (
-                    <div key={i} className="marquee-item shrink-0">
+                    <div key={i} className="marquee-item shrink-0" style={{ contain: "layout style paint" }}>
                         {child}
                     </div>
                 ))}
@@ -44,25 +44,29 @@ export default function MarqueeLayout({
             <style>{`
                 .marquee-track {
                     animation: marquee-scroll var(--marquee-duration) linear infinite;
+                    backface-visibility: hidden;
+                    transform: translate3d(0, 0, 0);
                 }
                 ${pauseOnHover ? ".marquee-track:hover { animation-play-state: paused; }" : ""}
                 @keyframes marquee-scroll {
-                    from { transform: translateX(0); }
-                    to { transform: translateX(-50%); }
+                    from { transform: translate3d(0, 0, 0); }
+                    to { transform: translate3d(-50%, 0, 0); }
                 }
                 .marquee-item {
                     opacity: 0.5;
                     filter: saturate(0.65);
-                    transition: opacity .4s ease, filter .4s ease, transform .4s cubic-bezier(.22,1,.36,1);
+                    transition: opacity .4s ease, transform .4s cubic-bezier(.22,1,.36,1);
+                    backface-visibility: hidden;
+                    transform: translate3d(0, 0, 0);
                 }
                 .marquee-track:hover .marquee-item {
                     opacity: 0.28;
-                    filter: saturate(0.35) blur(0.3px);
+                    filter: saturate(0.35);
                 }
                 .marquee-item:hover {
                     opacity: 1 !important;
                     filter: saturate(1) !important;
-                    transform: translateY(-3px) scale(1.06);
+                    transform: translate3d(0, -3px, 0) scale(1.06);
                 }
                 @media (prefers-reduced-motion: reduce) {
                     .marquee-track { animation: none; }

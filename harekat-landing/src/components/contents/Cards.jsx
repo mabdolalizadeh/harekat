@@ -1,9 +1,11 @@
 import {cn} from "../../utils/cn.js";
 import Img from "../ui/Img.jsx";
-import {H1, P} from "../ui/Headings.jsx";
+import {H1, H2, H3, P} from "../ui/Headings.jsx";
 import {motion} from "motion/react";
 import {ArrowUpRight, Plus} from "lucide-react";
 import {useState} from "react";
+import Box from "../ui/Box.jsx";
+import Chip from "../ui/Chip.jsx";
 
 export function ContentCard({title, subtitle, className}) {
     return (
@@ -103,5 +105,64 @@ export function AccordionCard({title, content, className, ...props }) {
                 </div>
             </div>
         </div>
+    )
+}
+
+export function CourseCard({
+    title,
+    imgSrc,
+    category,
+    level,
+    duration,
+    courseType,
+    teacher,
+    price,
+    registrationStatus,
+    className,
+    ...props
+                           }) {
+
+    const [isHovered, setIsHovered] = useState(false);
+    return (
+        <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={cn(
+                'bg-ink-800 flex flex-col justify-center gap-4 p-2 rounded-lg w-100 hover:bg-brand-300/10',
+                'group',
+                'transition-all duration-200 ease-standard',
+                className
+            )}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            {...props}
+        >
+            <div className={'relative'}>
+                <Img src={imgSrc} groupHover={true} className={'h-52 w-full'} />
+                {isHovered &&
+                    <div
+                        className={cn(
+                            'absolute bg-ink-900 py-1 px-2 text-white rounded-full',
+                            'top-[45%] right-[38%]',
+                            'flex items-center justify-center'
+                        )}
+                    >
+                        {category}
+                    </div>
+                }
+            </div>
+            <H2 className={'w-[90%] font-bold'}>
+                {title}
+            </H2>
+            <Box className={'flex-row flex-wrap justify-start items-start gap-2'}>
+                {[level, duration, price, courseType, registrationStatus].map((item, i) => (
+                    <Chip key={i}>{item}</Chip>
+                ))}
+            </Box>
+            <H3
+                className="text-ink-600 font-semibold group-hover:text-ink-400 transition-all duration-200 ease-in-out"
+            >
+                {teacher}
+            </H3>
+        </motion.div>
     )
 }

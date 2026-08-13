@@ -26,8 +26,8 @@ export default function TopBarLayout() {
         },
     ]
     return (
-            <div className={'fixed top-10 z-20 w-[95%]'}>
-                <div className="relative flex h-16 w-full items-center justify-between px-5 pb-2 border-b border-b-ink-600 backdrop-blur-2xl">
+            <div className={'fixed top-0 pt-15 z-20 w-[95%] bg-ink-950/80 backdrop-blur-sm'}>
+                <div className="relative flex w-full items-center justify-between px-5 pb-2 border-b border-b-ink-600 ">
                 {/*links*/}
                 <div className={'flex gap-3 items-center justify-center'}>
                     {topBarLinks.map((item, index) => (
