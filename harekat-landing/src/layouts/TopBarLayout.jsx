@@ -58,7 +58,7 @@ export default function TopBarLayout() {
                     'mx-auto max-w-[var(--container-8xl)] px-[clamp(1.5rem,5vw,7.5rem)] py-3',
                     'transition-all duration-300',
                     scrolled
-                        ? 'bg-ink-950/70 backdrop-blur-xl shadow-lg shadow-black/10 border-b border-ink-50/5 rounded-b-[var(--radius-xl)]'
+                        ? 'bg-ink-950/70 backdrop-blur-xl shadow-sm shadow-black/10 border-b border-ink-50/5 rounded-[var(--radius-xl)]'
                         : 'bg-transparent'
                 )}
             >
@@ -70,7 +70,7 @@ export default function TopBarLayout() {
                         transition={{duration: 0.3, ease: 'easeInOut', delay: 0.1}}
                     >
                         <Logo
-                            className={'h-8 cursor-pointer hover:opacity-80 transition-opacity duration-200'}
+                            className={'h-15 invert cursor-pointer hover:opacity-80 transition-opacity duration-200'}
                             onClick={() => {
                                 navigate('/');
                                 setTimeout(() => scrollToId('hero'), 100);
