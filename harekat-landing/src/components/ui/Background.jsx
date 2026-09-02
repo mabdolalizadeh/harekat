@@ -6,7 +6,7 @@ export default function Background({children, className}) {
             className={cn(
                 'flex flex-col items-center justify-center',
                 'w-full min-h-screen',
-                'bg-ink-950',
+                'bg-background',
                 className
             )}
         >

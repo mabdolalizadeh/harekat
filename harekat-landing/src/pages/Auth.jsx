@@ -96,10 +96,10 @@ export default function Auth() {
 
             <Box className={'pt-40 pb-24 gap-8 min-h-[70vh]'}>
                 <SectionTag>ورود / ثبت نام</SectionTag>
-                <H1 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[500px]'}>
+                <H1 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[500px]'}>
                     {step === 'phone' ? 'شماره تلفنت رو وارد کن' : 'کد تایید رو وارد کن'}
                 </H1>
-                <P className={'text-center text-ink-400 max-w-[400px] text-sm'}>
+                <P className={'text-center text-muted max-w-[400px] text-sm'}>
                     {step === 'phone'
                         ? 'یک کد تایید به شماره‌ات ارسال می‌شه'
                         : `کد ۶ رقمی به ${phone} ارسال شد`
@@ -116,7 +116,7 @@ export default function Auth() {
                     {step === 'phone' ? (
                         <form onSubmit={handleRequestOtp} className={'flex flex-col gap-4'}>
                             <div className={'relative'}>
-                                <Phone size={18} className={'absolute right-4 top-1/2 -translate-y-1/2 text-ink-500'}/>
+                                <Phone size={18} className={'absolute right-4 top-1/2 -translate-y-1/2 text-muted'}/>
                                 <input
                                     type={'tel'}
                                     value={phone}
@@ -124,7 +124,7 @@ export default function Auth() {
                                     placeholder={'09123456789'}
                                     dir={'ltr'}
                                     className={
-                                        'w-full bg-ink-900 border border-ink-50/10 rounded-[var(--radius-md)] pr-12 pl-4 py-3.5 text-ink-50 text-sm placeholder:text-ink-600 focus:outline-none focus:border-ink-50/30 transition-colors'
+                                        'w-full bg-card border border-[var(--border)] rounded-[var(--radius-md)] pr-12 pl-4 py-3.5 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors'
                                     }
                                 />
                             </div>
@@ -140,7 +140,7 @@ export default function Auth() {
                     ) : (
                         <form onSubmit={handleSubmitOtp} className={'flex flex-col gap-4'}>
                             <div className={'relative'}>
-                                <KeyRound size={18} className={'absolute right-4 top-1/2 -translate-y-1/2 text-ink-500'}/>
+                                <KeyRound size={18} className={'absolute right-4 top-1/2 -translate-y-1/2 text-muted'}/>
                                 <input
                                     type={'text'}
                                     value={otp}
@@ -149,7 +149,7 @@ export default function Auth() {
                                     dir={'ltr'}
                                     maxLength={6}
                                     className={
-                                        'w-full bg-ink-900 border border-ink-50/10 rounded-[var(--radius-md)] pr-12 pl-4 py-3.5 text-ink-50 text-sm placeholder:text-ink-600 focus:outline-none focus:border-ink-50/30 transition-colors tracking-widest text-center text-lg'
+                                        'w-full bg-card border border-[var(--border)] rounded-[var(--radius-md)] pr-12 pl-4 py-3.5 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors tracking-widest text-center text-lg'
                                     }
                                 />
                             </div>
@@ -164,7 +164,7 @@ export default function Auth() {
                             <button
                                 type={'button'}
                                 onClick={() => { setStep('phone'); setError(''); setOtp(''); }}
-                                className={'flex items-center justify-center gap-2 text-ink-500 text-xs hover:text-ink-300 transition-colors'}
+                                className={'flex items-center justify-center gap-2 text-muted text-xs hover:text-foreground/70 transition-colors'}
                             >
                                 <ArrowLeft size={14}/>
                                 تغییر شماره تلفن
@@ -184,7 +184,7 @@ export default function Auth() {
                         <Zap size={14}/>
                         ورود سریع (Dev)
                     </SecondaryButton>
-                    <P className={'text-ink-600 text-xs text-center'}>
+                    <P className={'text-muted text-xs text-center'}>
                         09123456789 · کد: 299510
                     </P>
                 </div>

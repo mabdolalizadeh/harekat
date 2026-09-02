@@ -230,6 +230,48 @@
     --hero-glow: rgb(255 163 63 / 0.13);
 }
 
+/* Manual light mode: <html class="light"> */
+.light {
+    color-scheme: light;
+
+    --background: #f7f5f0;
+    --foreground: #171715;
+
+    --surface: #ffffff;
+    --surface-raised: #ffffff;
+    --surface-muted: #efede7;
+    --surface-inverse: #171715;
+
+    --card: #ffffff;
+    --card-foreground: #171715;
+
+    --popover: #ffffff;
+    --popover-foreground: #171715;
+
+    --primary: #f47c20;
+    --primary-foreground: #ffffff;
+
+    --secondary: #eceae4;
+    --secondary-foreground: #252522;
+
+    --muted: #eceae4;
+    --muted-foreground: #6b6b63;
+    --text-muted: #6b6b63;
+
+    --accent: #eaf7ff;
+    --accent-foreground: #0b5d86;
+
+    --border: #deddd7;
+    --input: #d7d6cf;
+    --ring: #f47c20;
+
+    --link: #0b71a8;
+    --selection: #ffdda8;
+
+    --hero-grid: rgb(23 23 21 / 0.07);
+    --hero-glow: rgb(244 124 32 / 0.16);
+}
+
 /* =========================================================
    Base
    ========================================================= */
@@ -241,10 +283,18 @@
         border-color: var(--border);
     }
 
+    html.theme-transition,
+    html.theme-transition *,
+    html.theme-transition *::before,
+    html.theme-transition *::after {
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+    }
+
     html {
         min-width: 320px;
         scroll-behavior: smooth;
         background: var(--background);
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     body {
@@ -256,6 +306,7 @@
         font-feature-settings: "kern" 1, "liga" 1;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     ::selection {
@@ -297,6 +348,27 @@
    ========================================================= */
 
 @layer utilities {
+    /* Theme-aware utilities — map to CSS variables so light/dark toggles work */
+    .bg-background { background-color: var(--background); }
+    .bg-surface { background-color: var(--surface); }
+    .bg-surface-raised { background-color: var(--surface-raised); }
+    .bg-surface-muted { background-color: var(--surface-muted); }
+    .bg-surface-inverse { background-color: var(--surface-inverse); }
+    .bg-card { background-color: var(--card); }
+    .bg-accent { background-color: var(--accent); }
+
+    .text-foreground { color: var(--foreground); }
+    .text-primary { color: var(--primary); }
+    .text-primary-foreground { color: var(--primary-foreground); }
+    .text-muted { color: var(--muted-foreground); }
+    .text-accent-foreground { color: var(--accent-foreground); }
+    .text-link { color: var(--link); }
+    .text-danger { color: var(--danger-500); }
+
+    .border-themed { border-color: var(--border); }
+    .border-input { border-color: var(--input); }
+    .ring-themed { --tw-ring-color: var(--ring); }
+
     .text-balance {
         text-wrap: balance;
     }

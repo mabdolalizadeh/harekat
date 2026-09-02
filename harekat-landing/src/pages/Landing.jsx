@@ -202,7 +202,7 @@ const faqItems = [
 const footerLinks = [
     {text: 'خانه', link: '/#hero'},
     {text: 'دوره‌ها', link: '/#courses'},
-    {text: 'تولیدات', link: '/#products'},
+    {text: 'تولیدات', link: '/products'},
     {text: 'درباره ما', link: '/about-us'},
     {text: 'تماس با ما', link: '/contact-us'},
 ];
@@ -215,11 +215,11 @@ export default function Landing() {
             <TopBarLayout />
 
             {/* ============ HERO ============ */}
-            <Box id={'hero'} className={'relative pt-44 pb-20'}>
-                <div className={'absolute inset-0 bg-ink-950 -z-10'}/>
+            <Box id={'hero'} className={'relative pt-36 sm:pt-44 pb-14 sm:pb-20'}>
+                <div className={'absolute inset-0 bg-background -z-10'}/>
 
                 <motion.div
-                    className={'flex flex-col items-center justify-center w-full md:w-[60%] gap-6 md:gap-8'}
+                    className={'flex flex-col items-center justify-center w-full md:w-[60%] gap-5 sm:gap-6 md:gap-8'}
                     variants={heroVariants}
                     initial="hidden"
                     animate="visible"
@@ -229,13 +229,13 @@ export default function Landing() {
                     </motion.div>
 
                     <motion.div variants={heroItem}>
-                        <H1 className={'text-[clamp(3rem,7vw,6rem)] text-center leading-[1.05] text-ink-50'}>
+                        <H1 className={'text-[clamp(2.25rem,7vw,6rem)] text-center leading-[1.05] text-foreground'}>
                             اینجا فقط یاد<br/>نمی‌گیری؛
                         </H1>
                     </motion.div>
 
                     <motion.div variants={heroItem}>
-                        <P className={'text-center text-ink-400 max-w-[540px] text-[clamp(1rem,2vw,1.25rem)]'}>
+                        <P className={'text-center text-muted max-w-[540px] text-[clamp(1rem,2vw,1.25rem)]'}>
                             حرکت مدیا جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.
                         </P>
                     </motion.div>
@@ -250,7 +250,7 @@ export default function Landing() {
                         <MarqueeLayout>
                             {images.map((image, index) => (
                                 <div className={'overflow-hidden'} key={index}>
-                                    <Img src={image} className={'w-40 h-50'} groupHover={true}/>
+                                    <Img src={image} className={'w-28 h-36 sm:w-40 sm:h-50'} groupHover={true}/>
                                 </div>
                             ))}
                         </MarqueeLayout>
@@ -259,12 +259,12 @@ export default function Landing() {
             </Box>
 
             {/* ============ MANIFESTO ============ */}
-            <Box className={'py-24 gap-6'}>
+            <Box className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>درباره ما</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     رسانه عوض می‌شه؛ هنرمند می‌مونه.
                 </H2>
-                <P className={'text-center text-ink-400 max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
+                <P className={'text-center text-muted max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
                     در حرکت مدیا، ما متخصص یک ابزار خاص تربیت نمی‌کنیم. ما هنرمندانی رو آماده می‌کنیم که آزادانه بین فرمت‌ها حرکت کنن. اونچه این حوزه‌ها رو به هم وصل می‌کنه تکنیک نیست، آگاهیه — توانایی دیدن، تفسیر کردن و انتخاب آگاهانه.
                 </P>
             </Box>
@@ -276,14 +276,14 @@ export default function Landing() {
                     whileInView={{opacity: 1, rotate: 2}}
                     viewport={{once: true}}
                     transition={{duration: 0.7, ease: [0.2, 0, 0, 1]}}
-                    className={'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-2xl)] p-8 max-w-[600px] w-full'}
+                    className={'bg-card border border-[var(--border)] rounded-[var(--radius-2xl)] p-8 max-w-full sm:max-w-[600px] w-full'}
                 >
                     <div className={'flex flex-col gap-4'}>
                         <div className={'flex flex-col gap-0.5'}>
-                            <H3 className={'text-ink-50 text-lg font-semibold'}>نیما جهان تیغ</H3>
-                            <span className={'text-ink-500 text-sm'}>بنیان‌گذار حرکت مدیا</span>
+                            <H3 className={'text-foreground text-lg font-semibold'}>نیما جهان تیغ</H3>
+                            <span className={'text-muted text-sm'}>بنیان‌گذار حرکت مدیا</span>
                         </div>
-                        <P className={'text-ink-300 text-[clamp(0.9rem,1.5vw,1.05rem)] leading-relaxed'}>
+                        <P className={'text-foreground/70 text-[clamp(0.9rem,1.5vw,1.05rem)] leading-relaxed'}>
                             ما هنرمندها رو آماده می‌کنیم که آزادانه بین فرمت‌ها حرکت کنن. اونچه این حوزه‌ها رو به هم وصل می‌کنه نه تکنیک، بلکه آگاهیه — توانایی دیدن، تفسیر کردن و انتخاب آگاهانه.
                         </P>
                     </div>
@@ -291,12 +291,12 @@ export default function Landing() {
             </Box>
 
             {/* ============ COURSES / PROGRAMS ============ */}
-            <Box id={'courses'} className={'py-24 gap-6'}>
+            <Box id={'courses'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>دوره‌ها</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     مسیر هنری خودت رو کشف کن
                 </H2>
-                <span className={'text-ink-500 text-sm mb-2 cursor-pointer hover:text-ink-300 transition-colors'}>
+                <span className={'text-muted text-sm mb-2 cursor-pointer hover:text-foreground/70 transition-colors'}>
                     همه دوره‌ها
                 </span>
 
@@ -331,12 +331,12 @@ export default function Landing() {
             </Box>
 
             {/* ============ MENTORS ============ */}
-            <Box id={'mentors'} className={'py-24 gap-6'}>
+            <Box id={'mentors'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>اساتید</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     از هنرمندان فعال یاد بگیر
                 </H2>
-                <P className={'text-center text-ink-400 max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
+                <P className={'text-center text-muted max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
                     اساتیدی با تجربه‌های متفاوت، با روش، توجه و بلندمدت‌اندیشی مشترک
                 </P>
                 <PrimaryButton onClick={() => navigate('/contact-us')}>
@@ -363,9 +363,9 @@ export default function Landing() {
             </Box>
 
             {/* ============ WHO IT'S FOR ============ */}
-            <Box id={'who'} className={'py-24 gap-6'}>
+            <Box id={'who'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>برای کیه؟</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     این مدرسه برای چه کسی مناسبه؟
                 </H2>
 
@@ -382,19 +382,19 @@ export default function Landing() {
                             whileInView={{opacity: 1, y: 0}}
                             viewport={{once: true}}
                             transition={{duration: 0.5, delay: index * 0.08}}
-                            className={'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-xl)] p-6'}
+                            className={'bg-card border border-[var(--border)] rounded-[var(--radius-xl)] p-6'}
                         >
-                            <H3 className={'text-ink-50 text-lg mb-2'}>{item.title}</H3>
-                            <P className={'text-ink-400 text-sm leading-relaxed'}>{item.desc}</P>
+                            <H3 className={'text-foreground text-lg mb-2'}>{item.title}</H3>
+                            <P className={'text-muted text-sm leading-relaxed'}>{item.desc}</P>
                         </motion.div>
                     ))}
                 </div>
             </Box>
 
             {/* ============ CTA ============ */}
-            <Box className={'py-24 gap-6'}>
+            <Box className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>تماس با ما</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     درباره دوره‌ها با ما صحبت کن
                 </H2>
                 <ArrowButton onClick={() => navigate('/contact-us')}>
@@ -403,9 +403,9 @@ export default function Landing() {
             </Box>
 
             {/* ============ HOW IT WORKS ============ */}
-            <Box id={'how-it-works'} className={'py-24 gap-6'}>
+            <Box id={'how-it-works'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>نحوه عملکرد</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     یادگیری چطور اتفاق می‌افته
                 </H2>
 
@@ -429,9 +429,9 @@ export default function Landing() {
             </Box>
 
             {/* ============ TESTIMONIALS ============ */}
-            <Box id={'reviews'} className={'py-24 gap-6'}>
+            <Box id={'reviews'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>نظرات دانش‌آموزان</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     دانش‌آموزان ما چه می‌گن
                 </H2>
 
@@ -456,12 +456,12 @@ export default function Landing() {
             </Box>
 
             {/* ============ FAQ ============ */}
-            <Box className={'py-24 gap-6'}>
+            <Box className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>سوالات متداول</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     سوالات درباره ثبت‌نام
                 </H2>
-                <P className={'text-center text-ink-400 max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
+                <P className={'text-center text-muted max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
                     جزئیات عملی درباره ثبت‌نام، برنامه زمانی و نحوه برگزاری دوره‌ها
                 </P>
 
@@ -477,7 +477,7 @@ export default function Landing() {
                             <AccordionCard
                                 title={item.title}
                                 content={item.content}
-                                className={'bg-ink-900'}
+                                className={'bg-card'}
                             />
                         </motion.div>
                     ))}
@@ -485,24 +485,24 @@ export default function Landing() {
             </Box>
 
             {/* ============ CONTACT ============ */}
-            <Box className={'py-24 gap-6'}>
+            <Box className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>ارتباط</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     سوالی داری یا می‌خوای ثبت‌نام کنی؟
                 </H2>
-                <P className={'text-center text-ink-400 max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
+                <P className={'text-center text-muted max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
                     خوشحالیم درباره دوره‌ها، زمان‌بندی و تناسب با شرایطت صحبت کنیم
                 </P>
 
                 <div className={'flex flex-col sm:flex-row gap-8 mt-4 items-center'}>
                     <a
                         href="mailto:info@harekatmedia.com"
-                        className={'flex items-center gap-3 text-ink-300 hover:text-ink-50 transition-colors'}
+                        className={'flex items-center gap-3 text-foreground/70 hover:text-foreground transition-colors'}
                     >
                         <Mail size={20}/>
                         <span className={'text-sm'}>info@harekatmedia.com</span>
                     </a>
-                    <div className={'flex items-center gap-3 text-ink-400'}>
+                    <div className={'flex items-center gap-3 text-muted'}>
                         <MapPin size={20}/>
                         <span className={'text-sm'}>تهران، ایران</span>
                     </div>
@@ -510,17 +510,17 @@ export default function Landing() {
             </Box>
 
             {/* ============ FOOTER ============ */}
-            <footer className={'w-full py-12 border-t border-ink-50/10 mt-12'}>
+            <footer className={'w-full py-12 border-t border-[var(--border)] mt-12'}>
                 <div className={'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 w-full'}>
                     {/*logo + links*/ }
                     <div className={'flex flex-col gap-1'}>
-                        <Logo className={'h-20 invert'}/>
+                        <Logo className={'h-20'}/>
                         <div className={'flex gap-4 flex-wrap'}>
                             {footerLinks.map((item, index) => (
                                 <span
                                     key={index}
                                     onClick={() => navigate(item.link)}
-                                    className={'text-ink-500 text-sm cursor-pointer hover:text-ink-300 transition-colors'}
+                                    className={'text-muted text-sm cursor-pointer hover:text-foreground/70 transition-colors'}
                                 >
                                     {item.text}
                                 </span>
@@ -531,11 +531,11 @@ export default function Landing() {
                     {/*social + legal*/ }
                     <div className={'flex flex-col gap-2 items-start sm:items-end'}>
                         <div className={'flex gap-4'}>
-                            <a href="#" className={'text-ink-500 text-xs hover:text-ink-300 transition-colors'}>اینستاگرام</a>
-                            <a href="#" className={'text-ink-500 text-xs hover:text-ink-300 transition-colors'}>تلگرام</a>
-                            <a href="#" className={'text-ink-500 text-xs hover:text-ink-300 transition-colors'}>لینکدین</a>
+                            <a href="#" className={'text-muted text-xs hover:text-foreground/70 transition-colors'}>اینستاگرام</a>
+                            <a href="#" className={'text-muted text-xs hover:text-foreground/70 transition-colors'}>تلگرام</a>
+                            <a href="#" className={'text-muted text-xs hover:text-foreground/70 transition-colors'}>لینکدین</a>
                         </div>
-                        <span className={'text-ink-600 text-xs'}>© ۱۴۰۵ حرکت مدیا</span>
+                        <span className={'text-muted text-xs'}>© ۱۴۰۵ حرکت مدیا</span>
                     </div>
                 </div>
             </footer>

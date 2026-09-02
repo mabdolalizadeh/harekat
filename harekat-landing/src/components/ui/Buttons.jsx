@@ -5,10 +5,10 @@ export function PrimaryButton({ children, className, ...props }) {
     return (
         <button
             className={cn(
-                'bg-(--primary) px-4 py-1',
-                'text-ink-800',
+                'bg-primary px-4 py-1.5 sm:py-1',
+                'text-primary-foreground',
                 'rounded-full',
-                'hover:bg-brand-200 active:scale-95 transition-all duration-200 ease-standard',
+                'hover:opacity-90 active:scale-95 transition-all duration-200',
                 className
             )}
             {...props}
@@ -22,10 +22,10 @@ export function SecondaryButton({ children, className, ...props }) {
     return (
         <button
             className={cn(
-                'bg-ink-700 px-4 py-1',
-                'text-white',
+                'bg-surface-muted px-4 py-1.5 sm:py-1',
+                'text-foreground',
                 'rounded-full',
-                'hover:bg-ink-400 hover:text-ink-800 active:scale-95 transition-all duration-200 ease-standard',
+                'hover:bg-border active:scale-95 transition-all duration-200',
                 className
             )}
             {...props}
@@ -39,10 +39,10 @@ export function ArrowButton({ children, className, ...props }) {
     return (
         <button
             className={cn(
-                'bg-white pr-3 pl-2 py-1 flex items-center justify-center gap-3',
-                'text-ink-950',
+                'bg-primary pr-3 pl-2 py-1.5 sm:py-1 flex items-center justify-center gap-3',
+                'text-primary-foreground',
                 'rounded-full',
-                'hover:bg-ink-400 hover:text-ink-800 transition-all duration-200 ease-standard',
+                'hover:opacity-90 transition-all duration-200',
                 'group',
                 className
             )}
@@ -50,11 +50,11 @@ export function ArrowButton({ children, className, ...props }) {
         >
             {children}
             <div
-                className='relative flex items-center justify-center size-8 bg-black rounded-full overflow-hidden'
+                className='relative flex items-center justify-center size-8 bg-black/30 rounded-full overflow-hidden'
             >
-                <ArrowLeft color={'white'} size={18}
+                <ArrowLeft color={'currentColor'} size={18}
                     className='absolute inset-0 m-auto transition-transform duration-300 group-hover:translate-x-[-160%]'/>
-                <ArrowLeft color={'white'} size={18}
+                <ArrowLeft color={'currentColor'} size={18}
                     className='absolute inset-0 m-auto translate-x-[160%] transition-transform duration-300 group-hover:translate-x-0'/>
             </div>
         </button>

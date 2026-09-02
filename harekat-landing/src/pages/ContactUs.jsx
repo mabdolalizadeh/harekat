@@ -21,10 +21,10 @@ export default function ContactUs() {
 
             <Box className={'pt-40 pb-24 gap-6'}>
                 <SectionTag>تماس با ما</SectionTag>
-                <H1 className={'text-[clamp(2.5rem,5vw,4rem)] text-center text-ink-50 max-w-[700px]'}>
+                <H1 className={'text-[clamp(2.5rem,5vw,4rem)] text-center text-foreground max-w-[700px]'}>
                     با ما در ارتباط باش
                 </H1>
-                <P className={'text-center text-ink-400 max-w-[540px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
+                <P className={'text-center text-muted max-w-[540px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
                     خوشحالیم به سوالاتت جواب بدیم و درباره دوره‌ها، ثبت‌نام و شرایط همکاری صحبت کنیم.
                 </P>
             </Box>
@@ -44,21 +44,21 @@ export default function ContactUs() {
                             viewport={{once: true}}
                             transition={{duration: 0.5, delay: index * 0.08}}
                             className={
-                                'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-xl)] p-6 flex flex-col gap-3'
+                                'bg-card border border-[var(--border)] rounded-[var(--radius-xl)] p-6 flex flex-col gap-3'
                             }
                         >
                             <div className={'flex items-center gap-3'}>
-                                <div className={'w-10 h-10 rounded-full bg-ink-800 flex items-center justify-center'}>
-                                    <item.icon size={18} className={'text-ink-400'}/>
+                                <div className={'w-10 h-10 rounded-full bg-surface-muted flex items-center justify-center'}>
+                                    <item.icon size={18} className={'text-muted'}/>
                                 </div>
-                                <H2 className={'text-ink-50 text-sm font-semibold'}>{item.title}</H2>
+                                <H2 className={'text-foreground text-sm font-semibold'}>{item.title}</H2>
                             </div>
                             {item.href ? (
-                                <a href={item.href} className={'text-ink-300 text-sm hover:text-ink-50 transition-colors'}>
+                                <a href={item.href} className={'text-foreground/70 text-sm hover:text-foreground transition-colors'}>
                                     {item.value}
                                 </a>
                             ) : (
-                                <span className={'text-ink-300 text-sm'}>{item.value}</span>
+                                <span className={'text-foreground/70 text-sm'}>{item.value}</span>
                             )}
                         </motion.div>
                     ))}
@@ -78,19 +78,19 @@ export default function ContactUs() {
                     >
                         <div className={'grid grid-cols-1 sm:grid-cols-2 gap-5'}>
                             <div className={'flex flex-col gap-2'}>
-                                <label className={'text-ink-400 text-sm'}>نام</label>
+                                <label className={'text-muted text-sm'}>نام</label>
                                 <input
                                     name={'name'}
                                     value={formState.name}
                                     onChange={handleChange}
                                     placeholder={'نام خودت رو وارد کن'}
                                     className={
-                                        'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-md)] px-4 py-3 text-ink-50 text-sm placeholder:text-ink-600 focus:outline-none focus:border-ink-50/30 transition-colors'
+                                        'bg-card border border-[var(--border)] rounded-[var(--radius-md)] px-4 py-3 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors'
                                     }
                                 />
                             </div>
                             <div className={'flex flex-col gap-2'}>
-                                <label className={'text-ink-400 text-sm'}>ایمیل</label>
+                                <label className={'text-muted text-sm'}>ایمیل</label>
                                 <input
                                     name={'email'}
                                     type={'email'}
@@ -98,25 +98,25 @@ export default function ContactUs() {
                                     onChange={handleChange}
                                     placeholder={'example@email.com'}
                                     className={
-                                        'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-md)] px-4 py-3 text-ink-50 text-sm placeholder:text-ink-600 focus:outline-none focus:border-ink-50/30 transition-colors'
+                                        'bg-card border border-[var(--border)] rounded-[var(--radius-md)] px-4 py-3 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors'
                                     }
                                 />
                             </div>
                         </div>
                         <div className={'flex flex-col gap-2'}>
-                            <label className={'text-ink-400 text-sm'}>موضوع</label>
+                            <label className={'text-muted text-sm'}>موضوع</label>
                             <input
                                 name={'subject'}
                                 value={formState.subject}
                                 onChange={handleChange}
                                 placeholder={'چطور می‌تونیم کمکت کنیم؟'}
                                 className={
-                                    'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-md)] px-4 py-3 text-ink-50 text-sm placeholder:text-ink-600 focus:outline-none focus:border-ink-50/30 transition-colors'
+                                    'bg-card border border-[var(--border)] rounded-[var(--radius-md)] px-4 py-3 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors'
                                 }
                             />
                         </div>
                         <div className={'flex flex-col gap-2'}>
-                            <label className={'text-ink-400 text-sm'}>پیام</label>
+                            <label className={'text-muted text-sm'}>پیام</label>
                             <textarea
                                 name={'message'}
                                 rows={5}
@@ -124,7 +124,7 @@ export default function ContactUs() {
                                 onChange={handleChange}
                                 placeholder={'پیامت رو بنویس...'}
                                 className={
-                                    'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-md)] px-4 py-3 text-ink-50 text-sm placeholder:text-ink-600 focus:outline-none focus:border-ink-50/30 transition-colors resize-none'
+                                    'bg-card border border-[var(--border)] rounded-[var(--radius-md)] px-4 py-3 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors resize-none'
                                 }
                             />
                         </div>
@@ -143,11 +143,11 @@ export default function ContactUs() {
                     whileInView={{opacity: 1, y: 0}}
                     viewport={{once: true}}
                     transition={{duration: 0.6}}
-                    className={'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-xl)] p-6 w-full'}
+                    className={'bg-card border border-[var(--border)] rounded-[var(--radius-xl)] p-6 w-full'}
                 >
                     <div className={'flex items-center gap-3 mb-4'}>
-                        <Clock size={18} className={'text-ink-400'}/>
-                        <H2 className={'text-ink-50 text-sm font-semibold'}>ساعات کاری</H2>
+                        <Clock size={18} className={'text-muted'}/>
+                        <H2 className={'text-foreground text-sm font-semibold'}>ساعات کاری</H2>
                     </div>
                     <div className={'flex flex-col gap-2'}>
                         {[
@@ -156,8 +156,8 @@ export default function ContactUs() {
                             {day: 'جمعه', time: 'تعطیل'},
                         ].map((item, i) => (
                             <div key={i} className={'flex justify-between items-center text-sm'}>
-                                <span className={'text-ink-400'}>{item.day}</span>
-                                <span className={'text-ink-300'}>{item.time}</span>
+                                <span className={'text-muted'}>{item.day}</span>
+                                <span className={'text-foreground/70'}>{item.time}</span>
                             </div>
                         ))}
                     </div>

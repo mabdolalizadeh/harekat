@@ -36,10 +36,10 @@ export default function AboutUs() {
             {/*hero*/ }
             <Box className={'pt-40 pb-20 gap-6'}>
                 <SectionTag>درباره ما</SectionTag>
-                <H1 className={'text-[clamp(2.5rem,5vw,4.5rem)] text-center text-ink-50 max-w-[800px] leading-[1.1]'}>
+                <H1 className={'text-[clamp(2.5rem,5vw,4.5rem)] text-center text-foreground max-w-[800px] leading-[1.1]'}>
                     حرکت مدیا کجاست و<br/>چرا وجود داره؟
                 </H1>
-                <P className={'text-center text-ink-400 max-w-[580px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
+                <P className={'text-center text-muted max-w-[580px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
                     ما یک مدرسه هنر و مهارت هستیم که مرز بین هنر، رسانه و فناوری رو جابه‌جا می‌کنیم.
                 </P>
             </Box>
@@ -53,15 +53,15 @@ export default function AboutUs() {
                     transition={{duration: 0.6}}
                     className={'flex flex-col gap-6'}
                 >
-                    <P className={'text-ink-300 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
+                    <P className={'text-foreground/70 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
                         حرکت مدیا از یک سوال ساده شروع شد: چرا هنرمندها باید مجبور باشن خودشون رو فقط در یک دسته جا بدن؟
                         عکاس، طراح، برنامه‌نویس — انگار هر کسی باید یکی رو انتخاب کنه.
                     </P>
-                    <P className={'text-ink-300 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
+                    <P className={'text-foreground/70 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
                         ما فکر می‌کنیم هنرمند واقعی کسیه که بتونه بین فرمت‌ها حرکت کنه. از عکاسی تا کدنویسی، از تدوین
                         ویدیو تا طراحی رابط کاربری — ابزار عوض می‌شه، ولی تفکر خلاق پشت همه اونها مشترکه.
                     </P>
-                    <P className={'text-ink-300 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
+                    <P className={'text-foreground/70 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
                         به همین دلیل دوره‌های ما طوری طراحی شدن که هم مهارت فنی یاد بدی، هم تفکر انتقادی و خلاقیت رو
                         پرورش بدیم. ما متخصص یک ابزار تربیت نمی‌کنیم — ما هنرمند تربیت می‌کنیم.
                     </P>
@@ -72,7 +72,7 @@ export default function AboutUs() {
             <Box className={'py-20 gap-8 w-full max-w-[1000px] mx-auto'}>
                 <div className={'flex flex-col items-center gap-4 mb-4'}>
                     <SectionTag>ارزش‌ها</SectionTag>
-                    <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-ink-50 max-w-[600px]'}>
+                    <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-foreground max-w-[600px]'}>
                         چه چیزی ما رو متفاوت می‌کنه
                     </H2>
                 </div>
@@ -85,11 +85,11 @@ export default function AboutUs() {
                             whileInView={{opacity: 1, y: 0}}
                             viewport={{once: true}}
                             transition={{duration: 0.5, delay: index * 0.08}}
-                            className={'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-xl)] p-6'}
+                            className={'bg-card border border-[var(--border)] rounded-[var(--radius-xl)] p-6'}
                         >
-                            <span className={'text-4xl font-extrabold text-ink-800 leading-none'}>{item.number}</span>
-                            <H3 className={'text-ink-50 text-lg mt-3 mb-2'}>{item.title}</H3>
-                            <P className={'text-ink-400 text-sm leading-relaxed'}>{item.desc}</P>
+                            <span className={'text-4xl font-extrabold bg-surface-muted leading-none'}>{item.number}</span>
+                            <H3 className={'text-foreground text-lg mt-3 mb-2'}>{item.title}</H3>
+                            <P className={'text-muted text-sm leading-relaxed'}>{item.desc}</P>
                         </motion.div>
                     ))}
                 </div>
@@ -99,10 +99,10 @@ export default function AboutUs() {
             <Box className={'py-20 gap-8 w-full max-w-[1000px] mx-auto'}>
                 <div className={'flex flex-col items-center gap-4 mb-4'}>
                     <SectionTag>تیم ما</SectionTag>
-                    <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-ink-50 max-w-[600px]'}>
+                    <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-foreground max-w-[600px]'}>
                         اساتید و همکاران
                     </H2>
-                    <P className={'text-center text-ink-400 max-w-[500px] text-sm'}>
+                    <P className={'text-center text-muted max-w-[500px] text-sm'}>
                         تیمی از هنرمندان و متخصصان با تجربه‌های متفاوت که با روش مشترک کار می‌کنن.
                     </P>
                 </div>
@@ -143,8 +143,8 @@ export default function AboutUs() {
                             transition={{duration: 0.5, delay: index * 0.08}}
                             className={'text-center flex flex-col gap-1'}
                         >
-                            <span className={'text-3xl font-extrabold text-ink-50'}>{item.number}</span>
-                            <span className={'text-ink-500 text-sm'}>{item.label}</span>
+                            <span className={'text-3xl font-extrabold text-foreground'}>{item.number}</span>
+                            <span className={'text-muted text-sm'}>{item.label}</span>
                         </motion.div>
                     ))}
                 </div>
@@ -152,7 +152,7 @@ export default function AboutUs() {
 
             {/*cta*/ }
             <Box className={'py-24 gap-6'}>
-                <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-ink-50 max-w-[600px]'}>
+                <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-foreground max-w-[600px]'}>
                     آماده‌ای شروع کنی؟
                 </H2>
                 <ArrowButton onClick={() => navigate('/#courses')}>

@@ -3,9 +3,10 @@ import {H3} from "../components/ui/Headings.jsx";
 import {useNavigate, useLocation} from "react-router-dom";
 import {motion, AnimatePresence} from "motion/react";
 import {SecondaryButton} from "../components/ui/Buttons.jsx";
-import {Menu, X} from "lucide-react";
+import {Menu, X, Sun, Moon} from "lucide-react";
 import {useState, useEffect} from "react";
 import {cn} from "../utils/cn.js";
+import {useTheme} from "../contexts/ThemeContext.jsx";
 
 function scrollToId(id) {
     const el = document.getElementById(id);
@@ -15,6 +16,7 @@ function scrollToId(id) {
 export default function TopBarLayout() {
     const navigate = useNavigate();
     const location = useLocation();
+    const {theme, setTheme} = useTheme();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
@@ -35,7 +37,7 @@ export default function TopBarLayout() {
     const topBarLinks = [
         {text: 'خانه', link: '/#hero', scrollId: 'hero'},
         {text: 'دوره‌ها', link: '/#courses', scrollId: 'courses'},
-        {text: 'تولیدات', link: '/#products', scrollId: 'products'},
+        {text: 'تولیدات', link: '/products', scrollId: null},
         {text: 'درباره ما', link: '/about-us', scrollId: null},
         {text: 'تماس با ما', link: '/contact-us', scrollId: null},
     ];
@@ -62,10 +64,10 @@ export default function TopBarLayout() {
         <div className={cn('fixed top-0 z-50 w-full transition-all duration-300', scrolled ? 'pt-3' : 'pt-5')}>
             <div
                 className={cn(
-                    'mx-auto max-w-[var(--container-8xl)] px-[clamp(1.5rem,5vw,7.5rem)] py-3',
+                    'mx-auto max-w-[var(--container-8xl)] px-[clamp(1rem,4vw,7.5rem)] py-3',
                     'transition-all duration-300',
                     scrolled
-                        ? 'bg-ink-950/70 backdrop-blur-xl shadow-sm shadow-black/10 border-b border-ink-50/5 rounded-[var(--radius-xl)]'
+                        ? 'bg-background/80 backdrop-blur-xl shadow-sm shadow-black/10 border-b border-[var(--border)]/50 rounded-[var(--radius-xl)]'
                         : 'bg-transparent'
                 )}
             >
@@ -77,7 +79,7 @@ export default function TopBarLayout() {
                         transition={{duration: 0.3, ease: 'easeInOut', delay: 0.1}}
                     >
                         <Logo
-                            className={'h-15 invert cursor-pointer hover:opacity-80 transition-opacity duration-200'}
+                            className={'h-10 md:h-15 invert cursor-pointer hover:opacity-80 transition-opacity duration-200'}
                             onClick={() => {
                                 navigate('/');
                                 setTimeout(() => scrollToId('hero'), 100);
@@ -101,20 +103,30 @@ export default function TopBarLayout() {
                                 <H3
                                     onClick={() => handleNav(item)}
                                     className={
-                                        'cursor-pointer text-ink-400 hover:text-ink-50 transition-all duration-200 ease-in-out text-sm'
+                                        'cursor-pointer text-muted hover:text-foreground transition-all duration-200 ease-in-out text-sm'
                                     }
                                 >{item.text}</H3>
                             </motion.div>
                         ))}
                     </div>
 
-                    {/*signIn - desktop*/}
+                    {/*theme toggle + signIn - desktop*/}
                     <motion.div
                         initial={{opacity: 0, y: 20}}
                         animate={{opacity: 1, y: 0}}
                         transition={{duration: 0.2, ease: 'easeInOut', delay: 0.08}}
-                        className={'hidden md:block'}
+                        className={'hidden md:flex items-center gap-3'}
                     >
+                        <button
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            className={
+                                'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ' +
+                                'bg-surface-muted hover:bg-border text-muted hover:text-foreground hover:rotate-45'
+                            }
+                            title={theme === 'dark' ? 'حالت روشن' : 'حالت تاریک'}
+                        >
+                            {theme === 'dark' ? <Sun size={16}/> : <Moon size={16}/>}
+                        </button>
                         {isLoggedIn ? (
                             <SecondaryButton onClick={() => navigate('/dashboard')}>
                                 داشبورد
@@ -128,7 +140,7 @@ export default function TopBarLayout() {
 
                     {/*mobile menu button*/}
                     <button
-                        className={'md:hidden text-ink-50 p-2'}
+                        className={'md:hidden text-foreground p-2'}
                         onClick={() => setMobileOpen(!mobileOpen)}
                     >
                         {mobileOpen ? <X size={24}/> : <Menu size={24}/>}
@@ -145,7 +157,7 @@ export default function TopBarLayout() {
                         exit={{opacity: 0, y: -10}}
                         transition={{duration: 0.2}}
                         className={
-                            'md:hidden absolute top-full left-0 w-full bg-ink-950/90 backdrop-blur-xl border-b border-ink-50/10 px-6 py-6 flex flex-col gap-4 z-40'
+                            'md:hidden absolute top-full left-0 w-full bg-background/95 backdrop-blur-xl border-b border-[var(--border)] px-6 py-6 flex flex-col gap-4 z-40'
                         }
                     >
                         {topBarLinks.map((item, index) => (
@@ -153,16 +165,25 @@ export default function TopBarLayout() {
                                 key={index}
                                 onClick={() => handleNav(item)}
                                 className={
-                                    'cursor-pointer text-ink-400 hover:text-ink-50 transition-all duration-200 text-base py-1'
+                                    'cursor-pointer text-muted hover:text-foreground transition-all duration-200 text-base py-2'
                                 }
                             >{item.text}</H3>
                         ))}
-                        <div className={'pt-2 border-t border-ink-50/10'}>
+                        <div className={'pt-4 border-t border-[var(--border)] flex flex-col gap-4'}>
+                            <button
+                                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                                className={
+                                    'flex items-center gap-3 text-muted hover:text-foreground transition-colors text-sm py-2'
+                                }
+                            >
+                                {theme === 'dark' ? <Sun size={16}/> : <Moon size={16}/>}
+                                {theme === 'dark' ? 'حالت روشن' : 'حالت تاریک'}
+                            </button>
                             <SecondaryButton onClick={() => {
                                 setMobileOpen(false);
-                                navigate('/auth');
+                                navigate(isLoggedIn ? '/dashboard' : '/auth');
                             }}>
-                                ثبت نام یا ورود
+                                {isLoggedIn ? 'داشبورد' : 'ثبت نام یا ورود'}
                             </SecondaryButton>
                         </div>
                     </motion.div>

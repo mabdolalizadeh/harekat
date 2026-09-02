@@ -20,8 +20,8 @@ export default function TeacherCard({name, role, avatar, className, ...props}) {
                 />
             </div>
             <div className={'flex flex-col items-center gap-1'}>
-                <H3 className={'text-ink-50 text-base'}>{name}</H3>
-                <P className={'text-ink-500 text-sm'}>{role}</P>
+                <H3 className={'text-foreground text-base'}>{name}</H3>
+                <P className={'text-muted text-sm'}>{role}</P>
             </div>
         </div>
     )

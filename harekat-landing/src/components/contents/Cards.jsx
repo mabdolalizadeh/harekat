@@ -8,8 +8,8 @@ import {useState} from "react";
 export function ContentCard({title, subtitle, className}) {
     return (
         <div className={cn('w-100', className)}>
-            <H2 className={'border-b border-ink-500 pb-2'}>{title}</H2>
-            <p className={'text-ink-400 text-sm'}>{subtitle}</p>
+            <H2 className={'border-b border-themed pb-2'}>{title}</H2>
+            <p className={'text-muted text-sm'}>{subtitle}</p>
         </div>
     )
 }
@@ -19,7 +19,7 @@ export function AccordionCard({title, content, className, ...props}) {
     return (
         <div
             className={cn(
-                'w-full bg-ink-900 flex flex-col rounded-lg p-5',
+                'w-full bg-card flex flex-col rounded-lg p-3 sm:p-5',
                 'cursor-pointer select-none',
                 className
             )}
@@ -31,7 +31,7 @@ export function AccordionCard({title, content, className, ...props}) {
                 <div
                     className={cn(
                         'p-px rounded-full bg-black transition-all duration-200 ease-in-out',
-                        isOpen && 'rotate-45 bg-ink-600'
+                        isOpen && 'rotate-45 bg-muted'
                     )}
                 >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -45,7 +45,7 @@ export function AccordionCard({title, content, className, ...props}) {
                     isOpen ? 'grid-rows-[1fr] mt-5' : 'grid-rows-[0fr] mt-0'
                 )}
             >
-                <div className="overflow-hidden text-ink-400">{content}</div>
+                <div className="overflow-hidden text-muted">{content}</div>
             </div>
         </div>
     )
@@ -58,8 +58,8 @@ export function CourseCard({
         <motion.div
             whileHover={{y: -4}}
             className={cn(
-                'bg-ink-900 border border-ink-50/10 flex flex-col rounded-[var(--radius-xl)] overflow-hidden',
-                'group cursor-pointer transition-all duration-300 hover:border-ink-50/20 hover:shadow-lg hover:shadow-black/20',
+                'bg-card border border-[var(--border)]/10 flex flex-col rounded-[var(--radius-xl)] overflow-hidden',
+                'group cursor-pointer transition-all duration-300 hover:border-[var(--border)]/20 hover:shadow-lg hover:shadow-black/20',
                 className
             )}
             {...props}
@@ -74,7 +74,7 @@ export function CourseCard({
                 {/*category badge*/ }
                 <div className={'absolute top-3 right-3'}>
                     <span className={
-                        'bg-ink-950/80 backdrop-blur-sm text-ink-50 text-xs px-2.5 py-1 rounded-full border border-ink-50/10'
+                        'bg-background/80 backdrop-blur-sm text-foreground text-xs px-2.5 py-1 rounded-full border border-[var(--border)]/10'
                     }>
                         {category}
                     </span>
@@ -95,26 +95,26 @@ export function CourseCard({
             </div>
 
             {/*content*/ }
-            <div className={'flex flex-col gap-3 p-4 flex-1'}>
-                <H3 className={'text-ink-50 font-bold text-base leading-snug line-clamp-2'}>{title}</H3>
+            <div className={'flex flex-col gap-3 p-3 sm:p-4 flex-1'}>
+                <H3 className={'text-foreground font-bold text-base leading-snug line-clamp-2'}>{title}</H3>
 
                 <div className={'flex flex-wrap gap-2'}>
-                    <span className={'flex items-center gap-1 text-xs text-ink-400 bg-ink-800 px-2 py-0.5 rounded-md'}>
+                    <span className={'flex items-center gap-1 text-xs text-muted bg-surface-muted px-2 py-0.5 rounded-md'}>
                         <BookOpen size={12}/>{level}
                     </span>
-                    <span className={'flex items-center gap-1 text-xs text-ink-400 bg-ink-800 px-2 py-0.5 rounded-md'}>
+                    <span className={'flex items-center gap-1 text-xs text-muted bg-surface-muted px-2 py-0.5 rounded-md'}>
                         <Clock size={12}/>{duration}
                     </span>
-                    <span className={'flex items-center gap-1 text-xs text-ink-400 bg-ink-800 px-2 py-0.5 rounded-md'}>
+                    <span className={'flex items-center gap-1 text-xs text-muted bg-surface-muted px-2 py-0.5 rounded-md'}>
                         {courseType}
                     </span>
                 </div>
 
-                <div className={'mt-auto flex items-center justify-between pt-2 border-t border-ink-50/5'}>
-                    <span className={'flex items-center gap-1.5 text-xs text-ink-400'}>
+                <div className={'mt-auto flex items-center justify-between pt-2 border-t border-[var(--border)]/5'}>
+                    <span className={'flex items-center gap-1.5 text-xs text-muted'}>
                         <User size={12}/>{teacher}
                     </span>
-                    <span className={'text-sm font-bold text-ink-50'}>{price}</span>
+                    <span className={'text-xs sm:text-sm font-bold text-foreground'}>{price}</span>
                 </div>
             </div>
         </motion.div>
