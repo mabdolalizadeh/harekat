@@ -17,12 +17,19 @@ export default function TopBarLayout() {
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 40);
         onScroll();
         window.addEventListener('scroll', onScroll, {passive: true});
         return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    useEffect(() => {
+        const onStorage = () => setIsLoggedIn(!!localStorage.getItem('token'));
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
     }, []);
 
     const topBarLinks = [
@@ -108,9 +115,15 @@ export default function TopBarLayout() {
                         transition={{duration: 0.2, ease: 'easeInOut', delay: 0.08}}
                         className={'hidden md:block'}
                     >
-                        <SecondaryButton onClick={() => navigate('/auth')}>
-                            ثبت نام یا ورود
-                        </SecondaryButton>
+                        {isLoggedIn ? (
+                            <SecondaryButton onClick={() => navigate('/dashboard')}>
+                                داشبورد
+                            </SecondaryButton>
+                        ) : (
+                            <SecondaryButton onClick={() => navigate('/auth')}>
+                                ثبت نام یا ورود
+                            </SecondaryButton>
+                        )}
                     </motion.div>
 
                     {/*mobile menu button*/}

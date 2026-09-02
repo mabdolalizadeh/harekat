@@ -60,8 +60,12 @@ app.use('/api/v1', routes);
 const frontendDist = path.resolve(__dirname, '../../harekat-landing/dist');
 app.use(express.static(frontendDist));
 
-app.get('/{*splat}', (req, res) => {
-    res.sendFile(path.join(frontendDist, 'index.html'));
+app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api/v1')) {
+        res.sendFile(path.join(frontendDist, 'index.html'));
+    } else {
+        next();
+    }
 });
 
 app.use((req, res) => {

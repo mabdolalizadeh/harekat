@@ -4,17 +4,17 @@ import {motion} from "motion/react";
 import Box from "../components/ui/Box.jsx";
 import {H1, P} from "../components/ui/Headings.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
-import {PrimaryButton} from "../components/ui/Buttons.jsx";
+import {PrimaryButton, SecondaryButton} from "../components/ui/Buttons.jsx";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {ArrowLeft, Phone, KeyRound} from "lucide-react";
+import {ArrowLeft, Phone, KeyRound, Zap} from "lucide-react";
 import {cn} from "../utils/cn.js";
 
 const BASE = 'http://localhost:3000/api/v1';
 
 export default function Auth() {
     const navigate = useNavigate();
-    const [step, setStep] = useState('phone'); // phone | otp
+    const [step, setStep] = useState('phone');
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
@@ -44,30 +44,38 @@ export default function Auth() {
         }
     };
 
-    const handleValidateOtp = async (e) => {
-        e.preventDefault();
-        if (!otp || otp.length < 4) {
-            setError('کد تایید را وارد کنید');
-            return;
-        }
+    const handleValidateOtp = async (phoneNumber, otpCode) => {
         setLoading(true);
         setError('');
         try {
             const res = await fetch(`${BASE}/auth/validate-otp`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({phoneNumber: phone, otp}),
+                body: JSON.stringify({phoneNumber, otp: otpCode}),
             });
             const json = await res.json();
             if (!json.ok) throw new Error(json.message);
             localStorage.setItem('token', json.data.token);
             localStorage.setItem('user', JSON.stringify(json.data.user));
-            navigate('/');
+            navigate('/dashboard');
         } catch (err) {
             setError(err.message || 'کد تایید نادرست است');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSubmitOtp = (e) => {
+        e.preventDefault();
+        if (!otp || otp.length < 4) {
+            setError('کد تایید را وارد کنید');
+            return;
+        }
+        handleValidateOtp(phone, otp);
+    };
+
+    const handleDevBypass = () => {
+        handleValidateOtp('09123456789', '299510');
     };
 
     return (
@@ -101,7 +109,7 @@ export default function Auth() {
                                     type={'tel'}
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
-                                    placeholder={'۰۹۱۲۳۴۵۶۷۸۹'}
+                                    placeholder={'09123456789'}
                                     dir={'ltr'}
                                     className={
                                         'w-full bg-ink-900 border border-ink-50/10 rounded-[var(--radius-md)] pr-12 pl-4 py-3.5 text-ink-50 text-sm placeholder:text-ink-600 focus:outline-none focus:border-ink-50/30 transition-colors'
@@ -118,14 +126,14 @@ export default function Auth() {
                             </PrimaryButton>
                         </form>
                     ) : (
-                        <form onSubmit={handleValidateOtp} className={'flex flex-col gap-4'}>
+                        <form onSubmit={handleSubmitOtp} className={'flex flex-col gap-4'}>
                             <div className={'relative'}>
                                 <KeyRound size={18} className={'absolute right-4 top-1/2 -translate-y-1/2 text-ink-500'}/>
                                 <input
                                     type={'text'}
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
-                                    placeholder={'۱۲۳۴۵۶'}
+                                    placeholder={'299510'}
                                     dir={'ltr'}
                                     maxLength={6}
                                     className={
@@ -152,6 +160,22 @@ export default function Auth() {
                         </form>
                     )}
                 </motion.div>
+
+                {/*dev bypass*/}
+                <div className={'flex flex-col items-center gap-3 mt-4'}>
+                    <div className={'hairline w-32'}/>
+                    <SecondaryButton
+                        onClick={handleDevBypass}
+                        disabled={loading}
+                        className={cn('flex items-center gap-2 text-xs', loading && 'opacity-50')}
+                    >
+                        <Zap size={14}/>
+                        ورود سریع (Dev)
+                    </SecondaryButton>
+                    <P className={'text-ink-600 text-xs text-center'}>
+                        09123456789 · کد: 299510
+                    </P>
+                </div>
             </Box>
         </MainLayout>
     )

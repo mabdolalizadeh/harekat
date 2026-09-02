@@ -3,6 +3,7 @@ import Landing from "./pages/Landing.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 import Auth from "./pages/Auth.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 
 export default function App() {
     return (
@@ -11,6 +12,7 @@ export default function App() {
             <Route path='/contact-us' element={<ContactUs/>}/>
             <Route path='/about-us' element={<AboutUs/>}/>
             <Route path='/auth' element={<Auth/>}/>
+            <Route path='/dashboard' element={<Dashboard/>}/>
         </Routes>
     )
 }

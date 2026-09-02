@@ -1,7 +1,13 @@
+import { useEffect } from "react";
 import Background from "../components/ui/Background.jsx";
 import {cn} from "../utils/cn.js";
 
-export default function MainLayout({ children, className }) {
+export default function MainLayout({ children, className, title }) {
+
+    useEffect(() => {
+        document.title = (title ? title + ' | ' : '') + 'Harekat';
+    },[title])
+
     return (
         <Background>
             <div className={cn(
