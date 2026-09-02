@@ -2,10 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import routes from './routes/index.js';
 import { apiLimiter, authLimiter, strictAuthLimiter } from './middleware/rateLimiter.js';
 import { logSecurityEvent } from './utils/logger.js';
 import { configs } from './config/config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -51,6 +56,13 @@ app.use('/api/v1/admins/auth', strictAuthLimiter);
 app.use('/api/v1/admins/register', strictAuthLimiter);
 
 app.use('/api/v1', routes);
+
+const frontendDist = path.resolve(__dirname, '../../harekat-landing/dist');
+app.use(express.static(frontendDist));
+
+app.get('/{*splat}', (req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+});
 
 app.use((req, res) => {
     logSecurityEvent('route_not_found', { path: req.path, method: req.method, ip: req.ip });

@@ -513,8 +513,8 @@ export default function Landing() {
             <footer className={'w-full py-12 border-t border-ink-50/10 mt-12'}>
                 <div className={'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 w-full'}>
                     {/*logo + links*/ }
-                    <div className={'flex flex-col gap-4'}>
-                        <Logo className={'h-10 '}/>
+                    <div className={'flex flex-col gap-1'}>
+                        <Logo className={'h-20 invert'}/>
                         <div className={'flex gap-4 flex-wrap'}>
                             {footerLinks.map((item, index) => (
                                 <span
