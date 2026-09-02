@@ -5,7 +5,7 @@ import {cn} from "../utils/cn.js";
 export default function MainLayout({ children, className, title }) {
 
     useEffect(() => {
-        document.title = (title ? title + ' | ' : '') + 'Harekat';
+        document.title = (title ? title + ' | ' : '') + 'حرکت مدیا';
     },[title])
 
     return (

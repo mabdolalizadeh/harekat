@@ -3,7 +3,7 @@ import {motion} from "motion/react";
 import Box from "../components/ui/Box.jsx";
 import {H1, H2, H3, P} from "../components/ui/Headings.jsx";
 import {PrimaryButton, SecondaryButton} from "../components/ui/Buttons.jsx";
-import {useState, useEffect} from "react";
+import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {LogOut, BookOpen, User, CreditCard, Clock} from "lucide-react";
 
@@ -23,10 +23,6 @@ export default function Dashboard() {
     const [courses] = useState(fallbackCourses.slice(0, 2));
     const [loading] = useState(false);
 
-    useEffect(() => {
-        if (!user) navigate('/auth');
-    }, [user, navigate]);
-
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -44,7 +40,7 @@ export default function Dashboard() {
     }
 
     return (
-        <MainLayout>
+        <MainLayout title={'داشبورد'}>
             <Box className={'pt-36 pb-24 gap-10'}>
                 {/*header*/ }
                 <div className={'flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4'}>

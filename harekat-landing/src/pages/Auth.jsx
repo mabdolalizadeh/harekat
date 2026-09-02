@@ -12,6 +12,18 @@ import {cn} from "../utils/cn.js";
 
 const BASE = 'http://localhost:3000/api/v1';
 
+const errorTranslations = {
+    'Too many attempts. Please try again later.': 'تعداد تلاش‌های شما بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید.',
+    'Invalid OTP': 'کد تایید نادرست است',
+    'User not found': 'کاربر یافت نشد',
+    'OTP expired': 'کد تایید منقضی شده است',
+    'Invalid phone number': 'شماره تلفن نادرست است',
+};
+
+function translateError(msg) {
+    return errorTranslations[msg] || msg;
+}
+
 export default function Auth() {
     const navigate = useNavigate();
     const [step, setStep] = useState('phone');
@@ -35,7 +47,7 @@ export default function Auth() {
                 body: JSON.stringify({phoneNumber: phone}),
             });
             const json = await res.json();
-            if (!json.ok) throw new Error(json.message);
+            if (!json.ok) throw new Error(translateError(json.message));
             setStep('otp');
         } catch (err) {
             setError(err.message || 'خطا در ارسال کد');
@@ -54,7 +66,7 @@ export default function Auth() {
                 body: JSON.stringify({phoneNumber, otp: otpCode}),
             });
             const json = await res.json();
-            if (!json.ok) throw new Error(json.message);
+            if (!json.ok) throw new Error(translateError(json.message));
             localStorage.setItem('token', json.data.token);
             localStorage.setItem('user', JSON.stringify(json.data.user));
             navigate('/dashboard');
@@ -79,7 +91,7 @@ export default function Auth() {
     };
 
     return (
-        <MainLayout>
+        <MainLayout title={'ورود'}>
             <TopBarLayout/>
 
             <Box className={'pt-40 pb-24 gap-8 min-h-[70vh]'}>

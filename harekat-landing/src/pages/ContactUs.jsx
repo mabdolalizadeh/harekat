@@ -16,7 +16,7 @@ export default function ContactUs() {
     };
 
     return (
-        <MainLayout>
+        <MainLayout title={'تماس با ما'}>
             <TopBarLayout/>
 
             <Box className={'pt-40 pb-24 gap-6'}>

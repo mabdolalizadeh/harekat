@@ -30,7 +30,7 @@ export default function AboutUs() {
     const navigate = useNavigate();
 
     return (
-        <MainLayout>
+        <MainLayout title={'درباره ما'}>
             <TopBarLayout/>
 
             {/*hero*/ }
