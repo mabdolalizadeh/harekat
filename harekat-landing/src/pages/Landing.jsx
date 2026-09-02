@@ -7,20 +7,8 @@ import {H1, H2, H3, P} from "../components/ui/Headings.jsx";
 import {ArrowButton, PrimaryButton} from "../components/ui/Buttons.jsx";
 import MarqueeLayout from "../layouts/MarqueeLayout.jsx";
 import {useNavigate} from "react-router-dom";
-import cameraImg from '../assets/marquee/black-camera-lens-brown-wooden-table.jpg';
-import lightImg from '../assets/marquee/bright-flashlight-beam-cutting-through-dark-background-with-dramatic-lighting-effect.jpg';
-import micImg from '../assets/marquee/closeup-shot-condenser-microphone-with-pop-filter-blurred.jpg'
-import codeImg from '../assets/marquee/side-shot-code-editor-using-react-js.jpg';
 import Img from "../components/ui/Img.jsx";
 import {CourseCard} from "../components/contents/Cards.jsx";
-import aiImg from '../assets/courses/bwink_med_10_single_03.jpg';
-import pythonImg from '../assets/courses/c2322d1b-a818-4a77-8048-016248b8f014.jpg';
-import figmaImg from '../assets/courses/5765393.jpg';
-import cyberImg from '../assets/courses/cyber-security-concept-digital-art.jpg';
-import videoImg from '../assets/courses/1910.i309.028.F.m004.c7.cinema film production realistic transparent-03.jpg';
-import marketingImg from '../assets/courses/32718.jpg';
-import wordpressImg from '../assets/courses/4827607.jpg';
-import reactImg from '../assets/courses/side-shot-code-editor-using-react-js.jpg';
 import SectionTag from "../components/ui/SectionTag.jsx";
 import TeacherCard from "../components/contents/TeacherCard.jsx";
 import StepCard from "../components/contents/StepCard.jsx";
@@ -46,21 +34,18 @@ const heroItem = {
     },
 };
 
-const fadeUp = {
-    hidden: {opacity: 0, y: 24},
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: {duration: 0.6, ease: [0.2, 0, 0, 1]},
-    },
-};
 
-const images = [cameraImg, lightImg, micImg, codeImg];
+const images = [
+    'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400',
+    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400',
+    'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400',
+    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400',
+];
 
 const courses = [
     {
         title: 'طراحی با هوش مصنوعی',
-        imgSrc: aiImg,
+        imgSrc: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400',
         category: 'هوش مصنوعی',
         level: 'مبتدی',
         duration: '۱۵ ساعت',
@@ -71,7 +56,7 @@ const courses = [
     },
     {
         title: 'برنامه‌نویسی پایتون',
-        imgSrc: pythonImg,
+        imgSrc: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400',
         category: 'برنامه‌نویسی',
         level: 'مبتدی',
         duration: '۲۰ ساعت',
@@ -82,7 +67,7 @@ const courses = [
     },
     {
         title: 'طراحی رابط کاربری با Figma',
-        imgSrc: figmaImg,
+        imgSrc: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400',
         category: 'طراحی UI/UX',
         level: 'متوسط',
         duration: '۱۲ ساعت',
@@ -93,7 +78,7 @@ const courses = [
     },
     {
         title: 'توسعه وب با React',
-        imgSrc: reactImg,
+        imgSrc: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400',
         category: 'برنامه‌نویسی',
         level: 'متوسط',
         duration: '۲۵ ساعت',
@@ -104,7 +89,7 @@ const courses = [
     },
     {
         title: 'مبانی امنیت سایبری',
-        imgSrc: cyberImg,
+        imgSrc: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400',
         category: 'امنیت',
         level: 'مبتدی',
         duration: '۱۸ ساعت',
@@ -115,7 +100,7 @@ const courses = [
     },
     {
         title: 'ادیت و تدوین ویدیو',
-        imgSrc: videoImg,
+        imgSrc: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400',
         category: 'تولید محتوا',
         level: 'مبتدی',
         duration: '۱۰ ساعت',
@@ -126,7 +111,7 @@ const courses = [
     },
     {
         title: 'دیجیتال مارکتینگ',
-        imgSrc: marketingImg,
+        imgSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400',
         category: 'کسب‌وکار',
         level: 'متوسط',
         duration: '۱۶ ساعت',
@@ -137,7 +122,7 @@ const courses = [
     },
     {
         title: 'آموزش طراحی سایت با WordPress',
-        imgSrc: wordpressImg,
+        imgSrc: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=400',
         category: 'طراحی سایت',
         level: 'مبتدی',
         duration: '۱۴ ساعت',

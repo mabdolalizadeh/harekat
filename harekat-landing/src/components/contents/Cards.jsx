@@ -2,7 +2,7 @@ import {cn} from "../../utils/cn.js";
 import Img from "../ui/Img.jsx";
 import {H1, H2, H3, P} from "../ui/Headings.jsx";
 import {motion} from "motion/react";
-import {ArrowUpRight, Plus} from "lucide-react";
+import {Plus} from "lucide-react";
 import {useState} from "react";
 import Box from "../ui/Box.jsx";
 import Chip from "../ui/Chip.jsx";
