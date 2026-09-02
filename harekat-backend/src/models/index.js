@@ -3,6 +3,7 @@ import Courses from "./courses.js";
 import Teachers from "./teachers.js";
 import Payments from "./payments.js";
 import Categories from "./categories.js";
+import Admins from "./admins.js";
 
 // Users <-> Courses (many-to-many)
 Users.belongsToMany(Courses, {
@@ -52,4 +53,4 @@ Categories.belongsToMany(Courses, {
     otherKey: "courseId"
 });
 
-export { Users, Courses, Teachers, Payments, Categories };
+export { Users, Courses, Teachers, Payments, Categories, Admins };

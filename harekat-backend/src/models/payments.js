@@ -8,9 +8,18 @@ const Payments = sequelize.define("Payments", {
         defaultValue: () => uuidv4(),
         primaryKey: true
     },
-    status: {
-        type: DataTypes.ENUM('pending', 'paid', 'failed', 'refunded'),
+    type: {
+        type: DataTypes.ENUM('paid', 'pending', 'failed', 'refunded'),
+        allowNull: false,
         defaultValue: 'pending'
+    },
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'Users',
+            key: 'id'
+        }
     }
 }, {
     createdAt: true,

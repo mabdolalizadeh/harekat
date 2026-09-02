@@ -35,6 +35,14 @@ const Courses = sequelize.define('Courses', {
     statusOfRegistration: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    teacherId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'Teachers',
+            key: 'id'
+        }
     }
 }, {
     updatedAt: true,
