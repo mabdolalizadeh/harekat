@@ -1,0 +1,164 @@
+import MainLayout from "../layouts/MainLayout.jsx";
+import TopBarLayout from "../layouts/TopBarLayout.jsx";
+import {motion} from "motion/react";
+import Box from "../components/ui/Box.jsx";
+import {H1, H2, H3, P} from "../components/ui/Headings.jsx";
+import SectionTag from "../components/ui/SectionTag.jsx";
+import {ArrowButton} from "../components/ui/Buttons.jsx";
+import {useNavigate} from "react-router-dom";
+import TeacherCard from "../components/contents/TeacherCard.jsx";
+
+const teachers = [
+    {name: 'دکتر احمدی', role: 'برنامه‌نویسی و هوش مصنوعی', avatar: 'https://i.pravatar.cc/400?u=11'},
+    {name: 'استاد محمدی', role: 'طراحی UI/UX', avatar: 'https://i.pravatar.cc/400?u=12'},
+    {name: 'مهندس رضایی', role: 'توسعه وب', avatar: 'https://i.pravatar.cc/400?u=13'},
+    {name: 'دکتر کریمی', role: 'امنیت سایبری', avatar: 'https://i.pravatar.cc/400?u=14'},
+    {name: 'نیما جهان تیغ', role: 'هوش مصنوعی', avatar: 'https://i.pravatar.cc/400?u=15'},
+    {name: 'سارا محمدی', role: 'طراحی رابط کاربری', avatar: 'https://i.pravatar.cc/400?u=16'},
+    {name: 'مهدی نادری', role: 'تدوین و تولید محتوا', avatar: 'https://i.pravatar.cc/400?u=17'},
+    {name: 'نگار اکبری', role: 'دیجیتال مارکتینگ', avatar: 'https://i.pravatar.cc/400?u=18'},
+];
+
+const values = [
+    {number: '۰۱', title: 'عملگرایی', desc: 'یادگیری از طریق انجام دادن، نه فقط شنیدن. هر دوره حول پروژه‌های واقعی ساخته شده.'},
+    {number: '۰۲', title: 'نقدپذیری', desc: 'ما باور داریم رشد از بازخورد صادقانه شروع می‌شه. جلسات نقد بخش جدایی‌ناپذیر یادگیریه.'},
+    {number: '۰۳', title: 'چندرسانه‌ای', desc: 'هنرمند امروز نباید در یک ابزار زندانی بشه. ما بین رسانه‌ها حرکت می‌کنیم.'},
+    {number: '۰۴', title: 'فردیت', desc: 'هر هنرمند مسیر منحصربه‌فرد خودش رو داره. ما مسیر رو هموار می‌کنیم، مقصد رو تعیین نمی‌کنیم.'},
+];
+
+export default function AboutUs() {
+    const navigate = useNavigate();
+
+    return (
+        <MainLayout>
+            <TopBarLayout/>
+
+            {/*hero*/ }
+            <Box className={'pt-40 pb-20 gap-6'}>
+                <SectionTag>درباره ما</SectionTag>
+                <H1 className={'text-[clamp(2.5rem,5vw,4.5rem)] text-center text-ink-50 max-w-[800px] leading-[1.1]'}>
+                    حرکت مدیا کجاست و<br/>چرا وجود داره؟
+                </H1>
+                <P className={'text-center text-ink-400 max-w-[580px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
+                    ما یک مدرسه هنر و مهارت هستیم که مرز بین هنر، رسانه و فناوری رو جابه‌جا می‌کنیم.
+                </P>
+            </Box>
+
+            {/*story*/ }
+            <Box className={'py-20 gap-10 w-full max-w-[800px] mx-auto'}>
+                <motion.div
+                    initial={{opacity: 0, y: 24}}
+                    whileInView={{opacity: 1, y: 0}}
+                    viewport={{once: true}}
+                    transition={{duration: 0.6}}
+                    className={'flex flex-col gap-6'}
+                >
+                    <P className={'text-ink-300 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
+                        حرکت مدیا از یک سوال ساده شروع شد: چرا هنرمندها باید مجبور باشن خودشون رو فقط در یک دسته جا بدن؟
+                        عکاس، طراح، برنامه‌نویس — انگار هر کسی باید یکی رو انتخاب کنه.
+                    </P>
+                    <P className={'text-ink-300 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
+                        ما فکر می‌کنیم هنرمند واقعی کسیه که بتونه بین فرمت‌ها حرکت کنه. از عکاسی تا کدنویسی، از تدوین
+                        ویدیو تا طراحی رابط کاربری — ابزار عوض می‌شه، ولی تفکر خلاق پشت همه اونها مشترکه.
+                    </P>
+                    <P className={'text-ink-300 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
+                        به همین دلیل دوره‌های ما طوری طراحی شدن که هم مهارت فنی یاد بدی، هم تفکر انتقادی و خلاقیت رو
+                        پرورش بدیم. ما متخصص یک ابزار تربیت نمی‌کنیم — ما هنرمند تربیت می‌کنیم.
+                    </P>
+                </motion.div>
+            </Box>
+
+            {/*values*/ }
+            <Box className={'py-20 gap-8 w-full max-w-[1000px] mx-auto'}>
+                <div className={'flex flex-col items-center gap-4 mb-4'}>
+                    <SectionTag>ارزش‌ها</SectionTag>
+                    <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-ink-50 max-w-[600px]'}>
+                        چه چیزی ما رو متفاوت می‌کنه
+                    </H2>
+                </div>
+
+                <div className={'grid grid-cols-1 sm:grid-cols-2 gap-6 w-full'}>
+                    {values.map((item, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{opacity: 0, y: 24}}
+                            whileInView={{opacity: 1, y: 0}}
+                            viewport={{once: true}}
+                            transition={{duration: 0.5, delay: index * 0.08}}
+                            className={'bg-ink-900 border border-ink-50/10 rounded-[var(--radius-xl)] p-6'}
+                        >
+                            <span className={'text-4xl font-extrabold text-ink-800 leading-none'}>{item.number}</span>
+                            <H3 className={'text-ink-50 text-lg mt-3 mb-2'}>{item.title}</H3>
+                            <P className={'text-ink-400 text-sm leading-relaxed'}>{item.desc}</P>
+                        </motion.div>
+                    ))}
+                </div>
+            </Box>
+
+            {/*team*/ }
+            <Box className={'py-20 gap-8 w-full max-w-[1000px] mx-auto'}>
+                <div className={'flex flex-col items-center gap-4 mb-4'}>
+                    <SectionTag>تیم ما</SectionTag>
+                    <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-ink-50 max-w-[600px]'}>
+                        اساتید و همکاران
+                    </H2>
+                    <P className={'text-center text-ink-400 max-w-[500px] text-sm'}>
+                        تیمی از هنرمندان و متخصصان با تجربه‌های متفاوت که با روش مشترک کار می‌کنن.
+                    </P>
+                </div>
+
+                <div className={'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 w-full'}>
+                    {teachers.map((teacher, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{opacity: 0, y: 24}}
+                            whileInView={{opacity: 1, y: 0}}
+                            viewport={{once: true}}
+                            transition={{duration: 0.5, delay: index * 0.06}}
+                        >
+                            <TeacherCard
+                                name={teacher.name}
+                                role={teacher.role}
+                                avatar={teacher.avatar}
+                            />
+                        </motion.div>
+                    ))}
+                </div>
+            </Box>
+
+            {/*stats*/ }
+            <Box className={'py-20 gap-8 w-full'}>
+                <div className={'grid grid-cols-2 sm:grid-cols-4 gap-6 w-full max-w-[800px] mx-auto'}>
+                    {[
+                        {number: '+۲۰۰', label: 'دانش‌آموز'},
+                        {number: '+۳۰', label: 'دوره فعال'},
+                        {number: '+۱۵', label: 'استاد'},
+                        {number: '%۹۵', label: 'رضایتمندی'},
+                    ].map((item, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{opacity: 0, scale: 0.9}}
+                            whileInView={{opacity: 1, scale: 1}}
+                            viewport={{once: true}}
+                            transition={{duration: 0.5, delay: index * 0.08}}
+                            className={'text-center flex flex-col gap-1'}
+                        >
+                            <span className={'text-3xl font-extrabold text-ink-50'}>{item.number}</span>
+                            <span className={'text-ink-500 text-sm'}>{item.label}</span>
+                        </motion.div>
+                    ))}
+                </div>
+            </Box>
+
+            {/*cta*/ }
+            <Box className={'py-24 gap-6'}>
+                <H2 className={'text-[clamp(2rem,4vw,3rem)] text-center text-ink-50 max-w-[600px]'}>
+                    آماده‌ای شروع کنی؟
+                </H2>
+                <ArrowButton onClick={() => navigate('/#courses')}>
+                    دوره‌ها رو ببین
+                </ArrowButton>
+            </Box>
+        </MainLayout>
+    )
+}

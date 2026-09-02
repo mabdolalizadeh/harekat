@@ -1,74 +1,21 @@
 import {cn} from "../../utils/cn.js";
 import Img from "../ui/Img.jsx";
-import {H1, H2, H3, P} from "../ui/Headings.jsx";
+import {H2, H3} from "../ui/Headings.jsx";
 import {motion} from "motion/react";
-import {Plus} from "lucide-react";
+import {Clock, User, BookOpen} from "lucide-react";
 import {useState} from "react";
-import Box from "../ui/Box.jsx";
-import Chip from "../ui/Chip.jsx";
 
 export function ContentCard({title, subtitle, className}) {
     return (
-        <div className={cn(
-            'w-100',
-            className
-        )}>
-            <H1
-                className={'border-b border-ink-500 pb-2'}
-            >
-                {title}
-            </H1>
-            <P>
-                {subtitle}
-            </P>
+        <div className={cn('w-100', className)}>
+            <H2 className={'border-b border-ink-500 pb-2'}>{title}</H2>
+            <p className={'text-ink-400 text-sm'}>{subtitle}</p>
         </div>
     )
 }
 
-export function ImageCard({src, alt='', title, subtitle, className, photoHoverText='', ...props }) {
-    const [isHovered, setIsHovered] = useState(false);
-    return (
-        <motion.div
-            whileHover={{ scale: 1.02 }}
-            className={cn(
-                'bg-ink-800 flex flex-col justify-center gap-5 p-2 rounded-lg w-81.5 hover:bg-brand-300/10',
-                'group',
-                'transition-all duration-200 ease-standard',
-                className
-            )}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            {...props}
-        >
-            <div className={'relative'}>
-                <Img src={src} alt={alt} groupHover={true} />
-                {isHovered &&
-                    <div
-                        className={cn(
-                            'absolute bg-ink-900 py-1 px-2 text-white rounded-full',
-                            'top-[45%] right-[38%]',
-                            'flex items-center justify-center'
-                        )}
-                    >
-                        {photoHoverText}
-                    </div>
-                }
-            </div>
-            <div className={'w-[90%] leading-6 text-md'}>
-                {title}
-            </div>
-            <div
-                className="uppercase text-sm text-ink-600 font-semibold group-hover:text-ink-400 transition-all duration-200 ease-in-out"
-            >
-                {subtitle}
-            </div>
-        </motion.div>
-    )
-}
-
-export function AccordionCard({title, content, className, ...props }) {
+export function AccordionCard({title, content, className, ...props}) {
     const [isOpen, setIsOpen] = useState(false);
-
     return (
         <div
             className={cn(
@@ -80,89 +27,96 @@ export function AccordionCard({title, content, className, ...props }) {
             {...props}
         >
             <div className="flex items-center justify-between w-full">
-                <H1 className="font-semibold">{title}</H1>
-
+                <H2 className="font-semibold">{title}</H2>
                 <div
                     className={cn(
                         'p-px rounded-full bg-black transition-all duration-200 ease-in-out',
                         isOpen && 'rotate-45 bg-ink-600'
                     )}
                 >
-                    <Plus />
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.5"/>
+                    </svg>
                 </div>
             </div>
-
             <div
                 className={cn(
                     'grid w-full transition-[grid-template-rows] duration-200 ease-in-out',
-                    isOpen
-                        ? 'grid-rows-[1fr] mt-5'
-                        : 'grid-rows-[0fr] mt-0'
+                    isOpen ? 'grid-rows-[1fr] mt-5' : 'grid-rows-[0fr] mt-0'
                 )}
             >
-                <div className="overflow-hidden text-ink-400">
-                    {content}
-                </div>
+                <div className="overflow-hidden text-ink-400">{content}</div>
             </div>
         </div>
     )
 }
 
 export function CourseCard({
-    title,
-    imgSrc,
-    category,
-    level,
-    duration,
-    courseType,
-    teacher,
-    price,
-    registrationStatus,
-    className,
-    ...props
-                           }) {
-
-    const [isHovered, setIsHovered] = useState(false);
+    title, imgSrc, category, level, duration, courseType, teacher, price, registrationStatus, className, ...props
+}) {
     return (
         <motion.div
-            whileHover={{ scale: 1.02 }}
+            whileHover={{y: -4}}
             className={cn(
-                'bg-ink-800 flex flex-col justify-center gap-4 p-2 rounded-lg w-100 hover:bg-brand-300/10',
-                'group',
-                'transition-all duration-200 ease-standard',
+                'bg-ink-900 border border-ink-50/10 flex flex-col rounded-[var(--radius-xl)] overflow-hidden',
+                'group cursor-pointer transition-all duration-300 hover:border-ink-50/20 hover:shadow-lg hover:shadow-black/20',
                 className
             )}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
             {...props}
         >
-            <div className={'relative'}>
-                <Img src={imgSrc} groupHover={true} className={'h-52 w-full'} />
-                {isHovered &&
-                    <div
-                        className={cn(
-                            'absolute bg-ink-900 py-1 px-2 text-white rounded-full',
-                            'top-[45%] right-[38%]',
-                            'flex items-center justify-center'
-                        )}
-                    >
+            {/*image*/ }
+            <div className={'relative overflow-hidden aspect-[16/10]'}>
+                <Img
+                    src={imgSrc}
+                    groupHover={true}
+                    className={'w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'}
+                />
+                {/*category badge*/ }
+                <div className={'absolute top-3 right-3'}>
+                    <span className={
+                        'bg-ink-950/80 backdrop-blur-sm text-ink-50 text-xs px-2.5 py-1 rounded-full border border-ink-50/10'
+                    }>
                         {category}
+                    </span>
+                </div>
+                {/*registration badge*/ }
+                {registrationStatus && (
+                    <div className={'absolute top-3 left-3'}>
+                        <span className={cn(
+                            'text-xs px-2.5 py-1 rounded-full font-medium',
+                            registrationStatus === 'درحال ثبت نام' && 'bg-green-500/20 text-green-400 border border-green-500/30',
+                            registrationStatus === 'به‌زودی' && 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+                            registrationStatus === 'تکمیل ظرفیت' && 'bg-red-500/20 text-red-400 border border-red-500/30',
+                        )}>
+                            {registrationStatus}
+                        </span>
                     </div>
-                }
+                )}
             </div>
-            <H2 className={'w-[90%] font-bold'}>
-                {title}
-            </H2>
-            <Box className={'flex-row flex-wrap justify-start items-start gap-2'}>
-                {[level, duration, price, courseType, registrationStatus].map((item, i) => (
-                    <Chip key={i}>{item}</Chip>
-                ))}
-            </Box>
-            <H3
-                className="text-ink-600 font-semibold group-hover:text-ink-400 transition-all duration-200 ease-in-out"
-            >
-                {teacher}
-            </H3>
+
+            {/*content*/ }
+            <div className={'flex flex-col gap-3 p-4 flex-1'}>
+                <H3 className={'text-ink-50 font-bold text-base leading-snug line-clamp-2'}>{title}</H3>
+
+                <div className={'flex flex-wrap gap-2'}>
+                    <span className={'flex items-center gap-1 text-xs text-ink-400 bg-ink-800 px-2 py-0.5 rounded-md'}>
+                        <BookOpen size={12}/>{level}
+                    </span>
+                    <span className={'flex items-center gap-1 text-xs text-ink-400 bg-ink-800 px-2 py-0.5 rounded-md'}>
+                        <Clock size={12}/>{duration}
+                    </span>
+                    <span className={'flex items-center gap-1 text-xs text-ink-400 bg-ink-800 px-2 py-0.5 rounded-md'}>
+                        {courseType}
+                    </span>
+                </div>
+
+                <div className={'mt-auto flex items-center justify-between pt-2 border-t border-ink-50/5'}>
+                    <span className={'flex items-center gap-1.5 text-xs text-ink-400'}>
+                        <User size={12}/>{teacher}
+                    </span>
+                    <span className={'text-sm font-bold text-ink-50'}>{price}</span>
+                </div>
+            </div>
         </motion.div>
     )
 }

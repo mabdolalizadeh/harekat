@@ -15,7 +15,7 @@ import StepCard from "../components/contents/StepCard.jsx";
 import TestimonialCard from "../components/contents/TestimonialCard.jsx";
 import {AccordionCard} from "../components/contents/Cards.jsx";
 import {Mail, MapPin} from "lucide-react";
-import footerLogo from '../assets/logo.png';
+import Logo from "../components/ui/Logo.jsx";
 
 const heroVariants = {
     hidden: {opacity: 0},
@@ -168,12 +168,12 @@ const steps = [
 ];
 
 const testimonials = [
-    {quote: 'این برنامه نحوه نگاه من به تصاویر رو کاملاً تغییر داد. دیگه فقط عکس نمی‌گیرم، کار تولید می‌کنم.', name: 'علی محمدی', role: 'عکاس'},
-    {quote: 'قبل از حرکت مدیا با حس کار می‌کردم. الان هر تصمیمم پشتوانه فکری داره.', name: 'مریم رضایی', role: 'طراح گرافیک'},
-    {quote: 'اولین جایی بود که اجازه دادم آزمایش کنم. این آزادی خیلی ارزشمند بود.', name: 'سارا احمدی', role: 'نقاش'},
-    {quote: 'جلسات نقد خیلی سخت ولی عالی بود. یاد گرفتم چطور تصمیماتم رو توضیح بدم.', name: 'رضا کریمی', role: 'هنرمند چندرسانه‌ای'},
-    {quote: 'از طراحی گرافیک اومدم اینجا. فهمیدم طراحی فقط ویژوال نیست، فکر و روش هم هست.', name: 'محمد حسینی', role: 'طراح'},
-    {quote: 'حرکت مدیا فقط کار من رو بهتر نکرد، کل نگاهم به خلاقیت رو عوض کرد.', name: 'امیرحسین احمدی', role: 'عکاس'},
+    {quote: 'این برنامه نحوه نگاه من به تصاویر رو کاملاً تغییر داد. دیگه فقط عکس نمی‌گیرم، کار تولید می‌کنم.', name: 'علی محمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=1'},
+    {quote: 'قبل از حرکت مدیا با حس کار می‌کردم. الان هر تصمیمم پشتوانه فکری داره.', name: 'مریم رضایی', role: 'طراح گرافیک', avatar: 'https://i.pravatar.cc/150?u=2'},
+    {quote: 'اولین جایی بود که اجازه دادم آزمایش کنم. این آزادی خیلی ارزشمند بود.', name: 'سارا احمدی', role: 'نقاش', avatar: 'https://i.pravatar.cc/150?u=3'},
+    {quote: 'جلسات نقد خیلی سخت ولی عالی بود. یاد گرفتم چطور تصمیماتم رو توضیح بدم.', name: 'رضا کریمی', role: 'هنرمند چندرسانه‌ای', avatar: 'https://i.pravatar.cc/150?u=4'},
+    {quote: 'از طراحی گرافیک اومدم اینجا. فهمیدم طراحی فقط ویژوال نیست، فکر و روش هم هست.', name: 'محمد حسینی', role: 'طراح', avatar: 'https://i.pravatar.cc/150?u=5'},
+    {quote: 'حرکت مدیا فقط کار من رو بهتر نکرد، کل نگاهم به خلاقیت رو عوض کرد.', name: 'امیرحسین احمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=6'},
 ];
 
 const faqItems = [
@@ -301,18 +301,18 @@ export default function Landing() {
                 </span>
 
                 <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full"
                     initial="hidden"
                     whileInView="visible"
-                    viewport={{once: true, amount: 0.1}}
+                    viewport={{once: true, amount: 0.05}}
                 >
-                    {courses.slice(0, 4).map((course, index) => (
+                    {courses.map((course, index) => (
                         <motion.div
                             key={index}
                             initial={{opacity: 0, y: 24}}
                             whileInView={{opacity: 1, y: 0}}
                             viewport={{once: true}}
-                            transition={{duration: 0.5, delay: index * 0.08}}
+                            transition={{duration: 0.4, delay: index * 0.05}}
                         >
                             <CourseCard
                                 title={course.title}
@@ -435,7 +435,7 @@ export default function Landing() {
                     دانش‌آموزان ما چه می‌گن
                 </H2>
 
-                <div className={'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full mt-4'}>
+                <div className={'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 w-full mt-4 border border-ink-50/10 rounded-[var(--radius-xl)] overflow-hidden bg-ink-900/50'}>
                     {testimonials.map((item, index) => (
                         <motion.div
                             key={index}
@@ -448,6 +448,7 @@ export default function Landing() {
                                 quote={item.quote}
                                 name={item.name}
                                 role={item.role}
+                                avatar={item.avatar}
                             />
                         </motion.div>
                     ))}
@@ -511,9 +512,9 @@ export default function Landing() {
             {/* ============ FOOTER ============ */}
             <footer className={'w-full py-12 border-t border-ink-50/10 mt-12'}>
                 <div className={'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 w-full'}>
-                    {/*logo + links*/}
+                    {/*logo + links*/ }
                     <div className={'flex flex-col gap-4'}>
-                        <img src={footerLogo} alt={'logo'} className={'h-8 invert'}/>
+                        <Logo className={'h-7'}/>
                         <div className={'flex gap-4 flex-wrap'}>
                             {footerLinks.map((item, index) => (
                                 <span
@@ -527,7 +528,7 @@ export default function Landing() {
                         </div>
                     </div>
 
-                    {/*social + legal*/}
+                    {/*social + legal*/ }
                     <div className={'flex flex-col gap-2 items-start sm:items-end'}>
                         <div className={'flex gap-4'}>
                             <a href="#" className={'text-ink-500 text-xs hover:text-ink-300 transition-colors'}>اینستاگرام</a>
