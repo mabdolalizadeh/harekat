@@ -64,10 +64,10 @@ export default function TopBarLayout() {
         <div className={cn('fixed top-0 z-50 w-full transition-all duration-300', scrolled ? 'pt-3' : 'pt-5')}>
             <div
                 className={cn(
-                    'mx-auto max-w-[var(--container-8xl)] px-[clamp(1rem,4vw,7.5rem)] py-3',
+                    'mx-auto max-w-[var(--container-8xl)] px-8 py-1',
                     'transition-all duration-300',
                     scrolled
-                        ? 'bg-background/80 backdrop-blur-xl shadow-sm shadow-black/10 border-b border-[var(--border)]/50 rounded-[var(--radius-xl)]'
+                        ? 'bg-background/80 backdrop-blur-xl shadow-sm shadow-black/10 border-b border-[var(--border)]/50 rounded-full'
                         : 'bg-transparent'
                 )}
             >
@@ -79,7 +79,7 @@ export default function TopBarLayout() {
                         transition={{duration: 0.3, ease: 'easeInOut', delay: 0.1}}
                     >
                         <Logo
-                            className={'h-10 md:h-15 invert cursor-pointer hover:opacity-80 transition-opacity duration-200'}
+                            className={'h-10 md:h-15 text-foreground cursor-pointer hover:opacity-80 transition-opacity duration-200'}
                             onClick={() => {
                                 navigate('/');
                                 setTimeout(() => scrollToId('hero'), 100);

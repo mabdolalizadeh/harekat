@@ -514,7 +514,7 @@ export default function Landing() {
                 <div className={'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 w-full'}>
                     {/*logo + links*/ }
                     <div className={'flex flex-col gap-1'}>
-                        <Logo className={'h-20'}/>
+                        <Logo className={'h-20 text-foreground'}/>
                         <div className={'flex gap-4 flex-wrap'}>
                             {footerLinks.map((item, index) => (
                                 <span

@@ -25,12 +25,9 @@ export function ThemeProvider({children}) {
     });
 
     const setTheme = (t) => {
-        const root = document.documentElement;
-        root.classList.add('theme-transition');
         localStorage.setItem('theme', t);
         setThemeState(t);
         applyTheme(t);
-        setTimeout(() => root.classList.remove('theme-transition'), 350);
     };
 
     const toggleTheme = () => {
