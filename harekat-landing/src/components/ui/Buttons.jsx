@@ -50,7 +50,7 @@ export function ArrowButton({ children, className, ...props }) {
         >
             {children}
             <div
-                className='relative flex items-center justify-center size-8 bg-black/30 rounded-full overflow-hidden'
+                className='relative flex items-center justify-center size-8 bg-primary-foreground/20 rounded-full overflow-hidden'
             >
                 <ArrowLeft color={'currentColor'} size={18}
                     className='absolute inset-0 m-auto transition-transform duration-300 group-hover:translate-x-[-160%]'/>

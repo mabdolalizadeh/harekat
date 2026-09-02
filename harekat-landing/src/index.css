@@ -347,6 +347,8 @@
     .bg-surface-inverse { background-color: var(--surface-inverse); }
     .bg-card { background-color: var(--card); }
     .bg-accent { background-color: var(--accent); }
+    .bg-primary { background-color: var(--primary); }
+    .bg-primary-foreground { background-color: var(--primary-foreground); }
 
     .text-foreground { color: var(--foreground); }
     .text-primary { color: var(--primary); }
