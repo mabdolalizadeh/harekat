@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Phase: Implementation
+Phase: Implementation Complete
 
 Completed:
 - Read handbook.md — understood API endpoints, auth flow, data models
@@ -12,17 +12,31 @@ Completed:
 - Studied reference website (faculty.framer.website) — full structural breakdown
 - Created AGENT_PROGRESS.md
 - Created Git checkpoint (first-design)
+- Redesigned TopBarLayout — dark, sticky, Faculty-style nav with mobile hamburger
+- Redesigned Hero — tag + large display H1 + subtitle + CTA + marquee
+- Added Manifesto section — tag + H2 + body text
+- Added Founder Card — rotated 2deg, quote + name + role
+- Redesigned Courses — tag + H2 + 2-col grid
+- Added Teachers/Mentors — tag + H2 + subtitle + 4-col grid
+- Added Who It's For — tag + H2 + 4 content cards
+- Added How It Works — tag + H2 + 4 numbered steps
+- Added Testimonials — tag + H2 + 3-col quote grid
+- Added FAQ — tag + H2 + accordion items
+- Added Contact — tag + H2 + email + location
+- Added Footer — logo + nav links + social + copyright
+- Fixed responsive behavior (mobile menu, responsive grids)
+- Fixed lint errors
+- Fixed missing asset imports (placeholder URLs)
+- Build passes, lint passes
 
 Currently working on:
-- Redesigning TopBarLayout to match Faculty nav pattern
+- None — implementation complete
 
 Next:
-- Redesign Hero section
-- Add Manifesto section
-- Redesign Courses section
-- Add Teachers/Mentors section
-- Add remaining sections (Who It's For, How It Works, Testimonials, FAQ, Contact, Footer)
-- Polish responsive behavior
+- Connect to real API data (handbook.md endpoints)
+- Add real images when available
+- Add loading/empty states for API data
+- Add page routing for /about-us, /contact-us, /auth
 
 ---
 
@@ -40,43 +54,52 @@ src/
   main.jsx          — Entry point (BrowserRouter wrapping)
   App.jsx           — Routes definition
   index.css         — Global styles, design tokens, utilities
-  pages/Landing.jsx — Main landing page
+  pages/Landing.jsx — Main landing page (all sections)
   layouts/
-    MainLayout.jsx   — Background + centered container
-    TopBarLayout.jsx — Fixed navigation bar
+    MainLayout.jsx   — Background + centered container (max-w 1440px)
+    TopBarLayout.jsx — Fixed dark nav with mobile hamburger
     MarqueeLayout.jsx — Infinite scrolling marquee
   components/
     ui/
-      Background.jsx — Full-page background wrapper
+      Background.jsx — Full-page dark background wrapper
       Box.jsx        — Flex container primitive
       Buttons.jsx    — PrimaryButton, SecondaryButton, ArrowButton
-      Chip.jsx       — Small tag/badge
+      Chip.jsx       — Small tag/badge (now accepts className)
       Headings.jsx   — H1, H2, H3, P typography components
       Img.jsx        — Image with hover effects
+      SectionTag.jsx — Section eyebrow/label (new)
     contents/
       Cards.jsx      — ContentCard, ImageCard, AccordionCard, CourseCard
+      TeacherCard.jsx — Teacher/mentor card (new)
+      StepCard.jsx    — How-it-works step card (new)
+      TestimonialCard.jsx — Testimonial quote card (new)
   utils/cn.js        — clsx + twMerge utility
 ```
 
 ### Component System
-- **Background**: Full-page dark background wrapper
+- **Background**: Full-page dark bg wrapper (bg-ink-950)
 - **Box**: Generic flex container (flex-col, items-center, justify-center)
 - **Buttons**: PrimaryButton (brand orange), SecondaryButton (dark), ArrowButton (white with arrow icon)
 - **Chip**: Small bordered tag with text-sm font-semibold
 - **Headings**: H1 (text-2xl extrabold), H2 (text-xl extrabold), H3 (clamp-based), P (clamp-based)
 - **Img**: Image with overflow-hidden, rounded-lg, hover rotation, ArrowUpRight overlay
+- **SectionTag**: Section eyebrow/label using .eyebrow utility class
+- **TeacherCard**: Photo + name + role
+- **StepCard**: Large number + title + description
+- **TestimonialCard**: Quote + name + role
 - **CourseCard**: Image + title + chips + teacher, dark bg, hover scale
 - **AccordionCard**: Expandable content with Plus icon toggle
 - **MarqueeLayout**: Infinite horizontal scroll with pause-on-hover
 
 ### Design Language
-- **Background**: Warm cream #f7f5f0 (light) / #10100f (dark)
+- **Background**: Near-black #10100f (dark-first, matching Faculty)
 - **Brand**: Warm orange #f47c20 (primary)
 - **Typography**: Vazirmatn (Persian font), extrabold headings
-- **Cards**: Dark bg (ink-800), rounded-lg, hover scale 1.02
-- **Spacing**: section-spacing = clamp(4rem, 9vw, 9rem)
-- **Container**: max-w-[var(--container-8xl)] = 1440px
-- **Animations**: motion library (framer-motion successor), fade-up, stagger children
+- **Cards**: Dark bg (ink-900), border border-ink-50/10, rounded-xl/2xl
+- **Spacing**: py-24 between sections, gap-6 for content
+- **Container**: max-w-[var(--container-8xl)] = 1440px, px-[clamp(1.5rem,5vw,7.5rem)]
+- **Animations**: motion library, fade-up, stagger children
+- **Section pattern**: SectionTag → H2 → optional P → content
 
 ### Coding Style
 - Uses `cn()` for all className merging
@@ -94,7 +117,7 @@ src/
 
 ### Existing Project Identity
 - Warm, creative, educational atmosphere
-- Orange brand accent on dark/cream surfaces
+- Orange brand accent on dark surfaces
 - Persian/RTL layout
 - Editorial feel with bold typography
 - Image-forward cards with hover interactions
@@ -103,7 +126,7 @@ src/
 ### Reference Website (Faculty) Key Patterns
 - **Dark-first**: Near-black (#0d0d0d) backgrounds, warm off-white (#fefff5) text
 - **Tag + Heading + Subtitle**: Every section follows this pattern
-- **Typography**: Display font (Apfel Grotezk) for ALL text — distinctive
+- **Typography**: Display font for ALL text
 - **Section spacing**: 100-120px between sections
 - **Grid layouts**: 2-col for programs, 4-col for team/features
 - **Rounded corners**: 20px on cards/images, 10px on buttons
@@ -153,73 +176,67 @@ src/
 - [x] Analyzed reference website (faculty.framer.website)
 - [x] Created AGENT_PROGRESS.md
 - [x] Create Git checkpoint (first-design)
-- [ ] Redesign TopBarLayout
-- [ ] Redesign Hero section
-- [ ] Add Manifesto section
-- [ ] Redesign Courses section
-- [ ] Add Teachers/Mentors section
-- [ ] Add Who It's For section
-- [ ] Add How It Works section
-- [ ] Add Testimonials section
-- [ ] Add FAQ section
-- [ ] Add Contact section
-- [ ] Add Footer
-- [ ] Polish responsive
+- [x] Redesign TopBarLayout
+- [x] Redesign Hero section
+- [x] Add Manifesto section
+- [x] Add Founder Card
+- [x] Redesign Courses section (2-col grid)
+- [x] Add Teachers/Mentors section (4-col grid)
+- [x] Add Who It's For section (4 cards)
+- [x] Add How It Works section (4 steps)
+- [x] Add Testimonials section (3-col grid)
+- [x] Add FAQ section (accordion)
+- [x] Add Contact section
+- [x] Add Footer
+- [x] Fix responsive behavior (mobile menu, responsive grids)
+- [x] Fix lint errors
+- [x] Fix missing asset imports
+- [x] Verify build passes
 
 ---
 
 ## Current Task
 
-Creating Git checkpoint before beginning implementation.
+All implementation tasks complete. Build and lint pass.
 
 ---
 
 ## Next Steps
 
-1. Create Git checkpoint with `first-design` tag
-2. Redesign TopBarLayout → dark, sticky, Faculty-style nav
-3. Redesign Hero → tag + large H1 + subtitle + CTA, centered
-4. Add Manifesto section → tag + H2 + body
-5. Add Founder/About card
-6. Redesign Courses → tag + H2 + 2-col grid cards
-7. Add Teachers → tag + H2 + subtitle + 4-col grid
-8. Add Who It's For → tag + H2 + 4 cards
-9. Add How It Works → tag + H2 + 4 steps
-10. Add Testimonials → tag + H2 + quote grid
-11. Add FAQ → accordion
-12. Add Contact → tag + H2 + details
-13. Add Footer → links + logo + social
-14. Responsive polish
-15. Lint and final check
+1. Connect to real API data from handbook.md endpoints
+2. Add real images when available (replace placeholder URLs)
+3. Add loading/empty/error states for API-driven content
+4. Add page routing for /about-us, /contact-us, /auth
+5. Add mobile hamburger menu refinement
+6. Consider adding scroll-to-section smooth behavior
+7. Consider adding dark/light mode toggle
 
 ---
 
 ## Decisions
 
-- Reusing existing component system (Box, Chip, Headings, Buttons, Img, CourseCard, AccordionCard)
-- Keeping Vazirmatn font (project identity) but matching Faculty's display-weight patterns
-- Adapting Faculty's dark-first approach while preserving brand orange
-- Faculty uses 2-col grid for programs — will adapt courses to similar layout
-- Will create new reusable components following existing architecture: SectionHeader, TeacherCard, StepCard, TestimonialCard, ContactSection, Footer
-- Will keep RTL/Persian layout intact
+- Reused existing component system (Box, Chip, Headings, Buttons, Img, CourseCard, AccordionCard)
+- Kept Vazirmatn font (project identity) while matching Faculty's display-weight patterns
+- Adapted Faculty's dark-first approach while preserving brand orange
+- Used Faculty's 2-col grid for programs (adapted to courses)
+- Created new reusable components following existing architecture: SectionTag, TeacherCard, StepCard, TestimonialCard
+- Used placeholder URLs for images since local assets were never committed to git
+- Copied logo.png from project root to src/assets/ for proper imports
 
 ---
 
 ## Known Issues
 
-- No footer exists yet
-- No teachers section
-- No testimonials
-- No FAQ
-- No contact section
-- TopBarLayout is functional but needs redesign to match Faculty pattern
-- Hero needs larger typography and Faculty-style composition
-- Course cards need layout adjustment to match Faculty program cards
-- No dark-first hero (current hero is on light background)
-- Mobile nav needs hamburger menu
+- Images are placeholder URLs (Unsplash) — should be replaced with real assets
+- No actual API integration yet — all data is static/hardcoded
+- No loading states for async data
+- No error boundaries
+- Mobile menu needs refinement for touch interactions
+- No scroll-to-section behavior for anchor links
+- No dark/light mode toggle (currently dark-only)
 
 ---
 
 ## Git Checkpoints
 
-- `first-design` — Original project state before AI implementation (pending creation)
+- `first-design` — Original project state before AI implementation
