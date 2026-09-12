@@ -61,11 +61,10 @@ export function AccordionCard({title, content, className, ...props}) {
 }
 
 export function CourseCard({
-    id, title, imgSrc, category, level, duration, courseType, teacher, price, salePrice, registrationStatus, productType = 'course', onAddToCart, variant = 'default', className, ...props
+    id, title, imgSrc, category, level, duration, courseType, teacher, price, salePrice, registrationStatus, productType = 'course', onAddToCart, className, ...props
 }) {
     const [adding, setAdding] = useState(false);
     const hasSale = salePrice !== null && salePrice !== undefined && salePrice !== '' && String(salePrice) !== String(price);
-    const variantClasses = { base: 'border-sky-200/80 dark:border-sky-900/80 hover:border-sky-400', beginner: 'border-emerald-200/80 dark:border-emerald-900/80 hover:border-emerald-400', advanced: 'border-violet-200/80 dark:border-violet-900/80 hover:border-violet-400' };
     const add = async (event) => {
         event.stopPropagation();
         if (!id || adding) return;
@@ -80,7 +79,6 @@ export function CourseCard({
             className={cn(
                 'bg-card border border-border/10 flex flex-col rounded-xl overflow-hidden',
                 'group cursor-pointer transition-all duration-300 hover:border-border/20 hover:shadow-lg hover:shadow-black/20',
-                variantClasses[variant],
                 className
             )}
             {...props}

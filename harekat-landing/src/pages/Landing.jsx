@@ -21,9 +21,7 @@ import { useEffect, useState } from "react";
 import { storeApi } from "../services/api.js";
 
 const fallbackHeroSlides = [
-    { image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600', alt: 'محیط آموزشی حرکت مدیا' },
-    { image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1600', alt: 'کارگاه خلاقیت' },
-    { image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=1600', alt: 'یادگیری تیمی' },
+    { image: '', alt: '' },
 ];
 
 const heroVariants = {
@@ -44,12 +42,7 @@ const heroItem = {
 };
 
 
-const images = [
-    'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400',
-    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400',
-    'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400',
-    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400',
-];
+const images = [];
 
 const courses = [
     {
@@ -217,11 +210,11 @@ function mapApiTeacher(teacher) {
     return { id: teacher.id, name: `${teacher.firstName ?? ''} ${teacher.lastName ?? ''}`.trim(), role: teacher.categories?.[0]?.name ?? 'مدرس', avatar: teacher.avatar };
 }
 
-function LevelSection({ id, eyebrow, title, courses: items, tone }) {
+function LevelSection({ id, eyebrow, title, courses: items }) {
     if (!items.length) return null;
     return <section id={id} className="w-full">
         <div className="mb-5 flex flex-col gap-1"><span className="text-xs font-bold uppercase tracking-[0.16em] text-muted">{eyebrow}</span><H2 className="text-foreground">{title}</H2></div>
-        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map((course, index) => <motion.div key={course.id || course.title || index} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: index * 0.04 }}><CourseCard {...course} variant={tone} /></motion.div>)}</div>
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{items.map((course, index) => <motion.div key={course.id || course.title || index} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: index * 0.04 }}><CourseCard {...course} /></motion.div>)}</div>
     </section>;
 }
 
@@ -357,9 +350,9 @@ export default function Landing() {
                     مسیر هنری خودت رو کشف کن
                 </H2>
                 <div className="flex w-full flex-col gap-5">
-                    <LevelSection id="base-courses" eyebrow="سطح پایه" title="شروع از پایه" courses={baseCourses} tone="base" />
-                    <LevelSection id="beginner-courses" eyebrow="سطح مقدماتی" title="ساختن مهارت‌های اصلی" courses={beginnerCourses} tone="beginner" />
-                    <LevelSection id="advanced-courses" eyebrow="سطح پیشرفته" title="برای قدم‌های جدی‌تر" courses={advancedCourses} tone="advanced" />
+                    <LevelSection id="base-courses" eyebrow="سطح پایه" title="شروع از پایه" courses={baseCourses} />
+                    <LevelSection id="beginner-courses" eyebrow="سطح مقدماتی" title="ساختن مهارت‌های اصلی" courses={beginnerCourses} />
+                    <LevelSection id="advanced-courses" eyebrow="سطح پیشرفته" title="برای قدم‌های جدی‌تر" courses={advancedCourses} />
                 </div>
             </Box>
 
