@@ -356,19 +356,19 @@ export default function Landing() {
                 </div>
             </Box>
 
-            {capsuleCourses.length > 0 && <Box id={sectionIds.capsule} className="gap-4 py-12 sm:py-16">
+            {capsuleCourses.length > 0 && <Box id={'capsule-courses'} className="gap-4 py-12 sm:py-16">
                 <SectionTag>دوره‌های کپسولی</SectionTag>
                 <H2 className="text-center text-foreground">یادگیری کوتاه و کاربردی</H2>
                 <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{capsuleCourses.map((course) => <CourseCard key={course.id || course.title} {...course} />)}</div>
             </Box>}
 
-            {skillPackages.length > 0 && <Box id={sectionIds.skill} className="gap-4 py-12 sm:py-16">
+            {skillPackages.length > 0 && <Box id={'skill-packages'} className="gap-4 py-12 sm:py-16">
                 <SectionTag>پکیج‌های مهارتی</SectionTag>
                 <H2 className="text-center text-foreground">مسیرهای کامل برای رشد</H2>
                 <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{skillPackages.map((course) => <CourseCard key={course.id || course.title} {...course} productType="course" />)}</div>
             </Box>}
 
-            {apiSubscriptions?.length > 0 && <Box id={sectionIds.subscriptions} className="gap-4 py-12 sm:py-16">
+            {apiSubscriptions?.length > 0 && <Box id={'subscriptions'} className="gap-4 py-12 sm:py-16">
                 <SectionTag>اشتراک‌ها</SectionTag>
                 <H2 className="text-center text-foreground">عضویت در مسیر یادگیری</H2>
                 <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{apiSubscriptions.map((item) => <SubscriptionCard key={item.id} {...item} />)}</div>
