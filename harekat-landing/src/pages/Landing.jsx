@@ -217,6 +217,19 @@ function mapApiTeacher(teacher) {
     return { id: teacher.id, name: `${teacher.firstName ?? ''} ${teacher.lastName ?? ''}`.trim(), role: teacher.categories?.[0]?.name ?? 'مدرس', avatar: teacher.avatar };
 }
 
+function LevelSection({ id, eyebrow, title, courses: items, tone }) {
+    if (!items.length) return null;
+    const tones = {
+        base: 'border-sky-200/60 bg-sky-50/40 dark:border-sky-900/60 dark:bg-sky-950/20',
+        beginner: 'border-emerald-200/60 bg-emerald-50/40 dark:border-emerald-900/60 dark:bg-emerald-950/20',
+        advanced: 'border-violet-200/60 bg-violet-50/40 dark:border-violet-900/60 dark:bg-violet-950/20',
+    };
+    return <section id={id} className={`w-full rounded-2xl border p-4 sm:p-6 ${tones[tone]}`}>
+        <div className="mb-5 flex flex-col gap-1"><span className="text-xs font-bold uppercase tracking-[0.16em] text-muted">{eyebrow}</span><H2 className="text-foreground">{title}</H2></div>
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map((course, index) => <motion.div key={course.id || course.title || index} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: index * 0.04 }}><CourseCard {...course} /></motion.div>)}</div>
+    </section>;
+}
+
 export default function Landing() {
     const navigate = useNavigate();
     const [banners, setBanners] = useState([]);
@@ -246,6 +259,9 @@ export default function Landing() {
     const regularCourses = apiCourses?.length ? apiCourseRows.filter((course) => !course.kind || course.kind === 'regular').map(mapApiCourse) : displayCourses;
     const capsuleCourses = apiCourses?.length ? apiCourseRows.filter((course) => course.kind === 'capsule').map(mapApiCourse) : [];
     const skillPackages = apiCourses?.length ? apiCourseRows.filter((course) => course.kind === 'skill').map(mapApiCourse) : [];
+    const baseCourses = regularCourses.filter((course) => course.level === 'پایه');
+    const beginnerCourses = regularCourses.filter((course) => course.level === 'مقدماتی' || course.level === 'مبتدی' || !course.level);
+    const advancedCourses = regularCourses.filter((course) => course.level === 'پیشرفته' || course.level === 'متوسط');
     const heroTitle = contentMap['hero-title']?.title || 'اینجا فقط یاد';
     const heroSubtitle = contentMap['hero-title']?.body || 'حرکت مدیا جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.';
 
@@ -339,40 +355,11 @@ export default function Landing() {
                 <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     مسیر هنری خودت رو کشف کن
                 </H2>
-                <span className={'text-muted text-sm mb-2 cursor-pointer hover:text-foreground/70 transition-colors'}>
-                    همه دوره‌ها
-                </span>
-
-                <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{once: true, amount: 0.05}}
-                >
-                    {regularCourses.map((course, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{opacity: 0, y: 24}}
-                            whileInView={{opacity: 1, y: 0}}
-                            viewport={{once: true}}
-                            transition={{duration: 0.4, delay: index * 0.05}}
-                        >
-                            <CourseCard
-                                id={course.id}
-                                title={course.title}
-                                imgSrc={course.imgSrc}
-                                category={course.category}
-                                level={course.level}
-                                duration={course.duration}
-                                courseType={course.courseType}
-                                teacher={course.teacher}
-                                price={course.price}
-                                salePrice={course.salePrice}
-                                registrationStatus={course.registrationStatus}
-                            />
-                        </motion.div>
-                    ))}
-                </motion.div>
+                <div className="flex w-full flex-col gap-5">
+                    <LevelSection id="base-courses" eyebrow="سطح پایه" title="شروع از پایه" courses={baseCourses} tone="base" />
+                    <LevelSection id="beginner-courses" eyebrow="سطح مقدماتی" title="ساختن مهارت‌های اصلی" courses={beginnerCourses} tone="beginner" />
+                    <LevelSection id="advanced-courses" eyebrow="سطح پیشرفته" title="برای قدم‌های جدی‌تر" courses={advancedCourses} tone="advanced" />
+                </div>
             </Box>
 
             {capsuleCourses.length > 0 && <Box id="capsule-courses" className="gap-4 py-12 sm:py-16">
@@ -384,7 +371,7 @@ export default function Landing() {
             {skillPackages.length > 0 && <Box id="skill-packages" className="gap-4 py-12 sm:py-16">
                 <SectionTag>پکیج‌های مهارتی</SectionTag>
                 <H2 className="text-center text-foreground">مسیرهای کامل برای رشد</H2>
-                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{skillPackages.map((course) => <CourseCard key={course.id || course.title} {...course} productType="course" />)}</div>
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{skillPackages.map((course) => <CourseCard key={course.id || course.title} {...course} productType="course" />)}</div>
             </Box>}
 
             {apiSubscriptions?.length > 0 && <Box id="subscriptions" className="gap-4 py-12 sm:py-16">
