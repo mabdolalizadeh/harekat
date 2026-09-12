@@ -39,8 +39,8 @@ export function ArrowButton({ children, className, ...props }) {
     return (
         <button
             className={cn(
-                'bg-primary pr-3 pl-2 py-1.5 sm:py-1 flex items-center justify-center gap-3',
-                'text-primary-foreground',
+                'bg-black pr-3 pl-2 py-1.5 sm:py-1 flex items-center justify-center gap-3',
+                'text-white dark:bg-white dark:text-black',
                 'rounded-full',
                 'hover:opacity-90 transition-all duration-200',
                 'group',
@@ -50,7 +50,7 @@ export function ArrowButton({ children, className, ...props }) {
         >
             {children}
             <div
-                className='relative flex items-center justify-center size-8 bg-primary-foreground/20 rounded-full overflow-hidden'
+                className='relative flex items-center justify-center size-8 rounded-full bg-white text-black dark:bg-black dark:text-white overflow-hidden'
             >
                 <ArrowLeft color={'currentColor'} size={18}
                     className='absolute inset-0 m-auto transition-transform duration-300 group-hover:translate-x-[-160%]'/>
