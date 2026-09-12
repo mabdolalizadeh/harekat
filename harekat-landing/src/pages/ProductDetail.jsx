@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout.jsx';
 import TopBarLayout from '../layouts/TopBarLayout.jsx';
 import Box from '../components/ui/Box.jsx';
@@ -33,6 +33,7 @@ function videoSource(value) {
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [course, setCourse] = useState(null);
     const [error, setError] = useState(null);
     const [added, setAdded] = useState(false);
@@ -41,7 +42,14 @@ export default function ProductDetail() {
     if (!course) return <MainLayout><TopBarLayout /><Box className="min-h-[50vh] pt-32"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></Box></MainLayout>;
     const discounted = course.salePrice && String(course.salePrice) !== String(course.price);
     const video = videoSource(course.videoUrl);
-    const add = async () => { await customerApi.addToCart(course.id, 'course', 1, discounted ? course.salePrice : course.price); setAdded(true); };
+    const add = async () => {
+        if (!localStorage.getItem('token')) {
+            navigate('/auth', {state: {from: `${location.pathname}${location.search}${location.hash}`}});
+            return;
+        }
+        await customerApi.addToCart(course.id, 'course', 1, discounted ? course.salePrice : course.price);
+        setAdded(true);
+    };
     return <MainLayout title={course.name}><TopBarLayout /><Box className="w-full max-w-5xl gap-8 pb-20 pt-28 sm:pt-36">
         <button onClick={() => navigate(-1)} className="self-start text-sm text-muted">بازگشت</button>
         <div className="grid w-full gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">

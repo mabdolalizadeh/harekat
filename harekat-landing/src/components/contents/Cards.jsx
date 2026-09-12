@@ -4,6 +4,7 @@ import {H2, H3} from "../ui/Headings.jsx";
 import {motion} from "motion/react";
 import {Clock, User, BookOpen} from "lucide-react";
 import {useState} from "react";
+import {useLocation, useNavigate} from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { customerApi } from "../../services/api.js";
 
@@ -64,10 +65,17 @@ export function CourseCard({
     id, title, imgSrc, category, level, duration, courseType, teacher, price, salePrice, registrationStatus, productType = 'course', onAddToCart, className, ...props
 }) {
     const [adding, setAdding] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const isSubscription = productType === 'subscription';
     const hasSale = salePrice !== null && salePrice !== undefined && salePrice !== '' && String(salePrice) !== String(price);
     const add = async (event) => {
         event.stopPropagation();
         if (!id || adding) return;
+        if (!localStorage.getItem('token')) {
+            navigate('/auth', {state: {from: `${location.pathname}${location.search}${location.hash}`}});
+            return;
+        }
         setAdding(true);
         try { await customerApi.addToCart(id, productType, 1, hasSale ? salePrice : price); onAddToCart?.(); }
         finally { setAdding(false); }
@@ -75,10 +83,11 @@ export function CourseCard({
     return (
         <motion.div
             whileHover={{y: -4}}
-            onClick={() => id && (window.location.href = `/products/${id}`)}
+            onClick={() => id && !isSubscription && (window.location.href = `/products/${id}`)}
             className={cn(
                 'bg-card border border-border/10 flex flex-col rounded-xl overflow-hidden',
-                'group cursor-pointer transition-all duration-300 hover:border-border/20 hover:shadow-lg hover:shadow-black/20',
+                'group transition-all duration-300 hover:border-border/20 hover:shadow-lg hover:shadow-black/20',
+                !isSubscription && 'cursor-pointer',
                 className
             )}
             {...props}

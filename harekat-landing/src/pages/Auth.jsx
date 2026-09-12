@@ -6,7 +6,7 @@ import {H1, P} from "../components/ui/Headings.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
 import {PrimaryButton} from "../components/ui/Buttons.jsx";
 import {useState} from "react";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {ArrowLeft, Phone, KeyRound} from "lucide-react";
 import {cn} from "../utils/cn.js";
 import {authApi} from "../services/api.js";
@@ -25,6 +25,7 @@ function translateError(msg) {
 
 export default function Auth() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [step, setStep] = useState('phone');
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
@@ -56,7 +57,13 @@ export default function Auth() {
             const json = await authApi.validateOtp(phoneNumber, otpCode);
             localStorage.setItem('token', json.data.token);
             localStorage.setItem('user', JSON.stringify(json.data.user));
-            navigate('/dashboard');
+            const from = location.state?.from;
+            const destination = typeof from === 'string'
+                ? from
+                : from?.pathname
+                    ? `${from.pathname}${from.search || ''}${from.hash || ''}`
+                    : '/dashboard';
+            navigate(destination, {replace: true});
         } catch (err) {
             setError(translateError(err.message) || 'کد تایید نادرست است');
         } finally {
