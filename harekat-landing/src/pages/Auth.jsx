@@ -4,13 +4,12 @@ import {motion} from "motion/react";
 import Box from "../components/ui/Box.jsx";
 import {H1, P} from "../components/ui/Headings.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
-import {PrimaryButton, SecondaryButton} from "../components/ui/Buttons.jsx";
+import {PrimaryButton} from "../components/ui/Buttons.jsx";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {ArrowLeft, Phone, KeyRound, Zap} from "lucide-react";
+import {ArrowLeft, Phone, KeyRound} from "lucide-react";
 import {cn} from "../utils/cn.js";
-
-const BASE = 'http://localhost:3000/api/v1';
+import {authApi} from "../services/api.js";
 
 const errorTranslations = {
     'Too many attempts. Please try again later.': 'تعداد تلاش‌های شما بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید.',
@@ -41,16 +40,10 @@ export default function Auth() {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch(`${BASE}/auth`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({phoneNumber: phone}),
-            });
-            const json = await res.json();
-            if (!json.ok) throw new Error(translateError(json.message));
+            await authApi.requestOtp(phone);
             setStep('otp');
         } catch (err) {
-            setError(err.message || 'خطا در ارسال کد');
+            setError(translateError(err.message) || 'خطا در ارسال کد');
         } finally {
             setLoading(false);
         }
@@ -60,18 +53,12 @@ export default function Auth() {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch(`${BASE}/auth/validate-otp`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({phoneNumber, otp: otpCode}),
-            });
-            const json = await res.json();
-            if (!json.ok) throw new Error(translateError(json.message));
+            const json = await authApi.validateOtp(phoneNumber, otpCode);
             localStorage.setItem('token', json.data.token);
             localStorage.setItem('user', JSON.stringify(json.data.user));
             navigate('/dashboard');
         } catch (err) {
-            setError(err.message || 'کد تایید نادرست است');
+            setError(translateError(err.message) || 'کد تایید نادرست است');
         } finally {
             setLoading(false);
         }
@@ -84,10 +71,6 @@ export default function Auth() {
             return;
         }
         handleValidateOtp(phone, otp);
-    };
-
-    const handleDevBypass = () => {
-        handleValidateOtp('09123456789', '299510');
     };
 
     return (
@@ -145,7 +128,7 @@ export default function Auth() {
                                     type={'text'}
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
-                                    placeholder={'299510'}
+                                    placeholder={'123456'}
                                     dir={'ltr'}
                                     maxLength={6}
                                     className={
@@ -173,21 +156,6 @@ export default function Auth() {
                     )}
                 </motion.div>
 
-                {/*dev bypass*/}
-                <div className={'flex flex-col items-center gap-3 mt-4'}>
-                    <div className={'hairline w-32'}/>
-                    <SecondaryButton
-                        onClick={handleDevBypass}
-                        disabled={loading}
-                        className={cn('flex items-center gap-2 text-xs', loading && 'opacity-50')}
-                    >
-                        <Zap size={14}/>
-                        ورود سریع (Dev)
-                    </SecondaryButton>
-                    <P className={'text-muted text-xs text-center'}>
-                        09123456789 · کد: 299510
-                    </P>
-                </div>
             </Box>
         </MainLayout>
     )

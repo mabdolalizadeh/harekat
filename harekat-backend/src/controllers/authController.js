@@ -24,7 +24,7 @@ export default class AuthController {
             await user.save();
 
             logSecurityEvent('otp_generated', { userId: user.id, phoneNumber, ip: req.ip });
-            return res.status(200).json({ ok: true, data: { userId: user.id, otp: user.otp } });
+            return res.status(200).json({ ok: true, data: { userId: user.id } });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
         }

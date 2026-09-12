@@ -12,7 +12,7 @@ const configs = {
     jwtExpiry: process.env.JWT_EXPIRY || '1d',
     userJwtExpiry: process.env.USER_JWT_EXPIRY || '15m',
     corsOrigin: process.env.CORS_ORIGIN || '*',
-    nodeEnv: process.env.NODE_ENV || 'development'
+    nodeEnv: String(process.env.NODE_ENV || 'production').toLowerCase()
 };
 
 const validateConfig = () => {
