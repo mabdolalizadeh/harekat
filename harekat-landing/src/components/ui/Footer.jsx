@@ -6,24 +6,20 @@ import { Camera, Send, Briefcase } from "lucide-react";
 const footerLinks = [
     { text: "خانه", link: "/#hero", scrollId: "hero" },
     { text: "دوره‌ها", link: "/#courses", scrollId: "courses" },
-    { text: "پکیج‌های مهارتی", link: "/#skill-packages", scrollId: "skill-packages" },
-    { text: "دوره‌های کپسولی", link: "/#capsule-courses", scrollId: "capsule-courses" },
-    { text: "اشتراک‌ها", link: "/#subscriptions", scrollId: "subscriptions" },
+    { text: "پکیج‌های مهارتی", key: "skill", link: "/#skill-packages" },
+    { text: "دوره‌های کپسولی", key: "capsule", link: "/#capsule-courses" },
+    { text: "اشتراک‌ها", key: "subscriptions", link: "/#subscriptions" },
     { text: "درباره ما", link: "/about-us", scrollId: null },
     { text: "تماس با ما", link: "/contact-us", scrollId: null },
 ];
 
-export default function Footer({ socials, copyright, className }) {
+export default function Footer({ socials = [], copyright, sectionIds = {}, className }) {
     const navigate = useNavigate();
 
-    function scrollToId(id) {
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
     const handleNav = (item) => {
-        if (item.scrollId) {
-            scrollToId(item.scrollId);
+        const scrollId = item.key ? (sectionIds[item.key] || item.link.slice(2)) : item.scrollId;
+        if (scrollId) {
+            navigate(`/#${scrollId}`);
         } else {
             navigate(item.link);
         }

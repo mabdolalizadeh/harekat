@@ -219,14 +219,9 @@ function mapApiTeacher(teacher) {
 
 function LevelSection({ id, eyebrow, title, courses: items, tone }) {
     if (!items.length) return null;
-    const tones = {
-        base: 'border-sky-200/60 bg-sky-50/40 dark:border-sky-900/60 dark:bg-sky-950/20',
-        beginner: 'border-emerald-200/60 bg-emerald-50/40 dark:border-emerald-900/60 dark:bg-emerald-950/20',
-        advanced: 'border-violet-200/60 bg-violet-50/40 dark:border-violet-900/60 dark:bg-violet-950/20',
-    };
-    return <section id={id} className={`w-full rounded-2xl border p-4 sm:p-6 ${tones[tone]}`}>
+    return <section id={id} className="w-full">
         <div className="mb-5 flex flex-col gap-1"><span className="text-xs font-bold uppercase tracking-[0.16em] text-muted">{eyebrow}</span><H2 className="text-foreground">{title}</H2></div>
-        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map((course, index) => <motion.div key={course.id || course.title || index} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: index * 0.04 }}><CourseCard {...course} /></motion.div>)}</div>
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map((course, index) => <motion.div key={course.id || course.title || index} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: index * 0.04 }}><CourseCard {...course} variant={tone} /></motion.div>)}</div>
     </section>;
 }
 
@@ -236,17 +231,23 @@ export default function Landing() {
     const [apiCourses, setApiCourses] = useState(null);
     const [apiTeachers, setApiTeachers] = useState(null);
     const [apiSubscriptions, setApiSubscriptions] = useState(null);
+    const [sectionIds, setSectionIds] = useState({ capsule: 'capsule-courses', skill: 'skill-packages', subscriptions: 'subscriptions' });
     const [contentMap, setContentMap] = useState({});
 
     useEffect(() => {
         let cancelled = false;
-        Promise.allSettled([storeApi.getBanners(), storeApi.getCourses(), storeApi.getTeachers(), storeApi.getSubscriptions(), storeApi.getSiteContent()]).then((results) => {
+        Promise.allSettled([storeApi.getBanners(), storeApi.getCourses(), storeApi.getTeachers(), storeApi.getSubscriptions(), storeApi.getCategories(), storeApi.getSiteContent()]).then((results) => {
             if (cancelled) return;
-            const [bannerResult, courseResult, teacherResult, subscriptionResult, contentResult] = results;
+            const [bannerResult, courseResult, teacherResult, subscriptionResult, categoriesResult, contentResult] = results;
             if (bannerResult.status === 'fulfilled') setBanners((bannerResult.value.data ?? []).filter((banner) => banner.isActive !== false).map((banner) => ({ image: banner.imageUrl, tabletImage: banner.tabletImageUrl || banner.imageUrl, mobileImage: banner.mobileImageUrl || banner.tabletImageUrl || banner.imageUrl, link: banner.linkUrl || undefined, duration: banner.duration, alt: 'بنر صفحه اصلی' })));
             if (courseResult.status === 'fulfilled') setApiCourses((courseResult.value.data ?? []).filter((course) => course.isActive !== false));
             if (teacherResult.status === 'fulfilled') setApiTeachers((teacherResult.value.data ?? []).filter((teacher) => teacher.showOnLanding));
             if (subscriptionResult.status === 'fulfilled') setApiSubscriptions((subscriptionResult.value.data ?? []).filter((item) => item.isActive !== false));
+            if (categoriesResult.status === 'fulfilled') {
+                const categories = categoriesResult.value.data ?? [];
+                const findSection = (pattern, fallback) => categories.find((category) => pattern.test(`${category.slug ?? ''} ${category.name ?? ''}`))?.slug || fallback;
+                setSectionIds({ capsule: findSection(/capsule|کپسول/i, 'capsule-courses'), skill: findSection(/skill|مهارت|پکیج/i, 'skill-packages'), subscriptions: findSection(/subscription|اشتراک/i, 'subscriptions') });
+            }
             if (contentResult.status === 'fulfilled') setContentMap(Object.fromEntries((contentResult.value.data ?? []).map((block) => [block.key, block])));
         });
         return () => { cancelled = true; };
@@ -362,19 +363,19 @@ export default function Landing() {
                 </div>
             </Box>
 
-            {capsuleCourses.length > 0 && <Box id="capsule-courses" className="gap-4 py-12 sm:py-16">
+            {capsuleCourses.length > 0 && <Box id={sectionIds.capsule} className="gap-4 py-12 sm:py-16">
                 <SectionTag>دوره‌های کپسولی</SectionTag>
                 <H2 className="text-center text-foreground">یادگیری کوتاه و کاربردی</H2>
                 <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{capsuleCourses.map((course) => <CourseCard key={course.id || course.title} {...course} />)}</div>
             </Box>}
 
-            {skillPackages.length > 0 && <Box id="skill-packages" className="gap-4 py-12 sm:py-16">
+            {skillPackages.length > 0 && <Box id={sectionIds.skill} className="gap-4 py-12 sm:py-16">
                 <SectionTag>پکیج‌های مهارتی</SectionTag>
                 <H2 className="text-center text-foreground">مسیرهای کامل برای رشد</H2>
                 <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{skillPackages.map((course) => <CourseCard key={course.id || course.title} {...course} productType="course" />)}</div>
             </Box>}
 
-            {apiSubscriptions?.length > 0 && <Box id="subscriptions" className="gap-4 py-12 sm:py-16">
+            {apiSubscriptions?.length > 0 && <Box id={sectionIds.subscriptions} className="gap-4 py-12 sm:py-16">
                 <SectionTag>اشتراک‌ها</SectionTag>
                 <H2 className="text-center text-foreground">عضویت در مسیر یادگیری</H2>
                 <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{apiSubscriptions.map((item) => <SubscriptionCard key={item.id} {...item} />)}</div>
@@ -561,7 +562,7 @@ export default function Landing() {
                 </div>
             </Box>
 
-            <Footer copyright={contentMap['footer-copyright']?.body || '© ۱۴۰۵ حرکت مدیا'} socials={Object.values(contentMap).filter((item) => item.key?.startsWith('social-'))} />
+            <Footer sectionIds={sectionIds} copyright={contentMap['footer-copyright']?.body || '© ۱۴۰۵ حرکت مدیا'} socials={Object.values(contentMap).filter((item) => item.key?.startsWith('social-'))} />
         </MainLayout>
     )
 }
