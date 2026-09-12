@@ -77,13 +77,12 @@ export default function TopBarLayout() {
 
     const handleNav = (item) => {
         setMobileOpen(false);
-        if (item.scrollId && location.pathname === '/') {
-            scrollToId(item.scrollId);
-        } else if (item.scrollId) {
-            navigate(item.link);
-        } else {
-            navigate(item.link);
+        if (item.scrollId) {
+            navigate(`/#${item.scrollId}`);
+            return;
         }
+
+        navigate(item.link);
     };
 
     useEffect(() => {
