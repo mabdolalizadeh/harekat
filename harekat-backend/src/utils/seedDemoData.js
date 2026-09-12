@@ -1,7 +1,12 @@
 import { sequelize } from '../models/database.config.js';
-import { Admins, Users, Teachers, Categories, Courses, Payments } from '../models/index.js';
+import { Admins, Users, Teachers, Categories, Courses, Payments, Coupon, HeaderMenuItem, SiteContent, Subscriptions, Cart, CartItem, Orders, OrderItems } from '../models/index.js';
 
 async function clearData() {
+    await OrderItems.destroy({ where: {} });
+    await Orders.destroy({ where: {} });
+    await CartItem.destroy({ where: {} });
+    await Cart.destroy({ where: {} });
+    await Subscriptions.destroy({ where: {} });
     await Payments.destroy({ where: {} });
     await Courses.destroy({ where: {} });
     await Categories.destroy({ where: {} });
@@ -43,11 +48,17 @@ async function seedTeachers() {
 
 async function seedCategories() {
     const categories = [
-        { name: 'برنامه نویسی' },
-        { name: 'طراحی UI/UX' },
-        { name: 'تولید محتوا' },
-        { name: 'بازاریابی دیجیتال' },
-        { name: 'عکاسی' },
+        // Canonical product/content sections (managed from Admin Panel)
+        { name: 'آموزش کپسولی', slug: 'capsule-training', sortOrder: 1 },
+        { name: 'دوره‌های مقدماتی', slug: 'beginner-courses', sortOrder: 2 },
+        { name: 'پکیج‌های مهارتی', slug: 'skill-packages', sortOrder: 3 },
+        { name: 'اشتراک‌ها', slug: 'subscriptions', sortOrder: 4 },
+        // Legacy demo categories
+        { name: 'برنامه نویسی', slug: 'programming', sortOrder: 5 },
+        { name: 'طراحی UI/UX', slug: 'ui-ux', sortOrder: 6 },
+        { name: 'تولید محتوا', slug: 'content-creation', sortOrder: 7 },
+        { name: 'بازاریابی دیجیتال', slug: 'digital-marketing', sortOrder: 8 },
+        { name: 'عکاسی', slug: 'photography', sortOrder: 9 },
     ];
     for (const c of categories) {
         await Categories.create(c);
@@ -122,6 +133,58 @@ async function seedPayments() {
     }
 }
 
+async function seedCoupons() {
+    const coupons = [
+        { code: 'HAREKAT10', discountType: 'percent', discountValue: 10, isActive: true, usageLimit: 100, usageCount: 0, minimumOrderAmount: null, expiresAt: null },
+        { code: 'WELCOME50', discountType: 'fixed', discountValue: 50000, isActive: true, usageLimit: 200, usageCount: 0, minimumOrderAmount: 200000, expiresAt: null },
+    ];
+    for (const c of coupons) {
+        await Coupon.create(c);
+    }
+}
+
+async function seedHeaderMenu() {
+    const items = [
+        { label: 'خانه', link: '/#hero', scrollId: 'hero', sortOrder: 1 },
+        { label: 'دوره‌ها', link: '/#courses', scrollId: 'courses', sortOrder: 2 },
+        { label: 'تولیدات', link: '/products', scrollId: null, sortOrder: 3 },
+        { label: 'درباره ما', link: '/about-us', scrollId: null, sortOrder: 4 },
+        { label: 'تماس با ما', link: '/contact-us', scrollId: null, sortOrder: 5 },
+    ];
+    for (const item of items) {
+        await HeaderMenuItem.create(item);
+    }
+}
+
+async function seedSiteContent() {
+    const blocks = [
+        { key: 'hero-title', title: 'اینجا فقط یاد نمی‌گیری', body: 'مدرسه هنر و مهارت حرکت مدیا', sortOrder: 1 },
+        { key: 'hero-cta', title: 'بریم شروع کنیم!', linkUrl: '/#courses', linkText: 'مشاهده دوره‌ها', sortOrder: 2 },
+        { key: 'contact-email', title: 'ایمیل', body: 'info@harekatmedia.com', sortOrder: 10 },
+        { key: 'contact-phone', title: 'تلفن', body: '۰۲۱-۱۲۳۴۵۶۷۸', sortOrder: 11 },
+        { key: 'contact-address', title: 'آدرس', body: 'تهران، ایران', sortOrder: 12 },
+        { key: 'social-instagram', title: 'اینستاگرام', linkUrl: 'https://instagram.com', linkText: 'اینستاگرام', sortOrder: 20 },
+        { key: 'social-telegram', title: 'تلگرام', linkUrl: 'https://t.me', linkText: 'تلگرام', sortOrder: 21 },
+        { key: 'social-linkedin', title: 'لینکدین', linkUrl: 'https://linkedin.com', linkText: 'لینکدین', sortOrder: 22 },
+        { key: 'footer-copyright', title: 'کپی‌رایت', body: '© ۱۴۰۵ حرکت مدیا', sortOrder: 30 },
+        { key: 'announcement', title: 'اطلاعیه', body: '', isActive: false, sortOrder: 0 },
+    ];
+    for (const b of blocks) {
+        await SiteContent.create(b);
+    }
+}
+
+async function seedSubscriptions() {
+    const subscriptions = [
+        { name: 'اشتراک ماهانه اتاق فکر خلاق', price: '99000', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400', buttonLink: '/products', buttonText: 'مشاهده جزئیات', description: 'دسترسی ماهانه به جلسات آنلاین اتاق فکر با اساتید برجسته. شامل بازخورد پروژه و شبکه‌سازی حرفه‌ای.', sortOrder: 1 },
+        { name: 'اشتراک سالانه پریمیوم', price: '990000', salePrice: '790000', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400', buttonLink: '/products', buttonText: 'مشاهده جزئیات', description: 'دسترسی کامل به تمام دوره‌ها، ورکشاپ‌ها و محتوای اختصاصی برای یک سال کامل.', sortOrder: 2 },
+        { name: 'اشتراک دانشجویی', price: '49000', image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=400', buttonLink: '/products', buttonText: 'مشاهده جزئیات', description: 'اشتراک ویژه برای دانشجویان با تخفیف ۵۰٪، شامل دسترسی به دوره‌های مقدماتی.', sortOrder: 3 },
+    ];
+    for (const s of subscriptions) {
+        await Subscriptions.create(s);
+    }
+}
+
 async function main() {
     try {
         await sequelize.authenticate();
@@ -156,6 +219,18 @@ async function main() {
 
         console.log('Seeding Payments...');
         await seedPayments();
+
+        console.log('Seeding Coupons...');
+        await seedCoupons();
+
+        console.log('Seeding HeaderMenu...');
+        await seedHeaderMenu();
+
+        console.log('Seeding SiteContent...');
+        await seedSiteContent();
+
+        console.log('Seeding Subscriptions...');
+        await seedSubscriptions();
 
         console.log('Demo data seeded successfully!');
     } catch (err) {

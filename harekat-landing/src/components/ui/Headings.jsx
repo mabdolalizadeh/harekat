@@ -32,7 +32,7 @@ export function H3({ children, className, ...props }) {
     return (
         <h3
             className={cn(
-                'text-[clamp(1.375rem,calc(3vw+1rem),2rem)] font-bold leading-[1.1] tracking-[-0.04em] text-balance',
+                'text-[clamp(1.125rem,calc(2vw+0.8rem),1.5rem)] font-bold leading-[1.1] tracking-[-0.03em] text-balance',
                 className
             )}
             {...props}
@@ -46,7 +46,7 @@ export function P({ children, className, ...props }) {
     return (
         <p
             className={cn(
-                'text-[clamp(1.0625rem,2.5vw,1.125rem)] font-normal leading-normal tracking-[-0.02em] text-balance',
+                'text-[clamp(0.9rem,1.5vw,1rem)] font-normal leading-relaxed tracking-[-0.01em] text-balance',
                 className
             )}
             {...props}

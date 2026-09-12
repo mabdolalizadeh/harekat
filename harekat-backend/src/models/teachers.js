@@ -21,8 +21,13 @@ const Teachers = sequelize.define('Teachers', {
         allowNull: true
     },
     resume: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
+    },
+    resumeFile: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: 'Uploaded PDF/file URL for resume'
     },
     email: {
         type: DataTypes.STRING,
@@ -30,6 +35,11 @@ const Teachers = sequelize.define('Teachers', {
         validate: {
             isEmail: true
         }
+    },
+    showOnLanding: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     }
 }, {
     createdAt: true,

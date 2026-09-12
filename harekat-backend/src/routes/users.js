@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import UsersController from '../controllers/usersController.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import adminAuth from '../middleware/adminAuth.js';
 import { ownerOrAdmin, adminOnly } from '../middleware/ownerCheck.js';
 

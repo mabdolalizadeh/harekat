@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harekat Media Backend Handbook - English</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-secondary: #12121a;
+            --fg: #e8e8f0;
+            --muted: #6b6b80;
+            --accent: #00d4aa;
+            --accent-dim: rgba(0, 212, 170, 0.15);
+            --card: #1a1a24;
+            --border: #2a2a3a;
+            --transition: 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', 'B Nazanin', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            :root {
+                --transition: 0s;
+            }
+            *, *::before, *::after {
+                animation-duration: 0s !important;
+                transition-duration: 0s !important;
+            }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--fg), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--fg);
+            font-size: 0.9rem;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .search-wrapper input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+
+        .search-wrapper svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: var(--muted);
+        }
+
+        nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        nav button {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        nav button.active,
+        nav button:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar {
+            height: fit-content;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .section li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .section li:hover {
+            color: var(--accent);
+        }
+
+        .section li.active {
+            color: var(--accent);
+        }
+
+        .section a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .section a:hover {
+            color: var(--accent);
+        }
+
+        .main-section {
+            padding-left: 2rem;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page h1 {
+            margin-top: 0;
+        }
+
+        .section-content {
+            margin-top: 1rem;
+        }
+
+        .section-content h3 {
+            color: var(--accent);
+            margin: 1.5rem 0 0.5rem;
+            font-size: 1rem;
+        }
+
+        .section-content p {
+            color: var(--muted);
+            margin: 0 0 1rem;
+        }
+
+        .section-content code {
+            background: var(--card);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin: 0 2px;
+        }
+
+        .section-content pre {
+            background: var(--card);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .section-content pre code {
+            padding: 0;
+            color: var(--fg);
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+        button:focus,
+        input:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in {
+                animation: none;
+                opacity: 1;
+            }
+            * {
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Harekat Media Backend Handbook - English</h1>
+            
+            <div class="search-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6.17-6.17a2 2 0 01-2.83-2.83L16 13.72M4 4l16 16M10 10l4 4M14 14l4 4"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search the content...">
+            </div>
+        </header>
+
+        <nav>
+            <button class="active" data-section="overview">Overview</button>
+            <button data-section="setup">1. Setup</button>
+            <button data-section="auth">2. Authentication</button>
+            <button data-section="api">3. API Endpoints</button>
+            <button data-section="integration">4. Frontend Integration</button>
+            <button data-section="error">5. Error Handling</button>
+            <button data-section="tips">6. Tips & Best Practices</button>
+        </nav>
+
+        <main class="content" id="mainContent">
+            <!-- Overview Section -->
+            <section id="overview" class="section fade-in">
+                <h2>Overview</h2>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#setup">1. Setup</a></li>
+                    <li><a href="#auth">2. Authentication</a></li>
+                    <li><a href="#api">3. API Endpoints</a></li>
+                    <li><a href="#integration">4. Frontend Integration</a></li>
+                    <li><a href="#error">5. Error Handling</a></li>
+                    <li><a href="#tips">6. Tips & Best Practices</a></li>
+                </ul>
+            </section>
+
+            <!-- Setup Section -->
+            <section id="setup" class="section fade-in delay-1">
+                <h2>1. Setup</h2>
+                <div class="section-content">
+                    <h3>Prerequisites</h3>
+                    <p>Node.js (v18 or higher) and npm or yarn</p>
+                    
+                    <h3>Installation</h3>
+                    <pre><code>cd harekat-backend
+npm install</code></pre>
+                    
+                    <h3>Running the Server</h3>
+                    <pre><code>npm run dev</code></pre>
+                    <p>Server starts on http://localhost:3000 by default. The API base URL is http://localhost:3000/api/v1.</p>
+                    
+                    <h3>Seed Demo Data</h3>
+                    <pre><code>npm run seed</code></pre>
+                    <p>This populates the database with demo users, teachers, courses, categories, and payments.</p>
+                </div>
+            </section>
+
+            <!-- Auth Section -->
+            <section id="auth" class="section fade-in delay-2">
+                <h2>2. Authentication</h2>
+                <div class="section-content">
+                    <h3>User Flow</h3>
+                    <ol>
+                        <li><strong>Request OTP:</strong> POST /auth with { "phoneNumber": "09123456789" }</li>
+                        <li><strong>Validate OTP:</strong> POST /auth/validate-otp with phone + OTP</li>
+                        <li><strong>Receive token:</strong> Get JWT token in response</li>
+                        <li><strong>Use token:</strong> Include Authorization: Bearer <token> in headers</li>
+                    </ol>
+                    
+                    <h3>Admin Flow</h3>
+                    <ol start="1">
+                        <li><strong>Admin login:</strong> POST /admins/auth with { "username": "admin", "password": "admin123" }</li>
+                        <li><strong>Admin token:</strong> Use for write operations</li>
+                    </ol>
+                    
+                    <h3>Token Usage Example</h3>
+                    <pre><code>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code></pre>
+                </div>
+            </section>
+
+            <!-- API Section -->
+            <section id="api" class="section fade-in delay-3">
+                <h2>3. API Endpoints</h2>
+                <div class="section-content">
+                    <h3>Auth Endpoints (Public)</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <thead>
+                            <tr style="background: var(--card); color: var(--muted);">
+                                <th style="padding: 0.5rem;">Method</th>
+                                <th style="padding: 0.5rem;">Endpoint</th>
+                                <th style="padding: 0.5rem;">Auth</th>
+                                <th style="padding: 0.5rem;">Access</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 0.5rem;">POST</td>
+                                <td style="padding: 0.5rem;">/auth</td>
+                                <td style="padding: 0.5rem;">Public</td>
+                                <td style="padding: 0.5rem;">Request OTP</td>
+                            </tr>
+                            <tr style="background: var(--bg-secondary);">
+                                <td style="padding: 0.5rem;">POST</td>
+                                <td style="padding: 0.5rem;">/auth/validate-otp</td>
+                                <td style="padding: 0.5rem;">Public</td>
+                                <td style="padding: 0.5rem;">Validate OTP</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>CMS Endpoints</h3>
+                    <p><strong>Public (storefront, no auth):</strong></p>
+                    <ul>
+                        <li>GET /cms/header-menu</li>
+                        <li>GET /cms/content</li>
+                        <li>GET /cms/content/:key</li>
+                    </ul>
+                    
+                    <p><strong>Admin (admin token required):</strong></p>
+                    <ul>
+                        <li>GET /cms/admin/header-menu</li>
+                        <li>POST /cms/admin/header-menu</li>
+                        <li>PUT /cms/admin/header-menu/:id</li>
+                        <li>DELETE /cms/admin/header-menu/:id</li>
+                        <li>GET /cms/admin/content</li>
+                        <li>POST /cms/admin/content</li>
+                        <li>DELETE /cms/admin/content/:key</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Integration Section -->
+            <section id="integration" class="section fade-in delay-4">
+                <h2>4. Frontend Integration</h2>
+                <div class="section-content">
+                    <h3>Getting User Token (React)</h3>
+                    <pre><code>import { customerApi } from '../services/api';
+
+const requestOtp = async (phoneNumber) => {
+  const res = await customerApi.requestOtp(phoneNumber);
+  return res.data; // { userId, otp }
+};
+
+const validateOtp = async (phoneNumber, otp) => {
+  const res = await customerApi.validateOtp(phoneNumber, otp);
+  return res.data; // { token, user }
+};</code></pre>
+                    
+                    <h3>Admin Operations</h3>
+                    <pre><code>import { adminApi } from '../services/adminApi';
+
+const createCourse = async (courseData) => {
+  const res = await adminApi.createCourse(courseData);
+  return res.data;
+};
+
+const getCourses = async () => {
+  const res = await adminApi.listCourses();
+  return res.data;
+};</code></pre>
+                    
+                    <h3>CMS Content (Public)</h3>
+                    <pre><code>// Public - no auth needed
+const getHeaderMenu = async () => {
+  const res = await storeApi.getHeaderMenu();
+  return res.data;
+};
+
+const getSiteContent = async () => {
+  const res = await storeApi.getSiteContent();
+  return res.data;
+};</code></pre>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section id="error" class="section fade-in delay-1">
+                <h2>5. Error Handling</h2>
+                <div class="section-content">
+                    <h3>Common Error Codes</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <thead>
+                            <tr style="background: var(--card); color: var(--muted);">
+                                <th style="padding: 0.5rem;">Code</th>
+                                <th style="padding: 0.5rem; text-align: center;">Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 0.5rem;">400</td>
+                                <td style="padding: 0.5rem;">Bad Request</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 0.5rem;">401</td>
+                                <td style="padding: 0.5rem;">Unauthorized</td>
+                            </tr>
+                            <tr style="background: var(--bg-secondary);">
+                                <td style="padding: 0.5rem;">403</td>
+                                <td style="padding: 0.5rem;">Forbidden</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 0.5rem;">404</td>
+                                <td style="padding: 0.5rem;">Not Found</td>
+                            </tr>
+                            <tr style="background: var(--bg-secondary);">
+                                <td style="padding: 0.5rem;">409</td>
+                                <td style="padding: 0.5rm;">Conflict</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 0.5rem;">500</td>
+                                <td style="padding: 0.5rem;">Internal Server Error</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Validation Errors</h3>
+                    <ul>
+                        <li>Non-numeric prices → 400</li>
+                        <li>`salePrice > price` → 400 with message "salePrice must not exceed price"</li>
+                        <li>Duplicate phone/username → 409</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Tips Section -->
+            <section id="tips" class="section fade-in delay-2">
+                <h2>6. Tips & Best Practices</h2>
+                <div class="section-content">
+                    <ol>
+                        <li><strong>Always seed demo data</strong> before demos: `npm run seed`</li>
+                        <li><strong>Use admin token</strong> for create/update/delete operations</li>
+                        <li><strong>Use user token</strong> for read operations and personal data</li>
+                        <li><strong>Public endpoints</strong> (no auth) are for storefront display only</li>
+                        <li><strong>Handle 409 conflicts</strong> gracefully in frontend (phone/username already exists)</li>
+                        <li><strong>Token expiry:</strong> Admin token default 1 day, user token from OTP flow</li>
+                        <li><strong>Always check `ok` field</strong> in response before using `data`</li>
+                        <li><strong>Backend uses SQLite</strong> - suitable for demo/development, consider PostgreSQL for production</li>
+                        <li><strong>CMS blocks</strong> use unique keys (e.g., `hero-title`, `contact-email`) for content management</li>
+                        <li><strong>Category slugs</strong> are latin (e.g., `skill-packages`, `capsule-training`)</li>
+                    </ol>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        Harekat Media Backend Handbook - English • For production consider PostgreSQL
+    </footer>
+
+    <script>
+        // Initialize state
+        const sections = {
+            overview: document.getElementById('overview'),
+            setup: document.getElementById('setup'),
+            auth: document.getElementById('auth'),
+            api: document.getElementById('api'),
+            integration: document.getElementById('integration'),
+            error: document.getElementById('error'),
+            tips: document.getElementById('tips')
+        };
+
+        // Sidebar navigation
+        document.querySelectorAll('nav button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                
+                const sectionId = button.dataset.section;
+                Object.values(sections).forEach(section => {
+                    section.classList.remove('active');
+                });
+                if (sections[sectionId]) {
+                    sections[sectionId].classList.add('active');
+                }
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            Object.values(sections).forEach(section => {
+                const text = section.textContent.toLowerCase();
+                section.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+
+        // Fade-in animations on load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.fade-in').forEach((el, index) => {
+                el.style.animationDelay = `${0.1 * (index % 4 + 1)}s`;
+                el.classList.add('active');
+            });
+        });
+
+        // Highlight current section based on URL
+        const hash = window.location.hash;
+        if (hash && sections[hash.substring(1)]) {
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`nav button[data-section="${hash.substring(1)}"]`).classList.add('active');
+            Object.values(sections).forEach(s => s.classList.remove('active'));
+            sections[hash.substring(1)].classList.add('active');
+        }
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('nav') && !e.target.closest('.container')) {
+                // Could add mobile menu toggling here
+            }
+        });
+    </script>
+</body>
+</html>

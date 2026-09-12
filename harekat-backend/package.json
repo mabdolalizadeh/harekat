@@ -7,6 +7,7 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "seed": "node src/utils/seedDemoData.js",
+    "seed:cms": "node src/utils/seedCmsData.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

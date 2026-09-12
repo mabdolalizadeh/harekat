@@ -519,6 +519,117 @@ Authorization: Bearer <admin-token>
 
 ---
 
+## Storefront Public Reads (No Auth)
+
+These endpoints are intentionally public so the landing/products pages load without login.
+Writes on the same resources remain admin-only.
+
+```http
+GET /courses
+GET /courses/:id
+GET /categories
+GET /categories/:id
+GET /teachers
+GET /teachers/:id
+GET /cms/header-menu
+GET /cms/content
+GET /cms/content/:key
+```
+
+---
+
+## Product Pricing (Courses)
+
+`Courses` is the sellable product model. New fields (all optional except `price`):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `price` | STRING | Original price (numeric string, e.g. `"450000"`) |
+| `salePrice` | STRING \| null | Discounted price. Must be numeric and `<= price`. `null`/omitted = no discount |
+| `description` | TEXT \| null | Long description |
+| `isActive` | BOOLEAN | Hidden from storefront filters when `false` (default `true`) |
+| `sortOrder` | INTEGER | Display ordering (default `0`) |
+
+Validation: non-numeric prices → `400`; `salePrice > price` → `400 "salePrice must not exceed price"`.
+
+`Categories` gained `slug` (latin, e.g. `skill-packages`), `isActive`, `sortOrder`.
+Canonical categories: `capsule-training` (آموزش کپسولی), `beginner-courses` (دوره‌های مقدماتی),
+`skill-packages` (پکیج‌های مهارتی), `subscriptions` (اشتراک‌ها).
+
+---
+
+## Coupon Endpoints
+
+### Validate Coupon (Public — server-side calculation, never trust frontend math)
+```http
+POST /coupons/validate
+```
+
+**Body:**
+```json
+{ "code": "HAREKAT10", "orderAmount": 1000000 }
+```
+
+**Success:**
+```json
+{ "ok": true, "data": { "valid": true, "coupon": { ... }, "discount": 100000, "finalAmount": 900000 } }
+```
+
+Validation checks: exists → active → not expired → usage limit → `minimumOrderAmount`.
+`discountType` is `percent` (1–100) or `fixed` (تومان, capped at order total).
+
+### Redeem Coupon (Authenticated — increments `usageCount`)
+```http
+POST /coupons/redeem
+Authorization: Bearer <user-or-admin-token>
+```
+
+### Admin Coupon CRUD (Admin Only)
+```http
+POST   /coupons
+GET    /coupons                    # ?active=true&page=1&limit=50&search=CODE
+GET    /coupons/:id
+PUT    /coupons/:id                # incl. { "isActive": false } to deactivate
+DELETE /coupons/:id
+Authorization: Bearer <admin-token>
+```
+
+Coupon fields: `code` (unique, uppercased), `discountType` (`percent`|`fixed`),
+`discountValue`, `isActive`, `expiresAt`, `usageLimit`, `usageCount`,
+`minimumOrderAmount`, timestamps.
+
+---
+
+## CMS Endpoints (Header Menu + Site Content)
+
+### Public (storefront)
+```http
+GET /cms/header-menu     # active items, sorted by sortOrder
+GET /cms/content         # active blocks (?key=hero-title to filter)
+GET /cms/content/:key
+```
+
+`HeaderMenuItem`: `label`, `link`, `scrollId` (nullable, for `/#section` scroll),
+`sortOrder`, `isActive`.
+
+`SiteContent` block: `key` (unique, e.g. `hero-title`, `contact-email`,
+`social-instagram`, `footer-copyright`), `title`, `body`, `imageUrl`,
+`linkUrl`, `linkText`, `sortOrder`, `isActive`.
+
+### Admin (Admin Only)
+```http
+GET    /cms/admin/header-menu
+POST   /cms/admin/header-menu
+PUT    /cms/admin/header-menu/:id
+DELETE /cms/admin/header-menu/:id
+GET    /cms/admin/content          # includes inactive blocks
+POST   /cms/admin/content          # upsert by { "key": ... }
+DELETE /cms/admin/content/:key
+Authorization: Bearer <admin-token>
+```
+
+---
+
 ## Error Codes
 
 | Code | Meaning |

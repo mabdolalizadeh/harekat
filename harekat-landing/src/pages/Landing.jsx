@@ -8,14 +8,23 @@ import {ArrowButton, PrimaryButton} from "../components/ui/Buttons.jsx";
 import MarqueeLayout from "../layouts/MarqueeLayout.jsx";
 import {useNavigate} from "react-router-dom";
 import Img from "../components/ui/Img.jsx";
-import {CourseCard} from "../components/contents/Cards.jsx";
+import {CourseCard, SubscriptionCard} from "../components/contents/Cards.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
 import TeacherCard from "../components/contents/TeacherCard.jsx";
 import StepCard from "../components/contents/StepCard.jsx";
 import TestimonialCard from "../components/contents/TestimonialCard.jsx";
 import {AccordionCard} from "../components/contents/Cards.jsx";
 import {Mail, MapPin} from "lucide-react";
-import Logo from "../components/ui/Logo.jsx";
+import Footer from "../components/ui/Footer.jsx";
+import Slideshow from "../components/ui/Slideshow.jsx";
+import { useEffect, useState } from "react";
+import { storeApi } from "../services/api.js";
+
+const fallbackHeroSlides = [
+    { image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600', alt: 'محیط آموزشی حرکت مدیا' },
+    { image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1600', alt: 'کارگاه خلاقیت' },
+    { image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=1600', alt: 'یادگیری تیمی' },
+];
 
 const heroVariants = {
     hidden: {opacity: 0},
@@ -199,20 +208,54 @@ const faqItems = [
     },
 ];
 
-const footerLinks = [
-    {text: 'خانه', link: '/#hero'},
-    {text: 'دوره‌ها', link: '/#courses'},
-    {text: 'تولیدات', link: '/products'},
-    {text: 'درباره ما', link: '/about-us'},
-    {text: 'تماس با ما', link: '/contact-us'},
-];
+function mapApiCourse(course) {
+    const teacher = course.teacher ? `${course.teacher.firstName ?? ''} ${course.teacher.lastName ?? ''}`.trim() : '';
+    return { id: course.id, title: course.name, imgSrc: course.image, category: course.categories?.[0]?.name ?? '', level: course.level ?? '', duration: course.duration ?? '', courseType: course.typeOfAttendence ?? '', teacher: teacher || '—', price: course.price, salePrice: course.salePrice, registrationStatus: course.statusOfRegistration ?? '' };
+}
+
+function mapApiTeacher(teacher) {
+    return { id: teacher.id, name: `${teacher.firstName ?? ''} ${teacher.lastName ?? ''}`.trim(), role: teacher.categories?.[0]?.name ?? 'مدرس', avatar: teacher.avatar };
+}
 
 export default function Landing() {
     const navigate = useNavigate();
+    const [banners, setBanners] = useState([]);
+    const [apiCourses, setApiCourses] = useState(null);
+    const [apiTeachers, setApiTeachers] = useState(null);
+    const [apiSubscriptions, setApiSubscriptions] = useState(null);
+    const [contentMap, setContentMap] = useState({});
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.allSettled([storeApi.getBanners(), storeApi.getCourses(), storeApi.getTeachers(), storeApi.getSubscriptions(), storeApi.getSiteContent()]).then((results) => {
+            if (cancelled) return;
+            const [bannerResult, courseResult, teacherResult, subscriptionResult, contentResult] = results;
+            if (bannerResult.status === 'fulfilled') setBanners((bannerResult.value.data ?? []).filter((banner) => banner.isActive !== false).map((banner) => ({ image: banner.imageUrl, tabletImage: banner.tabletImageUrl || banner.imageUrl, mobileImage: banner.mobileImageUrl || banner.tabletImageUrl || banner.imageUrl, link: banner.linkUrl || undefined, duration: banner.duration, alt: 'بنر صفحه اصلی' })));
+            if (courseResult.status === 'fulfilled') setApiCourses((courseResult.value.data ?? []).filter((course) => course.isActive !== false));
+            if (teacherResult.status === 'fulfilled') setApiTeachers((teacherResult.value.data ?? []).filter((teacher) => teacher.showOnLanding));
+            if (subscriptionResult.status === 'fulfilled') setApiSubscriptions((subscriptionResult.value.data ?? []).filter((item) => item.isActive !== false));
+            if (contentResult.status === 'fulfilled') setContentMap(Object.fromEntries((contentResult.value.data ?? []).map((block) => [block.key, block])));
+        });
+        return () => { cancelled = true; };
+    }, []);
+
+    const heroSlides = banners.length > 0 ? banners : fallbackHeroSlides;
+    const displayCourses = apiCourses?.length ? apiCourses.map(mapApiCourse) : courses;
+    const displayTeachers = apiTeachers?.length ? apiTeachers.map(mapApiTeacher) : teachers;
+    const apiCourseRows = apiCourses ?? [];
+    const regularCourses = apiCourses?.length ? apiCourseRows.filter((course) => !course.kind || course.kind === 'regular').map(mapApiCourse) : displayCourses;
+    const capsuleCourses = apiCourses?.length ? apiCourseRows.filter((course) => course.kind === 'capsule').map(mapApiCourse) : [];
+    const skillPackages = apiCourses?.length ? apiCourseRows.filter((course) => course.kind === 'skill').map(mapApiCourse) : [];
+    const heroTitle = contentMap['hero-title']?.title || 'اینجا فقط یاد';
+    const heroSubtitle = contentMap['hero-title']?.body || 'حرکت مدیا جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.';
 
     return (
         <MainLayout>
             <TopBarLayout />
+
+            <div className="w-full pt-20 sm:pt-24">
+                <Slideshow slides={heroSlides} autoPlay interval={3000} className="mx-auto aspect-[4/5] max-w-[calc(100%-2rem)] rounded-[var(--radius-2xl)] sm:aspect-[4/3] md:aspect-[16/9]" />
+            </div>
 
             {/* ============ HERO ============ */}
             <Box id={'hero'} className={'relative pt-36 sm:pt-44 pb-14 sm:pb-20'}>
@@ -230,13 +273,13 @@ export default function Landing() {
 
                     <motion.div variants={heroItem}>
                         <H1 className={'text-[clamp(2.25rem,7vw,6rem)] text-center leading-[1.05] text-foreground'}>
-                            اینجا فقط یاد<br/>نمی‌گیری؛
+                            {heroTitle}<br/>نمی‌گیری؛
                         </H1>
                     </motion.div>
 
                     <motion.div variants={heroItem}>
-                        <P className={'text-center text-muted max-w-[540px] text-[clamp(1rem,2vw,1.25rem)]'}>
-                            حرکت مدیا جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.
+                        <P className={'text-center text-muted max-w-135 text-[clamp(1rem,2vw,1.25rem)]'}>
+                            {heroSubtitle}
                         </P>
                     </motion.div>
 
@@ -306,7 +349,7 @@ export default function Landing() {
                     whileInView="visible"
                     viewport={{once: true, amount: 0.05}}
                 >
-                    {courses.map((course, index) => (
+                    {regularCourses.map((course, index) => (
                         <motion.div
                             key={index}
                             initial={{opacity: 0, y: 24}}
@@ -315,6 +358,7 @@ export default function Landing() {
                             transition={{duration: 0.4, delay: index * 0.05}}
                         >
                             <CourseCard
+                                id={course.id}
                                 title={course.title}
                                 imgSrc={course.imgSrc}
                                 category={course.category}
@@ -323,12 +367,31 @@ export default function Landing() {
                                 courseType={course.courseType}
                                 teacher={course.teacher}
                                 price={course.price}
+                                salePrice={course.salePrice}
                                 registrationStatus={course.registrationStatus}
                             />
                         </motion.div>
                     ))}
                 </motion.div>
             </Box>
+
+            {capsuleCourses.length > 0 && <Box id="capsule-courses" className="gap-4 py-12 sm:py-16">
+                <SectionTag>دوره‌های کپسولی</SectionTag>
+                <H2 className="text-center text-foreground">یادگیری کوتاه و کاربردی</H2>
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{capsuleCourses.map((course) => <CourseCard key={course.id || course.title} {...course} />)}</div>
+            </Box>}
+
+            {skillPackages.length > 0 && <Box id="skill-packages" className="gap-4 py-12 sm:py-16">
+                <SectionTag>پکیج‌های مهارتی</SectionTag>
+                <H2 className="text-center text-foreground">مسیرهای کامل برای رشد</H2>
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{skillPackages.map((course) => <CourseCard key={course.id || course.title} {...course} productType="course" />)}</div>
+            </Box>}
+
+            {apiSubscriptions?.length > 0 && <Box id="subscriptions" className="gap-4 py-12 sm:py-16">
+                <SectionTag>اشتراک‌ها</SectionTag>
+                <H2 className="text-center text-foreground">عضویت در مسیر یادگیری</H2>
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{apiSubscriptions.map((item) => <SubscriptionCard key={item.id} {...item} />)}</div>
+            </Box>}
 
             {/* ============ MENTORS ============ */}
             <Box id={'mentors'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
@@ -344,7 +407,7 @@ export default function Landing() {
                 </PrimaryButton>
 
                 <div className={'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 w-full mt-4'}>
-                    {teachers.map((teacher, index) => (
+                    {displayTeachers.map((teacher, index) => (
                         <motion.div
                             key={index}
                             initial={{opacity: 0, y: 24}}
@@ -356,6 +419,8 @@ export default function Landing() {
                                 name={teacher.name}
                                 role={teacher.role}
                                 avatar={teacher.avatar}
+                                onClick={() => teacher.id && (window.location.href = `/teachers/${teacher.id}`)}
+                                className={teacher.id ? 'cursor-pointer' : ''}
                             />
                         </motion.div>
                     ))}
@@ -509,36 +574,7 @@ export default function Landing() {
                 </div>
             </Box>
 
-            {/* ============ FOOTER ============ */}
-            <footer className={'w-full py-12 border-t border-[var(--border)] mt-12'}>
-                <div className={'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 w-full'}>
-                    {/*logo + links*/ }
-                    <div className={'flex flex-col gap-1'}>
-                        <Logo className={'h-20 text-foreground'}/>
-                        <div className={'flex gap-4 flex-wrap'}>
-                            {footerLinks.map((item, index) => (
-                                <span
-                                    key={index}
-                                    onClick={() => navigate(item.link)}
-                                    className={'text-muted text-sm cursor-pointer hover:text-foreground/70 transition-colors'}
-                                >
-                                    {item.text}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/*social + legal*/ }
-                    <div className={'flex flex-col gap-2 items-start sm:items-end'}>
-                        <div className={'flex gap-4'}>
-                            <a href="#" className={'text-muted text-xs hover:text-foreground/70 transition-colors'}>اینستاگرام</a>
-                            <a href="#" className={'text-muted text-xs hover:text-foreground/70 transition-colors'}>تلگرام</a>
-                            <a href="#" className={'text-muted text-xs hover:text-foreground/70 transition-colors'}>لینکدین</a>
-                        </div>
-                        <span className={'text-muted text-xs'}>© ۱۴۰۵ حرکت مدیا</span>
-                    </div>
-                </div>
-            </footer>
+            <Footer copyright={contentMap['footer-copyright']?.body || '© ۱۴۰۵ حرکت مدیا'} socials={Object.values(contentMap).filter((item) => item.key?.startsWith('social-'))} />
         </MainLayout>
     )
 }

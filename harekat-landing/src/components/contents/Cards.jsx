@@ -4,6 +4,15 @@ import {H2, H3} from "../ui/Headings.jsx";
 import {motion} from "motion/react";
 import {Clock, User, BookOpen} from "lucide-react";
 import {useState} from "react";
+import { ShoppingCart } from "lucide-react";
+import { customerApi } from "../../services/api.js";
+
+function formatPrice(value) {
+    if (value === null || value === undefined || value === '') return 'رایگان';
+    const normalized = String(value).replace(/[,٬\s]/g, '');
+    const numeric = Number(normalized);
+    return `${Number.isFinite(numeric) ? numeric.toLocaleString('fa-IR') : value} تومان`;
+}
 
 export function ContentCard({title, subtitle, className}) {
     return (
@@ -52,11 +61,21 @@ export function AccordionCard({title, content, className, ...props}) {
 }
 
 export function CourseCard({
-    title, imgSrc, category, level, duration, courseType, teacher, price, registrationStatus, className, ...props
+    id, title, imgSrc, category, level, duration, courseType, teacher, price, salePrice, registrationStatus, productType = 'course', onAddToCart, className, ...props
 }) {
+    const [adding, setAdding] = useState(false);
+    const hasSale = salePrice !== null && salePrice !== undefined && salePrice !== '' && String(salePrice) !== String(price);
+    const add = async (event) => {
+        event.stopPropagation();
+        if (!id || adding) return;
+        setAdding(true);
+        try { await customerApi.addToCart(id, productType, 1, hasSale ? salePrice : price); onAddToCart?.(); }
+        finally { setAdding(false); }
+    };
     return (
         <motion.div
             whileHover={{y: -4}}
+            onClick={() => id && (window.location.href = `/products/${id}`)}
             className={cn(
                 'bg-card border border-[var(--border)]/10 flex flex-col rounded-[var(--radius-xl)] overflow-hidden',
                 'group cursor-pointer transition-all duration-300 hover:border-[var(--border)]/20 hover:shadow-lg hover:shadow-black/20',
@@ -65,7 +84,7 @@ export function CourseCard({
             {...props}
         >
             {/*image*/ }
-            <div className={'relative overflow-hidden aspect-[16/10]'}>
+            <div className={'relative overflow-hidden aspect-square'}>
                 <Img
                     src={imgSrc}
                     groupHover={true}
@@ -114,9 +133,33 @@ export function CourseCard({
                     <span className={'flex items-center gap-1.5 text-xs text-muted'}>
                         <User size={12}/>{teacher}
                     </span>
-                    <span className={'text-xs sm:text-sm font-bold text-foreground'}>{price}</span>
+                    <div className="flex flex-col items-end">
+                        {hasSale && <span className="text-xs text-muted line-through">{formatPrice(price)}</span>}
+                        <span className={'text-xs sm:text-sm font-bold text-foreground'}>{formatPrice(hasSale ? salePrice : price)}</span>
+                    </div>
+                    <button type="button" onClick={add} disabled={!id || adding} className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs text-primary-foreground transition hover:opacity-90 disabled:opacity-50">
+                        <ShoppingCart size={13} />{adding ? '...' : 'افزودن'}
+                    </button>
                 </div>
             </div>
         </motion.div>
     )
+}
+
+export function SubscriptionCard({ id, name, image, price, salePrice, buttonText = 'افزودن به سبد', onAddToCart }) {
+    return <CourseCard
+        id={id}
+        title={name}
+        imgSrc={image}
+        category="اشتراک"
+        level=""
+        duration="ماهانه"
+        courseType="عضویت"
+        teacher="حرکت مدیا"
+        price={price}
+        salePrice={salePrice}
+        registrationStatus={buttonText}
+        productType="subscription"
+        onAddToCart={onAddToCart}
+    />;
 }

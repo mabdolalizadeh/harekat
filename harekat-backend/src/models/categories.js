@@ -10,6 +10,22 @@ const Categories = sequelize.define('Categories', {
     name: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    slug: {
+        // NOTE: uniqueness enforced in app code + via unique index (see seedCmsData);
+        // kept non-unique here because SQLite cannot ADD a UNIQUE column via ALTER.
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    isActive: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    sortOrder: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
     }
 });
 

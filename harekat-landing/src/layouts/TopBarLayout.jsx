@@ -3,10 +3,11 @@ import {H3} from "../components/ui/Headings.jsx";
 import {useNavigate, useLocation} from "react-router-dom";
 import {motion, AnimatePresence} from "motion/react";
 import {SecondaryButton} from "../components/ui/Buttons.jsx";
-import {Menu, X, Sun, Moon} from "lucide-react";
+import {Menu, X, Sun, Moon, ShoppingCart, UserRound, ChevronDown} from "lucide-react";
 import {useState, useEffect} from "react";
 import {cn} from "../utils/cn.js";
 import {useTheme} from "../contexts/ThemeContext.jsx";
+import {storeApi, customerApi} from "../services/api.js";
 
 function scrollToId(id) {
     const el = document.getElementById(id);
@@ -20,6 +21,10 @@ export default function TopBarLayout() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+    const [apiLinks, setApiLinks] = useState(null);
+    const [user, setUser] = useState(() => { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; } });
+    const [cartCount, setCartCount] = useState(0);
+    const [profileOpen, setProfileOpen] = useState(false);
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 40);
@@ -29,18 +34,46 @@ export default function TopBarLayout() {
     }, []);
 
     useEffect(() => {
-        const onStorage = () => setIsLoggedIn(!!localStorage.getItem('token'));
+        let cancelled = false;
+        storeApi.getHeaderMenu().then((response) => {
+            if (!cancelled && Array.isArray(response?.data) && response.data.length) {
+                setApiLinks(response.data.map((item) => ({ text: item.label, link: item.link, scrollId: item.scrollId || null })));
+            }
+        }).catch(() => {});
+        return () => { cancelled = true; };
+    }, []);
+
+    useEffect(() => {
+        const onStorage = () => {
+            setIsLoggedIn(!!localStorage.getItem('token'));
+            try { setUser(JSON.parse(localStorage.getItem('user') || 'null')); } catch { setUser(null); }
+        };
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
     }, []);
 
-    const topBarLinks = [
+    useEffect(() => {
+        if (!isLoggedIn) return;
+        customerApi.getCart().then((response) => setCartCount((response.data?.items ?? []).reduce((sum, item) => sum + (item.quantity || 0), 0))).catch(() => {});
+    }, [isLoggedIn]);
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setIsLoggedIn(false);
+        setUser(null);
+        setProfileOpen(false);
+        navigate('/');
+    };
+
+    const fallbackLinks = [
         {text: 'خانه', link: '/#hero', scrollId: 'hero'},
         {text: 'دوره‌ها', link: '/#courses', scrollId: 'courses'},
         {text: 'تولیدات', link: '/products', scrollId: null},
         {text: 'درباره ما', link: '/about-us', scrollId: null},
         {text: 'تماس با ما', link: '/contact-us', scrollId: null},
     ];
+    const topBarLinks = apiLinks || fallbackLinks;
 
     const handleNav = (item) => {
         setMobileOpen(false);
@@ -127,11 +160,20 @@ export default function TopBarLayout() {
                         >
                             {theme === 'dark' ? <Sun size={16}/> : <Moon size={16}/>}
                         </button>
-                        {isLoggedIn ? (
-                            <SecondaryButton onClick={() => navigate('/dashboard')}>
-                                داشبورد
-                            </SecondaryButton>
-                        ) : (
+                        {isLoggedIn ? (<>
+                            <button type="button" onClick={() => navigate('/dashboard')} className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-surface-muted text-foreground" title="سبد خرید">
+                                <ShoppingCart size={16} />{cartCount > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-primary px-1 text-[10px] text-primary-foreground">{cartCount}</span>}
+                            </button>
+                            <div className="relative">
+                                <button type="button" onClick={() => setProfileOpen((open) => !open)} className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-surface-muted px-2 py-1 text-xs text-foreground">
+                                    <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-primary/15 text-primary">{user?.avatar ? <img src={user.avatar} alt="" className="h-full w-full object-cover" /> : <UserRound size={15} />}</span><ChevronDown size={13} />
+                                </button>
+                                {profileOpen && <div className="absolute left-0 top-full z-50 mt-2 flex min-w-36 flex-col gap-1 rounded-xl border border-[var(--border)] bg-background p-2 shadow-lg">
+                                    <button type="button" className="rounded-lg px-3 py-2 text-right text-xs hover:bg-surface-muted" onClick={() => navigate('/dashboard')}>داشبورد</button>
+                                    <button type="button" className="rounded-lg px-3 py-2 text-right text-xs text-danger-600 hover:bg-surface-muted" onClick={logout}>خروج</button>
+                                </div>}
+                            </div>
+                        </>) : (
                             <SecondaryButton onClick={() => navigate('/auth')}>
                                 ثبت نام یا ورود
                             </SecondaryButton>

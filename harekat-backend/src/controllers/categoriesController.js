@@ -3,13 +3,13 @@ import { logSecurityEvent } from '../utils/logger.js';
 
 export default class CategoriesController {
     static async createCategory(req, res) {
-        const { name } = req.body;
+        const { name, slug, isActive, sortOrder } = req.body;
         if (!name) {
             return res.status(400).json({ ok: false, message: 'name is required' });
         }
 
         try {
-            const category = await Categories.create({ name });
+            const category = await Categories.create({ name, slug: slug ?? null, isActive: isActive ?? true, sortOrder: sortOrder ?? 0 });
             logSecurityEvent('category_created', { categoryId: category.id, requesterId: req.user?.id, ip: req.ip });
             return res.status(201).json({ ok: true, data: category });
         } catch (err) {
@@ -45,7 +45,7 @@ export default class CategoriesController {
 
     static async updateCategory(req, res) {
         const { id } = req.params;
-        const { name } = req.body;
+        const { name, slug, isActive, sortOrder } = req.body;
         if (!name) {
             return res.status(400).json({ ok: false, message: 'name is required' });
         }
@@ -56,6 +56,9 @@ export default class CategoriesController {
                 return res.status(404).json({ ok: false, message: 'category not found' });
             }
             category.name = name;
+            if (slug !== undefined) category.slug = slug;
+            if (isActive !== undefined) category.isActive = isActive;
+            if (sortOrder !== undefined) category.sortOrder = sortOrder;
             await category.save();
             logSecurityEvent('category_updated', { categoryId: id, requesterId: req.user?.id, ip: req.ip });
             return res.status(200).json({ ok: true, data: category });
