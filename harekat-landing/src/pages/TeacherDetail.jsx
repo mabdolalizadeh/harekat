@@ -29,11 +29,11 @@ function MarkdownContent({ content }) {
                 code: ({ children, className }) => {
                     const isBlock = className?.includes("language-");
                     if (isBlock) return <code className={className}>{children}</code>;
-                    return <code className="rounded-md bg-surface-muted px-1.5 py-0.5 font-mono text-[0.85em] border border-[var(--border)]">{children}</code>;
+                    return <code className="rounded-md bg-surface-muted px-1.5 py-0.5 font-mono text-[0.85em] border border-border">{children}</code>;
                 },
-                pre: ({ children }) => <pre className="my-4 overflow-x-auto rounded-xl border border-[var(--border)] bg-surface-muted p-4 text-sm leading-6 [&_code]:bg-transparent [&_code]:border-0">{children}</pre>,
-                img: ({ src, alt }) => <img src={src} alt={alt || ""} className="my-4 w-full rounded-xl border border-[var(--border)]" />,
-                hr: () => <hr className="my-6 border-[var(--border)]" />,
+                pre: ({ children }) => <pre className="my-4 overflow-x-auto rounded-xl border border-border bg-surface-muted p-4 text-sm leading-6 [&_code]:bg-transparent [&_code]:border-0">{children}</pre>,
+                img: ({ src, alt }) => <img src={src} alt={alt || ""} className="my-4 w-full rounded-xl border border-border" />,
+                hr: () => <hr className="my-6 border-border" />,
             }}
         >
             {content}
@@ -66,12 +66,12 @@ export default function TeacherDetail() {
     return (
         <MainLayout title={fullName}>
             <TopBarLayout />
-            <Box className="w-full gap-8 pb-20 pt-28 sm:pt-36 max-w-[900px] mx-auto">
+            <Box className="w-full gap-8 pb-20 pt-28 sm:pt-36 max-w-225 mx-auto">
                 <button onClick={() => navigate(-1)} className="self-start flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"><ArrowRight size={16} /> بازگشت</button>
 
                 {/* header */}
-                <div className="w-full rounded-[var(--radius-2xl)] border border-[var(--border)] bg-card p-6 sm:p-8 flex flex-col items-center sm:items-start sm:flex-row gap-6">
-                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-surface-muted border border-[var(--border)] flex-shrink-0 flex items-center justify-center">
+                <div className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8 flex flex-col items-center sm:items-start sm:flex-row gap-6">
+                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-surface-muted border border-border shrink-0 flex items-center justify-center">
                         {teacher.avatar ? <img src={teacher.avatar} alt={fullName} className="h-full w-full object-cover" /> : <User size={56} className="opacity-30 text-muted" />}
                     </div>
                     <div className="flex flex-col gap-3 text-center sm:text-right flex-1 min-w-0">
@@ -90,8 +90,8 @@ export default function TeacherDetail() {
                 </div>
 
                 {/* resume markdown */}
-                <div className="w-full rounded-[var(--radius-2xl)] border border-[var(--border)] bg-card p-6 sm:p-8">
-                    <div className="mb-4 flex items-center gap-2 border-b border-[var(--border)] pb-3"><div className="h-6 w-1 rounded-full bg-primary" /><H2 className="text-base">رزومه و سوابق</H2></div>
+                <div className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8">
+                    <div className="mb-4 flex items-center gap-2 border-b border-border pb-3"><div className="h-6 w-1 rounded-full bg-primary" /><H2 className="text-base">رزومه و سوابق</H2></div>
                     {teacher.resume ? <MarkdownContent content={teacher.resume} /> : <P className="text-muted text-sm">رزومه‌ای ثبت نشده است.</P>}
                 </div>
 

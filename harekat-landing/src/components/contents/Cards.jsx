@@ -77,8 +77,8 @@ export function CourseCard({
             whileHover={{y: -4}}
             onClick={() => id && (window.location.href = `/products/${id}`)}
             className={cn(
-                'bg-card border border-[var(--border)]/10 flex flex-col rounded-[var(--radius-xl)] overflow-hidden',
-                'group cursor-pointer transition-all duration-300 hover:border-[var(--border)]/20 hover:shadow-lg hover:shadow-black/20',
+                'bg-card border border-border/10 flex flex-col rounded-xl overflow-hidden',
+                'group cursor-pointer transition-all duration-300 hover:border-border/20 hover:shadow-lg hover:shadow-black/20',
                 className
             )}
             {...props}
@@ -91,21 +91,21 @@ export function CourseCard({
                     className={'w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'}
                 />
                 {/*category badge*/ }
-                <div className={'absolute top-3 right-3'}>
+                <div className={'absolute bottom-3 right-3'}>
                     <span className={
-                        'bg-background/80 backdrop-blur-sm text-foreground text-xs px-2.5 py-1 rounded-full border border-[var(--border)]/10'
+                        'bg-background backdrop-blur-sm text-foreground text-xs px-2.5 py-1 rounded-full border border-border/10'
                     }>
                         {category}
                     </span>
                 </div>
                 {/*registration badge*/ }
                 {registrationStatus && (
-                    <div className={'absolute top-3 left-3'}>
+                    <div className={'absolute bottom-3 left-3'}>
                         <span className={cn(
                             'text-xs px-2.5 py-1 rounded-full font-medium',
-                            registrationStatus === 'درحال ثبت نام' && 'bg-green-500/20 text-green-400 border border-green-500/30',
-                            registrationStatus === 'به‌زودی' && 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
-                            registrationStatus === 'تکمیل ظرفیت' && 'bg-red-500/20 text-red-400 border border-red-500/30',
+                            registrationStatus === 'در حال ثبت نام' && 'bg-green-950/80 text-green-400 border border-green-500/30',
+                            registrationStatus === 'بزودی' && 'bg-yellow-950/80 text-yellow-400 border border-yellow-500/30',
+                            registrationStatus === 'تکمیل ظرفیت' && 'bg-red-950/80 text-red-400 border border-red-500/30',
                         )}>
                             {registrationStatus}
                         </span>
@@ -129,7 +129,7 @@ export function CourseCard({
                     </span>
                 </div>
 
-                <div className={'mt-auto flex items-center justify-between pt-2 border-t border-[var(--border)]/5'}>
+                <div className={'mt-auto flex items-center justify-between pt-2 border-t border-border/5'}>
                     <span className={'flex items-center gap-1.5 text-xs text-muted'}>
                         <User size={12}/>{teacher}
                     </span>
@@ -137,8 +137,8 @@ export function CourseCard({
                         {hasSale && <span className="text-xs text-muted line-through">{formatPrice(price)}</span>}
                         <span className={'text-xs sm:text-sm font-bold text-foreground'}>{formatPrice(hasSale ? salePrice : price)}</span>
                     </div>
-                    <button type="button" onClick={add} disabled={!id || adding} className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs text-primary-foreground transition hover:opacity-90 disabled:opacity-50">
-                        <ShoppingCart size={13} />{adding ? '...' : 'افزودن'}
+                    <button type="button" onClick={add} disabled={!id || adding} className="flex items-center gap-1 rounded-full bg-primary p-2 text-xs text-primary-foreground transition hover:opacity-90 disabled:opacity-50">
+                        <ShoppingCart size={20} />
                     </button>
                 </div>
             </div>
