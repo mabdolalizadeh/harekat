@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env?.VITE_API_BASE || 'http://localhost:3000/api/v1';
+const API_BASE = import.meta.env?.VITE_API_BASE || (import.meta.env?.DEV ? 'http://localhost:3000/api/v1' : '/api/v1');
 
 function token(kind = 'token') {
     try { return localStorage.getItem(kind); } catch { return null; }

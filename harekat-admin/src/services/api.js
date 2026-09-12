@@ -3,7 +3,7 @@
 
 const API_BASE =
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE) ||
-    'http://localhost:3000/api/v1';
+    (typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'http://localhost:3000/api/v1' : '/api/v1');
 
 function getToken(kind = 'token') {
     try {

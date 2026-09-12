@@ -74,6 +74,13 @@ app.use((err, req, res, next) => {
 });
 
 const frontendDist = path.resolve(__dirname, '../../harekat-landing/dist');
+const adminDist = path.resolve(__dirname, '../../harekat-admin/dist');
+const configuredAdminHost = String(process.env.ADMIN_HOSTNAME || process.env.ADMIN_HOST || '').trim().toLowerCase();
+
+function isAdminHost(req) {
+    const hostname = String(req.hostname || '').toLowerCase();
+    return (configuredAdminHost && hostname === configuredAdminHost) || hostname.startsWith('admin.');
+}
 
 // Persistent upload directory — MUST be outside `dist`.
 // `dist` is gitignored and wiped on every `vite build` (emptyOutDir:true),
@@ -189,21 +196,38 @@ app.use('/api/v1/admins/register', strictAuthLimiter);
 
 app.use('/api/v1', routes);
 
-app.use(express.static(frontendDist));
-
-// Admin panel (separate harekat-admin project) is served at /admin.
-// Mounted only when harekat-admin has been built; otherwise /admin falls
-// through to the landing SPA fallback below.
-const adminDist = path.resolve(__dirname, '../../harekat-admin/dist');
+// Serve the admin SPA from the admin hostname at its root. The hostname is
+// configured with ADMIN_HOSTNAME (for example admin.domain.tld); the
+// admin.* fallback also makes local subdomain testing straightforward.
 if (fs.existsSync(path.join(adminDist, 'index.html'))) {
-    app.use('/admin', express.static(adminDist));
-    app.use('/admin', (req, res) => {
-        res.sendFile(path.join(adminDist, 'index.html'));
+    app.use((req, res, next) => {
+        if (!isAdminHost(req) || req.path.startsWith('/api/v1')) return next();
+        express.static(adminDist)(req, res, (err) => {
+            if (err) return next(err);
+            if (req.method === 'GET') return res.sendFile(path.join(adminDist, 'index.html'));
+            next();
+        });
     });
 }
 
+// Keep the old /admin URL working for existing deployments and bookmarks.
+if (fs.existsSync(path.join(adminDist, 'index.html'))) {
+    app.use('/admin', express.static(adminDist));
+    app.use('/admin', (req, res) => res.sendFile(path.join(adminDist, 'index.html')));
+}
+
+// The public landing SPA is served from the root hostname. Do not let an
+// admin-host request fall through to the public app.
+app.use((req, res, next) => {
+    if (isAdminHost(req)) return next();
+    express.static(frontendDist)(req, res, next);
+});
+
 app.use((req, res, next) => {
     if (req.method === 'GET' && !req.path.startsWith('/api/v1') && !req.path.startsWith('/admin')) {
+        if (isAdminHost(req) && fs.existsSync(path.join(adminDist, 'index.html'))) {
+            return res.sendFile(path.join(adminDist, 'index.html'));
+        }
         res.sendFile(path.join(frontendDist, 'index.html'));
     } else {
         next();
