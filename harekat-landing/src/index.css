@@ -340,6 +340,28 @@
    ========================================================= */
 
 @layer utilities {
+    .arrow-button,
+    .accordion-toggle {
+        background-color: #000000;
+        color: #ffffff;
+    }
+
+    .arrow-button-icon {
+        background-color: #ffffff;
+        color: #000000;
+    }
+
+    .dark .arrow-button,
+    .dark .accordion-toggle {
+        background-color: #ffffff;
+        color: #000000;
+    }
+
+    .dark .arrow-button-icon {
+        background-color: #000000;
+        color: #ffffff;
+    }
+
     /* Theme-aware utilities — map to CSS variables so light/dark toggles work */
     .bg-background { background-color: var(--background); }
     .bg-surface { background-color: var(--surface); }

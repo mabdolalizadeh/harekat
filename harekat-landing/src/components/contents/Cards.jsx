@@ -2,7 +2,7 @@ import {cn} from "../../utils/cn.js";
 import Img from "../ui/Img.jsx";
 import {H2, H3} from "../ui/Headings.jsx";
 import {motion} from "motion/react";
-import {Clock, User, BookOpen} from "lucide-react";
+import {Clock, User, BookOpen, Plus} from "lucide-react";
 import {useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
@@ -40,13 +40,11 @@ export function AccordionCard({title, content, className, ...props}) {
                 <H2 className="font-semibold">{title}</H2>
                 <div
                     className={cn(
-                        'p-px rounded-full bg-black transition-all duration-200 ease-in-out',
-                        isOpen && 'rotate-45 bg-muted'
+                        'accordion-toggle p-px rounded-full transition-all duration-200 ease-in-out',
+                        isOpen && 'rotate-45'
                     )}
                 >
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                        <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.5"/>
-                    </svg>
+                    <Plus />
                 </div>
             </div>
             <div
