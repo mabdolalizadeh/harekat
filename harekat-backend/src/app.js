@@ -82,6 +82,10 @@ function isAdminHost(req) {
     return (configuredAdminHost && hostname === configuredAdminHost) || hostname.startsWith('admin.');
 }
 
+function isLegacyAdminPath(req) {
+    return req.path === '/admin' || req.path.startsWith('/admin/');
+}
+
 // Persistent upload directory — MUST be outside `dist`.
 // `dist` is gitignored and wiped on every `vite build` (emptyOutDir:true),
 // so storing uploads there causes silent data loss after each frontend rebuild
@@ -201,19 +205,13 @@ app.use('/api/v1', routes);
 // admin.* fallback also makes local subdomain testing straightforward.
 if (fs.existsSync(path.join(adminDist, 'index.html'))) {
     app.use((req, res, next) => {
-        if (!isAdminHost(req) || req.path.startsWith('/api/v1')) return next();
+        if (!isAdminHost(req) || req.path.startsWith('/api/v1') || isLegacyAdminPath(req)) return next();
         express.static(adminDist)(req, res, (err) => {
             if (err) return next(err);
             if (req.method === 'GET') return res.sendFile(path.join(adminDist, 'index.html'));
             next();
         });
     });
-}
-
-// Keep the old /admin URL working for existing deployments and bookmarks.
-if (fs.existsSync(path.join(adminDist, 'index.html'))) {
-    app.use('/admin', express.static(adminDist));
-    app.use('/admin', (req, res) => res.sendFile(path.join(adminDist, 'index.html')));
 }
 
 // The public landing SPA is served from the root hostname. Do not let an
@@ -224,7 +222,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.startsWith('/api/v1') && !req.path.startsWith('/admin')) {
+    if (req.method === 'GET' && !req.path.startsWith('/api/v1') && !isLegacyAdminPath(req)) {
         if (isAdminHost(req) && fs.existsSync(path.join(adminDist, 'index.html'))) {
             return res.sendFile(path.join(adminDist, 'index.html'));
         }
