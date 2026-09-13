@@ -10,6 +10,7 @@ import AdminTeachers from "./pages/admin/AdminTeachers.jsx";
 import AdminMarquee from "./pages/admin/AdminMarquee.jsx";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions.jsx";
 import AdminBanners from "./pages/admin/AdminBanners.jsx";
+import AdminSettings from "./pages/admin/AdminSettings.jsx";
 
 export default function App({ mode, onToggleTheme }) {
     return (
@@ -25,6 +26,7 @@ export default function App({ mode, onToggleTheme }) {
                 <Route path='marquee' element={<AdminMarquee/>}/>
                 <Route path='subscriptions' element={<AdminSubscriptions/>}/>
                 <Route path='banners' element={<AdminBanners/>}/>
+                <Route path='settings' element={<AdminSettings/>}/>
             </Route>
         </Routes>
     )

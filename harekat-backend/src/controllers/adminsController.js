@@ -25,7 +25,7 @@ const validatePassword = (password) => {
 
 export default class AdminsController {
     static async createAdmin(req, res) {
-        const { username, password } = req.body;
+        const { username, password, currentPassword } = req.body;
         if (!username || !password) {
             return res.status(400).json({ ok: false, message: 'username and password are required' });
         }
@@ -85,6 +85,9 @@ export default class AdminsController {
                 admin.username = username;
             }
             if (password !== undefined) {
+                if (!currentPassword || !(await bcrypt.compare(currentPassword, admin.password))) {
+                    return res.status(401).json({ ok: false, message: 'current password is incorrect' });
+                }
                 const passwordError = validatePassword(password);
                 if (passwordError) {
                     return res.status(400).json({ ok: false, message: passwordError });

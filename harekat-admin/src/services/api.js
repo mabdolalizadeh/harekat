@@ -128,6 +128,7 @@ export const authApi = {
 // ---- Admin ----
 export const adminApi = {
     login: (username, password) => post('/admins/auth', { username, password }),
+    updateAdmin: (id, payload) => put(`/admins/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
     uploadImage,
     uploadFile,
     // landing banners

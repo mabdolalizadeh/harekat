@@ -20,6 +20,7 @@ import {
   LightMode as SunIcon,
   DarkMode as MoonIcon,
   Close as CloseIcon,
+  Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { adminLogout, isAdminLoggedIn } from '../../services/api.js';
 
@@ -33,6 +34,7 @@ const NAV = [
   { to: '/banners', label: 'بنرهای صفحه اصلی', icon: ImageIcon },
   { to: '/header', label: 'مدیریت سربرگ', icon: MenuIcon },
   { to: '/content', label: 'محتوای سایت', icon: ArticleIcon },
+  { to: '/settings', label: 'تنظیمات حساب', icon: SettingsIcon },
 ];
 
 const SITE_URL = import.meta.env?.VITE_SITE_URL || 'http://localhost:5173';
