@@ -525,3 +525,24 @@
         scroll-behavior: auto !important;
     }
 }
+
+
+/* =========================================================
+   Ambient Background Glow
+   ========================================================= */
+
+.ambient-glow {
+    position: absolute;
+    width: 45vw;
+    height: 45vw;
+    min-width: 400px;
+    min-height: 400px;
+
+    border-radius: 9999px;
+
+    filter: blur(100px);
+    opacity: 0.14;
+
+    pointer-events: none;
+    will-change: transform, background;
+}

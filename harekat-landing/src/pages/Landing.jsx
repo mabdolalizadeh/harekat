@@ -374,7 +374,7 @@ export default function Landing() {
             </Box>}
 
             {/* ============ MENTORS ============ */}
-            <Box id={'mentors'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
+            {/* <Box id={'mentors'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>اساتید</SectionTag>
                 <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     از هنرمندان فعال یاد بگیر
@@ -405,7 +405,7 @@ export default function Landing() {
                         </motion.div>
                     ))}
                 </div>
-            </Box>
+            </Box> */}
 
             {/* ============ WHO IT'S FOR ============ */}
             <Box id={'who'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>

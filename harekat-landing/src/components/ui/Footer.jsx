@@ -43,8 +43,8 @@ export default function Footer({ socials = [], copyright, sectionIds = {}, class
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-2 items-start sm:items-end">
-                    
+<div className="flex flex-col gap-2 items-start sm:items-end">
+
                     <div className="flex gap-4">
                         {socials.length > 0 ? socials.map((s) => (
                             <a key={s.key} href={s.linkUrl || "#"} className="text-muted text-xs hover:text-foreground/70 transition-colors">{s.linkText || s.title}</a>
@@ -62,9 +62,25 @@ export default function Footer({ socials = [], copyright, sectionIds = {}, class
                             </>
                         )}
                     </div>
+                    <a
+                        referrerPolicy="origin"
+                        target="_blank"
+                        href="https://trustseal.enamad.ir/?id=7739197&Code=VeYjTFI6U9DFuWlbi7lSZyCVV6SJsRyY"
+                        className="inline-block"
+                    >
+                        <img
+                            referrerPolicy="origin"
+                            src="https://trustseal.enamad.ir/logo.aspx?id=7739197&Code=VeYjTFI6U9DFuWlbi7lSZyCVV6SJsRyY"
+                            alt=""
+                            style={{ cursor: "pointer" }}
+                            code="VeYjTFI6U9DFuWlbi7lSZyCVV6SJsRyY"
+                        />
+                    </a>
                     <span className="text-muted text-xs">{copyright}</span>
                 </div>
-            </div>
+                    <span className="text-muted text-xs">{copyright}</span>
+                </div>
+            
         </footer>
     );
 }
