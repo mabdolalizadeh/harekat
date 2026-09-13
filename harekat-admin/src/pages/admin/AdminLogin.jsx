@@ -90,22 +90,34 @@ export default function AdminLogin() {
 
           <Box component="form" onSubmit={submit} noValidate>
             <Stack spacing={2}>
-              <TextField
-                label="نام کاربری"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-                placeholder="admin"
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><PersonIcon fontSize="small" color="action" /></InputAdornment> } }}
-              />
-              <TextField
-                label="رمز عبور"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><LockIcon fontSize="small" color="action" /></InputAdornment> } }}
-              />
+              <Box>
+                <Typography component="label" htmlFor="admin-username" sx={{ display: 'block', mb: 0.75, fontSize: 13, fontWeight: 600, color: 'text.primary' }}>
+                  نام کاربری
+                </Typography>
+                <TextField
+                  id="admin-username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="username"
+                  placeholder="admin"
+                  aria-label="نام کاربری"
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><PersonIcon fontSize="small" color="action" /></InputAdornment> } }}
+                />
+              </Box>
+              <Box>
+                <Typography component="label" htmlFor="admin-password" sx={{ display: 'block', mb: 0.75, fontSize: 13, fontWeight: 600, color: 'text.primary' }}>
+                  رمز عبور
+                </Typography>
+                <TextField
+                  id="admin-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  aria-label="رمز عبور"
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><LockIcon fontSize="small" color="action" /></InputAdornment> } }}
+                />
+              </Box>
               {error && <Alert severity="error" variant="outlined" sx={{ fontSize: 13 }}>{error}</Alert>}
               <Button type="submit" variant="contained" size="large" disabled={loading} fullWidth sx={{ mt: 1, height: 46 }}>
                 {loading ? 'در حال ورود...' : 'ورود به پنل'}
