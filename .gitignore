@@ -1,6 +1,8 @@
 # Dependencies — any directory at any level
 node_modules/
 
+*.zip
+
 # Environment variables
 .env
 .env.*
