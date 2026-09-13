@@ -333,8 +333,7 @@ export default function Landing() {
                 >
                     <div className={'flex flex-col gap-4'}>
                         <div className={'flex flex-col gap-0.5'}>
-                            <H3 className={'text-foreground text-lg font-semibold'}>نیما جهان تیغ</H3>
-                            <span className={'text-muted text-sm'}>بنیان‌گذار حرکت مدیا</span>
+                            <H3 className={'text-foreground text-lg font-semibold'}>حرکت مدیا</H3>
                         </div>
                         <P className={'text-foreground/70 text-[clamp(0.9rem,1.5vw,1.05rem)] leading-relaxed'}>
                             ما هنرمندها رو آماده می‌کنیم که آزادانه بین فرمت‌ها حرکت کنن. اونچه این حوزه‌ها رو به هم وصل می‌کنه نه تکنیک، بلکه آگاهیه — توانایی دیدن، تفسیر کردن و انتخاب آگاهانه.
