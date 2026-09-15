@@ -84,7 +84,7 @@ export default function Dashboard() {
     }, 0);
 
     return (
-        <MainLayout title={'داشبورد'}>
+        <MainLayout title={'داشبورد'} sectionIds={null} contentMap={null}>
             <Box className={'pt-32 pb-24 gap-8 min-h-screen'}>
 
                 {/*top bar: profile + actions*/ }

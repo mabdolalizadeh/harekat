@@ -44,13 +44,13 @@ export default function ProductDetail() {
     const video = videoSource(course.videoUrl);
     const add = async () => {
         if (!localStorage.getItem('token')) {
-            navigate('/auth', {state: {from: `${location.pathname}${location.search}${location.hash}`}});
+            navigate('/auth', { state: { from: `${location.pathname}${location.search}${location.hash}` } });
             return;
         }
         await customerApi.addToCart(course.id, 'course', 1, discounted ? course.salePrice : course.price);
         setAdded(true);
     };
-    return <MainLayout title={course.name}><TopBarLayout /><Box className="w-full max-w-5xl gap-8 pb-20 pt-28 sm:pt-36">
+    return <MainLayout title={course.name} sectionIds={null} contentMap={null}><TopBarLayout /><Box className="w-full max-w-5xl gap-8 pb-20 pt-28 sm:pt-36">
         <button onClick={() => navigate(-1)} className="self-start text-sm text-muted">بازگشت</button>
         <div className="grid w-full gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
             <div className="overflow-hidden rounded-2xl border border-border bg-card"><img src={course.image} alt={course.name} className="aspect-square w-full object-cover" /></div>

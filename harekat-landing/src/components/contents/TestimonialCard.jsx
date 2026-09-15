@@ -5,7 +5,7 @@ export default function TestimonialCard({quote, name, role, avatar, className, .
     return (
         <div
             className={cn(
-                'border border-[var(--border)] bg-card/80 rounded-[var(--radius-xl)] p-3 sm:p-4 flex gap-3',
+                'border border-[var(--border)] bg-card rounded-[var(--radius-xl)] p-3 sm:p-4 flex gap-3',
                 className
             )}
             {...props}

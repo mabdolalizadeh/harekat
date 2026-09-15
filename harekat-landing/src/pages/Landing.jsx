@@ -1,20 +1,20 @@
 import TopBarLayout from "../layouts/TopBarLayout.jsx";
 import MainLayout from "../layouts/MainLayout.jsx";
-import {motion} from "motion/react";
+import { motion } from "motion/react";
 import Chip from "../components/ui/Chip.jsx";
 import Box from "../components/ui/Box.jsx";
-import {H1, H2, H3, P} from "../components/ui/Headings.jsx";
-import {ArrowButton, PrimaryButton} from "../components/ui/Buttons.jsx";
+import { H1, H2, H3, P } from "../components/ui/Headings.jsx";
+import { ArrowButton, PrimaryButton } from "../components/ui/Buttons.jsx";
 import MarqueeLayout from "../layouts/MarqueeLayout.jsx";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Img from "../components/ui/Img.jsx";
-import {CourseCard, SubscriptionCard} from "../components/contents/Cards.jsx";
+import { CourseCard, SubscriptionCard } from "../components/contents/Cards.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
 import TeacherCard from "../components/contents/TeacherCard.jsx";
 import StepCard from "../components/contents/StepCard.jsx";
 import TestimonialCard from "../components/contents/TestimonialCard.jsx";
-import {AccordionCard} from "../components/contents/Cards.jsx";
-import {Mail, MapPin} from "lucide-react";
+import { AccordionCard } from "../components/contents/Cards.jsx";
+import { Mail, MapPin } from "lucide-react";
 import Footer from "../components/ui/Footer.jsx";
 import Slideshow from "../components/ui/Slideshow.jsx";
 import { useEffect, useState } from "react";
@@ -25,19 +25,19 @@ const fallbackHeroSlides = [
 ];
 
 const heroVariants = {
-    hidden: {opacity: 0},
+    hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: {staggerChildren: 0.12, delayChildren: 0.15},
+        transition: { staggerChildren: 0.12, delayChildren: 0.15 },
     },
 };
 
 const heroItem = {
-    hidden: {opacity: 0, y: 24},
+    hidden: { opacity: 0, y: 24 },
     visible: {
         opacity: 1,
         y: 0,
-        transition: {duration: 0.6, ease: [0.2, 0, 0, 1]},
+        transition: { duration: 0.6, ease: [0.2, 0, 0, 1] },
     },
 };
 
@@ -46,104 +46,20 @@ const images = [];
 
 const courses = [
     {
-        title: 'طراحی با هوش مصنوعی',
-        imgSrc: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400',
-        category: 'هوش مصنوعی',
-        level: 'مبتدی',
-        duration: '۱۵ ساعت',
-        courseType: 'حضوری',
-        teacher: 'نیما جهان تیغ',
-        price: '۵۰۰ هزار تومان',
-        registrationStatus: 'درحال ثبت نام',
-    },
-    {
-        title: 'برنامه‌نویسی پایتون',
-        imgSrc: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400',
-        category: 'برنامه‌نویسی',
-        level: 'مبتدی',
-        duration: '۲۰ ساعت',
-        courseType: 'آنلاین',
-        teacher: 'علی رضایی',
-        price: '۷۵۰ هزار تومان',
-        registrationStatus: 'درحال ثبت نام',
-    },
-    {
-        title: 'طراحی رابط کاربری با Figma',
-        imgSrc: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400',
-        category: 'طراحی UI/UX',
-        level: 'متوسط',
-        duration: '۱۲ ساعت',
-        courseType: 'حضوری',
-        teacher: 'سارا محمدی',
-        price: '۶۰۰ هزار تومان',
-        registrationStatus: 'درحال ثبت نام',
-    },
-    {
-        title: 'توسعه وب با React',
-        imgSrc: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400',
-        category: 'برنامه‌نویسی',
-        level: 'متوسط',
-        duration: '۲۵ ساعت',
-        courseType: 'آنلاین',
-        teacher: 'محمد کریمی',
-        price: '۹۵۰ هزار تومان',
-        registrationStatus: 'به‌زودی',
-    },
-    {
-        title: 'مبانی امنیت سایبری',
-        imgSrc: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400',
-        category: 'امنیت',
-        level: 'مبتدی',
-        duration: '۱۸ ساعت',
-        courseType: 'حضوری',
-        teacher: 'امیرحسین احمدی',
-        price: '۸۰۰ هزار تومان',
-        registrationStatus: 'درحال ثبت نام',
-    },
-    {
-        title: 'ادیت و تدوین ویدیو',
-        imgSrc: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400',
-        category: 'تولید محتوا',
-        level: 'مبتدی',
-        duration: '۱۰ ساعت',
-        courseType: 'آنلاین',
-        teacher: 'مهدی نادری',
-        price: '۴۵۰ هزار تومان',
-        registrationStatus: 'تکمیل ظرفیت',
-    },
-    {
-        title: 'دیجیتال مارکتینگ',
-        imgSrc: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400',
-        category: 'کسب‌وکار',
-        level: 'متوسط',
-        duration: '۱۶ ساعت',
-        courseType: 'آنلاین',
-        teacher: 'نگار اکبری',
-        price: '۶۵۰ هزار تومان',
-        registrationStatus: 'درحال ثبت نام',
-    },
-    {
-        title: 'آموزش طراحی سایت با WordPress',
-        imgSrc: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=400',
-        category: 'طراحی سایت',
-        level: 'مبتدی',
-        duration: '۱۴ ساعت',
-        courseType: 'حضوری',
-        teacher: 'رضا مرادی',
-        price: '۵۵۰ هزار تومان',
-        registrationStatus: 'درحال ثبت نام',
-    },
+        title: '',
+        imgSrc: '',
+        category: '',
+        level: '',
+        duration: '',
+        courseType: '',
+        teacher: '',
+        price: '',
+        registrationStatus: ''
+    }
 ];
 
 const teachers = [
-    {name: 'دکتر احمدی', role: 'برنامه‌نویسی و هوش مصنوعی', avatar: 'https://i.pravatar.cc/400?u=11'},
-    {name: 'استاد محمدی', role: 'طراحی UI/UX', avatar: 'https://i.pravatar.cc/400?u=12'},
-    {name: 'مهندس رضایی', role: 'توسعه وب', avatar: 'https://i.pravatar.cc/400?u=13'},
-    {name: 'دکتر کریمی', role: 'امنیت سایبری', avatar: 'https://i.pravatar.cc/400?u=14'},
-    {name: 'نیما جهان تیغ', role: 'هوش مصنوعی', avatar: 'https://i.pravatar.cc/400?u=15'},
-    {name: 'سارا محمدی', role: 'طراحی رابط کاربری', avatar: 'https://i.pravatar.cc/400?u=16'},
-    {name: 'مهدی نادری', role: 'تدوین و تولید محتوا', avatar: 'https://i.pravatar.cc/400?u=17'},
-    {name: 'نگار اکبری', role: 'دیجیتال مارکتینگ', avatar: 'https://i.pravatar.cc/400?u=18'},
+    { name: '', role: '', avatar: '' }
 ];
 
 const steps = [
@@ -170,12 +86,12 @@ const steps = [
 ];
 
 const testimonials = [
-    {quote: 'این برنامه نحوه نگاه من به تصاویر رو کاملاً تغییر داد. دیگه فقط عکس نمی‌گیرم، کار تولید می‌کنم.', name: 'علی محمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=1'},
-    {quote: 'قبل از حرکت مدیا با حس کار می‌کردم. الان هر تصمیمم پشتوانه فکری داره.', name: 'مریم رضایی', role: 'طراح گرافیک', avatar: 'https://i.pravatar.cc/150?u=2'},
-    {quote: 'اولین جایی بود که اجازه دادم آزمایش کنم. این آزادی خیلی ارزشمند بود.', name: 'سارا احمدی', role: 'نقاش', avatar: 'https://i.pravatar.cc/150?u=3'},
-    {quote: 'جلسات نقد خیلی سخت ولی عالی بود. یاد گرفتم چطور تصمیماتم رو توضیح بدم.', name: 'رضا کریمی', role: 'هنرمند چندرسانه‌ای', avatar: 'https://i.pravatar.cc/150?u=4'},
-    {quote: 'از طراحی گرافیک اومدم اینجا. فهمیدم طراحی فقط ویژوال نیست، فکر و روش هم هست.', name: 'محمد حسینی', role: 'طراح', avatar: 'https://i.pravatar.cc/150?u=5'},
-    {quote: 'حرکت مدیا فقط کار من رو بهتر نکرد، کل نگاهم به خلاقیت رو عوض کرد.', name: 'امیرحسین احمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=6'},
+    { quote: 'این برنامه نحوه نگاه من به تصاویر رو کاملاً تغییر داد. دیگه فقط عکس نمی‌گیرم، کار تولید می‌کنم.', name: 'علی محمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=1' },
+    { quote: 'قبل از حرکت مدیا با حس کار می‌کردم. الان هر تصمیمم پشتوانه فکری داره.', name: 'مریم رضایی', role: 'طراح گرافیک', avatar: 'https://i.pravatar.cc/150?u=2' },
+    { quote: 'اولین جایی بود که اجازه دادم آزمایش کنم. این آزادی خیلی ارزشمند بود.', name: 'سارا احمدی', role: 'نقاش', avatar: 'https://i.pravatar.cc/150?u=3' },
+    { quote: 'جلسات نقد خیلی سخت ولی عالی بود. یاد گرفتم چطور تصمیماتم رو توضیح بدم.', name: 'رضا کریمی', role: 'هنرمند چندرسانه‌ای', avatar: 'https://i.pravatar.cc/150?u=4' },
+    { quote: 'از طراحی گرافیک اومدم اینجا. فهمیدم طراحی فقط ویژوال نیست، فکر و روش هم هست.', name: 'محمد حسینی', role: 'طراح', avatar: 'https://i.pravatar.cc/150?u=5' },
+    { quote: 'حرکت مدیا فقط کار من رو بهتر نکرد، کل نگاهم به خلاقیت رو عوض کرد.', name: 'امیرحسین احمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=6' },
 ];
 
 const faqItems = [
@@ -260,7 +176,7 @@ export default function Landing() {
     const heroSubtitle = contentMap['hero-title']?.body || 'حرکت مدیا جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.';
 
     return (
-        <MainLayout>
+        <MainLayout sectionIds={sectionIds} contentMap={contentMap}>
             <TopBarLayout />
 
             <div className="w-full pt-20 sm:pt-24">
@@ -269,7 +185,7 @@ export default function Landing() {
 
             {/* ============ HERO ============ */}
             <Box id={'hero'} className={'relative pt-36 sm:pt-44 pb-14 sm:pb-20'}>
-                <div className={'absolute inset-0 bg-background -z-10'}/>
+                <div className={'absolute inset-0  -z-10'} />
 
                 <motion.div
                     className={'flex flex-col items-center justify-center w-full md:w-[60%] gap-5 sm:gap-6 md:gap-8'}
@@ -283,7 +199,7 @@ export default function Landing() {
 
                     <motion.div variants={heroItem}>
                         <H1 className={'text-[clamp(2.25rem,7vw,6rem)] text-center leading-[1.05] text-foreground'}>
-                            {heroTitle}<br/>نمی‌گیری؛
+                            {heroTitle}<br />نمی‌گیری؛
                         </H1>
                     </motion.div>
 
@@ -303,7 +219,7 @@ export default function Landing() {
                         <MarqueeLayout>
                             {images.map((image, index) => (
                                 <div className={'overflow-hidden'} key={index}>
-                                    <Img src={image} className={'w-28 h-36 sm:w-40 sm:h-50'} groupHover={true}/>
+                                    <Img src={image} className={'w-28 h-36 sm:w-40 sm:h-50'} groupHover={true} />
                                 </div>
                             ))}
                         </MarqueeLayout>
@@ -325,10 +241,10 @@ export default function Landing() {
             {/* ============ FOUNDER CARD ============ */}
             <Box className={'py-10'}>
                 <motion.div
-                    initial={{opacity: 0, rotate: 0}}
-                    whileInView={{opacity: 1, rotate: 2}}
-                    viewport={{once: true}}
-                    transition={{duration: 0.7, ease: [0.2, 0, 0, 1]}}
+                    initial={{ opacity: 0, rotate: 0 }}
+                    whileInView={{ opacity: 1, rotate: 2 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, ease: [0.2, 0, 0, 1] }}
                     className={'bg-card border border-[var(--border)] rounded-[var(--radius-2xl)] p-8 max-w-full sm:max-w-[600px] w-full'}
                 >
                     <div className={'flex flex-col gap-4'}>
@@ -416,17 +332,17 @@ export default function Landing() {
 
                 <div className={'grid grid-cols-1 sm:grid-cols-2 gap-5 w-full mt-4'}>
                     {[
-                        {title: 'طراحان', desc: 'طراحانی که می‌خوان فراتر از ابزار فکر کنن و روش‌شناسی یاد بگیرن.'},
-                        {title: 'عکاسان', desc: 'عکاسانی که می‌خوان عکاسیشون فقط فنی نباشه، بلکه مفهومی و هنری باشه.'},
-                        {title: 'هنرمندان', desc: 'هنرمندانی که می‌خوان بین رسانه‌ها حرکت کنن و زبان بصری خودشون رو پیدا کنن.'},
-                        {title: 'خلاقان', desc: 'هر کسی که احساس می‌کنه خلاقیتش نیاز به ساختار و هدایت داره.'},
+                        { title: 'طراحان', desc: 'طراحانی که می‌خوان فراتر از ابزار فکر کنن و روش‌شناسی یاد بگیرن.' },
+                        { title: 'عکاسان', desc: 'عکاسانی که می‌خوان عکاسیشون فقط فنی نباشه، بلکه مفهومی و هنری باشه.' },
+                        { title: 'هنرمندان', desc: 'هنرمندانی که می‌خوان بین رسانه‌ها حرکت کنن و زبان بصری خودشون رو پیدا کنن.' },
+                        { title: 'خلاقان', desc: 'هر کسی که احساس می‌کنه خلاقیتش نیاز به ساختار و هدایت داره.' },
                     ].map((item, index) => (
                         <motion.div
                             key={index}
-                            initial={{opacity: 0, y: 24}}
-                            whileInView={{opacity: 1, y: 0}}
-                            viewport={{once: true}}
-                            transition={{duration: 0.5, delay: index * 0.08}}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: index * 0.08 }}
                             className={'bg-card border border-[var(--border)] rounded-[var(--radius-xl)] p-6'}
                         >
                             <H3 className={'text-foreground text-lg mb-2'}>{item.title}</H3>
@@ -458,10 +374,10 @@ export default function Landing() {
                     {steps.map((step, index) => (
                         <motion.div
                             key={index}
-                            initial={{opacity: 0, y: 24}}
-                            whileInView={{opacity: 1, y: 0}}
-                            viewport={{once: true}}
-                            transition={{duration: 0.5, delay: index * 0.08}}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: index * 0.08 }}
                         >
                             <StepCard
                                 number={step.number}
@@ -484,10 +400,10 @@ export default function Landing() {
                     {testimonials.map((item, index) => (
                         <motion.div
                             key={index}
-                            initial={{opacity: 0, y: 24}}
-                            whileInView={{opacity: 1, y: 0}}
-                            viewport={{once: true}}
-                            transition={{duration: 0.5, delay: index * 0.06}}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: index * 0.06 }}
                         >
                             <TestimonialCard
                                 quote={item.quote}
@@ -514,10 +430,10 @@ export default function Landing() {
                     {faqItems.map((item, index) => (
                         <motion.div
                             key={index}
-                            initial={{opacity: 0, y: 24}}
-                            whileInView={{opacity: 1, y: 0}}
-                            viewport={{once: true}}
-                            transition={{duration: 0.5, delay: index * 0.06}}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: index * 0.06 }}
                         >
                             <AccordionCard
                                 title={item.title}
@@ -541,20 +457,19 @@ export default function Landing() {
 
                 <div className={'flex flex-col sm:flex-row gap-8 mt-4 items-center'}>
                     <a
-                        href="mailto:info@harekatmedia.com"
+                        href="mailto:info@schoolharekat.ir"
                         className={'flex items-center gap-3 text-foreground/70 hover:text-foreground transition-colors'}
                     >
-                        <Mail size={20}/>
-                        <span className={'text-sm'}>info@harekatmedia.com</span>
+                        <Mail size={20} />
+                        <span className={'text-sm'}>info@schoolharekat.ir</span>
                     </a>
                     <div className={'flex items-center gap-3 text-muted'}>
-                        <MapPin size={20}/>
+                        <MapPin size={20} />
                         <span className={'text-sm'}>تهران، ایران</span>
                     </div>
                 </div>
             </Box>
 
-            <Footer sectionIds={sectionIds} copyright={contentMap['footer-copyright']?.body || '© ۱۴۰۵ حرکت مدیا'} socials={Object.values(contentMap).filter((item) => item.key?.startsWith('social-'))} />
         </MainLayout>
     )
 }

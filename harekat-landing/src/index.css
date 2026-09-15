@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap');
 @import "tailwindcss";
 
 @theme {
     /* Typography */
-    --font-sans: "Vazirmatn", "IRANSansX", "Inter", ui-sans-serif, system-ui, sans-serif;
-    --font-display: "Vazirmatn", "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Baloo Bhaijaan 2", ui-sans-serif, system-ui, sans-serif;
+    --font-display:  "Baloo Bhaijaan 2", ui-sans-serif, system-ui, sans-serif;
+    --font-title:"Alan Sans", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
 
     /* Brand — warm creative orange */
@@ -330,6 +330,10 @@
         max-width: 100%;
     }
 
+    h1,h2,h3,h4,h5,h6 {
+        font-family: var(--font-title);
+    }
+
     img {
         height: auto;
     }
@@ -533,16 +537,38 @@
 
 .ambient-glow {
     position: absolute;
-    width: 45vw;
-    height: 45vw;
-    min-width: 400px;
-    min-height: 400px;
-
-    border-radius: 9999px;
-
-    filter: blur(100px);
-    opacity: 0.14;
-
+    width: 110vmax;
+    height: 110vmax;
+    border-radius: 50%;
     pointer-events: none;
-    will-change: transform, background;
+    will-change: transform;
+    /* blur ملایم فقط برای از بین بردن banding گرادیان */
+    filter: blur(70px);
+    /* مرکز پیش‌فرض؛ JS در حین اسکرول drift رو اضافه می‌کنه */
+    transform: translate3d(-50%, -50%, 0);
+}
+
+.ambient-glow-a {
+    top: 30%;
+    left: 30%;
+}
+
+.ambient-glow-b {
+    top: 45%;
+    left: 75%;
+}
+
+@media (max-width: 768px) {
+    .ambient-glow {
+        width: 140vmax;
+        height: 140vmax;
+        filter: blur(50px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ambient-glow {
+        transition: none !important;
+        animation: none !important;
+    }
 }

@@ -93,7 +93,7 @@ export default function Products() {
     const navigate = useNavigate();
 
     return (
-        <MainLayout title={'تولیدات'}>
+        <MainLayout title={'تولیدات'} sectionIds={null} contentMap={null}>
             <TopBarLayout/>
 
             {/*hero*/ }

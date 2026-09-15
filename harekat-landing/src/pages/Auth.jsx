@@ -81,7 +81,7 @@ export default function Auth() {
     };
 
     return (
-        <MainLayout title={'ورود'}>
+        <MainLayout title={'ورود'} sectionIds={null} contentMap={null}>
             <TopBarLayout/>
 
             <Box className={'pt-40 pb-24 gap-8 min-h-[70vh]'}>

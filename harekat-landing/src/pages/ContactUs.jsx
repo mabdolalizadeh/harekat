@@ -16,7 +16,7 @@ export default function ContactUs() {
     };
 
     return (
-        <MainLayout title={'تماس با ما'}>
+        <MainLayout title={'تماس با ما'} sectionIds={null} contentMap={null}>
             <TopBarLayout/>
 
             <Box className={'pt-40 pb-24 gap-6'}>
@@ -33,7 +33,7 @@ export default function ContactUs() {
                 {/*info cards*/ }
                 <div className={'grid grid-cols-1 sm:grid-cols-3 gap-5 w-full'}>
                     {[
-                        {icon: Mail, title: 'ایمیل', value: 'info@harekatmedia.com', href: 'mailto:info@harekatmedia.com'},
+                        {icon: Mail, title: 'ایمیل', value: 'info@schoolharekat.ir', href: 'mailto:info@schoolharekat.ir'},
                         {icon: Phone, title: 'تلفن', value: '۰۲۱-۱۲۳۴۵۶۷۸', href: 'tel:+982112345678'},
                         {icon: MapPin, title: 'آدرس', value: 'تهران، خیابان ولیعصر', href: null},
                     ].map((item, index) => (

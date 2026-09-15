@@ -1,13 +1,14 @@
 import { cn } from '../../utils/cn'
 
-export default function Logo({ className }) {
+export default function Logo({ className, onClick }) {
     return (
-        <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        version="1.0" 
-        viewBox="0 0 800.000000 800.000000" 
-        preserveAspectRatio="xMidYMid meet"
-        className={cn(className)}
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            version="1.0"
+            viewBox="0 0 800.000000 800.000000"
+            preserveAspectRatio="xMidYMid meet"
+            className={cn(className)}
+            onClick={onClick}
         >
 
             <g transform="translate(0.000000,800.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">

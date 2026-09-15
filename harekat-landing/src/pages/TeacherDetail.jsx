@@ -57,14 +57,14 @@ export default function TeacherDetail() {
         return () => { cancelled = true; };
     }, [id]);
 
-    if (loading) return <MainLayout title="مدرس"><TopBarLayout /><Box className="min-h-[50vh] pt-32"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></Box></MainLayout>;
-    if (error || !teacher) return <MainLayout title="مدرس یافت نشد"><TopBarLayout /><Box className="min-h-[50vh] pt-32 gap-4 text-center"><H1>مدرس یافت نشد</H1><PrimaryButton onClick={() => navigate('/')}>بازگشت</PrimaryButton></Box></MainLayout>;
+    if (loading) return <MainLayout title="مدرس" sectionIds={null} contentMap={null}><TopBarLayout /><Box className="min-h-[50vh] pt-32"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></Box></MainLayout>;
+    if (error || !teacher) return <MainLayout title="مدرس یافت نشد" sectionIds={null} contentMap={null}><TopBarLayout /><Box className="min-h-[50vh] pt-32 gap-4 text-center"><H1>مدرس یافت نشد</H1><PrimaryButton onClick={() => navigate('/')}>بازگشت</PrimaryButton></Box></MainLayout>;
 
     const fullName = `${teacher.firstName ?? ''} ${teacher.lastName ?? ''}`.trim() || '—';
     const courses = teacher.courses ?? [];
 
     return (
-        <MainLayout title={fullName}>
+        <MainLayout title={fullName} sectionIds={null} contentMap={null}>
             <TopBarLayout />
             <Box className="w-full gap-8 pb-20 pt-28 sm:pt-36 max-w-225 mx-auto">
                 <button onClick={() => navigate(-1)} className="self-start flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"><ArrowRight size={16} /> بازگشت</button>
