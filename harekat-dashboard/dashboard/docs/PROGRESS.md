@@ -1,30 +1,20 @@
 # Current Status
 
-Current phase: Phase 12 — Verification, Documentation & Finalization
-Current task: Enable rich mockup preview mode for instant visual inspection ("what face like")
+Current phase: Phase 12 — Full-Screen Layout & Brand Theme Alignment
+Current task: Refactor dashboard to full-screen modern SaaS layout, match landing page brand theme and tokens, and resolve all sidebar/topbar alignment issues
 Overall completion: 100%
-Last completed step: Implemented instant Mockup Preview Mode with a default student profile (Ali Mohammadi, 28 rubies, 112 points, enrolled courses), fully populated Dribbble-style 4-column curriculum kanban board (SOON, IN PROGRESS, ON CHECK, COMPLETED), preview orders, and progress bars. Disabled blocking redirects on direct preview visits so the complete UI face can be inspected immediately at `http://localhost:5175/`.
-Current implementation: Fully functional React + MUI LMS Dashboard isolated in `dashboard/` with instant Mockup Preview mode + real Landing Page auth synchronization.
-Current working files:
-- `dashboard/src/contexts/AuthContext.jsx`
-- `dashboard/src/components/common/RequireAuth.jsx`
-- `dashboard/src/layouts/Header.jsx`
-- `dashboard/src/pages/OverviewPage.jsx`
-- `dashboard/src/pages/OrdersPage.jsx`
-- `dashboard/docs/PROGRESS.md`
-Known issues:
-- Backend `GET /cart` requires `x-session-id` header to avoid an undefined property read; successfully handled in `client.js` by auto-attaching `x-session-id`.
-- Backend `POST /orders` coupon logic is a stub server-side; frontend validates coupons accurately against `/coupons/validate`.
-Next exact step:
-Open `http://localhost:5175/` in your browser to immediately see the complete, polished LMS Dashboard face (sidebar progress, kanban board, video modals, course cards, and cart drawer).
-How to test:
-1. Ensure backend is running: `cd ../harekat-backend && npm run dev` (running on `http://localhost:3000`).
-2. Run `npm run dev` inside `dashboard/` (running on `http://localhost:5175`).
-3. Open `http://localhost:5175/` directly in the browser.
-4. Verify that the entire dashboard renders immediately in Mockup Preview mode without being blocked or redirected away:
-   - Left Sidebar: Ali Mohammadi avatar, 28 rubies badge, 112 points progress bar with 100/200/300 milestone ticks, and navigation links.
-   - Top Header: Brand logo, breadcrumbs, preview mode indicator, cart icon, chat badge 15, and notification popover with "+8 points for homework".
-   - Overview Board: All 4 Dribbble columns populated (SOON, IN PROGRESS with blue interactive survey card, ON CHECK, COMPLETED with 20/20 scores).
-   - Click any lesson to open the interactive video & syllabus modal and toggle completion.
-   - Switch pages: "دوره‌های من", "کاوش دوره‌ها", "پلن‌های اشتراک", "سفارشات من", and "پروفایل".
-Last meaningful commit: feat(dashboard): add instant mockup preview mode for visual inspection
+Last completed step:
+1. Full Screen Layout: Removed the constrained floating card (`maxWidth: 1440` and outer padding) and converted the dashboard to a true edge-to-edge full-screen viewport layout (`100vw` x `100vh`).
+2. Brand Theme Alignment: Aligned the dashboard palette and typography with the landing page design system:
+   - Primary Brand Color: Harekat Creative Orange (`#f47c20` main, `#df5b13` hover, `#ffa33f` light, `#fff8ed` brand-50 tint).
+   - Canvas & Surfaces: Warm parchment canvas (`#f7f5f0`), clean white cards (`#ffffff`), and warm borders (`#deddd7`).
+   - Deep Charcoal Ink Typography: `#171715` foreground, `#6b6b63` muted stone gray.
+   - Fonts: Loaded `"Baloo Bhaijaan 2"` and `"Alan Sans"` alongside `"Vazirmatn"`.
+3. Topbar & Sidebar Arrangement:
+   - Topbar: Full-width sticky header (64px) with official Harekat SVG brand logo, breadcrumb title, cart trigger with count badge, notifications, and profile dropdown menu.
+   - Sidebar: Clean 280px docked panel with distinct white background and `#deddd7` border, compact student card (warm orange theme, 28 rubies, milestone points), internal slim scrollbar preventing any overflow, and pinned footer actions (profile settings & logout).
+   - Profile & Course Pages: Updated all cards, progress bars, and forms to match the new warm branding.
+
+Current implementation: Production-ready React + MUI LMS Dashboard isolated in `dashboard/`, running full-screen on `http://localhost:5175/`.
+
+Last meaningful commit: feat(dashboard): full-screen layout, brand theme alignment, and polished sidebar/header arrangement
