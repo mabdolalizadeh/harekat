@@ -176,10 +176,10 @@ export default function MyCoursesPage() {
                     {/* Progress Bar */}
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        <Typography variant="caption" sx={{ color: '#6b6b63', fontWeight: 600 }}>
                           میزان پیشرفت:
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#2563eb', fontWeight: 800 }}>
+                        <Typography variant="caption" sx={{ color: '#f47c20', fontWeight: 800 }}>
                           {toPersianDigits(progress)}٪
                         </Typography>
                       </Box>
@@ -189,24 +189,32 @@ export default function MyCoursesPage() {
                         sx={{
                           height: 7,
                           borderRadius: 4,
-                          backgroundColor: '#e2e8f0',
+                          backgroundColor: '#efede7',
                           '& .MuiLinearProgress-bar': {
                             borderRadius: 4,
-                            background: 'linear-gradient(90deg, #2563eb 0%, #3b82f6 100%)'
+                            background: 'linear-gradient(90deg, #f47c20 0%, #df5b13 100%)'
                           }
                         }}
                       />
                     </Box>
 
+                    {/* Action button */}
                     <Button
                       component={NavLink}
                       to={`/courses/${course.id}`}
                       variant="contained"
                       fullWidth
                       startIcon={<PlayArrowIcon />}
-                      sx={{ borderRadius: '14px', py: 1.1, fontWeight: 700 }}
+                      sx={{
+                        borderRadius: '12px',
+                        py: 1,
+                        fontWeight: 700,
+                        backgroundColor: '#f47c20',
+                        color: '#ffffff',
+                        '&:hover': { backgroundColor: '#df5b13' }
+                      }}
                     >
-                      ادامه یادگیری
+                      ورود به کلاس و ادامه یادگیری
                     </Button>
                   </CardContent>
                 </Card>

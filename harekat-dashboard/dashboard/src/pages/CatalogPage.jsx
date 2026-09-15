@@ -240,12 +240,12 @@ export default function CatalogPage() {
                   </Box>
 
                   {/* Price & Add to Cart button */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, borderTop: '1px solid #f1f4f9' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, borderTop: '1px solid #deddd7' }}>
                     <Box>
-                      <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block', fontSize: '0.72rem' }}>
+                      <Typography variant="caption" sx={{ color: '#6b6b63', display: 'block', fontSize: '0.72rem' }}>
                         شهریه دوره
                       </Typography>
-                      <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#2563eb' }}>
+                      <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#f47c20' }}>
                         {formatPrice(course.salePrice || course.price)}
                       </Typography>
                     </Box>

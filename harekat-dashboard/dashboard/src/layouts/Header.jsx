@@ -1,224 +1,353 @@
 import { useState } from 'react';
-import { Box, Typography, IconButton, Badge, Avatar, Tooltip, Chip } from '@mui/material';
-import { NavLink } from 'react-router-dom';
+import {
+  Box,
+  Typography,
+  IconButton,
+  Badge,
+  Avatar,
+  Tooltip,
+  Chip,
+  Divider,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useNotifications } from '../contexts/NotificationContext.jsx';
 import { assetUrl, toPersianDigits } from '../utils/formatters.js';
 import NotificationPopover from '../components/common/NotificationPopover.jsx';
+import Logo from '../components/common/Logo.jsx';
 
 // Icons
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
+import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobileDrawer, activeContext }) {
-  const { user, isPreviewMode } = useAuth();
+  const navigate = useNavigate();
+  const { user, isPreviewMode, logout } = useAuth();
   const { itemCount, openCart } = useCart();
   const { unreadCount } = useNotifications();
 
   const [notifAnchor, setNotifAnchor] = useState(null);
+  const [profileAnchor, setProfileAnchor] = useState(null);
 
-  const handleOpenNotif = (e) => {
-    setNotifAnchor(e.currentTarget);
-  };
+  const handleOpenNotif = (e) => setNotifAnchor(e.currentTarget);
+  const handleCloseNotif = () => setNotifAnchor(null);
 
-  const handleCloseNotif = () => {
-    setNotifAnchor(null);
-  };
+  const handleOpenProfile = (e) => setProfileAnchor(e.currentTarget);
+  const handleCloseProfile = () => setProfileAnchor(null);
+
+  const displayName = user?.firstName && user?.lastName
+    ? `${user.firstName} ${user.lastName}`
+    : (user?.phoneNumber || 'کاربر مهمان');
 
   return (
     <Box
+      component="header"
       sx={{
+        height: 64,
+        width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        py: 1.5,
-        px: { xs: 1.5, md: 2.5 },
-        borderBottom: '1px solid #f1f4f9'
+        px: { xs: 2, md: 3 },
+        backgroundColor: '#ffffff',
+        borderBottom: '1px solid #deddd7',
+        zIndex: 1100,
+        flexShrink: 0
       }}
     >
-      {/* Left side: Brand + Collapse button + Context Breadcrumb */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 } }}>
-        {/* Mobile menu hamburger */}
+      {/* Right side (RTL start): Brand Logo + Toggle + Context Breadcrumb */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+        {/* Mobile menu button */}
         <IconButton
           onClick={onOpenMobileDrawer}
-          sx={{ display: { xs: 'flex', md: 'none' }, color: '#1e293b' }}
+          size="small"
+          sx={{ display: { xs: 'flex', md: 'none' }, color: '#171715' }}
+          title="منوی اصلی"
         >
           <MenuIcon />
         </IconButton>
 
-        {/* Brand Logo matching reference */}
-        <Box
-          component={NavLink}
-          to="/overview"
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            textDecoration: 'none',
-            color: '#1e293b',
-            gap: 0.8
-          }}
-        >
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              fontSize: { xs: '1.2rem', md: '1.45rem' },
-              letterSpacing: '-0.02em',
-              color: '#0f172a'
-            }}
-          >
-            حَرَکَت
-          </Typography>
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              backgroundColor: '#f47c20'
-            }}
-          />
-        </Box>
+        {/* Brand Logo */}
+        <Logo />
 
-        {/* Sidebar collapse button matching reference '< =' */}
-        <Tooltip title={isSidebarCollapsed ? 'باز کردن منو' : 'بستن منو'}>
+        {/* Desktop Sidebar collapse toggle */}
+        <Tooltip title={isSidebarCollapsed ? 'نمایش سایدبار' : 'مخفی‌سازی سایدبار'}>
           <IconButton
             onClick={onToggleSidebar}
             size="small"
             sx={{
               display: { xs: 'none', md: 'flex' },
-              color: '#64748b',
-              backgroundColor: '#f8fafc',
+              color: '#6b6b63',
+              backgroundColor: '#f7f5f0',
+              border: '1px solid #deddd7',
               borderRadius: '10px',
-              p: 0.8,
-              '&:hover': { backgroundColor: '#f1f5f9' }
+              p: 0.7,
+              '&:hover': { backgroundColor: '#efede7', color: '#171715' }
             }}
           >
-            {isSidebarCollapsed ? <MenuIcon fontSize="small" /> : <MenuOpenIcon fontSize="small" />}
+            {isSidebarCollapsed ? <MenuIcon sx={{ fontSize: 18 }} /> : <MenuOpenIcon sx={{ fontSize: 18 }} />}
           </IconButton>
         </Tooltip>
 
-        {/* Reference Context / Active Course Breadcrumb (e.g. "Strategic Marketing - Anna Smith") */}
-        <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: '#1e293b' }}>
-            {activeContext?.title || 'داشبورد یادگیری و دوره‌ها'}
+        <Divider
+          orientation="vertical"
+          flexItem
+          sx={{ display: { xs: 'none', sm: 'block' }, mx: 0.5, height: 22, alignSelf: 'center', borderColor: '#deddd7' }}
+        />
+
+        {/* Active Context Breadcrumb */}
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1, minWidth: 0 }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: '0.92rem',
+              color: '#171715',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            {activeContext?.title || 'داشبورد یادگیری'}
           </Typography>
+
           {activeContext?.subtitle && (
-            <Typography sx={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+            <Typography
+              sx={{
+                display: { xs: 'none', lg: 'inline' },
+                fontSize: '0.8rem',
+                color: '#6b6b63',
+                whiteSpace: 'nowrap'
+              }}
+            >
               • {activeContext.subtitle}
             </Typography>
           )}
         </Box>
 
-        {/* Mockup Preview Mode Indicator */}
+        {/* Preview badge */}
         {isPreviewMode && (
-          <Tooltip title="شما در حال مشاهده پیش‌نمایش موکاپ داشبورد هستید">
-            <Chip
-              icon={<VisibilityOutlinedIcon sx={{ fontSize: 14 }} />}
-              label="پیش‌نمایش موکاپ (Preview Mode)"
-              size="small"
-              sx={{
-                display: { xs: 'none', md: 'inline-flex' },
-                backgroundColor: '#eff6ff',
-                color: '#2563eb',
-                border: '1px solid #bfdbfe',
-                fontWeight: 700,
-                fontSize: '0.72rem',
-                borderRadius: '9999px'
-              }}
-            />
-          </Tooltip>
+          <Chip
+            label="پیش‌نمایش موکاپ"
+            size="small"
+            sx={{
+              display: { xs: 'none', md: 'inline-flex' },
+              backgroundColor: '#fff8ed',
+              color: '#b94410',
+              border: '1px solid #ffdda8',
+              fontWeight: 700,
+              fontSize: '0.7rem',
+              height: 22
+            }}
+          />
         )}
       </Box>
 
-      {/* Right side: Cart + Chat + Notification + Avatar */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 1.8 } }}>
+      {/* Left side (RTL end): Cart + Notification + Profile */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
         {/* Shopping Cart Drawer Trigger */}
         <Tooltip title="سبد خرید">
           <IconButton
             onClick={openCart}
+            size="small"
             sx={{
-              color: '#475569',
-              backgroundColor: '#f8fafc',
+              color: '#171715',
+              backgroundColor: '#f7f5f0',
+              border: '1px solid #deddd7',
               borderRadius: '12px',
-              p: 1,
-              '&:hover': { backgroundColor: '#f1f5f9' }
+              p: 0.9,
+              '&:hover': { backgroundColor: '#efede7' }
             }}
           >
-            <Badge badgeContent={itemCount ? toPersianDigits(itemCount) : 0} color="secondary">
-              <ShoppingBagOutlinedIcon sx={{ fontSize: 21 }} />
+            <Badge
+              badgeContent={itemCount ? toPersianDigits(itemCount) : 0}
+              sx={{
+                '& .MuiBadge-badge': {
+                  backgroundColor: '#f47c20',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.7rem'
+                }
+              }}
+            >
+              <ShoppingBagOutlinedIcon sx={{ fontSize: 20 }} />
             </Badge>
           </IconButton>
         </Tooltip>
 
-        {/* Chat icon with badge 15 as in Dribbble reference */}
-        <Tooltip title="گفتگوها و پیام‌ها">
-          <IconButton
-            sx={{
-              color: '#475569',
-              backgroundColor: '#f8fafc',
-              borderRadius: '12px',
-              p: 1,
-              '&:hover': { backgroundColor: '#f1f5f9' }
-            }}
-          >
-            <Badge badgeContent={toPersianDigits(15)} color="primary">
-              <ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 21 }} />
-            </Badge>
-          </IconButton>
-        </Tooltip>
-
-        {/* Notification bell with red badge 1 as in Dribbble reference */}
+        {/* Notification bell */}
         <Tooltip title="اعلان‌ها">
           <IconButton
             onClick={handleOpenNotif}
+            size="small"
             sx={{
-              color: '#475569',
-              backgroundColor: '#f8fafc',
+              color: '#171715',
+              backgroundColor: '#f7f5f0',
+              border: '1px solid #deddd7',
               borderRadius: '12px',
-              p: 1,
-              '&:hover': { backgroundColor: '#f1f5f9' }
+              p: 0.9,
+              '&:hover': { backgroundColor: '#efede7' }
             }}
           >
-            <Badge badgeContent={toPersianDigits(unreadCount)} color="error">
-              <NotificationsNoneOutlinedIcon sx={{ fontSize: 22 }} />
+            <Badge
+              badgeContent={toPersianDigits(unreadCount)}
+              sx={{
+                '& .MuiBadge-badge': {
+                  backgroundColor: '#f47c20',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.7rem'
+                }
+              }}
+            >
+              <NotificationsNoneOutlinedIcon sx={{ fontSize: 20 }} />
             </Badge>
           </IconButton>
         </Tooltip>
 
-        {/* Reference Notification Popover */}
         <NotificationPopover
           anchorEl={notifAnchor}
           open={Boolean(notifAnchor)}
           onClose={handleCloseNotif}
         />
 
-        {/* User Profile Avatar */}
+        <Divider
+          orientation="vertical"
+          flexItem
+          sx={{ mx: 0.5, height: 22, alignSelf: 'center', borderColor: '#deddd7' }}
+        />
+
+        {/* User Profile Trigger Button */}
         <Box
-          component={NavLink}
-          to="/profile"
-          sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+          onClick={handleOpenProfile}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            cursor: 'pointer',
+            p: '4px 8px 4px 6px',
+            borderRadius: '14px',
+            backgroundColor: '#f7f5f0',
+            border: '1px solid #deddd7',
+            transition: 'background-color 0.15s ease',
+            '&:hover': { backgroundColor: '#efede7' }
+          }}
         >
           <Avatar
             src={assetUrl(user?.avatar)}
-            alt={user?.firstName || 'کاربر'}
+            alt={displayName}
             sx={{
-              width: 38,
-              height: 38,
-              border: '2px solid #e2e8f0',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
-              cursor: 'pointer',
-              transition: 'transform 0.15s ease',
-              '&:hover': { transform: 'scale(1.05)' }
+              width: 32,
+              height: 32,
+              backgroundColor: '#f47c20',
+              color: '#ffffff',
+              fontSize: '0.85rem',
+              fontWeight: 700
             }}
           >
             {(user?.firstName?.[0] || 'ح')}
           </Avatar>
+          <Typography
+            sx={{
+              display: { xs: 'none', sm: 'block' },
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              color: '#171715',
+              maxWidth: 120,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            {displayName}
+          </Typography>
+          <KeyboardArrowDownIcon sx={{ fontSize: 16, color: '#6b6b63' }} />
         </Box>
+
+        {/* Profile Menu Dropdown */}
+        <Menu
+          anchorEl={profileAnchor}
+          open={Boolean(profileAnchor)}
+          onClose={handleCloseProfile}
+          transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+          PaperProps={{
+            sx: {
+              mt: 1,
+              width: 200,
+              borderRadius: '16px',
+              border: '1px solid #deddd7',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+              p: 0.5
+            }
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              handleCloseProfile();
+              navigate('/profile');
+            }}
+            sx={{ borderRadius: '10px', py: 1 }}
+          >
+            <ListItemIcon sx={{ minWidth: 32, color: '#6b6b63' }}>
+              <PersonOutlineIcon sx={{ fontSize: 19 }} />
+            </ListItemIcon>
+            <ListItemText primary="پروفایل کاربری" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }} />
+          </MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              handleCloseProfile();
+              navigate('/courses');
+            }}
+            sx={{ borderRadius: '10px', py: 1 }}
+          >
+            <ListItemIcon sx={{ minWidth: 32, color: '#6b6b63' }}>
+              <AutoStoriesOutlinedIcon sx={{ fontSize: 19 }} />
+            </ListItemIcon>
+            <ListItemText primary="دوره‌های من" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }} />
+          </MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              handleCloseProfile();
+              navigate('/orders');
+            }}
+            sx={{ borderRadius: '10px', py: 1 }}
+          >
+            <ListItemIcon sx={{ minWidth: 32, color: '#6b6b63' }}>
+              <ReceiptLongOutlinedIcon sx={{ fontSize: 19 }} />
+            </ListItemIcon>
+            <ListItemText primary="سفارشات من" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }} />
+          </MenuItem>
+
+          <Divider sx={{ my: 0.5, borderColor: '#deddd7' }} />
+
+          <MenuItem
+            onClick={() => {
+              handleCloseProfile();
+              logout();
+              navigate('/login');
+            }}
+            sx={{ borderRadius: '10px', py: 1, color: '#e5484d' }}
+          >
+            <ListItemIcon sx={{ minWidth: 32, color: '#e5484d' }}>
+              <LogoutOutlinedIcon sx={{ fontSize: 19 }} />
+            </ListItemIcon>
+            <ListItemText primary="خروج از حساب" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 700 }} />
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   );

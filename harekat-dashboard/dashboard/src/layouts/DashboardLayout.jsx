@@ -23,95 +23,107 @@ export default function DashboardLayout() {
       case '/orders':
         return { title: 'تاریخچه سفارشات و تراکنش‌ها', subtitle: 'رسید پرداخت‌ها و دوره‌های خریداری شده' };
       case '/profile':
-        return { title: 'پروفایل و دستاوردها', subtitle: 'ویرایش اطلاعات کاربری و سطح پیشرفت' };
+        return { title: 'پروفایل کاربری و تنظیمات', subtitle: 'مدیریت اطلاعات فردی و سطح پیشرفت' };
+      case '/faq':
+        return { title: 'سوالات متداول', subtitle: 'راهنما و پرسش‌های پرتکرار' };
+      case '/support':
+        return { title: 'پشتیبانی و تیکت', subtitle: 'ارسال پیام و پیگیری درخواست‌ها' };
       default:
-        return { title: 'حرکت مدیا', subtitle: 'سامانه آموزش تخصصی' };
+        return { title: 'حرکت مدیا', subtitle: 'سامانه آموزش تخصصی هنر و رسانه' };
     }
   };
 
   return (
     <Box
       sx={{
+        width: '100vw',
+        height: '100vh',
         minHeight: '100vh',
-        backgroundColor: '#edf1f7',
-        p: { xs: 0, sm: 1.5, md: 2.5 },
+        backgroundColor: '#f7f5f0',
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
+        flexDirection: 'column',
+        overflow: 'hidden',
+        m: 0,
+        p: 0
       }}
     >
-      {/* Reference Design: Large floating rounded dashboard card */}
+      {/* Top Header Bar - Full Width */}
+      <Header
+        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onOpenMobileDrawer={() => setMobileDrawerOpen(true)}
+        activeContext={getActiveContext()}
+      />
+
+      {/* Main Workspace Area: Sidebar + Scrollable Content */}
       <Box
         sx={{
-          width: '100%',
-          maxWidth: 1440,
-          minHeight: { xs: '100vh', md: 'calc(100vh - 40px)' },
-          backgroundColor: '#ffffff',
-          borderRadius: { xs: 0, sm: '24px', md: '32px' },
-          boxShadow: { xs: 'none', md: '0 25px 60px -15px rgba(15, 23, 42, 0.08)' },
-          border: { xs: 'none', md: '1px solid #eef2f7' },
           display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'
+          flex: 1,
+          height: 'calc(100vh - 64px)',
+          overflow: 'hidden',
+          width: '100%'
         }}
       >
-        {/* Top Header */}
-        <Header
-          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          isSidebarCollapsed={isSidebarCollapsed}
-          onOpenMobileDrawer={() => setMobileDrawerOpen(true)}
-          activeContext={getActiveContext()}
-        />
-
-        {/* Body: Sidebar + Main Content Area */}
-        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          {/* Desktop Sidebar */}
+        {/* Desktop Sidebar (docked on right in RTL) */}
+        {!isSidebarCollapsed && (
           <Box
+            component="aside"
             sx={{
-              display: { xs: 'none', md: isSidebarCollapsed ? 'none' : 'block' },
-              borderLeft: '1px solid #f1f4f9',
-              p: 2.5,
-              width: 270,
-              flexShrink: 0
+              display: { xs: 'none', md: 'flex' },
+              flexDirection: 'column',
+              width: 280,
+              minWidth: 280,
+              maxWidth: 280,
+              flexShrink: 0,
+              height: '100%',
+              backgroundColor: '#ffffff',
+              borderLeft: '1px solid #deddd7',
+              overflow: 'hidden'
             }}
           >
             <Sidebar />
           </Box>
+        )}
 
-          {/* Main Content Area */}
-          <Box
-            component="main"
-            sx={{
-              flex: 1,
-              p: { xs: 2, sm: 2.5, md: 3.5 },
-              overflowY: 'auto',
-              backgroundColor: '#ffffff',
-              height: { xs: 'auto', md: 'calc(100vh - 120px)' }
-            }}
-          >
+        {/* Scrollable Main Content Area */}
+        <Box
+          component="main"
+          sx={{
+            flex: 1,
+            height: '100%',
+            overflowY: 'auto',
+            backgroundColor: '#f7f5f0',
+            p: { xs: 2, sm: 2.5, md: 3.5 },
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          <Box sx={{ maxWidth: 1400, width: '100%', mx: 'auto', flex: 1 }}>
             <Outlet />
           </Box>
         </Box>
-
-        {/* Mobile Sidebar Drawer */}
-        <Drawer
-          anchor="right"
-          open={mobileDrawerOpen}
-          onClose={() => setMobileDrawerOpen(false)}
-          PaperProps={{
-            sx: {
-              width: 280,
-              p: 2,
-              backgroundColor: '#ffffff'
-            }
-          }}
-        >
-          <Sidebar onItemClick={() => setMobileDrawerOpen(false)} />
-        </Drawer>
-
-        {/* Global Cart Slide-Over Drawer */}
-        <CartDrawer />
       </Box>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileDrawerOpen}
+        onClose={() => setMobileDrawerOpen(false)}
+        ModalProps={{ keepMounted: true }}
+        PaperProps={{
+          sx: {
+            width: 290,
+            backgroundColor: '#ffffff',
+            borderLeft: '1px solid #deddd7'
+          }
+        }}
+      >
+        <Sidebar onItemClick={() => setMobileDrawerOpen(false)} />
+      </Drawer>
+
+      {/* Cart Drawer Slide-out */}
+      <CartDrawer />
     </Box>
   );
 }

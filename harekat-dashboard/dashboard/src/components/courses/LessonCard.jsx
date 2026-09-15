@@ -15,28 +15,28 @@ export default function LessonCard({ lesson, onPlay, status }) {
       sx={{
         p: 2,
         mb: 2,
-        borderRadius: '22px',
+        borderRadius: '18px',
         backgroundColor: '#ffffff',
-        border: isInProgress ? '1.5px solid #bfdbfe' : '1px solid #eef2f7',
+        border: isInProgress ? '1.5px solid #ffa33f' : '1px solid #deddd7',
         boxShadow: isInProgress
-          ? '0 12px 28px -6px rgba(37, 99, 235, 0.12)'
-          : '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
+          ? '0 6px 18px -4px rgba(244, 124, 32, 0.16)'
+          : '0 2px 6px rgba(0, 0, 0, 0.03)',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.09)'
+          boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.07)'
         }
       }}
       onClick={() => onPlay && onPlay(lesson)}
     >
       {/* Top lesson info: Lesson Number + Time / Date */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.2 }}>
-        <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 700, fontSize: '0.78rem' }}>
+        <Typography variant="caption" sx={{ color: '#9b9b92', fontWeight: 700, fontSize: '0.78rem' }}>
           {lesson.lessonNumber ? `جلسه ${toPersianDigits(lesson.lessonNumber)}` : 'جلسه آموزشی'}
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: isInProgress ? '#ef4444' : '#94a3b8' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: isInProgress ? '#df5b13' : '#9b9b92' }}>
           <AccessTimeIcon sx={{ fontSize: 14 }} />
           <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.74rem' }}>
             {toPersianDigits(lesson.timeInfo || lesson.duration || '۳۰ دقیقه')}
@@ -51,7 +51,7 @@ export default function LessonCard({ lesson, onPlay, status }) {
           fontWeight: 700,
           fontSize: '0.9rem',
           lineHeight: 1.4,
-          color: '#1e293b',
+          color: '#171715',
           mb: 1.5,
           display: '-webkit-box',
           WebkitLineClamp: 2,

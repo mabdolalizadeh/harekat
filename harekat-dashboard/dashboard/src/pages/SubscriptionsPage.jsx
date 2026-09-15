@@ -92,10 +92,10 @@ export default function SubscriptionsPage() {
                   display: 'flex',
                   flexDirection: 'column',
                   height: '100%',
-                  border: isFeatured ? '2px solid #2563eb' : '1px solid #eef2f7',
+                  border: isFeatured ? '2px solid #f47c20' : '1px solid #deddd7',
                   boxShadow: isFeatured
-                    ? '0 20px 40px -10px rgba(37, 99, 235, 0.15)'
-                    : '0 4px 20px -2px rgba(15, 23, 42, 0.04)',
+                    ? '0 12px 30px -8px rgba(244, 124, 32, 0.2)'
+                    : '0 2px 8px rgba(0, 0, 0, 0.04)',
                   position: 'relative',
                   backgroundColor: '#ffffff'
                 }}
@@ -108,7 +108,7 @@ export default function SubscriptionsPage() {
                       position: 'absolute',
                       top: -12,
                       right: 24,
-                      backgroundColor: '#2563eb',
+                      backgroundColor: '#f47c20',
                       color: '#ffffff',
                       fontWeight: 800,
                       px: 1
@@ -116,20 +116,20 @@ export default function SubscriptionsPage() {
                   />
                 )}
 
-                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: '#171715' }}>
                   {sub.name}
                 </Typography>
 
-                <Typography variant="body2" sx={{ color: '#64748b', mb: 3, minHeight: 44 }}>
+                <Typography variant="body2" sx={{ color: '#6b6b63', mb: 3, minHeight: 44 }}>
                   {sub.description || 'دسترسی کامل به تمام امکانات اختصاصی و محتوای VIP.'}
                 </Typography>
 
                 {/* Price block */}
-                <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8fafc', borderRadius: '18px' }}>
-                  <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block', mb: 0.5 }}>
+                <Box sx={{ mb: 3, p: 2, backgroundColor: '#fff8ed', borderRadius: '18px', border: '1px solid #ffdda8' }}>
+                  <Typography variant="caption" sx={{ color: '#6b6b63', display: 'block', mb: 0.5 }}>
                     هزینه اشتراک:
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#2563eb' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#f47c20' }}>
                     {formatPrice(sub.salePrice || sub.price)}
                   </Typography>
                 </Box>

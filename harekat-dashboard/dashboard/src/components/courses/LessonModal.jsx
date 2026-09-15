@@ -17,9 +17,10 @@ export default function LessonModal({ lesson, open, onClose, onToggleComplete, i
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: '28px',
+          borderRadius: '20px',
           p: 1,
-          boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.25)'
+          border: '1px solid #deddd7',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.15)'
         }
       }}
     >
@@ -29,13 +30,14 @@ export default function LessonModal({ lesson, open, onClose, onToggleComplete, i
             label={lesson.statusTitle || 'جلسه آموزشی'}
             size="small"
             sx={{
-              backgroundColor: '#eff6ff',
-              color: '#2563eb',
+              backgroundColor: '#fff8ed',
+              color: '#b94410',
+              border: '1px solid #ffdda8',
               fontWeight: 700,
               fontSize: '0.78rem'
             }}
           />
-          <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1.1rem' }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1.1rem', color: '#171715' }}>
             {lesson.title}
           </Typography>
         </Box>

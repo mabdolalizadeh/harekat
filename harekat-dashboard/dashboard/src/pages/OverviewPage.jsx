@@ -197,26 +197,33 @@ export default function OverviewPage() {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            backgroundColor: superfocus ? '#eff6ff' : '#f8fafc',
-            border: superfocus ? '1px solid #bfdbfe' : '1px solid #eef2f6',
+            backgroundColor: superfocus ? '#fff8ed' : '#ffffff',
+            border: superfocus ? '1px solid #ffdda8' : '1px solid #deddd7',
             borderRadius: '9999px',
             px: 2,
             py: 0.4,
             transition: 'all 0.2s ease'
           }}
         >
-          <FlashOnIcon sx={{ color: superfocus ? '#2563eb' : '#f59e0b', fontSize: 18, mr: 0.5 }} />
+          <FlashOnIcon sx={{ color: superfocus ? '#f47c20' : '#d99400', fontSize: 18, mr: 0.5 }} />
           <FormControlLabel
             control={
               <Switch
                 checked={superfocus}
                 onChange={(e) => setSuperfocus(e.target.checked)}
                 size="small"
-                color="primary"
+                sx={{
+                  '& .MuiSwitch-switchBase.Mui-checked': {
+                    color: '#f47c20'
+                  },
+                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                    backgroundColor: '#ffa33f'
+                  }
+                }}
               />
             }
             label={
-              <Typography sx={{ fontWeight: 700, fontSize: '0.84rem', color: superfocus ? '#2563eb' : '#475569' }}>
+              <Typography sx={{ fontWeight: 700, fontSize: '0.84rem', color: superfocus ? '#f47c20' : '#55554f' }}>
                 حالت تمرکز (Superfocus)
               </Typography>
             }
@@ -235,8 +242,9 @@ export default function OverviewPage() {
                 label={`به زودی: ${toPersianDigits(soonLessons.length)}`}
                 size="small"
                 sx={{
-                  backgroundColor: '#f1f5f9',
-                  color: '#64748b',
+                  backgroundColor: '#ffffff',
+                  color: '#6b6b63',
+                  border: '1px solid #deddd7',
                   fontWeight: 700,
                   fontSize: '0.75rem',
                   py: 0.5,
@@ -258,7 +266,7 @@ export default function OverviewPage() {
               <Button
                 endIcon={<ExpandMoreIcon />}
                 fullWidth
-                sx={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600, py: 1 }}
+                sx={{ color: '#6b6b63', fontSize: '0.8rem', fontWeight: 600, py: 1, '&:hover': { color: '#f47c20' } }}
               >
                 نمایش جلسات بیشتر
               </Button>
@@ -273,8 +281,9 @@ export default function OverviewPage() {
               label={`در حال یادگیری: ${toPersianDigits(inProgressLessons.length)}`}
               size="small"
               sx={{
-                backgroundColor: '#fef3c7',
-                color: '#b45309',
+                backgroundColor: '#fff8ed',
+                color: '#b94410',
+                border: '1px solid #ffdda8',
                 fontWeight: 700,
                 fontSize: '0.75rem',
                 py: 0.5,
@@ -283,19 +292,19 @@ export default function OverviewPage() {
             />
           </Box>
 
-          {/* Dribbble Reference: Blue Interactive Featured Card */}
+          {/* Dribbble Reference: Interactive Featured Card */}
           <Box
             sx={{
               p: 2.2,
               mb: 2,
-              borderRadius: '24px',
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+              borderRadius: '20px',
+              background: 'linear-gradient(135deg, #f47c20 0%, #df5b13 100%)',
               color: '#ffffff',
-              boxShadow: '0 12px 28px -6px rgba(37, 99, 235, 0.35)',
+              boxShadow: '0 8px 24px -4px rgba(244, 124, 32, 0.35)',
               position: 'relative'
             }}
           >
-            <Typography sx={{ fontSize: '0.78rem', opacity: 0.85, mb: 0.5 }}>
+            <Typography sx={{ fontSize: '0.78rem', opacity: 0.9, mb: 0.5 }}>
               نظرسنجی و ارزیابی
             </Typography>
             <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.4, mb: 2 }}>
@@ -308,7 +317,7 @@ export default function OverviewPage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 0.5,
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
                   backdropFilter: 'blur(4px)',
                   borderRadius: '9999px',
                   px: 1.2,
@@ -323,10 +332,10 @@ export default function OverviewPage() {
               <IconButton
                 size="small"
                 sx={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
                   color: '#ffffff',
                   borderRadius: '10px',
-                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.35)' }
+                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.4)' }
                 }}
               >
                 <ArrowBackIcon sx={{ fontSize: 16 }} />

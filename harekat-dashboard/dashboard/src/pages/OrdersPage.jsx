@@ -152,27 +152,27 @@ export default function OrdersPage() {
               <Box
                 sx={{
                   p: 2.5,
-                  backgroundColor: '#f8fafc',
+                  backgroundColor: '#fff8ed',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
                   gap: 1.5,
-                  borderBottom: '1px solid #eef2f7'
+                  borderBottom: '1px solid #ffdda8'
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: '#1e293b' }}>
+                  <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: '#171715' }}>
                     سفارش #{order.id.slice(0, 8)}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8rem' }}>
+                  <Typography variant="caption" sx={{ color: '#6b6b63', fontSize: '0.8rem' }}>
                     {formatDate(order.createdAt)}
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   {getStatusChip(order.status)}
-                  <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#2563eb' }}>
+                  <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#f47c20' }}>
                     {formatPrice(order.finalAmount || order.totalAmount)}
                   </Typography>
                 </Box>

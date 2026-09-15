@@ -177,12 +177,12 @@ export default function CartDrawer() {
                   </ListItemAvatar>
                   <ListItemText
                     primary={
-                      <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: '#1e293b' }}>
+                      <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: '#171715' }}>
                         {item.productName || (item.productType === 'course' ? 'دوره آموزشی' : 'اشتراک')}
                       </Typography>
                     }
                     secondary={
-                      <Typography sx={{ fontWeight: 600, fontSize: '0.82rem', color: '#2563eb', mt: 0.5 }}>
+                      <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#f47c20', mt: 0.5 }}>
                         {formatPrice(item.price)}
                       </Typography>
                     }
@@ -193,7 +193,7 @@ export default function CartDrawer() {
                     <IconButton
                       size="small"
                       onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
-                      sx={{ border: '1px solid #e2e8f0', borderRadius: '8px', p: 0.4 }}
+                      sx={{ border: '1px solid #deddd7', borderRadius: '8px', p: 0.4 }}
                     >
                       <AddIcon sx={{ fontSize: 14 }} />
                     </IconButton>
@@ -209,7 +209,7 @@ export default function CartDrawer() {
                           removeItem(item.id);
                         }
                       }}
-                      sx={{ border: '1px solid #e2e8f0', borderRadius: '8px', p: 0.4 }}
+                      sx={{ border: '1px solid #deddd7', borderRadius: '8px', p: 0.4 }}
                     >
                       <RemoveIcon sx={{ fontSize: 14 }} />
                     </IconButton>
@@ -217,7 +217,7 @@ export default function CartDrawer() {
                     <IconButton
                       size="small"
                       onClick={() => removeItem(item.id)}
-                      sx={{ color: '#ef4444', ml: 0.5 }}
+                      sx={{ color: '#e5484d', ml: 0.5 }}
                     >
                       <DeleteOutlineIcon sx={{ fontSize: 18 }} />
                     </IconButton>
@@ -227,8 +227,8 @@ export default function CartDrawer() {
             </List>
 
             {/* Coupon Code Input */}
-            <Box sx={{ mt: 3, p: 2, backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px solid #eef2f6' }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, fontSize: '0.85rem' }}>
+            <Box sx={{ mt: 3, p: 2, backgroundColor: '#fff8ed', borderRadius: '16px', border: '1px solid #ffdda8' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, fontSize: '0.85rem', color: '#171715' }}>
                 کد تخفیف دارید؟
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
@@ -249,7 +249,7 @@ export default function CartDrawer() {
                   variant="outlined"
                   onClick={handleValidateCoupon}
                   disabled={couponLoading || !couponCode.trim()}
-                  sx={{ borderRadius: '12px', minWidth: 80 }}
+                  sx={{ borderRadius: '12px', minWidth: 80, borderColor: '#f47c20', color: '#f47c20' }}
                 >
                   {couponLoading ? <CircularProgress size={18} /> : 'اعمال'}
                 </Button>
@@ -286,8 +286,8 @@ export default function CartDrawer() {
           )}
           <Divider sx={{ my: 1.5 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>مبلغ قابل پرداخت:</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#2563eb' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#171715' }}>مبلغ قابل پرداخت:</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#f47c20' }}>
               {formatPrice(finalPayable)}
             </Typography>
           </Box>
