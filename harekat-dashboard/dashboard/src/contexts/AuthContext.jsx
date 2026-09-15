@@ -4,14 +4,64 @@ import { userApi } from '../api/userApi.js';
 
 const AuthContext = createContext(null);
 
+const LANDING_URL = import.meta.env?.VITE_LANDING_URL || (import.meta.env?.DEV ? 'http://localhost:5173' : '');
+export const LANDING_AUTH_URL = `${LANDING_URL}/auth`;
+
+// Helper to decode JWT token payload without external libraries
+export function parseJwt(token) {
+  if (!token || typeof token !== 'string') return null;
+  try {
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.warn('Failed to parse JWT payload:', e);
+    return null;
+  }
+}
+
+// Redirects unauthenticated users to the main landing page auth flow
+export function redirectToLandingLogin(returnUrl) {
+  const target = returnUrl || window.location.href;
+  const url = new URL(LANDING_AUTH_URL, window.location.origin);
+  url.searchParams.set('redirect_to', target);
+  window.location.href = url.toString();
+}
+
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => {
+  // 1. Check for token passed from Landing Page via URL query param (?token=... or ?auth_token=...) or hash (#token=...)
+  const getInitialToken = () => {
     try {
+      if (typeof window !== 'undefined') {
+        const searchParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const queryToken = searchParams.get('token') || searchParams.get('auth_token') || searchParams.get('jwt') || hashParams.get('token');
+
+        if (queryToken) {
+          localStorage.setItem('token', queryToken);
+          // Clean token from URL address bar for security
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete('token');
+          cleanUrl.searchParams.delete('auth_token');
+          cleanUrl.searchParams.delete('jwt');
+          window.history.replaceState({}, document.title, cleanUrl.pathname + (cleanUrl.search ? cleanUrl.search : ''));
+          return queryToken;
+        }
+      }
       return localStorage.getItem('token');
     } catch {
       return null;
     }
-  });
+  };
+
+  const [token, setToken] = useState(getInitialToken);
 
   const [user, setUser] = useState(() => {
     try {
@@ -24,11 +74,27 @@ export function AuthProvider({ children }) {
 
   const [loading, setLoading] = useState(true);
 
-  // Load fresh user data including enrolled courses on mount
+  // Load fresh user data including enrolled courses from the backend
   const refreshUser = useCallback(async (userId, currentToken) => {
     const effectiveToken = currentToken || token;
-    const effectiveId = userId || user?.id;
+    let effectiveId = userId || user?.id;
+
+    // If we have a token but no user ID yet, extract it from JWT payload
+    if (!effectiveId && effectiveToken) {
+      const payload = parseJwt(effectiveToken);
+      effectiveId = payload?.id;
+    }
+
     if (!effectiveToken || !effectiveId) {
+      setLoading(false);
+      return;
+    }
+
+    // Check token expiration
+    const payload = parseJwt(effectiveToken);
+    if (payload?.exp && payload.exp * 1000 < Date.now()) {
+      console.warn('Auth token has expired. Logging out.');
+      logout();
       setLoading(false);
       return;
     }
@@ -41,7 +107,6 @@ export function AuthProvider({ children }) {
       }
     } catch (err) {
       console.warn('Failed to refresh user profile:', err);
-      // If 401/403, token is expired
       if (err.status === 401 || err.status === 403) {
         logout();
       }
@@ -51,8 +116,15 @@ export function AuthProvider({ children }) {
   }, [token, user?.id]);
 
   useEffect(() => {
-    if (token && user?.id) {
-      refreshUser(user.id, token);
+    const effectiveToken = token || getInitialToken();
+    if (effectiveToken) {
+      const payload = parseJwt(effectiveToken);
+      const userId = user?.id || payload?.id;
+      if (userId) {
+        refreshUser(userId, effectiveToken);
+      } else {
+        setLoading(false);
+      }
     } else {
       setLoading(false);
     }
@@ -69,7 +141,6 @@ export function AuthProvider({ children }) {
       setToken(receivedToken);
       localStorage.setItem('token', receivedToken);
 
-      // Fetch full user with courses and payments
       try {
         const fullUserRes = await userApi.getUserById(receivedUser.id);
         const fullUser = fullUserRes?.ok ? fullUserRes.data : receivedUser;
@@ -95,7 +166,7 @@ export function AuthProvider({ children }) {
     throw new Error(res?.message || 'خطا در ویرایش اطلاعات');
   };
 
-  const logout = () => {
+  const logout = (redirect = true) => {
     setToken(null);
     setUser(null);
     try {
@@ -103,6 +174,9 @@ export function AuthProvider({ children }) {
       localStorage.removeItem('user');
     } catch {
       // ignore
+    }
+    if (redirect) {
+      window.location.href = `${LANDING_URL}/`;
     }
   };
 
@@ -114,13 +188,15 @@ export function AuthProvider({ children }) {
   const value = {
     token,
     user,
-    isAuthenticated: Boolean(token && user),
+    isAuthenticated: Boolean(token && (user || parseJwt(token))),
     loading,
     requestOtp,
     validateOtp,
     refreshUser,
     updateProfile,
     logout,
+    redirectToLandingLogin,
+    landingAuthUrl: LANDING_AUTH_URL,
     rubies,
     studyPoints
   };

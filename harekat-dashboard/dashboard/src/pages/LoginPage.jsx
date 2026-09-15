@@ -1,36 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Typography,
   Card,
-  CardContent,
   TextField,
   Button,
   Alert,
   CircularProgress,
   Divider,
+  Collapse,
   Chip
 } from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LoginIcon from '@mui/icons-material/Login';
 import PhoneIphoneOutlinedIcon from '@mui/icons-material/PhoneIphoneOutlined';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import CodeIcon from '@mui/icons-material/Code';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { toPersianDigits } from '../utils/formatters.js';
 
 export default function LoginPage() {
-  const { requestOtp, validateOtp } = useAuth();
+  const { requestOtp, validateOtp, isAuthenticated, landingAuthUrl } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [step, setStep] = useState(1); // 1: Phone, 2: OTP
-  const [phoneNumber, setPhoneNumber] = useState('09123456789'); // Seeded demo user
+  const [step, setStep] = useState(1);
+  const [phoneNumber, setPhoneNumber] = useState('09123456789');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [devOtpHint, setDevOtpHint] = useState(null);
+  const [showDevForm, setShowDevForm] = useState(false);
 
   const from = location.state?.from?.pathname || '/overview';
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/overview', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleRequestOtp = async (e) => {
     e.preventDefault();
@@ -95,147 +103,143 @@ export default function LoginPage() {
       <Card
         sx={{
           width: '100%',
-          maxWidth: 440,
+          maxWidth: 460,
           borderRadius: '32px',
-          p: { xs: 2.5, sm: 4 },
+          p: { xs: 3, sm: 4.5 },
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.12)',
-          border: '1px solid #eef2f7'
+          border: '1px solid #eef2f7',
+          textAlign: 'center'
         }}
       >
-        {/* Brand Header */}
-        <Box sx={{ textAlign: 'center', mb: 3.5 }}>
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 56,
-              height: 56,
-              borderRadius: '20px',
-              backgroundColor: '#eff6ff',
-              color: '#2563eb',
-              mb: 2
-            }}
-          >
-            {step === 1 ? <PhoneIphoneOutlinedIcon sx={{ fontSize: 30 }} /> : <LockOutlinedIcon sx={{ fontSize: 30 }} />}
-          </Box>
-
-          <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.8, color: '#0f172a' }}>
-            {step === 1 ? 'ورود به پنل یادگیری حرکت' : 'تایید شماره موبایل'}
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            {step === 1
-              ? 'شماره موبایل خود را وارد کنید تا کد ورود ارسال شود.'
-              : `کد تایید ارسال شده به شماره ${toPersianDigits(phoneNumber)} را وارد کنید.`}
-          </Typography>
+        {/* Brand Icon */}
+        <Box
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 64,
+            height: 64,
+            borderRadius: '22px',
+            backgroundColor: '#eff6ff',
+            color: '#2563eb',
+            mb: 2.5
+          }}
+        >
+          <LoginIcon sx={{ fontSize: 32 }} />
         </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3, borderRadius: '16px', fontSize: '0.85rem' }}>
-            {error}
-          </Alert>
-        )}
+        <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#0f172a' }}>
+          ورود به پنل حرکت مدیا
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#64748b', mb: 3.5, lineHeight: 1.7 }}>
+          احراز هویت و دریافت توکن دسترسی از طریق صفحه اصلی (Landing Page) انجام می‌شود و سپس به این داشبورد هدایت می‌شوید.
+        </Typography>
 
-        {/* Step 1 Form */}
-        {step === 1 ? (
-          <Box component="form" onSubmit={handleRequestOtp}>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#334155' }}>
-                شماره موبایل:
+        {/* Primary Action: Go to Landing Page Auth */}
+        <Button
+          variant="contained"
+          size="large"
+          fullWidth
+          href={landingAuthUrl}
+          startIcon={<LoginIcon />}
+          sx={{
+            py: 1.5,
+            borderRadius: '16px',
+            fontWeight: 800,
+            fontSize: '1rem',
+            mb: 2,
+            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+          }}
+        >
+          ورود از طریق وب‌سایت اصلی حرکت
+        </Button>
+
+        <Divider sx={{ my: 3 }}>
+          <Chip
+            label="یا ورود آزمایشی محیط توسعه"
+            size="small"
+            onClick={() => setShowDevForm(!showDevForm)}
+            sx={{ cursor: 'pointer', fontSize: '0.72rem', backgroundColor: '#f1f5f9' }}
+          />
+        </Divider>
+
+        {/* Collapsible Local Dev Bypass */}
+        <Collapse in={showDevForm}>
+          <Box sx={{ mt: 2, textAlign: 'right', p: 2.5, backgroundColor: '#f8fafc', borderRadius: '20px', border: '1px solid #eef2f7' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <CodeIcon sx={{ fontSize: 18, color: '#64748b' }} />
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#475569' }}>
+                فرم ورود مستقیم برای تست محلی
               </Typography>
-              <TextField
-                fullWidth
-                autoFocus
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="09123456789"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '16px',
-                    backgroundColor: '#f8fafc'
-                  }
-                }}
-              />
             </Box>
 
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              size="large"
-              disabled={loading}
-              sx={{ py: 1.4, borderRadius: '16px', fontWeight: 700, fontSize: '1rem' }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'دریافت کد ورود'}
-            </Button>
-          </Box>
-        ) : (
-          /* Step 2 Form */
-          <Box component="form" onSubmit={handleValidateOtp}>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#334155' }}>
-                کد یکبار مصرف (OTP):
-              </Typography>
-              <TextField
-                fullWidth
-                autoFocus
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="123456"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '16px',
-                    backgroundColor: '#f8fafc',
-                    letterSpacing: '0.3em',
-                    textAlign: 'center',
-                    fontWeight: 700
-                  }
-                }}
-              />
-            </Box>
-
-            {devOtpHint && (
-              <Box sx={{ mb: 2.5, p: 1.5, backgroundColor: '#f0fdf4', borderRadius: '14px', border: '1px solid #bbf7d0' }}>
-                <Typography variant="caption" sx={{ color: '#15803d', fontWeight: 600, display: 'block' }}>
-                  کد تایید محیط توسعه: <strong>{devOtpHint}</strong> (تکمیل خودکار انجام شد)
-                </Typography>
-              </Box>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: '12px', fontSize: '0.8rem' }}>
+                {error}
+              </Alert>
             )}
 
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              size="large"
-              disabled={loading}
-              sx={{ py: 1.4, borderRadius: '16px', fontWeight: 700, fontSize: '1rem', mb: 1.5 }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'ورود به پنل'}
-            </Button>
-
-            <Button
-              fullWidth
-              onClick={() => {
-                setStep(1);
-                setError(null);
-              }}
-              sx={{ color: '#64748b', fontSize: '0.84rem' }}
-            >
-              تغییر شماره موبایل
-            </Button>
+            {step === 1 ? (
+              <Box component="form" onSubmit={handleRequestOtp}>
+                <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                  شماره موبایل دمو:
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="09123456789"
+                  sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '12px', backgroundColor: '#ffffff' } }}
+                />
+                <Button
+                  type="submit"
+                  variant="outlined"
+                  fullWidth
+                  disabled={loading}
+                  sx={{ borderRadius: '12px', fontWeight: 700 }}
+                >
+                  {loading ? <CircularProgress size={20} /> : 'دریافت کد تایید'}
+                </Button>
+              </Box>
+            ) : (
+              <Box component="form" onSubmit={handleValidateOtp}>
+                <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                  کد تایید OTP:
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="123456"
+                  sx={{ mb: 1.5, '& .MuiOutlinedInput-root': { borderRadius: '12px', backgroundColor: '#ffffff' } }}
+                />
+                {devOtpHint && (
+                  <Typography variant="caption" sx={{ color: '#15803d', display: 'block', mb: 1.5, fontWeight: 600 }}>
+                    کد آماده: {devOtpHint}
+                  </Typography>
+                )}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  disabled={loading}
+                  sx={{ borderRadius: '12px', fontWeight: 700, mb: 1 }}
+                >
+                  {loading ? <CircularProgress size={20} color="inherit" /> : 'ورود مستقیم'}
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => setStep(1)}
+                  sx={{ color: '#64748b', fontSize: '0.75rem', width: '100%' }}
+                >
+                  تغییر شماره
+                </Button>
+              </Box>
+            )}
           </Box>
-        )}
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Development fast login badge */}
-        <Box sx={{ textAlign: 'center' }}>
-          <Chip
-            label="اکانت تستی دمو: ۰۹۱۲۳۴۵۶۷۸۹"
-            size="small"
-            sx={{ backgroundColor: '#f1f5f9', color: '#64748b', fontSize: '0.75rem' }}
-          />
-        </Box>
+        </Collapse>
       </Card>
     </Box>
   );

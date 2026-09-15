@@ -1,50 +1,28 @@
 # Current Status
 
 Current phase: Phase 12 — Verification, Documentation & Finalization
-Current task: Complete end-to-end LMS dashboard verification and persistent documentation update
+Current task: Integrate landing page authentication redirect and token ingestion
 Overall completion: 100%
-Last completed step: Implemented complete React + MUI LMS Dashboard in isolated `dashboard/` directory, integrated real backend APIs (courses, categories, cart, orders, subscriptions, auth OTP, user profile), built Dribbble-faithful kanban overview, lesson playback & syllabus modal, shopping cart drawer, and verified production build (0 errors, 974ms).
-Current implementation: Fully functional React + MUI LMS Dashboard isolated in `dashboard/`.
+Last completed step: Updated AuthContext, RequireAuth, LoginPage, and App.jsx to seamlessly accept auth tokens from the Landing Page redirect (via URL params `?token=...`, hash `#token=...`, or shared `localStorage`), automatically decode JWT payload to hydrate user courses/profile from `GET /users/:id`, automatically redirect unauthenticated users to the Landing Page login (`/auth`), and support `/dashboard` route aliases.
+Current implementation: Fully functional React + MUI LMS Dashboard isolated in `dashboard/` with Landing Page auth synchronization.
 Current working files:
-- `dashboard/src/App.jsx`
-- `dashboard/src/main.jsx`
-- `dashboard/src/theme/theme.js`
-- `dashboard/src/layouts/DashboardLayout.jsx`
-- `dashboard/src/layouts/Header.jsx`
-- `dashboard/src/layouts/Sidebar.jsx`
-- `dashboard/src/pages/OverviewPage.jsx`
-- `dashboard/src/pages/MyCoursesPage.jsx`
-- `dashboard/src/pages/CourseDetailPage.jsx`
-- `dashboard/src/pages/CatalogPage.jsx`
-- `dashboard/src/pages/SubscriptionsPage.jsx`
-- `dashboard/src/pages/OrdersPage.jsx`
-- `dashboard/src/pages/ProfilePage.jsx`
-- `dashboard/src/pages/LoginPage.jsx`
-- `dashboard/src/components/courses/LessonCard.jsx`
-- `dashboard/src/components/courses/LessonModal.jsx`
-- `dashboard/src/components/cart/CartDrawer.jsx`
-- `dashboard/src/components/common/NotificationPopover.jsx`
-- `dashboard/src/components/common/RequireAuth.jsx`
 - `dashboard/src/contexts/AuthContext.jsx`
-- `dashboard/src/contexts/CartContext.jsx`
-- `dashboard/src/contexts/NotificationContext.jsx`
-- `dashboard/src/api/client.js`
+- `dashboard/src/components/common/RequireAuth.jsx`
+- `dashboard/src/pages/LoginPage.jsx`
+- `dashboard/src/App.jsx`
 - `dashboard/docs/PROJECT_CONTEXT.md`
-- `dashboard/docs/API_MAP.md`
-- `dashboard/docs/IMPLEMENTATION_PLAN.md`
-- `dashboard/docs/PROGRESS.md`
-- `dashboard/docs/ARCHITECTURE.md`
 - `dashboard/docs/DECISIONS.md`
+- `dashboard/docs/PROGRESS.md`
 Known issues:
 - Backend `GET /cart` requires `x-session-id` header to avoid an undefined property read; successfully handled in `client.js` by auto-attaching `x-session-id`.
 - Backend `POST /orders` coupon logic is a stub server-side; frontend validates coupons accurately against `/coupons/validate`.
 Next exact step:
-All core requirements and phases are implemented. For further extension, an agent can add direct MP4 video progress percentage synchronization with a backend custom progress endpoint if implemented in the future.
+Ready for end-to-end user testing. When the landing page completes OTP authentication and redirects to the dashboard (with `?token=...` or `/dashboard`), the dashboard automatically captures the token, hydrates user courses, and displays the panel.
 How to test:
 1. Ensure backend is running: `cd ../harekat-backend && npm run dev` (running on `http://localhost:3000`).
-2. Navigate to `dashboard/` and run `npm run build` to verify production bundling.
-3. Start dev server: `npm run dev` inside `dashboard/` (running on `http://localhost:5175`).
-4. Open `http://localhost:5175/login` in the browser.
-5. Login with demo phone `09123456789` and OTP `123456`.
-6. Test Overview kanban, play lessons, toggle superfocus, browse catalog, add course to cart, view cart drawer, checkout, check orders history, and edit user profile.
-Last meaningful commit: feat(dashboard): scaffold and implement complete React + MUI LMS panel connected to backend APIs
+2. Run `npm run dev` inside `dashboard/` (running on `http://localhost:5175`).
+3. Test landing redirect by opening:
+   `http://localhost:5175/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MTI1MmUxLTM0ZTEtNDg1ZS1hZDVkLWNiNGZjNGI1YjRiOCIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzg5NTAxMzkzLCJleHAiOjE3OTAxMDYxOTN9.7A7Yi9Vxc5pU2f4l87XfOWQ3DBS_p6nXASj2iekoka4`
+4. Notice that the dashboard immediately ingests the token, decodes user ID `681252e1-34e1-485e-ad5d-cb4fc4b5b4b8`, cleans the URL, loads Ali Mohammadi's enrolled courses and achievements, and renders the Dribbble-inspired overview.
+5. If accessed unauthenticated without a token, the dashboard automatically redirects to the Landing Page auth URL.
+Last meaningful commit: feat(dashboard): support landing page login redirect, JWT token ingestion, and route aliases

@@ -24,3 +24,11 @@
 ## Decision 5: Mandatory `x-session-id` on All API Requests
 - **Context:** In `harekat-backend/src/controllers/cartController.js`, `req.headers['x-session-id'] || req.body.sessionId` is read. On GET requests without `req.body`, this can throw a TypeError if the header is absent.
 - **Decision:** Generate a UUID in `localStorage.getItem('cartSessionId')` and attach it as `x-session-id` on every API call.
+
+## Decision 6: Landing Page Authentication & Cross-App Redirection
+- **Context:** User authentication takes place on the Landing Page (`/auth`). After successful OTP verification, the landing page obtains the JWT token and redirects to the Dashboard.
+- **Decision:**
+  1. `AuthContext.jsx` scans for incoming token parameters in `window.location.search` (`?token=...`, `?auth_token=...`, `?jwt=...`) and `window.location.hash` (`#token=...`), in addition to `localStorage.getItem('token')`.
+  2. If found in the URL, it persists the token to `localStorage`, safely cleans the URL via `window.history.replaceState` to prevent token leakage, decodes the JWT to get `userId`, and immediately hydrates user profile data via `GET /users/:id`.
+  3. Unauthenticated visits trigger an automatic redirection to the Landing Page login URL (`${LANDING_URL}/auth`), preserving return destination.
+  4. Both `/overview` and `/dashboard` (with sub-routes) are mapped in `App.jsx` to prevent route mismatches during cross-app redirects.

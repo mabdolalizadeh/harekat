@@ -17,7 +17,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Protected Dashboard Routes */}
+      {/* Main LMS Dashboard Routes */}
       <Route
         path="/"
         element={
@@ -27,6 +27,27 @@ export default function App() {
         }
       >
         <Route index element={<Navigate to="/overview" replace />} />
+        <Route path="overview" element={<OverviewPage />} />
+        <Route path="courses" element={<MyCoursesPage />} />
+        <Route path="courses/:id" element={<CourseDetailPage />} />
+        <Route path="catalog" element={<CatalogPage />} />
+        <Route path="subscriptions" element={<SubscriptionsPage />} />
+        <Route path="orders" element={<OrdersPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="faq" element={<FaqPage />} />
+        <Route path="support" element={<SupportPage />} />
+      </Route>
+
+      {/* Direct /dashboard routes to support landing page redirects */}
+      <Route
+        path="/dashboard"
+        element={
+          <RequireAuth>
+            <DashboardLayout />
+          </RequireAuth>
+        }
+      >
+        <Route index element={<OverviewPage />} />
         <Route path="overview" element={<OverviewPage />} />
         <Route path="courses" element={<MyCoursesPage />} />
         <Route path="courses/:id" element={<CourseDetailPage />} />
