@@ -84,7 +84,7 @@ export default function CourseDetailPage() {
         <Alert severity="error" sx={{ maxWidth: 500, mx: 'auto', mb: 3, borderRadius: '16px' }}>
           {error || 'دوره یافت نشد'}
         </Alert>
-        <Button component={NavLink} to="/courses" startIcon={<ArrowForwardIcon />} variant="outlined">
+        <Button component={NavLink} to="/courses" endIcon={<ArrowForwardIcon />} variant="outlined">
           بازگشت به دوره‌های من
         </Button>
       </Box>
@@ -97,7 +97,7 @@ export default function CourseDetailPage() {
       <Button
         component={NavLink}
         to="/courses"
-        startIcon={<ArrowForwardIcon />}
+        endIcon={<ArrowForwardIcon />}
         sx={{ mb: 3, color: '#64748b', fontWeight: 600, fontSize: '0.85rem' }}
       >
         بازگشت به لیست دوره‌ها
@@ -169,7 +169,7 @@ export default function CourseDetailPage() {
                 <Chip
                   label={`سطح: ${course.level}`}
                   size="small"
-                  sx={{ backgroundColor: '#eff6ff', color: '#2563eb', fontWeight: 600 }}
+                  sx={{ backgroundColor: '#fff8ed', color: '#b94410', border: '1px solid #ffdda8', fontWeight: 600 }}
                 />
               )}
               <Chip
@@ -230,11 +230,11 @@ export default function CourseDetailPage() {
                   شهریه دوره:
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mt: 0.5 }}>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#2563eb' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#f47c20' }}>
                     {formatPrice(course.salePrice || course.price)}
                   </Typography>
                   {course.salePrice && (
-                    <Typography sx={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.9rem' }}>
+                    <Typography sx={{ textDecoration: 'line-through', color: '#9b9b92', fontSize: '0.9rem' }}>
                       {formatPrice(course.price)}
                     </Typography>
                   )}
@@ -248,7 +248,7 @@ export default function CourseDetailPage() {
                 variant="contained"
                 fullWidth
                 size="large"
-                startIcon={<PlayCircleOutlineIcon />}
+                endIcon={<PlayCircleOutlineIcon />}
                 sx={{ py: 1.4, borderRadius: '16px', fontWeight: 700, mb: 2 }}
               >
                 شروع / ادامه یادگیری
@@ -258,7 +258,7 @@ export default function CourseDetailPage() {
                 variant="contained"
                 fullWidth
                 size="large"
-                startIcon={<ShoppingBagOutlinedIcon />}
+                endIcon={<ShoppingBagOutlinedIcon />}
                 disabled={addingToCart}
                 onClick={handleAddToCart}
                 sx={{ py: 1.4, borderRadius: '16px', fontWeight: 700, mb: 2 }}

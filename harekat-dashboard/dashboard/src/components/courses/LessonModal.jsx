@@ -156,7 +156,7 @@ export default function LessonModal({ lesson, open, onClose, onToggleComplete, i
         <Button
           variant={isCompleted ? 'outlined' : 'contained'}
           color={isCompleted ? 'success' : 'primary'}
-          startIcon={<CheckCircleOutlineIcon />}
+          endIcon={<CheckCircleOutlineIcon />}
           onClick={() => {
             if (onToggleComplete) onToggleComplete(lesson.id);
           }}

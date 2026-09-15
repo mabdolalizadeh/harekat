@@ -204,7 +204,7 @@ export default function MyCoursesPage() {
                       to={`/courses/${course.id}`}
                       variant="contained"
                       fullWidth
-                      startIcon={<PlayArrowIcon />}
+                      endIcon={<PlayArrowIcon />}
                       sx={{
                         borderRadius: '12px',
                         py: 1,

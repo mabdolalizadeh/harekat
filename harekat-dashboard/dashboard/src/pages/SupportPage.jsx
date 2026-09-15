@@ -73,7 +73,7 @@ export default function SupportPage() {
           type="submit"
           variant="contained"
           size="large"
-          startIcon={<SendIcon />}
+          endIcon={<SendIcon />}
           sx={{ borderRadius: '14px', px: 3.5, py: 1.2, fontWeight: 700 }}
         >
           ارسال تیکت پشتیبانی

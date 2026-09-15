@@ -31,25 +31,25 @@ export default function Sidebar({ onItemClick }) {
       title: 'یادگیری من',
       icon: <SchoolOutlinedIcon sx={{ fontSize: 16, color: '#9b9b92' }} />,
       items: [
-        { label: 'داشبورد و درس‌ها', path: '/overview', icon: <DashboardOutlinedIcon sx={{ fontSize: 20 }} /> },
-        { label: 'دوره‌های من', path: '/courses', icon: <AutoStoriesOutlinedIcon sx={{ fontSize: 20 }} />, badge: enrolledCount > 0 ? toPersianDigits(enrolledCount) : null },
-        { label: 'کاوش دوره‌ها', path: '/catalog', icon: <ExploreOutlinedIcon sx={{ fontSize: 20 }} /> }
+        { label: 'داشبورد و درس‌ها', path: '/overview', icon: <DashboardOutlinedIcon sx={{ fontSize: 19 }} /> },
+        { label: 'دوره‌های من', path: '/courses', icon: <AutoStoriesOutlinedIcon sx={{ fontSize: 19 }} />, badge: enrolledCount > 0 ? toPersianDigits(enrolledCount) : null },
+        { label: 'کاوش دوره‌ها', path: '/catalog', icon: <ExploreOutlinedIcon sx={{ fontSize: 19 }} /> }
       ]
     },
     {
       title: 'خرید و اشتراک',
       icon: <CardMembershipOutlinedIcon sx={{ fontSize: 16, color: '#9b9b92' }} />,
       items: [
-        { label: 'پلن‌های اشتراک', path: '/subscriptions', icon: <CardMembershipOutlinedIcon sx={{ fontSize: 20 }} /> },
-        { label: 'سفارشات من', path: '/orders', icon: <ReceiptLongOutlinedIcon sx={{ fontSize: 20 }} /> }
+        { label: 'پلن‌های اشتراک', path: '/subscriptions', icon: <CardMembershipOutlinedIcon sx={{ fontSize: 19 }} /> },
+        { label: 'سفارشات من', path: '/orders', icon: <ReceiptLongOutlinedIcon sx={{ fontSize: 19 }} /> }
       ]
     },
     {
       title: 'پشتیبانی',
       icon: <HeadsetMicOutlinedIcon sx={{ fontSize: 16, color: '#9b9b92' }} />,
       items: [
-        { label: 'سوالات متداول', path: '/faq', icon: <HelpOutlineOutlinedIcon sx={{ fontSize: 20 }} /> },
-        { label: 'پشتیبانی و تیکت', path: '/support', icon: <HeadsetMicOutlinedIcon sx={{ fontSize: 20 }} /> }
+        { label: 'سوالات متداول', path: '/faq', icon: <HelpOutlineOutlinedIcon sx={{ fontSize: 19 }} /> },
+        { label: 'پشتیبانی و تیکت', path: '/support', icon: <HeadsetMicOutlinedIcon sx={{ fontSize: 19 }} /> }
       ]
     }
   ];
@@ -66,7 +66,7 @@ export default function Sidebar({ onItemClick }) {
         overflow: 'hidden'
       }}
     >
-      {/* Top Student Progress Card (Warm Harekat theme) */}
+      {/* Top Student Progress Card */}
       <Box
         sx={{
           backgroundColor: '#fff8ed',
@@ -114,36 +114,37 @@ export default function Sidebar({ onItemClick }) {
             </Box>
           </Box>
 
-          {/* Rubies badge */}
+          {/* Rubies badge: Text on RIGHT, Diamond Icon on LEFT */}
           <Box
             sx={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 0.4,
+              gap: 0.5,
               backgroundColor: '#ffefd3',
               color: '#b94410',
               border: '1px solid #ffdda8',
               borderRadius: '9999px',
-              px: 0.9,
+              px: 1,
               py: 0.3,
               flexShrink: 0
             }}
           >
-            <DiamondOutlinedIcon sx={{ fontSize: 13, color: '#f47c20' }} />
             <Typography sx={{ fontSize: '0.72rem', fontWeight: 700 }}>
               {toPersianDigits(rubies)}
             </Typography>
+            <DiamondOutlinedIcon sx={{ fontSize: 13, color: '#f47c20' }} />
           </Box>
         </Box>
 
         {/* Milestone points & progress bar */}
         <Box sx={{ mt: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 }}>
+            {/* Text on RIGHT, Trophy icon on LEFT */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
-              <EmojiEventsOutlinedIcon sx={{ fontSize: 15, color: '#d99400' }} />
               <Typography sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#171715' }}>
                 {toPersianDigits(studyPoints)} امتیاز
               </Typography>
+              <EmojiEventsOutlinedIcon sx={{ fontSize: 15, color: '#d99400' }} />
             </Box>
             <Typography variant="caption" sx={{ color: '#72726a', fontSize: '0.7rem' }}>
               هدف {toPersianDigits(targetPoints)}
@@ -171,7 +172,7 @@ export default function Sidebar({ onItemClick }) {
           </Box>
         </Box>
 
-        {/* "My progress >" link */}
+        {/* "My progress >" link: Text on RIGHT, Chevron on LEFT */}
         <Box
           component={NavLink}
           to="/profile"
@@ -195,7 +196,7 @@ export default function Sidebar({ onItemClick }) {
         </Box>
       </Box>
 
-      {/* Navigation list with internal scroll so it NEVER overflows */}
+      {/* Navigation list with internal scroll */}
       <Box
         sx={{
           flex: 1,
@@ -207,8 +208,7 @@ export default function Sidebar({ onItemClick }) {
       >
         {navGroups.map((group, gIdx) => (
           <Box key={gIdx} sx={{ mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, px: 1, mb: 0.6 }}>
-              {group.icon}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, mb: 0.6 }}>
               <Typography
                 sx={{
                   fontSize: '0.72rem',
@@ -219,6 +219,7 @@ export default function Sidebar({ onItemClick }) {
               >
                 {group.title}
               </Typography>
+              {group.icon}
             </Box>
 
             <List disablePadding>
@@ -238,20 +239,16 @@ export default function Sidebar({ onItemClick }) {
                       backgroundColor: isActive ? '#fff8ed' : 'transparent',
                       color: isActive ? '#f47c20' : '#55554f',
                       borderRight: isActive ? '3px solid #f47c20' : '3px solid transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                       '&:hover': {
                         backgroundColor: isActive ? '#fff8ed' : '#f7f5f0',
                         color: isActive ? '#df5b13' : '#171715'
                       }
                     }}
                   >
-                    <ListItemIcon
-                      sx={{
-                        minWidth: 32,
-                        color: isActive ? '#f47c20' : '#72726a'
-                      }}
-                    >
-                      {item.icon}
-                    </ListItemIcon>
+                    {/* Text on RIGHT */}
                     <ListItemText
                       primary={item.label}
                       primaryTypographyProps={{
@@ -259,19 +256,31 @@ export default function Sidebar({ onItemClick }) {
                         fontWeight: isActive ? 700 : 500
                       }}
                     />
-                    {item.badge && (
-                      <Chip
-                        label={item.badge}
-                        size="small"
+
+                    {/* Badge + Icon on LEFT */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                      {item.badge && (
+                        <Chip
+                          label={item.badge}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.7rem',
+                            backgroundColor: isActive ? '#f47c20' : '#deddd7',
+                            color: isActive ? '#ffffff' : '#55554f',
+                            fontWeight: 700
+                          }}
+                        />
+                      )}
+                      <ListItemIcon
                         sx={{
-                          height: 20,
-                          fontSize: '0.7rem',
-                          backgroundColor: isActive ? '#f47c20' : '#deddd7',
-                          color: isActive ? '#ffffff' : '#55554f',
-                          fontWeight: 700
+                          minWidth: 'auto',
+                          color: isActive ? '#f47c20' : '#72726a'
                         }}
-                      />
-                    )}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                    </Box>
                   </ListItemButton>
                 );
               })}
@@ -280,7 +289,7 @@ export default function Sidebar({ onItemClick }) {
         ))}
       </Box>
 
-      {/* Pinned Footer: Profile settings + Logout */}
+      {/* Pinned Footer: Profile settings + Logout (Text on RIGHT, Icon on LEFT) */}
       <Box sx={{ pt: 1, borderTop: '1px solid #deddd7', flexShrink: 0 }}>
         <ListItemButton
           component={NavLink}
@@ -291,16 +300,19 @@ export default function Sidebar({ onItemClick }) {
             py: 0.7,
             px: 1.4,
             color: '#55554f',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             '&:hover': { backgroundColor: '#f7f5f0', color: '#171715' }
           }}
         >
-          <ListItemIcon sx={{ minWidth: 32, color: '#72726a' }}>
-            <PersonOutlineOutlinedIcon sx={{ fontSize: 20 }} />
-          </ListItemIcon>
           <ListItemText
             primary="تنظیمات پروفایل"
             primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 500 }}
           />
+          <ListItemIcon sx={{ minWidth: 'auto', color: '#72726a' }}>
+            <PersonOutlineOutlinedIcon sx={{ fontSize: 19 }} />
+          </ListItemIcon>
         </ListItemButton>
 
         <ListItemButton
@@ -313,16 +325,19 @@ export default function Sidebar({ onItemClick }) {
             py: 0.7,
             px: 1.4,
             color: '#e5484d',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             '&:hover': { backgroundColor: '#fff5f5' }
           }}
         >
-          <ListItemIcon sx={{ minWidth: 32, color: '#e5484d' }}>
-            <LogoutOutlinedIcon sx={{ fontSize: 20 }} />
-          </ListItemIcon>
           <ListItemText
             primary="خروج از حساب"
             primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 700 }}
           />
+          <ListItemIcon sx={{ minWidth: 'auto', color: '#e5484d' }}>
+            <LogoutOutlinedIcon sx={{ fontSize: 19 }} />
+          </ListItemIcon>
         </ListItemButton>
       </Box>
     </Box>

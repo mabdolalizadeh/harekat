@@ -5,13 +5,13 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#f47c20', // Harekat signature brand orange
+      main: '#f47c20', // Harekat brand orange
       light: '#ffa33f',
       dark: '#df5b13',
       contrastText: '#ffffff'
     },
     secondary: {
-      main: '#18adf0', // Electric blue accent from landing page
+      main: '#18adf0', // Electric blue accent
       light: '#4cc9ff',
       dark: '#078dca',
       contrastText: '#ffffff'
@@ -41,11 +41,11 @@ const theme = createTheme({
       contrastText: '#ffffff'
     },
     background: {
-      default: '#f7f5f0', // Signature warm parchment canvas from landing page
+      default: '#f7f5f0', // Warm canvas from landing page
       paper: '#ffffff'
     },
     text: {
-      primary: '#171715', // Warm deep charcoal ink
+      primary: '#171715', // Deep charcoal ink
       secondary: '#6b6b63', // Neutral stone gray
       disabled: '#9b9b92'
     },
@@ -53,9 +53,8 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: [
-      '"Baloo Bhaijaan 2"',
-      '"Alan Sans"',
       'Vazirmatn',
+      '"Plus Jakarta Sans"',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
@@ -102,6 +101,14 @@ const theme = createTheme({
           '&:hover': {
             boxShadow: 'none'
           }
+        },
+        startIcon: {
+          marginRight: 0,
+          marginLeft: 8
+        },
+        endIcon: {
+          marginRight: 8,
+          marginLeft: 0
         },
         containedPrimary: {
           background: '#f47c20',
@@ -159,7 +166,17 @@ const theme = createTheme({
         root: {
           borderRadius: 9999,
           fontWeight: 700,
-          fontSize: '0.75rem'
+          fontSize: '0.75rem',
+          flexDirection: 'row-reverse', // RTL: puts text on RIGHT, icon on LEFT!
+          padding: '0 6px'
+        },
+        icon: {
+          margin: '0 6px 0 0 !important', // Strictly no negative margins; perfectly contained on the left
+          fontSize: '1rem',
+          color: 'inherit'
+        },
+        label: {
+          padding: '0 4px'
         }
       }
     },

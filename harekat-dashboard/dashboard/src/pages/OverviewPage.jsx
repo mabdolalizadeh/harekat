@@ -202,10 +202,10 @@ export default function OverviewPage() {
             borderRadius: '9999px',
             px: 2,
             py: 0.4,
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            gap: 0.8
           }}
         >
-          <FlashOnIcon sx={{ color: superfocus ? '#f47c20' : '#d99400', fontSize: 18, mr: 0.5 }} />
           <FormControlLabel
             control={
               <Switch
@@ -229,6 +229,7 @@ export default function OverviewPage() {
             }
             sx={{ m: 0 }}
           />
+          <FlashOnIcon sx={{ color: superfocus ? '#f47c20' : '#d99400', fontSize: 18 }} />
         </Box>
       </Box>
 
@@ -324,9 +325,8 @@ export default function OverviewPage() {
                   py: 0.4
                 }}
               >
-                <Typography sx={{ fontSize: '0.72rem', fontWeight: 600 }}>پاداش:</Typography>
+                <Typography sx={{ fontSize: '0.74rem', fontWeight: 700 }}>پاداش: +۱</Typography>
                 <DiamondOutlinedIcon sx={{ fontSize: 14 }} />
-                <Typography sx={{ fontSize: '0.75rem', fontWeight: 700 }}>+۱</Typography>
               </Box>
 
               <IconButton

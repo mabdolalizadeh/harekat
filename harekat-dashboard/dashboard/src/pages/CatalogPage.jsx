@@ -253,7 +253,7 @@ export default function CatalogPage() {
                     <Button
                       variant="contained"
                       size="small"
-                      startIcon={<ShoppingBagOutlinedIcon sx={{ fontSize: 18 }} />}
+                      endIcon={<ShoppingBagOutlinedIcon sx={{ fontSize: 18 }} />}
                       disabled={addingId === course.id}
                       onClick={(e) => handleAddToCart(e, course)}
                       sx={{ borderRadius: '12px', px: 2, py: 0.8, fontWeight: 700 }}

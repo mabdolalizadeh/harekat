@@ -141,14 +141,14 @@ export default function LoginPage() {
           size="large"
           fullWidth
           href={landingAuthUrl}
-          startIcon={<LoginIcon />}
+          endIcon={<LoginIcon />}
           sx={{
             py: 1.5,
             borderRadius: '16px',
             fontWeight: 800,
             fontSize: '1rem',
             mb: 2,
-            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+            background: 'linear-gradient(135deg, #f47c20 0%, #df5b13 100%)'
           }}
         >
           ورود از طریق وب‌سایت اصلی حرکت

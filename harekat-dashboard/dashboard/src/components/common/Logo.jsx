@@ -57,7 +57,7 @@ export default function Logo({ sx, onClick }) {
             lineHeight: 1,
             letterSpacing: '-0.02em',
             color: '#171715',
-            fontFamily: '"Baloo Bhaijaan 2", "Alan Sans", "Vazirmatn", sans-serif'
+            fontFamily: 'Vazirmatn, "Plus Jakarta Sans", sans-serif'
           }}
         >
           حرکت مدیا
