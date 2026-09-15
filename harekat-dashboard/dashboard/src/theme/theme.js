@@ -167,16 +167,15 @@ const theme = createTheme({
           borderRadius: 9999,
           fontWeight: 700,
           fontSize: '0.75rem',
-          flexDirection: 'row-reverse', // RTL: puts text on RIGHT, icon on LEFT!
-          padding: '0 6px'
+          padding: '0 4px'
         },
         icon: {
-          margin: '0 6px 0 0 !important', // Strictly no negative margins; perfectly contained on the left
           fontSize: '1rem',
-          color: 'inherit'
+          color: 'inherit',
+          margin: '0 4px !important' // Safe positive margin: sits completely inside the chip
         },
         label: {
-          padding: '0 4px'
+          padding: '0 6px'
         }
       }
     },

@@ -84,7 +84,7 @@ export default function CourseDetailPage() {
         <Alert severity="error" sx={{ maxWidth: 500, mx: 'auto', mb: 3, borderRadius: '16px' }}>
           {error || 'دوره یافت نشد'}
         </Alert>
-        <Button component={NavLink} to="/courses" endIcon={<ArrowForwardIcon />} variant="outlined">
+        <Button component={NavLink} to="/courses" startIcon={<ArrowForwardIcon />} variant="outlined">
           بازگشت به دوره‌های من
         </Button>
       </Box>
@@ -97,7 +97,7 @@ export default function CourseDetailPage() {
       <Button
         component={NavLink}
         to="/courses"
-        endIcon={<ArrowForwardIcon />}
+        startIcon={<ArrowForwardIcon />}
         sx={{ mb: 3, color: '#64748b', fontWeight: 600, fontSize: '0.85rem' }}
       >
         بازگشت به لیست دوره‌ها
@@ -248,7 +248,7 @@ export default function CourseDetailPage() {
                 variant="contained"
                 fullWidth
                 size="large"
-                endIcon={<PlayCircleOutlineIcon />}
+                startIcon={<PlayCircleOutlineIcon />}
                 sx={{ py: 1.4, borderRadius: '16px', fontWeight: 700, mb: 2 }}
               >
                 شروع / ادامه یادگیری
@@ -258,7 +258,7 @@ export default function CourseDetailPage() {
                 variant="contained"
                 fullWidth
                 size="large"
-                endIcon={<ShoppingBagOutlinedIcon />}
+                startIcon={<ShoppingBagOutlinedIcon />}
                 disabled={addingToCart}
                 onClick={handleAddToCart}
                 sx={{ py: 1.4, borderRadius: '16px', fontWeight: 700, mb: 2 }}

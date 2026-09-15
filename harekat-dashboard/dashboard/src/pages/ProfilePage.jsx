@@ -263,7 +263,7 @@ export default function ProfilePage() {
                     type="submit"
                     variant="contained"
                     disabled={saving}
-                    endIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveOutlinedIcon />}
+                    startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveOutlinedIcon />}
                     sx={{
                       py: 1.2,
                       px: 3.5,

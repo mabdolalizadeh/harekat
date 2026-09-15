@@ -141,7 +141,7 @@ export default function LoginPage() {
           size="large"
           fullWidth
           href={landingAuthUrl}
-          endIcon={<LoginIcon />}
+          startIcon={<LoginIcon />}
           sx={{
             py: 1.5,
             borderRadius: '16px',

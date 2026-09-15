@@ -171,7 +171,7 @@ export default function SubscriptionsPage() {
                   size="large"
                   disabled={addingId === sub.id}
                   onClick={() => handleSubscribe(sub)}
-                  endIcon={<ShoppingBagOutlinedIcon />}
+                  startIcon={<ShoppingBagOutlinedIcon />}
                   sx={{ py: 1.3, borderRadius: '16px', fontWeight: 700 }}
                 >
                   {addingId === sub.id ? <CircularProgress size={22} color="inherit" /> : 'فعال‌سازی اشتراک'}
