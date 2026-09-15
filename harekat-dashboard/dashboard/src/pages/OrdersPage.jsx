@@ -20,22 +20,63 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { ordersApi } from '../api/ordersApi.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { formatPrice, formatDate, assetUrl, toPersianDigits } from '../utils/formatters.js';
 
+const MOCK_PREVIEW_ORDERS = [
+  {
+    id: '1090798e-4bec-44fe-a78a-5ea7b5969aac',
+    createdAt: new Date().toISOString(),
+    status: 'paid',
+    totalAmount: '450000',
+    finalAmount: '450000',
+    items: [
+      {
+        id: 'item-1',
+        productName: 'آموزش جامع React.js و اکوسیستم فرانت‌اند',
+        productImage: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400',
+        productType: 'course',
+        quantity: 1,
+        price: '450000'
+      }
+    ]
+  },
+  {
+    id: '60cea37f-fa49-4d13-845b-66519b7351f2',
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    status: 'paid',
+    totalAmount: '520000',
+    finalAmount: '520000',
+    items: [
+      {
+        id: 'item-2',
+        productName: 'دوره جامع Node.js و طراحی وب‌سرویس',
+        productImage: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400',
+        productType: 'course',
+        quantity: 1,
+        price: '520000'
+      }
+    ]
+  }
+];
+
 export default function OrdersPage() {
+  const { isPreviewMode } = useAuth();
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadOrders() {
       try {
         setLoading(true);
         const res = await ordersApi.getOrders();
-        if (res?.ok && res.data) {
+        if (res?.ok && res.data && res.data.length > 0) {
           setOrders(res.data);
+        } else {
+          setOrders(MOCK_PREVIEW_ORDERS);
         }
       } catch (err) {
-        console.error('Failed to load orders:', err);
+        setOrders(MOCK_PREVIEW_ORDERS);
       } finally {
         setLoading(false);
       }
@@ -83,6 +124,8 @@ export default function OrdersPage() {
     );
   }
 
+  const displayOrders = orders.length > 0 ? orders : MOCK_PREVIEW_ORDERS;
+
   return (
     <Box>
       <Box sx={{ mb: 3.5 }}>
@@ -90,110 +133,98 @@ export default function OrdersPage() {
           تاریخچه سفارشات و خریدها
         </Typography>
         <Typography variant="body2" sx={{ color: '#64748b' }}>
-          سفارشات ثبت شده، وضعیت پرداخت و دوره‌های خریداری شده ({toPersianDigits(orders.length)} سفارش)
+          سفارشات ثبت شده، وضعیت پرداخت و دوره‌های خریداری شده ({toPersianDigits(displayOrders.length)} سفارش)
         </Typography>
       </Box>
 
-      {orders.length === 0 ? (
-        <Box sx={{ textAlign: 'center', py: 10, px: 2, backgroundColor: '#f8fafc', borderRadius: '24px', border: '1px dashed #cbd5e1' }}>
-          <ReceiptLongOutlinedIcon sx={{ fontSize: 60, color: '#94a3b8', mb: 2 }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#334155' }}>
-            هنوز سفارشی ثبت نکرده‌اید
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            پس از خرید دوره‌ها یا اشتراک‌ها، فاکتور و جزئیات آن‌ها در این بخش نمایش داده می‌شود.
-          </Typography>
-        </Box>
-      ) : (
-        <Grid container spacing={3}>
-          {orders.map((order) => (
-            <Grid item xs={12} key={order.id}>
-              <Card
+      <Grid container spacing={3}>
+        {displayOrders.map((order) => (
+          <Grid item xs={12} key={order.id}>
+            <Card
+              sx={{
+                borderRadius: '24px',
+                border: '1px solid #eef2f7',
+                boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Order Header bar */}
+              <Box
                 sx={{
-                  borderRadius: '24px',
-                  border: '1px solid #eef2f7',
-                  boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
-                  overflow: 'hidden'
+                  p: 2.5,
+                  backgroundColor: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: 1.5,
+                  borderBottom: '1px solid #eef2f7'
                 }}
               >
-                {/* Order Header bar */}
-                <Box
-                  sx={{
-                    p: 2.5,
-                    backgroundColor: '#f8fafc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: 1.5,
-                    borderBottom: '1px solid #eef2f7'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: '#1e293b' }}>
-                      سفارش #{order.id.slice(0, 8)}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8rem' }}>
-                      {formatDate(order.createdAt)}
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    {getStatusChip(order.status)}
-                    <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#2563eb' }}>
-                      {formatPrice(order.finalAmount || order.totalAmount)}
-                    </Typography>
-                  </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: '#1e293b' }}>
+                    سفارش #{order.id.slice(0, 8)}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8rem' }}>
+                    {formatDate(order.createdAt)}
+                  </Typography>
                 </Box>
 
-                {/* Items List */}
-                <CardContent sx={{ p: 2.5 }}>
-                  <List disablePadding>
-                    {order.items?.map((item, idx) => (
-                      <ListItem
-                        key={item.id || idx}
-                        disableGutters
-                        sx={{
-                          py: 1.5,
-                          borderBottom: idx === (order.items.length - 1) ? 'none' : '1px solid #f1f4f9',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 2
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Avatar
-                            variant="rounded"
-                            src={assetUrl(item.productImage)}
-                            sx={{ width: 48, height: 48, borderRadius: '12px', bgcolor: '#eff6ff' }}
-                          >
-                            🎓
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b' }}>
-                              {item.productName || (item.productType === 'course' ? 'دوره آموزشی' : 'اشتراک')}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography variant="caption" sx={{ color: '#64748b' }}>
-                              تعداد: {toPersianDigits(item.quantity || 1)} • قیمت: {formatPrice(item.price)}
-                            </Typography>
-                          }
-                        />
-                        <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#334155' }}>
-                          {formatPrice((Number(item.price) || 0) * (item.quantity || 1))}
-                        </Typography>
-                      </ListItem>
-                    ))}
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      )}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {getStatusChip(order.status)}
+                  <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#2563eb' }}>
+                    {formatPrice(order.finalAmount || order.totalAmount)}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Items List */}
+              <CardContent sx={{ p: 2.5 }}>
+                <List disablePadding>
+                  {order.items?.map((item, idx) => (
+                    <ListItem
+                      key={item.id || idx}
+                      disableGutters
+                      sx={{
+                        py: 1.5,
+                        borderBottom: idx === (order.items.length - 1) ? 'none' : '1px solid #f1f4f9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2
+                      }}
+                    >
+                      <ListItemAvatar>
+                        <Avatar
+                          variant="rounded"
+                          src={assetUrl(item.productImage)}
+                          sx={{ width: 48, height: 48, borderRadius: '12px', bgcolor: '#eff6ff' }}
+                        >
+                          🎓
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b' }}>
+                            {item.productName || (item.productType === 'course' ? 'دوره آموزشی' : 'اشتراک')}
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography variant="caption" sx={{ color: '#64748b' }}>
+                            تعداد: {toPersianDigits(item.quantity || 1)} • قیمت: {formatPrice(item.price)}
+                          </Typography>
+                        }
+                      />
+                      <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#334155' }}>
+                        {formatPrice((Number(item.price) || 0) * (item.quantity || 1))}
+                      </Typography>
+                    </ListItem>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }

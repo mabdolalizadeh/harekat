@@ -20,33 +20,118 @@ import LessonCard from '../components/courses/LessonCard.jsx';
 import LessonModal from '../components/courses/LessonModal.jsx';
 import { toPersianDigits } from '../utils/formatters.js';
 
+// Realistic syllabus sessions for LMS preview (reproducing the Dribbble reference columns)
+const DEFAULT_CURRICULUM = [
+  {
+    id: 'lesson-1',
+    lessonNumber: 4,
+    title: 'مفاهیم پیشرفته کامپوننت‌ها و هوک‌های سفارشی',
+    duration: '۴۵ دقیقه',
+    timeInfo: 'تکمیل شده',
+    image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    description: 'آشنایی با هوک‌های اختصاصی، بازاستفاده منطق و چرخه حیات کامپوننت.',
+    longDescription: '# جلسه چهارم: هوک‌های سفارشی\n\nدر این جلسه با نحوه تعریف Custom Hooks و جداسازی منطق بیزینس از لایه نمایش آشنا شدیم.',
+    initialStatus: 'completed'
+  },
+  {
+    id: 'lesson-2',
+    lessonNumber: 5,
+    title: 'مدیریت وضعیت سراسری با React Context و Reducer',
+    duration: '۵۰ دقیقه',
+    timeInfo: 'تکمیل شده',
+    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    description: 'پیاده‌سازی استیت منیجمنت یکپارچه و بهینه‌سازی دفعات رندر مجدد.',
+    longDescription: '# جلسه پنجم: مدیریت وضعیت\n\nپیاده‌سازی کانتکست‌های مجزا برای احراز هویت، تم و سبد خرید.',
+    initialStatus: 'completed'
+  },
+  {
+    id: 'lesson-3',
+    lessonNumber: 6,
+    title: 'ارسال تمرین فرم‌های پیشرفته و اعتبارسنجی ورودی‌ها',
+    duration: '۳۵ دقیقه',
+    timeInfo: '۴ روز پیش',
+    image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    description: 'اعتبارسنجی ورودی‌های کاربر با کتابخانه‌های فرم و ارسال پاسخ به سرور.',
+    longDescription: '# جلسه ششم: اعتبارسنجی و فرم‌ها\n\nتکلیف این جلسه ارسال شده و توسط استاد در حال بررسی است.',
+    initialStatus: 'on_check'
+  },
+  {
+    id: 'lesson-4',
+    lessonNumber: 7,
+    title: 'اتصال به REST API، کشینگ داده‌ها و هندل خطاها',
+    duration: '۲:۳۲:۰۸',
+    timeInfo: '۲:۳۲:۰۸ باقی‌مانده',
+    image: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    description: 'اتصال پروژه به وب‌سرویس‌های واقعی و مدیریت لودینگ، ارور و خالی بودن داده‌ها.',
+    longDescription: '# جلسه هفتم: ارتباط با بک‌اند و REST API\n\n- تنظیم کلاینت اختصاصی Fetch با Bearer Token\n- مدیریت خطاهای شبکه و توکن منقضی\n- تمرین کلاسی: پیاده‌سازی اتصال سبد خرید به سرور',
+    initialStatus: 'in_progress'
+  },
+  {
+    id: 'lesson-5',
+    lessonNumber: 8,
+    title: 'پیاده‌سازی تست‌های واحد و کامپوننت با Vitest',
+    duration: '۴۰ دقیقه',
+    timeInfo: '۱۹ اردیبهشت، ساعت ۱۹:۰۰',
+    image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    description: 'نوشتن تست‌های اتوماتیک برای کامپوننت‌های فرم و جریان خرید.',
+    longDescription: '# جلسه هشتم: تست نرم‌افزار\n\nجلسه آنلاین در تاریخ ۱۹ اردیبهشت برگزار خواهد شد.',
+    initialStatus: 'soon'
+  },
+  {
+    id: 'lesson-6',
+    lessonNumber: 9,
+    title: 'بهینه‌سازی عملکرد (Performance) و تکنیک‌های Bundle Splitting',
+    duration: '۴۵ دقیقه',
+    timeInfo: '۲۱ اردیبهشت، ساعت ۱۹:۰۰',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    description: 'کاهش حجم باندل فرانت‌اند، Lazy loading و استراتژی‌های کش مرورگر.',
+    longDescription: '# جلسه نهم: بهینه‌سازی سرعت و حجم باندل\n\nجلسه آنلاین در تاریخ ۲۱ اردیبهشت برگزار خواهد شد.',
+    initialStatus: 'soon'
+  },
+  {
+    id: 'lesson-7',
+    lessonNumber: 10,
+    title: 'پروژه نهایی: استقرار پروداکشن و سئو در وب مدرن',
+    duration: '۶۰ دقیقه',
+    timeInfo: '۲۵ اردیبهشت، ساعت ۲۰:۰۰',
+    image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=400',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    description: 'استقرار روی سرورهای ابری، بیلد و ارائه گواهینامه معتبر پایان دوره.',
+    longDescription: '# جلسه دهم: استقرار نهایی و دریافت گواهینامه\n\nجلسه اختتامیه و ارزیابی پروژه‌های دانش‌آموزان.',
+    initialStatus: 'soon'
+  }
+];
+
 export default function OverviewPage() {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [superfocus, setSuperfocus] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [completedLessonIds, setCompletedLessonIds] = useState(() => {
     try {
       const saved = localStorage.getItem('completedLessons');
-      return saved ? JSON.parse(saved) : ['l_sample_completed'];
+      return saved ? JSON.parse(saved) : ['lesson-1', 'lesson-2'];
     } catch {
-      return [];
+      return ['lesson-1', 'lesson-2'];
     }
   });
 
   useEffect(() => {
     async function loadData() {
       try {
-        setLoading(true);
         const res = await coursesApi.getCourses();
-        if (res?.ok && res.data) {
+        if (res?.ok && res.data && res.data.length > 0) {
           setCourses(res.data);
         }
       } catch (err) {
-        console.warn('Failed to load courses for overview:', err);
-      } finally {
-        setLoading(false);
+        console.warn('Using preview curriculum for overview:', err);
       }
     }
     loadData();
@@ -61,28 +146,25 @@ export default function OverviewPage() {
     });
   };
 
-  // Build lesson items from enrolled courses or catalog courses
-  const enrolledCourses = user?.courses?.length > 0 ? user.courses : courses;
+  // Base lessons from realistic curriculum, blended with real course metadata if available
+  const activeCourse = (courses.length > 0 ? courses[0] : null) || user?.courses?.[0];
 
-  const lessons = enrolledCourses.map((c, index) => ({
-    id: c.id,
-    lessonNumber: index + 1,
-    title: c.name,
-    duration: c.duration || '۲۰ ساعت',
-    timeInfo: `${index + 6} عصر، ${index + 12} اردیبهشت`,
-    image: c.image,
-    videoUrl: c.videoUrl,
-    description: c.description,
-    longDescription: c.longDescription,
-    level: c.level,
-    teacher: c.teacher || (c.teachers && c.teachers[0]),
-    isEnrolled: user?.courses?.some((uc) => uc.id === c.id)
-  }));
+  const lessons = DEFAULT_CURRICULUM.map((item) => {
+    if (activeCourse && item.id === 'lesson-4') {
+      return {
+        ...item,
+        title: `${item.title} — ${activeCourse.name}`,
+        image: activeCourse.image || item.image,
+        videoUrl: activeCourse.videoUrl || item.videoUrl
+      };
+    }
+    return item;
+  });
 
   // Distribute into Dribbble columns: SOON, IN PROGRESS, ON CHECK, COMPLETED
-  const soonLessons = lessons.filter((l, i) => i >= 3 && !completedLessonIds.includes(l.id));
-  const inProgressLessons = lessons.filter((l, i) => (i === 0 || i === 1) && !completedLessonIds.includes(l.id));
-  const onCheckLessons = lessons.filter((l, i) => i === 2 && !completedLessonIds.includes(l.id));
+  const soonLessons = lessons.filter((l) => l.initialStatus === 'soon' && !completedLessonIds.includes(l.id));
+  const inProgressLessons = lessons.filter((l) => l.initialStatus === 'in_progress' && !completedLessonIds.includes(l.id));
+  const onCheckLessons = lessons.filter((l) => l.initialStatus === 'on_check' && !completedLessonIds.includes(l.id));
   const completedLessons = lessons.filter((l) => completedLessonIds.includes(l.id));
 
   if (loading) {
@@ -143,7 +225,7 @@ export default function OverviewPage() {
         </Box>
       </Box>
 
-      {/* Kanban Columns Grid */}
+      {/* Kanban Columns Grid matching Dribbble reference */}
       <Grid container spacing={2.5}>
         {/* Column 1: SOON */}
         {!superfocus && (
@@ -164,7 +246,7 @@ export default function OverviewPage() {
             </Box>
 
             <Box>
-              {soonLessons.slice(0, 3).map((lesson) => (
+              {soonLessons.map((lesson) => (
                 <LessonCard
                   key={lesson.id}
                   lesson={lesson}
@@ -173,21 +255,13 @@ export default function OverviewPage() {
                 />
               ))}
 
-              {soonLessons.length > 3 && (
-                <Button
-                  endIcon={<ExpandMoreIcon />}
-                  fullWidth
-                  sx={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600, py: 1 }}
-                >
-                  نمایش بیشتر
-                </Button>
-              )}
-
-              {soonLessons.length === 0 && (
-                <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 3 }}>
-                  درس آینده‌ای در این بخش نیست.
-                </Typography>
-              )}
+              <Button
+                endIcon={<ExpandMoreIcon />}
+                fullWidth
+                sx={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600, py: 1 }}
+              >
+                نمایش جلسات بیشتر
+              </Button>
             </Box>
           </Grid>
         )}
@@ -270,12 +344,6 @@ export default function OverviewPage() {
                 onPlay={(l) => setSelectedLesson(l)}
               />
             ))}
-
-            {inProgressLessons.length === 0 && (
-              <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 3 }}>
-                جلسه در حال یادگیری ندارید.
-              </Typography>
-            )}
           </Box>
         </Grid>
 
@@ -306,12 +374,6 @@ export default function OverviewPage() {
                   onPlay={(l) => setSelectedLesson(l)}
                 />
               ))}
-
-              {onCheckLessons.length === 0 && (
-                <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 3 }}>
-                  تکلیفی در انتظار بررسی نیست.
-                </Typography>
-              )}
             </Box>
           </Grid>
         )}
@@ -343,12 +405,6 @@ export default function OverviewPage() {
                   onPlay={(l) => setSelectedLesson(l)}
                 />
               ))}
-
-              {completedLessons.length === 0 && (
-                <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 3 }}>
-                  هنوز جلسه‌ای به پایان نرسیده است.
-                </Typography>
-              )}
             </Box>
           </Grid>
         )}

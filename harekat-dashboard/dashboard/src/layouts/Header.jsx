@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Typography, IconButton, Badge, Avatar, Tooltip } from '@mui/material';
+import { Box, Typography, IconButton, Badge, Avatar, Tooltip, Chip } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
@@ -13,9 +13,10 @@ import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutline
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 
 export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobileDrawer, activeContext }) {
-  const { user } = useAuth();
+  const { user, isPreviewMode } = useAuth();
   const { itemCount, openCart } = useCart();
   const { unreadCount } = useNotifications();
 
@@ -41,7 +42,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
       }}
     >
       {/* Left side: Brand + Collapse button + Context Breadcrumb */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2.5 } }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 } }}>
         {/* Mobile menu hamburger */}
         <IconButton
           onClick={onOpenMobileDrawer}
@@ -112,6 +113,26 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             </Typography>
           )}
         </Box>
+
+        {/* Mockup Preview Mode Indicator */}
+        {isPreviewMode && (
+          <Tooltip title="شما در حال مشاهده پیش‌نمایش موکاپ داشبورد هستید">
+            <Chip
+              icon={<VisibilityOutlinedIcon sx={{ fontSize: 14 }} />}
+              label="پیش‌نمایش موکاپ (Preview Mode)"
+              size="small"
+              sx={{
+                display: { xs: 'none', md: 'inline-flex' },
+                backgroundColor: '#eff6ff',
+                color: '#2563eb',
+                border: '1px solid #bfdbfe',
+                fontWeight: 700,
+                fontSize: '0.72rem',
+                borderRadius: '9999px'
+              }}
+            />
+          </Tooltip>
+        )}
       </Box>
 
       {/* Right side: Cart + Chat + Notification + Avatar */}

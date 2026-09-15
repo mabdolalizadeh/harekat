@@ -1,28 +1,30 @@
 # Current Status
 
 Current phase: Phase 12 — Verification, Documentation & Finalization
-Current task: Integrate landing page authentication redirect and token ingestion
+Current task: Enable rich mockup preview mode for instant visual inspection ("what face like")
 Overall completion: 100%
-Last completed step: Updated AuthContext, RequireAuth, LoginPage, and App.jsx to seamlessly accept auth tokens from the Landing Page redirect (via URL params `?token=...`, hash `#token=...`, or shared `localStorage`), automatically decode JWT payload to hydrate user courses/profile from `GET /users/:id`, automatically redirect unauthenticated users to the Landing Page login (`/auth`), and support `/dashboard` route aliases.
-Current implementation: Fully functional React + MUI LMS Dashboard isolated in `dashboard/` with Landing Page auth synchronization.
+Last completed step: Implemented instant Mockup Preview Mode with a default student profile (Ali Mohammadi, 28 rubies, 112 points, enrolled courses), fully populated Dribbble-style 4-column curriculum kanban board (SOON, IN PROGRESS, ON CHECK, COMPLETED), preview orders, and progress bars. Disabled blocking redirects on direct preview visits so the complete UI face can be inspected immediately at `http://localhost:5175/`.
+Current implementation: Fully functional React + MUI LMS Dashboard isolated in `dashboard/` with instant Mockup Preview mode + real Landing Page auth synchronization.
 Current working files:
 - `dashboard/src/contexts/AuthContext.jsx`
 - `dashboard/src/components/common/RequireAuth.jsx`
-- `dashboard/src/pages/LoginPage.jsx`
-- `dashboard/src/App.jsx`
-- `dashboard/docs/PROJECT_CONTEXT.md`
-- `dashboard/docs/DECISIONS.md`
+- `dashboard/src/layouts/Header.jsx`
+- `dashboard/src/pages/OverviewPage.jsx`
+- `dashboard/src/pages/OrdersPage.jsx`
 - `dashboard/docs/PROGRESS.md`
 Known issues:
 - Backend `GET /cart` requires `x-session-id` header to avoid an undefined property read; successfully handled in `client.js` by auto-attaching `x-session-id`.
 - Backend `POST /orders` coupon logic is a stub server-side; frontend validates coupons accurately against `/coupons/validate`.
 Next exact step:
-Ready for end-to-end user testing. When the landing page completes OTP authentication and redirects to the dashboard (with `?token=...` or `/dashboard`), the dashboard automatically captures the token, hydrates user courses, and displays the panel.
+Open `http://localhost:5175/` in your browser to immediately see the complete, polished LMS Dashboard face (sidebar progress, kanban board, video modals, course cards, and cart drawer).
 How to test:
 1. Ensure backend is running: `cd ../harekat-backend && npm run dev` (running on `http://localhost:3000`).
 2. Run `npm run dev` inside `dashboard/` (running on `http://localhost:5175`).
-3. Test landing redirect by opening:
-   `http://localhost:5175/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MTI1MmUxLTM0ZTEtNDg1ZS1hZDVkLWNiNGZjNGI1YjRiOCIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzg5NTAxMzkzLCJleHAiOjE3OTAxMDYxOTN9.7A7Yi9Vxc5pU2f4l87XfOWQ3DBS_p6nXASj2iekoka4`
-4. Notice that the dashboard immediately ingests the token, decodes user ID `681252e1-34e1-485e-ad5d-cb4fc4b5b4b8`, cleans the URL, loads Ali Mohammadi's enrolled courses and achievements, and renders the Dribbble-inspired overview.
-5. If accessed unauthenticated without a token, the dashboard automatically redirects to the Landing Page auth URL.
-Last meaningful commit: feat(dashboard): support landing page login redirect, JWT token ingestion, and route aliases
+3. Open `http://localhost:5175/` directly in the browser.
+4. Verify that the entire dashboard renders immediately in Mockup Preview mode without being blocked or redirected away:
+   - Left Sidebar: Ali Mohammadi avatar, 28 rubies badge, 112 points progress bar with 100/200/300 milestone ticks, and navigation links.
+   - Top Header: Brand logo, breadcrumbs, preview mode indicator, cart icon, chat badge 15, and notification popover with "+8 points for homework".
+   - Overview Board: All 4 Dribbble columns populated (SOON, IN PROGRESS with blue interactive survey card, ON CHECK, COMPLETED with 20/20 scores).
+   - Click any lesson to open the interactive video & syllabus modal and toggle completion.
+   - Switch pages: "دوره‌های من", "کاوش دوره‌ها", "پلن‌های اشتراک", "سفارشات من", and "پروفایل".
+Last meaningful commit: feat(dashboard): add instant mockup preview mode for visual inspection
