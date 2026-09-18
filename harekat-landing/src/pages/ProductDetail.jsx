@@ -12,8 +12,13 @@ import remarkGfm from 'remark-gfm';
 import { BookOpen, Clock, User, Video, ShoppingCart } from 'lucide-react';
 
 function price(value) {
-    const number = Number(String(value ?? '').replace(/[,٬\s]/g, ''));
-    return `${Number.isFinite(number) ? number.toLocaleString('fa-IR') : value} تومان`;
+    if (value === null || value === undefined || value === '') return 'رایگان';
+    const normalized = String(value)
+        .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+        .replace(/[,٬\s]/g, '');
+    const number = Number(normalized);
+    if (!Number.isFinite(number) || number === 0) return 'رایگان';
+    return `${number.toLocaleString('fa-IR')} تومان`;
 }
 
 function videoSource(value) {

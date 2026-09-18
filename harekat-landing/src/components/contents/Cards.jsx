@@ -10,9 +10,12 @@ import { customerApi } from "../../services/api.js";
 
 function formatPrice(value) {
     if (value === null || value === undefined || value === '') return 'رایگان';
-    const normalized = String(value).replace(/[,٬\s]/g, '');
+    const normalized = String(value)
+        .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+        .replace(/[,٬\s]/g, '');
     const numeric = Number(normalized);
-    return `${Number.isFinite(numeric) ? numeric.toLocaleString('fa-IR') : value} تومان`;
+    if (!Number.isFinite(numeric) || numeric === 0) return 'رایگان';
+    return `${numeric.toLocaleString('fa-IR')} تومان`;
 }
 
 export function ContentCard({title, subtitle, className}) {
