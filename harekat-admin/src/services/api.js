@@ -31,6 +31,15 @@ async function request(path, { method = 'GET', body, tokenKind = 'token', auth =
         throw new Error('خطای ارتباط با سرور');
     }
     if (!res.ok || data?.ok === false) {
+        if (auth && tokenKind === 'adminToken' && (res.status === 401 || res.status === 403)) {
+            adminLogout();
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('admin:unauthorized'));
+                if (!window.location.pathname.endsWith('/login')) {
+                    window.location.replace('/login?expired=1');
+                }
+            }
+        }
         const details = Array.isArray(data?.errors)
             ? `: ${data.errors.map((item) => `${item.field}: ${item.message}`).join('، ')}`
             : '';
@@ -61,6 +70,15 @@ async function uploadImage(file) {
     let data;
     try { data = await res.json(); } catch { throw new Error('خطای ارتباط با سرور'); }
     if (!res.ok || data?.ok === false) {
+        if (res.status === 401 || res.status === 403) {
+            adminLogout();
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('admin:unauthorized'));
+                if (!window.location.pathname.endsWith('/login')) {
+                    window.location.replace('/login?expired=1');
+                }
+            }
+        }
         const err = new Error(data?.message || `خطای سرور (${res.status})`);
         err.status = res.status;
         throw err;
@@ -77,6 +95,15 @@ async function uploadFile(file) {
     let data;
     try { data = await res.json(); } catch { throw new Error('خطای ارتباط با سرور'); }
     if (!res.ok || data?.ok === false) {
+        if (res.status === 401 || res.status === 403) {
+            adminLogout();
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('admin:unauthorized'));
+                if (!window.location.pathname.endsWith('/login')) {
+                    window.location.replace('/login?expired=1');
+                }
+            }
+        }
         const err = new Error(data?.message || `خطای سرور (${res.status})`);
         err.status = res.status;
         throw err;
@@ -236,10 +263,76 @@ export const adminApi = {
     },
 };
 
+export function parseJwt(token) {
+    try {
+        if (!token || typeof token !== 'string') return null;
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        const base64Url = parts[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    } catch {
+        return null;
+    }
+}
+
+export function isTokenExpired(token) {
+    if (!token) return true;
+    const payload = parseJwt(token);
+    if (!payload || typeof payload.exp !== 'number') return true;
+    const nowInSec = Math.floor(Date.now() / 1000);
+    return payload.exp <= nowInSec;
+}
+
+export function getTokenExpiry(kind = 'adminToken') {
+    const token = getToken(kind);
+    if (!token) return 0;
+    const payload = parseJwt(token);
+    if (!payload || typeof payload.exp !== 'number') return 0;
+    const msLeft = payload.exp * 1000 - Date.now();
+    return msLeft > 0 ? msLeft : 0;
+}
+
+export function isAdminAuthenticated() {
+    const token = getToken('adminToken');
+    if (!token) return false;
+    if (isTokenExpired(token)) {
+        adminLogout();
+        return false;
+    }
+    const payload = parseJwt(token);
+    if (!payload) {
+        adminLogout();
+        return false;
+    }
+    const role = payload.role;
+    if (role !== 'admin' && role !== 'superadmin' && role !== 'ta') {
+        adminLogout();
+        return false;
+    }
+    return true;
+}
+
 export function getAdminUser() {
     try {
+        if (!isAdminAuthenticated()) return null;
         const raw = localStorage.getItem('adminUser');
-        return raw ? JSON.parse(raw) : null;
+        if (raw) return JSON.parse(raw);
+        const payload = parseJwt(getToken('adminToken'));
+        if (payload) {
+            return {
+                id: payload.id,
+                role: payload.role,
+                username: payload.username || ''
+            };
+        }
+        return null;
     } catch {
         return null;
     }
@@ -256,7 +349,7 @@ export function isSuperAdmin() {
 }
 
 export function isAdminLoggedIn() {
-    return !!getToken('adminToken');
+    return isAdminAuthenticated();
 }
 
 export function adminLogout() {

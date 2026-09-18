@@ -1,6 +1,7 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLogin from "./pages/admin/AdminLogin.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
+import RequireAdminAuth from "./components/RequireAdminAuth.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import AdminProducts from "./pages/admin/AdminProducts.jsx";
 import AdminCoupons from "./pages/admin/AdminCoupons.jsx";
@@ -23,7 +24,11 @@ export default function App({ mode, onToggleTheme }) {
     return (
         <Routes>
             <Route path='/login' element={<AdminLogin />} />
-            <Route path='/' element={<AdminLayout mode={mode} onToggleTheme={onToggleTheme} />}>
+            <Route path='/' element={
+                <RequireAdminAuth>
+                    <AdminLayout mode={mode} onToggleTheme={onToggleTheme} />
+                </RequireAdminAuth>
+            }>
                 <Route index element={<AdminDashboard />} />
                 <Route path='students' element={<AdminStudents />} />
                 <Route path='courses' element={<AdminProducts defaultTab="products" />} />
@@ -46,6 +51,7 @@ export default function App({ mode, onToggleTheme }) {
                 <Route path='content' element={<AdminContent />} />
                 <Route path='settings' element={<AdminSettings />} />
             </Route>
+            <Route path='*' element={<Navigate to="/" replace />} />
         </Routes>
     );
 }

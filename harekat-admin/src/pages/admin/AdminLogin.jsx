@@ -1,16 +1,25 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Paper, Stack, Typography, TextField, Button, Alert, InputAdornment, Divider } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
-import { adminApi } from '../../services/api.js';
+import { adminApi, isAdminAuthenticated } from '../../services/api.js';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isExpired = !!location.state?.expired || new URLSearchParams(location.search).get('expired') === '1';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (isAdminAuthenticated()) {
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    }
+  }, [navigate, location]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -20,7 +29,8 @@ export default function AdminLogin() {
       const res = await adminApi.login(username, password);
       localStorage.setItem('adminToken', res.data.token);
       localStorage.setItem('adminUser', JSON.stringify(res.data.admin));
-      navigate('/', { replace: true });
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.status === 401 ? 'نام کاربری یا رمز عبور اشتباه است' : (err.message || 'خطای ورود'));
     } finally { setLoading(false); }
@@ -118,6 +128,11 @@ export default function AdminLogin() {
                   slotProps={{ input: { startAdornment: <InputAdornment position="start"><LockIcon fontSize="small" color="action" /></InputAdornment> } }}
                 />
               </Box>
+              {isExpired && !error && (
+                <Alert severity="warning" variant="outlined" sx={{ fontSize: 13 }}>
+                  نشست شما منقضی شده است یا نیاز به ورود مجدد دارید.
+                </Alert>
+              )}
               {error && <Alert severity="error" variant="outlined" sx={{ fontSize: 13 }}>{error}</Alert>}
               <Button type="submit" variant="contained" size="large" disabled={loading} fullWidth sx={{ mt: 1, height: 46 }}>
                 {loading ? 'در حال ورود...' : 'ورود به پنل'}

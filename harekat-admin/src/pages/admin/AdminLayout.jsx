@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText,
   Typography, Divider, IconButton, Avatar, Chip, Stack, Tooltip, useMediaQuery
@@ -134,17 +134,15 @@ function SidebarContent({ onClose, onLogout, activePath, mobile }) {
 }
 
 export default function AdminLayout({ mode, onToggleTheme }) {
+  if (!isAdminLoggedIn()) {
+    return <Navigate to="/login" replace />;
+  }
+
   const [open, setOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isAdminLoggedIn()) {
-      navigate('/login', { replace: true });
-    }
-  }, [navigate]);
 
   const logout = () => {
     adminLogout();
