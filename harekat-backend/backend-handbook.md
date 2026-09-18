@@ -1,8 +1,8 @@
-# Harekat Media Backend Handbook
+# Harekat School Backend Handbook
 
 ## Overview
 
-This handbook guides developers on how to work with the Harekat Media backend API, covering development setup, API structure, authentication patterns, and integration with the frontend.
+This handbook guides developers on how to work with the Harekat School backend API, covering development setup, API structure, authentication patterns, and integration with the frontend.
 
 ---
 

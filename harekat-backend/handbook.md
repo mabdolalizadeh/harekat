@@ -1,8 +1,8 @@
-# Harekat Media API Handbook
+# Harekat School API Handbook
 
 ## Overview
 
-This handbook explains how to use the Harekat Media backend API for demos and integration.
+This handbook explains how to use the Harekat School backend API for demos and integration.
 
 **Base URL:** `http://localhost:3000/api/v1`
 

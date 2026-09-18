@@ -44,7 +44,7 @@ export default function AboutUs() {
             <Box className={'pt-40 pb-20 gap-6'}>
                 <SectionTag>درباره ما</SectionTag>
                 <H1 className={'text-[clamp(2.5rem,5vw,4.5rem)] text-center text-foreground max-w-[800px] leading-[1.1]'}>
-                    حرکت مدیا کجاست و<br />چرا وجود داره؟
+                    حرکت اسکول کجاست و<br />چرا وجود داره؟
                 </H1>
                 <P className={'text-center text-muted max-w-[580px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
                     ما یک مدرسه هنر و مهارت هستیم که مرز بین هنر، رسانه و فناوری رو جابه‌جا می‌کنیم.
@@ -61,7 +61,7 @@ export default function AboutUs() {
                     className={'flex flex-col gap-6'}
                 >
                     <P className={'text-foreground/70 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>
-                        حرکت مدیا از یک سوال ساده شروع شد: چرا هنرمندها باید مجبور باشن خودشون رو فقط در یک دسته جا بدن؟
+                        حرکت اسکول از یک سوال ساده شروع شد: چرا هنرمندها باید مجبور باشن خودشون رو فقط در یک دسته جا بدن؟
                         عکاس، طراح، برنامه‌نویس — انگار هر کسی باید یکی رو انتخاب کنه.
                     </P>
                     <P className={'text-foreground/70 text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed'}>

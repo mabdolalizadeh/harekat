@@ -87,7 +87,7 @@ export default function OverviewPage() {
                 timeInfo: s.sessionNumber <= 2 ? 'تکمیل شده' : (s.sessionNumber === 3 ? 'در حال یادگیری' : 'به زودی'),
                 image: myCourses[0].image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400',
                 videoUrl: s.videoLink || 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                description: s.description || 'جلسه آموزشی دوره آنلاین حرکت مدیا',
+                description: s.description || 'جلسه آموزشی دوره آنلاین حرکت اسکول',
                 longDescription: s.description || '',
                 initialStatus: s.sessionNumber <= 2 ? 'completed' : (s.sessionNumber === 3 ? 'in_progress' : 'soon'),
                 sessionLink: s.sessionLink,

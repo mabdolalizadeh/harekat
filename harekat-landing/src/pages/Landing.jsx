@@ -82,11 +82,11 @@ const steps = [
 
 const testimonials = [
     { quote: 'این برنامه نحوه نگاه من به تصاویر رو کاملاً تغییر داد. دیگه فقط عکس نمی‌گیرم، کار تولید می‌کنم.', name: 'علی محمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=1' },
-    { quote: 'قبل از حرکت مدیا با حس کار می‌کردم. الان هر تصمیمم پشتوانه فکری داره.', name: 'مریم رضایی', role: 'طراح گرافیک', avatar: 'https://i.pravatar.cc/150?u=2' },
+    { quote: 'قبل از حرکت اسکول با حس کار می‌کردم. الان هر تصمیمم پشتوانه فکری داره.', name: 'مریم رضایی', role: 'طراح گرافیک', avatar: 'https://i.pravatar.cc/150?u=2' },
     { quote: 'اولین جایی بود که اجازه دادم آزمایش کنم. این آزادی خیلی ارزشمند بود.', name: 'سارا احمدی', role: 'نقاش', avatar: 'https://i.pravatar.cc/150?u=3' },
     { quote: 'جلسات نقد خیلی سخت ولی عالی بود. یاد گرفتم چطور تصمیماتم رو توضیح بدم.', name: 'رضا کریمی', role: 'هنرمند چندرسانه‌ای', avatar: 'https://i.pravatar.cc/150?u=4' },
     { quote: 'از طراحی گرافیک اومدم اینجا. فهمیدم طراحی فقط ویژوال نیست، فکر و روش هم هست.', name: 'محمد حسینی', role: 'طراح', avatar: 'https://i.pravatar.cc/150?u=5' },
-    { quote: 'حرکت مدیا فقط کار من رو بهتر نکرد، کل نگاهم به خلاقیت رو عوض کرد.', name: 'امیرحسین احمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=6' },
+    { quote: 'حرکت اسکول فقط کار من رو بهتر نکرد، کل نگاهم به خلاقیت رو عوض کرد.', name: 'امیرحسین احمدی', role: 'عکاس', avatar: 'https://i.pravatar.cc/150?u=6' },
 ];
 
 const faqItems = [
@@ -185,7 +185,7 @@ export default function Landing() {
     const beginnerCourses = regularCourses.filter((course) => course.level === 'مقدماتی' || course.level === 'مبتدی' || !course.level);
     const advancedCourses = regularCourses.filter((course) => course.level === 'پیشرفته' || course.level === 'متوسط');
     const heroTitle = contentMap['hero-title']?.title || 'اینجا فقط یاد';
-    const heroSubtitle = contentMap['hero-title']?.body || 'حرکت مدیا جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.';
+    const heroSubtitle = contentMap['hero-title']?.body || 'حرکت اسکول جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.';
 
     return (
         <MainLayout sectionIds={sectionIds} contentMap={contentMap}>
@@ -250,7 +250,7 @@ export default function Landing() {
                     رسانه عوض می‌شه؛ هنرمند می‌مونه.
                 </H2>
                 <P className={'text-center text-muted max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
-                    در حرکت مدیا، ما متخصص یک ابزار خاص تربیت نمی‌کنیم. ما هنرمندانی رو آماده می‌کنیم که آزادانه بین فرمت‌ها حرکت کنن. اونچه این حوزه‌ها رو به هم وصل می‌کنه تکنیک نیست، آگاهیه — توانایی دیدن، تفسیر کردن و انتخاب آگاهانه.
+                    در حرکت اسکول، ما متخصص یک ابزار خاص تربیت نمی‌کنیم. ما هنرمندانی رو آماده می‌کنیم که آزادانه بین فرمت‌ها حرکت کنن. اونچه این حوزه‌ها رو به هم وصل می‌کنه تکنیک نیست، آگاهیه — توانایی دیدن، تفسیر کردن و انتخاب آگاهانه.
                 </P>
             </Box>
 
@@ -265,7 +265,7 @@ export default function Landing() {
                 >
                     <div className={'flex flex-col gap-4'}>
                         <div className={'flex flex-col gap-0.5'}>
-                            <H3 className={'text-foreground text-lg font-semibold'}>حرکت مدیا</H3>
+                            <H3 className={'text-foreground text-lg font-semibold'}>حرکت اسکول</H3>
                         </div>
                         <P className={'text-foreground/70 text-[clamp(0.9rem,1.5vw,1.05rem)] leading-relaxed'}>
                             ما هنرمندها رو آماده می‌کنیم که آزادانه بین فرمت‌ها حرکت کنن. اونچه این حوزه‌ها رو به هم وصل می‌کنه نه تکنیک، بلکه آگاهیه — توانایی دیدن، تفسیر کردن و انتخاب آگاهانه.

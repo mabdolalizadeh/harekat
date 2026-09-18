@@ -169,7 +169,7 @@ export function SubscriptionCard({ id, name, image, price, salePrice, buttonText
         level=""
         duration="ماهانه"
         courseType="عضویت"
-        teacher="حرکت مدیا"
+        teacher="حرکت اسکول"
         price={price}
         salePrice={salePrice}
         registrationStatus={buttonText}

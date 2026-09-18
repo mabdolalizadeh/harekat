@@ -1,4 +1,4 @@
-# Harekat Media API Documentation
+# Harekat School API Documentation
 
 ## Base URL
 

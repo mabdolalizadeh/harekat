@@ -1,8 +1,8 @@
-# Harekat Media Backend Handbook
+# Harekat School Backend Handbook
 
 ## Overview
 
-This handbook guides developers on how to work with the Harekat Media backend API, covering development setup, API structure, authentication patterns, and integration with the frontend.
+This handbook guides developers on how to work with the Harekat School backend API, covering development setup, API structure, authentication patterns, and integration with the frontend.
 
 ---
 
@@ -680,7 +680,7 @@ curl -X POST http://localhost:3000/api/v1/cms/admin/content \
   -H "Content-Type: application/json" \
   -d '{
     "key": "hero-title",
-    "title": "Welcome to Harekat Media",
+    "title": "Welcome to Harekat School",
     "body": "Learn design, development, and creativity",
     "imageUrl": "https://example.com/hero-bg.jpg",
     "linkUrl": "/products",
@@ -696,7 +696,7 @@ curl -X POST http://localhost:3000/api/v1/cms/admin/content \
   "ok": true,
   "data": {
     "key": "hero-title",
-    "title": "Welcome to Harekat Media",
+    "title": "Welcome to Harekat School",
     "body": "Learn design, development, and creativity",
     "imageUrl": "https://example.com/hero-bg.jpg",
     "linkUrl": "/products",

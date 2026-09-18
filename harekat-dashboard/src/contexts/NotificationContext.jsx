@@ -21,7 +21,7 @@ const INITIAL_NOTIFICATIONS = [
   },
   {
     id: 'n3',
-    title: 'خوش آمدید به حرکت مدیا',
+    title: 'خوش آمدید به حرکت اسکول',
     description: 'یادگیری مهارت‌های تخصصی خود را آغاز کنید.',
     date: '۳ روز پیش',
     type: 'system',

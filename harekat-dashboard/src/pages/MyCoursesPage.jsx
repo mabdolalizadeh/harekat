@@ -62,7 +62,7 @@ export default function MyCoursesPage() {
           دوره‌های من
         </Typography>
         <Typography variant="body2" sx={{ color: '#6b6b63' }}>
-          دوره‌های با دسترسی فعال شما در حرکت مدیا ({toPersianDigits(courses.length)} دوره)
+          دوره‌های با دسترسی فعال شما در حرکت اسکول ({toPersianDigits(courses.length)} دوره)
         </Typography>
       </Box>
 

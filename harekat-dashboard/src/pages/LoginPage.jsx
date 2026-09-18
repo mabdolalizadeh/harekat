@@ -129,7 +129,7 @@ export default function LoginPage() {
         </Box>
 
         <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#0f172a' }}>
-          ورود به پنل حرکت مدیا
+          ورود به پنل حرکت اسکول
         </Typography>
         <Typography variant="body2" sx={{ color: '#64748b', mb: 3.5, lineHeight: 1.7 }}>
           احراز هویت و دریافت توکن دسترسی از طریق صفحه اصلی (Landing Page) انجام می‌شود و سپس به این داشبورد هدایت می‌شوید.

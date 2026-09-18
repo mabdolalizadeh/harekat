@@ -124,3 +124,41 @@ Phase: **All Tasks Completed** ✅
 - [x] Cart sidebar drawer in TopBarLayout
 - [x] All builds pass (landing, admin)
 - [x] All lint checks pass
+
+### 2026-09-19 — Route Separation, Skeletons, Course Deletion & WebP Conversion Complete
+- [x] **WebP Conversion for Uploaded Images**:
+  - Installed `sharp` npm package in `harekat-backend`.
+  - Replaced manual buffer writes with `sharp(req.body).webp({ quality: 85 }).toBuffer()`.
+  - Serves files with `.webp` extension and `Content-Type: image/webp`.
+- [x] **SQLite Course Deletion Foreign Key Error Fix**:
+  - Identified referencing foreign keys without `ON DELETE CASCADE` (`CourseCategories`, `CourseTeachers`, `UserCourses`, `CartItem`).
+  - Wrapped `deleteCourse` in a `sequelize.transaction` that deletes all dependent/junction records before destroying the course.
+  - Also added cascade protection to `deleteCategory` and `deleteTeacher`.
+  - Verified with automated tests creating and deleting courses with associations.
+- [x] **Skeleton Loading Effect Across Entire App**:
+  - Created reusable `Skeleton`, `CourseCardSkeleton`, `SubscriptionCardSkeleton`, `HeroSlideshowSkeleton`, `ProductDetailSkeleton`, `TeacherDetailSkeleton`, and `DashboardSkeleton` with `@keyframes shimmer` in `harekat-landing`.
+  - Integrated skeletons in `Landing`, `CoursesCatalog`, `ProductDetail`, `TeacherDetail`, and `Dashboard`.
+  - Upgraded admin dashboard in `harekat-admin` (`AdminDashboard`) with full stat cards and guide skeletons.
+  - Created and integrated `ListRowSkeleton`, `CategoryListSkeleton`, `TeacherCardSkeleton`, and `BannerListSkeleton` across all admin pages (`AdminProducts`, `AdminSubscriptions`, `AdminTeachers`, `AdminCoupons`, `AdminBanners`, `AdminHeader`, `AdminMarquee`, `AdminContent`).
+- [x] **Route Separation for Packages, Capsule Courses, and Courses**:
+  - Separated landing routes into `/courses`, `/capsules`, and `/packages` with dedicated pages, filters, and breadcrumbs.
+  - Updated card navigation to link to `/courses/:id`, `/capsules/:id`, or `/packages/:id` based on `kind`.
+  - Kept `/products` and `/products/:id` backwards-compatible.
+  - Added `/courses`, `/capsules`, `/packages`, and `/categories` admin routes in `App.jsx` and separated sidebar menu items in `AdminLayout.jsx`.
+- [x] **Verification**:
+  - Backend integration test passed (WebP upload, WebP serving, FK cascade deletion).
+  - `harekat-landing`: `npm run lint` and `npm run build` passed with 0 errors.
+  - `harekat-admin`: `npm run lint` and `npm run build` passed with 0 errors.
+
+### 2026-09-19 — Dashboard Cart & Course Search Removal, Dashboard Favicon & Brand Renaming
+- [x] **Dashboard Streamlining**:
+  - Removed shopping cart icon and drawer from user dashboard header and layout.
+  - Subscriptions and packages now use direct purchase flows creating orders/payments and redirecting to `/payments`.
+  - Removed course search input and course catalog search from dashboard (`/catalog` redirected to `/courses`).
+- [x] **Dashboard Favicon**:
+  - Copied landing SVG favicon to `harekat-dashboard/public/favicon.svg` and updated `index.html` link tag.
+- [x] **Full Project Rebranding (Harekat Media → Harekat School)**:
+  - Renamed all occurrences of "Harekat Media" / "harekatmedia" to "Harekat School" / "harekatschool" across codebase and docs.
+  - Renamed all Persian branding "حرکت مدیا" to "حرکت اسکول" across landing pages, dashboard components, seed data, and HTML titles.
+  - Verified 0 remaining occurrences across entire repository.
+  - Confirmed all three frontend applications build cleanly with 0 errors.

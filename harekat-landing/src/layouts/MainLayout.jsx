@@ -6,7 +6,7 @@ import Footer from "../components/ui/Footer.jsx";
 export default function MainLayout({ children, className, title, sectionIds, contentMap }) {
 
     useEffect(() => {
-        document.title = (title ? title + ' | ' : '') + 'حرکت مدیا';
+        document.title = (title ? title + ' | ' : '') + 'حرکت اسکول';
     }, [title])
 
     const safeContentMap = contentMap ?? {};
@@ -24,7 +24,7 @@ export default function MainLayout({ children, className, title, sectionIds, con
 
             <Footer
                 sectionIds={sectionIds}
-                copyright={safeContentMap['footer-copyright']?.body || '© ۱۴۰۵ حرکت مدیا'}
+                copyright={safeContentMap['footer-copyright']?.body || '© ۱۴۰۵ حرکت اسکول'}
                 socials={Object.values(safeContentMap).filter(
                     (item) => item.key?.startsWith('social-')
                 )}
