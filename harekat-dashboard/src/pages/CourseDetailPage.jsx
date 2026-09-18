@@ -127,7 +127,7 @@ export default function CourseDetailPage() {
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
             <Button
               component={NavLink}
-              to="/catalog"
+              to="/packages"
               variant="contained"
               sx={{
                 borderRadius: '14px',
@@ -138,7 +138,7 @@ export default function CourseDetailPage() {
                 '&:hover': { backgroundColor: '#df5b13' }
               }}
             >
-              مشاهده کاتالوگ دوره‌ها
+              مشاهده پکیج‌های مهارت
             </Button>
             <Button
               component={NavLink}

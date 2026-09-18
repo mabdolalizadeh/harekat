@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -17,21 +18,22 @@ import {
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CardMembershipOutlinedIcon from '@mui/icons-material/CardMembershipOutlined';
-import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
+import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
 import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { subscriptionsApi } from '../api/subscriptionsApi.js';
-import { useCart } from '../contexts/CartContext.jsx';
+import { cartApi } from '../api/cartApi.js';
+import { ordersApi } from '../api/ordersApi.js';
+import { paymentsApi } from '../api/paymentsApi.js';
 import { sanitizeSvg } from '../utils/sanitizeSvg.js';
 import { formatPrice, formatDate, toPersianDigits } from '../utils/formatters.js';
 
 export default function SubscriptionsPage() {
-  const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [subscriptions, setSubscriptions] = useState([]);
   const [activeSubData, setActiveSubData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [addingId, setAddingId] = useState(null);
-  const [cartSuccess, setCartSuccess] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -62,11 +64,15 @@ export default function SubscriptionsPage() {
     try {
       setAddingId(sub.id);
       const effectivePrice = sub.salePrice || sub.price;
-      await addToCart(sub.id, 'subscription', 1, effectivePrice);
-      setCartSuccess(sub.id);
-      setTimeout(() => setCartSuccess(null), 3500);
+      await cartApi.addToCart(sub.id, 'subscription', 1, effectivePrice);
+      const orderRes = await ordersApi.createOrder();
+      if (orderRes?.ok && orderRes.data?.id) {
+        await paymentsApi.initiatePayment(orderRes.data.id, 'mock');
+      }
+      navigate('/payments');
     } catch (err) {
       console.error(err);
+      navigate('/payments');
     } finally {
       setAddingId(null);
     }
@@ -319,7 +325,7 @@ export default function SubscriptionsPage() {
                   size="large"
                   disabled={addingId === sub.id}
                   onClick={() => handleSubscribe(sub)}
-                  startIcon={addingId === sub.id ? <CircularProgress size={20} color="inherit" /> : <ShoppingBagOutlinedIcon />}
+                  startIcon={addingId === sub.id ? <CircularProgress size={20} color="inherit" /> : <CreditCardOutlinedIcon />}
                   sx={{
                     py: 1.3,
                     borderRadius: '16px',
@@ -328,14 +334,8 @@ export default function SubscriptionsPage() {
                     '&:hover': { backgroundColor: '#df5b13' }
                   }}
                 >
-                  {addingId === sub.id ? 'در حال افزودن...' : 'خرید و فعال‌سازی اشتراک'}
+                  {addingId === sub.id ? 'در حال ثبت...' : 'خرید و فعال‌سازی اشتراک'}
                 </Button>
-
-                {cartSuccess === sub.id && (
-                  <Alert severity="success" sx={{ mt: 1.5, borderRadius: '12px', fontSize: '0.8rem' }}>
-                    اشتراک به سبد خرید اضافه شد
-                  </Alert>
-                )}
               </Card>
             </Grid>
           );

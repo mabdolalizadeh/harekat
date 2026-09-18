@@ -323,11 +323,11 @@ export default function OverviewPage() {
             شما هنوز در هیچ دوره‌ای ثبت‌نام نکرده‌اید
           </Typography>
           <Typography variant="body2" sx={{ color: '#6b6b63', mb: 3, maxWidth: 460, mx: 'auto' }}>
-            برای مشاهده جلسات، ویدیوها و دریافت مدرک، یکی از دوره‌های کاتالوگ یا پکیج‌های مهارت را انتخاب کنید.
+            برای مشاهده جلسات، ویدیوها و دریافت مدرک، پکیج‌های مهارت حرکت یا اشتراک ویژه را فعال فرمایید.
           </Typography>
           <Button
             component={NavLink}
-            to="/catalog"
+            to="/packages"
             variant="contained"
             sx={{
               borderRadius: '14px',
@@ -338,7 +338,7 @@ export default function OverviewPage() {
               '&:hover': { backgroundColor: '#df5b13' }
             }}
           >
-            مشاهده کاتالوگ دوره‌ها
+            مشاهده پکیج‌های مهارت
           </Button>
         </Card>
       ) : (

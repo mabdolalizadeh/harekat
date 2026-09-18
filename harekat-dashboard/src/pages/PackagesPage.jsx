@@ -15,25 +15,26 @@ import {
   Alert,
   Avatar
 } from '@mui/material';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
+import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { packagesApi } from '../api/packagesApi.js';
-import { useCart } from '../contexts/CartContext.jsx';
+import { cartApi } from '../api/cartApi.js';
+import { ordersApi } from '../api/ordersApi.js';
+import { paymentsApi } from '../api/paymentsApi.js';
 import { formatPrice, formatDuration, assetUrl, toPersianDigits } from '../utils/formatters.js';
 
 export default function PackagesPage() {
-  const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [tab, setTab] = useState(0); // 0: My Packages, 1: Available Packages
   const [myPackages, setMyPackages] = useState([]);
   const [allPackages, setAllPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingId, setAddingId] = useState(null);
-  const [cartSuccess, setCartSuccess] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -59,15 +60,19 @@ export default function PackagesPage() {
     loadData();
   }, []);
 
-  const handleAddToCart = async (pkg) => {
+  const handleDirectPurchase = async (pkg) => {
     try {
       setAddingId(pkg.id);
       const effectivePrice = pkg.salePrice || pkg.price;
-      await addToCart(pkg.id, 'course', 1, effectivePrice);
-      setCartSuccess(pkg.id);
-      setTimeout(() => setCartSuccess(null), 3500);
+      await cartApi.addToCart(pkg.id, 'course', 1, effectivePrice);
+      const orderRes = await ordersApi.createOrder();
+      if (orderRes?.ok && orderRes.data?.id) {
+        await paymentsApi.initiatePayment(orderRes.data.id, 'mock');
+      }
+      navigate('/payments');
     } catch (err) {
       console.error(err);
+      navigate('/payments');
     } finally {
       setAddingId(null);
     }
@@ -390,8 +395,8 @@ export default function PackagesPage() {
                         variant="contained"
                         fullWidth
                         disabled={addingId === pkg.id}
-                        onClick={() => handleAddToCart(pkg)}
-                        startIcon={addingId === pkg.id ? <CircularProgress size={18} color="inherit" /> : <ShoppingBagOutlinedIcon />}
+                        onClick={() => handleDirectPurchase(pkg)}
+                        startIcon={addingId === pkg.id ? <CircularProgress size={18} color="inherit" /> : <CreditCardOutlinedIcon />}
                         sx={{
                           py: 1.1,
                           borderRadius: '14px',
@@ -400,14 +405,8 @@ export default function PackagesPage() {
                           '&:hover': { backgroundColor: '#df5b13' }
                         }}
                       >
-                        افزودن به سبد خرید
+                        {addingId === pkg.id ? 'در حال ثبت...' : 'خرید و فعال‌سازی پکیج'}
                       </Button>
-                    )}
-
-                    {cartSuccess === pkg.id && (
-                      <Alert severity="success" sx={{ mt: 1.5, borderRadius: '10px', fontSize: '0.78rem' }}>
-                        پکیج به سبد خرید اضافه شد
-                      </Alert>
                     )}
                   </CardContent>
                 </Card>

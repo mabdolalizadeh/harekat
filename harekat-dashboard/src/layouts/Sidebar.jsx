@@ -11,7 +11,6 @@ import HeadsetMicOutlinedIcon from '@mui/icons-material/HeadsetMicOutlined';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import CardMembershipOutlinedIcon from '@mui/icons-material/CardMembershipOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
-import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined';
@@ -38,7 +37,6 @@ export default function Sidebar({ onItemClick }) {
   ];
 
   const secondaryNavItems = [
-    { label: 'کاوش دوره‌ها', path: '/catalog', icon: <ExploreOutlinedIcon sx={{ fontSize: 18 }} /> },
     { label: 'سوالات متداول', path: '/faq', icon: <HelpOutlineOutlinedIcon sx={{ fontSize: 18 }} /> }
   ];
 

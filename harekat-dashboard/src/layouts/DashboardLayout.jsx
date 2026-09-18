@@ -3,7 +3,6 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Box, Drawer } from '@mui/material';
 import Header from './Header.jsx';
 import Sidebar from './Sidebar.jsx';
-import CartDrawer from '../components/cart/CartDrawer.jsx';
 
 export default function DashboardLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -16,18 +15,20 @@ export default function DashboardLayout() {
         return { title: 'داشبورد و وضعیت یادگیری', subtitle: 'برنامه هفتگی و درس‌های فعال' };
       case '/courses':
         return { title: 'دوره‌های من', subtitle: 'محتوای آموزشی ثبت‌نام شده' };
-      case '/catalog':
-        return { title: 'کاوش دوره‌ها و مهارت‌ها', subtitle: 'کاتالوگ جامع دوره‌های آموزشی' };
+      case '/packages':
+        return { title: 'پکیج‌های مهارت', subtitle: 'مجموعه دوره‌ها و مهارت‌های جامع' };
       case '/subscriptions':
         return { title: 'پلن‌های اشتراک ویژه', subtitle: 'دسترسی نامحدود به اتاق فکر و کارگاه‌ها' };
+      case '/payments':
       case '/orders':
-        return { title: 'تاریخچه سفارشات و تراکنش‌ها', subtitle: 'رسید پرداخت‌ها و دوره‌های خریداری شده' };
+        return { title: 'تاریخچه پرداخت‌ها و تراکنش‌ها', subtitle: 'رسید پرداخت‌ها و دوره‌های خریداری شده' };
       case '/profile':
-        return { title: 'پروفایل کاربری و تنظیمات', subtitle: 'مدیریت اطلاعات فردی و سطح پیشرفت' };
-      case '/faq':
-        return { title: 'سوالات متداول', subtitle: 'راهنما و پرسش‌های پرتکرار' };
+        return { title: 'حساب کاربری و تنظیمات', subtitle: 'مدیریت اطلاعات هویتی و نشان اشتراک' };
+      case '/tickets':
       case '/support':
         return { title: 'پشتیبانی و تیکت', subtitle: 'ارسال پیام و پیگیری درخواست‌ها' };
+      case '/faq':
+        return { title: 'سوالات متداول', subtitle: 'راهنما و پرسش‌های پرتکرار' };
       default:
         return { title: 'حرکت مدیا', subtitle: 'سامانه آموزش تخصصی هنر و رسانه' };
     }
@@ -121,9 +122,6 @@ export default function DashboardLayout() {
       >
         <Sidebar onItemClick={() => setMobileDrawerOpen(false)} />
       </Drawer>
-
-      {/* Cart Drawer Slide-out */}
-      <CartDrawer />
     </Box>
   );
 }

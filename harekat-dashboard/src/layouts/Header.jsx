@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { useCart } from '../contexts/CartContext.jsx';
 import { useNotifications } from '../contexts/NotificationContext.jsx';
 import { assetUrl, toPersianDigits } from '../utils/formatters.js';
 import NotificationPopover from '../components/common/NotificationPopover.jsx';
@@ -23,7 +22,6 @@ import Logo from '../components/common/Logo.jsx';
 
 // Icons
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -35,7 +33,6 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobileDrawer, activeContext }) {
   const navigate = useNavigate();
   const { user, isPreviewMode, logout } = useAuth();
-  const { itemCount, openCart } = useCart();
   const { unreadCount } = useNotifications();
 
   const [notifAnchor, setNotifAnchor] = useState(null);
@@ -154,38 +151,8 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
         )}
       </Box>
 
-      {/* Left side (RTL end): Cart + Notification + Profile */}
+      {/* Left side (RTL end): Notification + Profile */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
-        {/* Shopping Cart Drawer Trigger */}
-        <Tooltip title="سبد خرید">
-          <IconButton
-            onClick={openCart}
-            size="small"
-            sx={{
-              color: '#171715',
-              backgroundColor: '#f7f5f0',
-              border: '1px solid #deddd7',
-              borderRadius: '12px',
-              p: 0.9,
-              '&:hover': { backgroundColor: '#efede7' }
-            }}
-          >
-            <Badge
-              badgeContent={itemCount ? toPersianDigits(itemCount) : 0}
-              sx={{
-                '& .MuiBadge-badge': {
-                  backgroundColor: '#f47c20',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  fontSize: '0.7rem'
-                }
-              }}
-            >
-              <ShoppingBagOutlinedIcon sx={{ fontSize: 20 }} />
-            </Badge>
-          </IconButton>
-        </Tooltip>
-
         {/* Notification bell */}
         <Tooltip title="اعلان‌ها">
           <IconButton

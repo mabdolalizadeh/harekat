@@ -10,7 +10,6 @@ import SubscriptionsPage from './pages/SubscriptionsPage.jsx';
 import OrdersPage from './pages/OrdersPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import SupportPage from './pages/SupportPage.jsx';
-import CatalogPage from './pages/CatalogPage.jsx';
 import FaqPage from './pages/FaqPage.jsx';
 
 export default function App() {
@@ -38,10 +37,10 @@ export default function App() {
         <Route path="subscriptions" element={<SubscriptionsPage />} />
         <Route path="payments" element={<OrdersPage />} />
 
-        {/* Aliases for links and catalog */}
+        {/* Aliases for links and redirections */}
         <Route path="orders" element={<OrdersPage />} />
         <Route path="support" element={<SupportPage />} />
-        <Route path="catalog" element={<CatalogPage />} />
+        <Route path="catalog" element={<Navigate to="/courses" replace />} />
         <Route path="faq" element={<FaqPage />} />
       </Route>
 
@@ -65,7 +64,7 @@ export default function App() {
         <Route path="payments" element={<OrdersPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="support" element={<SupportPage />} />
-        <Route path="catalog" element={<CatalogPage />} />
+        <Route path="catalog" element={<Navigate to="/courses" replace />} />
         <Route path="faq" element={<FaqPage />} />
       </Route>
 

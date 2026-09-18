@@ -10,12 +10,9 @@ import {
   LinearProgress,
   Chip,
   Avatar,
-  TextField,
-  InputAdornment,
   CircularProgress
 } from '@mui/material';
 import { NavLink } from 'react-router-dom';
-import SearchIcon from '@mui/icons-material/Search';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -28,7 +25,6 @@ export default function MyCoursesPage() {
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     async function loadAccessibleCourses() {
@@ -50,10 +46,6 @@ export default function MyCoursesPage() {
     loadAccessibleCourses();
   }, [user]);
 
-  const filteredCourses = courses.filter((course) =>
-    course.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
@@ -64,71 +56,46 @@ export default function MyCoursesPage() {
 
   return (
     <Box>
-      {/* Header & Search */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 3.5 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.75rem' }, mb: 0.5, color: '#171715' }}>
-            دوره‌های من
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#6b6b63' }}>
-            دوره‌های با دسترسی فعال شما در حرکت مدیا ({toPersianDigits(courses.length)} دوره)
-          </Typography>
-        </Box>
-
-        <TextField
-          size="small"
-          placeholder="جستجو در دوره‌های من..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#9b9b92', fontSize: 20 }} />
-              </InputAdornment>
-            ),
-            sx: {
-              borderRadius: '14px',
-              backgroundColor: '#ffffff',
-              minWidth: { xs: '100%', sm: 260 }
-            }
-          }}
-        />
+      {/* Header */}
+      <Box sx={{ mb: 3.5 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.75rem' }, mb: 0.5, color: '#171715' }}>
+          دوره‌های من
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#6b6b63' }}>
+          دوره‌های با دسترسی فعال شما در حرکت مدیا ({toPersianDigits(courses.length)} دوره)
+        </Typography>
       </Box>
 
       {/* Courses List */}
-      {filteredCourses.length === 0 ? (
+      {courses.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 10, px: 2, backgroundColor: '#ffffff', borderRadius: '24px', border: '1px dashed #deddd7' }}>
           <SchoolOutlinedIcon sx={{ fontSize: 64, color: '#f47c20', mb: 2 }} />
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
-            {searchTerm ? 'دوره‌ای با این عنوان یافت نشد' : 'هنوز در دوره‌ای ثبت‌نام نکرده‌اید'}
+            هنوز در دوره‌ای ثبت‌نام نکرده‌اید
           </Typography>
           <Typography variant="body2" sx={{ color: '#6b6b63', mb: 3, maxWidth: 460, mx: 'auto' }}>
-            {searchTerm
-              ? 'لطفاً عبارت دیگری را جستجو کنید.'
-              : 'از کاتالوگ دوره‌های حرکت دیدن کنید و دسترسی به آموزش‌های تخصصی را آغاز فرمایید.'}
+            برای شروع یادگیری و دسترسی به جلسات، یکی از پکیج‌های مهارتی یا اشتراک‌های حرکت را فعال فرمایید.
           </Typography>
-          {!searchTerm && (
-            <Button
-              component={NavLink}
-              to="/catalog"
-              variant="contained"
-              sx={{
-                borderRadius: '14px',
-                px: 3.5,
-                py: 1.2,
-                backgroundColor: '#f47c20',
-                fontWeight: 700,
-                '&:hover': { backgroundColor: '#df5b13' }
-              }}
-            >
-              کاوش و ثبت‌نام در دوره‌ها
-            </Button>
-          )}
+          <Button
+            component={NavLink}
+            to="/packages"
+            variant="contained"
+            sx={{
+              borderRadius: '14px',
+              px: 3.5,
+              py: 1.2,
+              backgroundColor: '#f47c20',
+              fontWeight: 700,
+              '&:hover': { backgroundColor: '#df5b13' }
+            }}
+          >
+            مشاهده پکیج‌های مهارت
+          </Button>
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {filteredCourses.map((course, index) => {
-            const progress = 45 + ((index * 23) % 50); // Simulated student progress
+          {courses.map((course, index) => {
+            const progress = 45 + ((index * 23) % 50); // Student progress
             return (
               <Grid item xs={12} sm={6} lg={4} key={course.id}>
                 <Card
