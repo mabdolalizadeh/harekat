@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, FormError, RowActions, StatusDot, PageHeader } from './adminUi.jsx';
+import { Card, FormError, RowActions, StatusDot, PageHeader, BannerListSkeleton } from './adminUi.jsx';
 import ImagePicker from '../../components/ImagePicker.jsx';
 import { Add as AddIcon, Image as ImageIcon } from '@mui/icons-material';
-import { Alert, Box, Button, Checkbox, Divider, FormControlLabel, Paper, Skeleton, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Checkbox, Divider, FormControlLabel, Paper, Stack, TextField, Typography } from '@mui/material';
 
 const blank = { imageUrl: '', tabletImageUrl: '', mobileImageUrl: '', linkUrl: '', duration: 3, sortOrder: 0, isActive: true };
 
@@ -56,7 +56,7 @@ export default function AdminBanners() {
     <PageHeader title="بنرهای صفحه اصلی" subtitle="بنر تصویر، لینک مقصد و مدت نمایش اسلایدها را مدیریت کنید." action={!editing && <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditing('new'); setNotice(null); }}>بنر جدید</Button>} />
     {notice && <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert>}
     {editing && <Card><Typography fontWeight={700} mb={2}>{editing === 'new' ? 'بنر جدید' : 'ویرایش بنر'}</Typography><Divider sx={{ mb: 2.5 }} /><BannerForm initial={editing === 'new' ? { ...blank, sortOrder: items.length } : editing} onSubmit={save} onCancel={() => setEditing(null)} saving={saving} /></Card>}
-    {banners.loading && <Skeleton variant="rounded" height={80} />}
+    {banners.loading && <BannerListSkeleton count={3} />}
     {banners.error && <Alert severity="error">خطا: {banners.error} <Button onClick={banners.reload} size="small">تلاش مجدد</Button></Alert>}
     {banners.isEmpty && !editing && <Alert severity="info">هنوز بنری ثبت نشده است.</Alert>}
     <Stack spacing={1.5}>{items.map((banner) => <Paper key={banner.id} elevation={0} sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2.5, opacity: banner.isActive ? 1 : 0.6 }}>

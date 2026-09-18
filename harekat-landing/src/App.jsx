@@ -1,4 +1,4 @@
-import {Routes, Route} from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom';
 import Landing from "./pages/Landing.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
@@ -7,6 +7,9 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Products from "./pages/Products.jsx";
 import TeacherDetail from "./pages/TeacherDetail.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
+import CoursesPage from "./pages/CoursesPage.jsx";
+import CapsulesPage from "./pages/CapsulesPage.jsx";
+import PackagesPage from "./pages/PackagesPage.jsx";
 import { AuthGuard } from "./components/AuthGuard.jsx";
 
 export default function App() {
@@ -17,9 +20,20 @@ export default function App() {
             <Route path='/about-us' element={<AboutUs/>}/>
             <Route path='/auth' element={<Auth/>}/>
             <Route path='/dashboard' element={<AuthGuard><Dashboard/></AuthGuard>}/>
+
+            {/* Dedicated separated routes for courses, capsules, and packages */}
+            <Route path='/courses' element={<CoursesPage/>}/>
+            <Route path='/courses/:id' element={<ProductDetail type="course"/>}/>
+            <Route path='/capsules' element={<CapsulesPage/>}/>
+            <Route path='/capsules/:id' element={<ProductDetail type="capsule"/>}/>
+            <Route path='/packages' element={<PackagesPage/>}/>
+            <Route path='/packages/:id' element={<ProductDetail type="package"/>}/>
+
+            {/* Products and legacy/fallback routes */}
             <Route path='/products' element={<Products/>}/>
             <Route path='/products/:id' element={<ProductDetail/>}/>
+
             <Route path='/teachers/:id' element={<TeacherDetail/>}/>
         </Routes>
-    )
+    );
 }

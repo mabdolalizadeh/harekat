@@ -6,20 +6,8 @@ import { H1, H2, H3, P } from "../components/ui/Headings.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
 import { ArrowButton } from "../components/ui/Buttons.jsx";
 import { useNavigate } from "react-router-dom";
-import TeacherCard from "../components/contents/TeacherCard.jsx";
 import { storeApi } from "../services/api.js";
 import { useState, useEffect } from "react";
-
-const teachers = [
-    { name: 'دکتر احمدی', role: 'برنامه‌نویسی و هوش مصنوعی', avatar: 'https://i.pravatar.cc/400?u=11' },
-    { name: 'استاد محمدی', role: 'طراحی UI/UX', avatar: 'https://i.pravatar.cc/400?u=12' },
-    { name: 'مهندس رضایی', role: 'توسعه وب', avatar: 'https://i.pravatar.cc/400?u=13' },
-    { name: 'دکتر کریمی', role: 'امنیت سایبری', avatar: 'https://i.pravatar.cc/400?u=14' },
-    { name: 'نیما جهان تیغ', role: 'هوش مصنوعی', avatar: 'https://i.pravatar.cc/400?u=15' },
-    { name: 'سارا محمدی', role: 'طراحی رابط کاربری', avatar: 'https://i.pravatar.cc/400?u=16' },
-    { name: 'مهدی نادری', role: 'تدوین و تولید محتوا', avatar: 'https://i.pravatar.cc/400?u=17' },
-    { name: 'نگار اکبری', role: 'دیجیتال مارکتینگ', avatar: 'https://i.pravatar.cc/400?u=18' },
-];
 
 const values = [
     { number: '۰۱', title: 'عملگرایی', desc: 'یادگیری از طریق انجام دادن، نه فقط شنیدن. هر دوره حول پروژه‌های واقعی ساخته شده.' },
@@ -29,16 +17,15 @@ const values = [
 ];
 
 export default function AboutUs() {
-    const [apiTeachers, setApiTeachers] = useState(null);
+    const navigate = useNavigate();
     const [sectionIds, setSectionIds] = useState({ capsule: 'capsule-courses', skill: 'skill-packages', subscriptions: 'subscriptions' });
     const [contentMap, setContentMap] = useState({});
 
     useEffect(() => {
         let cancelled = false;
-        Promise.allSettled([storeApi.getTeachers(),storeApi.getCategories(), storeApi.getSiteContent()]).then((results) => {
+        Promise.allSettled([storeApi.getCategories(), storeApi.getSiteContent()]).then((results) => {
             if (cancelled) return;
-            const [teacherResult, categoriesResult, contentResult] = results;
-            if (teacherResult.status === 'fulfilled') setApiTeachers((teacherResult.value.data ?? []));
+            const [categoriesResult, contentResult] = results;
             if (categoriesResult.status === 'fulfilled') {
                 const categories = categoriesResult.value.data ?? [];
                 const findSection = (pattern, fallback) => categories.find((category) => pattern.test(`${category.slug ?? ''} ${category.name ?? ''}`))?.slug || fallback;
@@ -48,19 +35,6 @@ export default function AboutUs() {
         });
         return () => { cancelled = true; };
     }, []);
-
-
-    useEffect(() => {
-        let cancelled = false;
-        Promise.allSettled([storeApi.getTeachers()]).then((results) => {
-            if (cancelled) return;
-            const [teacherResult] = results;
-            if (teacherResult.status === 'fulfilled') setApiTeachers((teacherResult.value.data ?? []));
-        });
-        return () => { cancelled = true; };
-    }, []);
-
-
 
     return (
         <MainLayout title={'درباره ما'} sectionIds={sectionIds} contentMap={contentMap}>

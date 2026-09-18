@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, FormError, RowActions, StatusDot, PageHeader } from './adminUi.jsx';
-import { Box, Stack, Button, TextField, FormControlLabel, Checkbox, Typography, IconButton, Alert, Skeleton, Paper, Divider } from '@mui/material';
+import { Card, FormError, RowActions, StatusDot, PageHeader, ListRowSkeleton } from './adminUi.jsx';
+import { Box, Stack, Button, TextField, FormControlLabel, Checkbox, Typography, IconButton, Alert, Paper, Divider } from '@mui/material';
 import { Add as AddIcon, ArrowUpward as UpIcon, ArrowDownward as DownIcon } from '@mui/icons-material';
 
 const EMPTY = { label: '', link: '', scrollId: '', sortOrder: 0, isActive: true };
@@ -58,7 +58,7 @@ export default function AdminHeader() {
           <MenuForm initial={editing === 'new' ? EMPTY : items.find((m) => m.id === editing)} onSubmit={save} onCancel={() => setEditing(null)} saving={saving} />
         </Card>
       )}
-      {menu.loading && <Skeleton variant="rounded" height={80} />}
+      {menu.loading && <ListRowSkeleton count={4} showAvatar={false} circularAvatar={false} />}
       {menu.error && <Alert severity="error">خطا: {menu.error}</Alert>}
       {menu.isEmpty && !editing && <Alert severity="info">آیتمی ثبت نشده است.</Alert>}
       <Stack spacing={1.5}>

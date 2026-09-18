@@ -12,9 +12,9 @@ export default function adminAuth(req, res, next) {
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, configs.jwtKey);
-        if (decoded.role !== 'admin') {
+        if (decoded.role !== 'admin' && decoded.role !== 'superadmin' && decoded.role !== 'ta') {
             logSecurityEvent('admin_auth_forbidden', { path: req.path, ip: req.ip, userId: decoded.id });
-            return res.status(403).json({ ok: false, message: 'admin access required' });
+            return res.status(403).json({ ok: false, message: 'administrative access required' });
         }
         req.user = { id: decoded.id, role: decoded.role };
         next();

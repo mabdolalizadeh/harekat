@@ -65,7 +65,7 @@ export default class UsersController {
             return res.status(403).json({ ok: false, message: 'forbidden' });
         }
 
-        const { firstName, lastName, phoneNumber, courseIds, paymentIds, avatar } = req.body;
+        const { firstName, lastName, phoneNumber, courseIds, paymentIds, avatar, nationalId, bio, jobTitle, education } = req.body;
 
         try {
             const user = await Users.findByPk(id);
@@ -76,6 +76,10 @@ export default class UsersController {
             if (firstName !== undefined) user.firstName = firstName;
             if (lastName !== undefined) user.lastName = lastName;
             if (avatar !== undefined) user.avatar = avatar;
+            if (nationalId !== undefined) user.nationalId = nationalId;
+            if (bio !== undefined) user.bio = bio;
+            if (jobTitle !== undefined) user.jobTitle = jobTitle;
+            if (education !== undefined) user.education = education;
             if (phoneNumber !== undefined && phoneNumber !== user.phoneNumber) {
                 const existing = await Users.findOne({ where: { phoneNumber } });
                 if (existing) {

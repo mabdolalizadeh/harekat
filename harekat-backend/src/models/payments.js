@@ -9,9 +9,40 @@ const Payments = sequelize.define("Payments", {
         primaryKey: true
     },
     type: {
-        type: DataTypes.ENUM('paid', 'pending', 'failed', 'refunded'),
+        type: DataTypes.STRING,
         allowNull: false,
         defaultValue: 'pending'
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'pending',
+        validate: { isIn: [['pending', 'paid', 'failed', 'cancelled', 'refunded']] }
+    },
+    orderId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        defaultValue: null
+    },
+    amount: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+    },
+    gateway: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'mock'
+    },
+    transactionId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+    },
+    metadata: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
     },
     userId: {
         type: DataTypes.UUID,

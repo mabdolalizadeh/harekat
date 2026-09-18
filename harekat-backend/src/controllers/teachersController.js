@@ -1,4 +1,5 @@
-import { Teachers, Courses, Categories } from '../models/index.js';
+import { Teachers, Courses, Categories, CourseTeachers, TeacherCategories } from '../models/index.js';
+import { sequelize } from '../models/database.config.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
 const teacherInclude = [
@@ -84,7 +85,12 @@ export default class TeachersController {
             if (!teacher) {
                 return res.status(404).json({ ok: false, message: 'teacher not found' });
             }
-            await teacher.destroy();
+            await sequelize.transaction(async (t) => {
+                await CourseTeachers.destroy({ where: { teacherId: id }, transaction: t });
+                await TeacherCategories.destroy({ where: { teacherId: id }, transaction: t });
+                await Courses.update({ teacherId: null }, { where: { teacherId: id }, transaction: t });
+                await teacher.destroy({ transaction: t });
+            });
             logSecurityEvent('teacher_deleted', { teacherId: id, requesterId: req.user?.id, ip: req.ip });
             return res.status(200).json({ ok: true, message: 'teacher deleted' });
         } catch (err) {

@@ -6,37 +6,48 @@ import { adminApi } from '../services/api.js';
 
 export default function ImagePicker({ value, onChange, alt = 'preview' }) {
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(value || '');
+  const [blobUrl, setBlobUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!file) setPreview(value || '');
-  }, [value, file]);
+  const preview = blobUrl || value || '';
 
-  useEffect(() => () => { if (preview?.startsWith('blob:')) URL.revokeObjectURL(preview); }, [preview]);
+  useEffect(() => () => {
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+  }, [blobUrl]);
 
   const chooseFile = (nextFile) => {
     if (!nextFile) return;
-    if (preview?.startsWith('blob:')) URL.revokeObjectURL(preview);
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    const url = URL.createObjectURL(nextFile);
     setFile(nextFile);
-    setPreview(URL.createObjectURL(nextFile));
+    setBlobUrl(url);
     setError(null);
   };
 
   const upload = async () => {
     if (!file) return;
-    setUploading(true); setError(null);
+    setUploading(true);
+    setError(null);
     try {
       const imageUrl = await adminApi.uploadImage(file);
       onChange(imageUrl);
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
       setFile(null);
-    } catch (e) { setError(e.message); } finally { setUploading(false); }
+      setBlobUrl('');
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const remove = () => {
-    if (preview?.startsWith('blob:')) URL.revokeObjectURL(preview);
-    setFile(null); setPreview(''); setError(null); onChange('');
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    setFile(null);
+    setBlobUrl('');
+    setError(null);
+    onChange('');
   };
 
   return (

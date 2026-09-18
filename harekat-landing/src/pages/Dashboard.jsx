@@ -3,8 +3,9 @@ import {motion} from "motion/react";
 import Box from "../components/ui/Box.jsx";
 import {H1, H2, H3, P} from "../components/ui/Headings.jsx";
 import {PrimaryButton, SecondaryButton} from "../components/ui/Buttons.jsx";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
+import { DashboardSkeleton } from "../components/ui/Skeleton.jsx";
 import {
     LogOut, BookOpen, User, Clock, Trophy, Play,
     Calendar, Bell, Star,
@@ -66,11 +67,17 @@ const certificates = [
 
 export default function Dashboard() {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
     const [user] = useState(() => {
         const saved = localStorage.getItem('user');
         return saved ? JSON.parse(saved) : null;
     });
     const [activeTab, setActiveTab] = useState('courses');
+
+    useEffect(() => {
+        const timer = setTimeout(() => setLoading(false), 250);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -82,6 +89,14 @@ export default function Dashboard() {
         const done = (c.completedLessons / c.totalLessons) * 12;
         return acc + done;
     }, 0);
+
+    if (loading) {
+        return (
+            <MainLayout title={'داشبورد'} sectionIds={null} contentMap={null}>
+                <DashboardSkeleton />
+            </MainLayout>
+        );
+    }
 
     return (
         <MainLayout title={'داشبورد'} sectionIds={null} contentMap={null}>

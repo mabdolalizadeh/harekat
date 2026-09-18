@@ -1,4 +1,5 @@
-import { Courses, Teachers, Categories } from '../models/index.js';
+import { Courses, Teachers, Categories, CourseCategories, CourseTeachers, CartItem, TACourses, PackageCourses, Sessions } from '../models/index.js';
+import { sequelize } from '../models/database.config.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
 function validatePricing(price, salePrice) {
@@ -51,31 +52,33 @@ async function validateTeachers(teacherIds) {
 
 export default class CoursesController {
     static async createCourse(req, res) {
-        const { name, teacherId, teacherIds, categoryIds, price, salePrice, description, isActive, sortOrder, image, level, duration, typeOfAttendence, statusOfRegistration, videoUrl, longDescription, kind } = req.body;
+        const { name, teacherId, teacherIds, categoryIds, includedCourseIds, price, salePrice, description, isActive, sortOrder, image, level, duration, typeOfAttendence, statusOfRegistration, videoUrl, longDescription, kind } = req.body;
         if (!name || price === undefined || price === null || price === '') {
             return res.status(400).json({ ok: false, message: 'name and price are required' });
         }
         const markdown = normalizeMarkdown(longDescription);
         if (markdown === undefined) return validationResponse(res, [{ field: 'longDescription', message: 'must be a string' }]);
+
         const pricingError = validatePricing(price, salePrice);
         if (pricingError) return res.status(400).json({ ok: false, message: pricingError });
+
         const normalizedTeacherIds = normalizeTeacherIds(teacherIds, teacherId);
         if (kind === 'skill' && normalizedTeacherIds.length === 0) {
             return validationResponse(res, [{ field: 'teacherIds', message: 'a skill package requires at least one teacher' }]);
         }
+        const selectedTeachers = await validateTeachers(normalizedTeacherIds);
+        if (selectedTeachers.missing) {
+            return validationResponse(res, [{ field: 'teacherIds', message: 'one or more teachers were not found' }]);
+        }
 
         try {
-            const selectedTeachers = await validateTeachers(normalizedTeacherIds);
-            if (selectedTeachers.missing) {
-                return validationResponse(res, [{ field: 'teacherIds', message: 'one or more teachers were not found' }]);
-            }
             const course = await Courses.create({
                 name,
                 price,
                 salePrice: normalizePrice(salePrice),
-                description: description ?? null,
-                isActive: isActive ?? true,
-                sortOrder: sortOrder ?? 0,
+                description,
+                isActive,
+                sortOrder,
                 image: image ?? '',
                 level: kind === 'skill' ? '' : (level ?? 'مقدماتی'),
                 duration: duration ?? '20 ساعت',
@@ -92,6 +95,12 @@ export default class CoursesController {
             if (Array.isArray(categoryIds)) {
                 const categories = await Categories.findAll({ where: { id: categoryIds } });
                 await course.setCategories(categories);
+            }
+
+            if (Array.isArray(includedCourseIds)) {
+                for (const cId of includedCourseIds) {
+                    await PackageCourses.create({ packageId: course.id, courseId: cId });
+                }
             }
 
             const created = await Courses.findByPk(course.id, { include: courseIncludes() });
@@ -111,7 +120,13 @@ export default class CoursesController {
 
     static async getCourses(req, res) {
         try {
-            const courses = await Courses.findAll({ include: courseIncludes() });
+            let whereClause = {};
+            if (req.user?.role === 'ta') {
+                const assigned = await TACourses.findAll({ where: { adminId: req.user.id } });
+                const courseIds = assigned.map((a) => a.courseId);
+                whereClause = { id: courseIds };
+            }
+            const courses = await Courses.findAll({ where: whereClause, include: courseIncludes() });
             return res.status(200).json({ ok: true, data: courses });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
@@ -121,6 +136,13 @@ export default class CoursesController {
     static async getCourseById(req, res) {
         const { id } = req.params;
         try {
+            if (req.user?.role === 'ta') {
+                const isAssigned = await TACourses.findOne({ where: { adminId: req.user.id, courseId: id } });
+                if (!isAssigned) {
+                    return res.status(403).json({ ok: false, message: 'دسترسی به این دوره برای شما مجاز نیست' });
+                }
+            }
+
             const course = await Courses.findByPk(id, { include: courseIncludes() });
             if (!course) {
                 return res.status(404).json({ ok: false, message: 'course not found' });
@@ -133,7 +155,14 @@ export default class CoursesController {
 
     static async updateCourse(req, res) {
         const { id } = req.params;
-        const { name, teacherId, teacherIds, categoryIds, price, salePrice, description, isActive, sortOrder, image, level, duration, typeOfAttendence, statusOfRegistration, videoUrl, longDescription, kind } = req.body;
+        const { name, teacherId, teacherIds, categoryIds, includedCourseIds, price, salePrice, description, isActive, sortOrder, image, level, duration, typeOfAttendence, statusOfRegistration, videoUrl, longDescription, kind } = req.body;
+
+        if (req.user?.role === 'ta') {
+            const isAssigned = await TACourses.findOne({ where: { adminId: req.user.id, courseId: id } });
+            if (!isAssigned) {
+                return res.status(403).json({ ok: false, message: 'دسترسی به این دوره برای شما مجاز نیست' });
+            }
+        }
 
         try {
             const course = await Courses.findByPk(id);
@@ -195,6 +224,13 @@ export default class CoursesController {
                 await course.setTeachers(selectedTeachers);
             }
 
+            if (Array.isArray(includedCourseIds)) {
+                await PackageCourses.destroy({ where: { packageId: id } });
+                for (const cId of includedCourseIds) {
+                    await PackageCourses.create({ packageId: id, courseId: cId });
+                }
+            }
+
             const updated = await Courses.findByPk(id, { include: courseIncludes() });
             logSecurityEvent('course_updated', { courseId: id, requesterId: req.user?.id, ip: req.ip });
             return res.status(200).json({ ok: true, data: updated });
@@ -217,10 +253,22 @@ export default class CoursesController {
             if (!course) {
                 return res.status(404).json({ ok: false, message: 'course not found' });
             }
-            await course.destroy();
+
+            await sequelize.transaction(async (t) => {
+                await CourseCategories.destroy({ where: { courseId: id }, transaction: t });
+                await CourseTeachers.destroy({ where: { courseId: id }, transaction: t });
+                await CartItem.destroy({ where: { productId: id, productType: 'course' }, transaction: t });
+                await PackageCourses.destroy({ where: { packageId: id }, transaction: t });
+                await PackageCourses.destroy({ where: { courseId: id }, transaction: t });
+                await Sessions.destroy({ where: { courseId: id }, transaction: t });
+                await TACourses.destroy({ where: { courseId: id }, transaction: t });
+                await course.destroy({ transaction: t });
+            });
+
             logSecurityEvent('course_deleted', { courseId: id, requesterId: req.user?.id, ip: req.ip });
             return res.status(200).json({ ok: true, message: 'course deleted' });
         } catch (err) {
+            console.error('Error deleting course:', err);
             return res.status(500).json({ ok: false, message: err.message });
         }
     }
@@ -230,6 +278,17 @@ function courseIncludes() {
     return [
         { model: Teachers, as: 'teacher' },
         { model: Teachers, as: 'teachers', through: { attributes: [] } },
-        { model: Categories, as: 'categories', through: { attributes: [] } }
+        { model: Categories, as: 'categories', through: { attributes: [] } },
+        {
+            model: Courses,
+            as: 'packageIncludedCourses',
+            through: { attributes: [] },
+            attributes: ['id', 'name', 'level', 'image', 'duration']
+        },
+        {
+            model: Sessions,
+            as: 'sessions',
+            attributes: ['id', 'sessionNumber', 'title', 'isFinal', 'sortOrder']
+        }
     ];
 }

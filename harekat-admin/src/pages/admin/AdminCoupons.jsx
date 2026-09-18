@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, FormError, RowActions, StatusDot, PageHeader } from './adminUi.jsx';
-import { Box, Stack, Button, TextField, Select, MenuItem, FormControl, InputLabel, FormControlLabel, Checkbox, Typography, Alert, Skeleton, Paper, Divider } from '@mui/material';
+import { Card, FormError, RowActions, StatusDot, PageHeader, ListRowSkeleton } from './adminUi.jsx';
+import { Box, Stack, Button, TextField, Select, MenuItem, FormControl, InputLabel, FormControlLabel, Checkbox, Typography, Alert, Paper, Divider } from '@mui/material';
 import { Add as AddIcon, LocalOffer as OfferIcon } from '@mui/icons-material';
 
 const EMPTY = { code: '', discountType: 'percent', discountValue: '', isActive: true, expiresAt: '', usageLimit: '', minimumOrderAmount: '' };
@@ -88,7 +88,7 @@ export default function AdminCoupons() {
           }} onSubmit={save} onCancel={() => setEditing(null)} saving={saving} />
         </Card>
       )}
-      {coupons.loading && <Skeleton variant="rounded" height={80} />}
+      {coupons.loading && <ListRowSkeleton count={4} circularAvatar={false} />}
       {coupons.error && <Alert severity="error">خطا: {coupons.error} <Button onClick={coupons.reload} size="small">تلاش مجدد</Button></Alert>}
       {coupons.isEmpty && !editing && <Alert severity="info">کدی ثبت نشده است.</Alert>}
       <Stack spacing={1.5}>

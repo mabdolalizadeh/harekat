@@ -11,6 +11,7 @@ import { logSecurityEvent } from './utils/logger.js';
 import { configs } from './config/config.js';
 import { auth } from './middleware/auth.js';
 import { adminOnly } from './middleware/ownerCheck.js';
+import sharp from 'sharp';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -126,17 +127,21 @@ app.use('/api/v1', apiLimiter);
 
 // Images are uploaded separately from JSON payloads so large binary data does
 // not count against the JSON request limit.
-app.use('/api/v1/uploads/image', auth, adminOnly, express.raw({ type: ['image/*'], limit: '10mb' }), async (req, res) => {
+app.use('/api/v1/uploads/image', auth, adminOnly, express.raw({ type: ['image/*'], limit: '15mb' }), async (req, res) => {
     try {
         if (!req.body || req.body.length === 0) {
             return res.status(400).json({ ok: false, message: 'No image data' });
         }
 
-        const extension = req.headers['content-type'].split('/')[1].split(';')[0].replace(/[^a-z0-9]/gi, '') || 'bin';
-        const filename = `image-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
+        // Convert uploaded image to WebP using sharp package
+        const webpBuffer = await sharp(req.body)
+            .webp({ quality: 85 })
+            .toBuffer();
+
+        const filename = `image-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.webp`;
         fs.mkdirSync(UPLOADS_DIR, { recursive: true });
         const filePath = path.join(UPLOADS_DIR, filename);
-        fs.writeFileSync(filePath, req.body);
+        fs.writeFileSync(filePath, webpBuffer);
 
         const imageUrl = `/uploads/${filename}`;
         return res.status(201).json({ ok: true, data: { imageUrl } });

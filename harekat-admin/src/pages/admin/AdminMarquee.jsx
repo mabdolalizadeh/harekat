@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, FormError, RowActions, StatusDot, PageHeader } from './adminUi.jsx';
-import { Box, Stack, Button, TextField, FormControlLabel, Checkbox, Typography, IconButton, Alert, Skeleton, Paper, Divider } from '@mui/material';
+import { Card, FormError, RowActions, StatusDot, PageHeader, ListRowSkeleton } from './adminUi.jsx';
+import { Box, Stack, Button, TextField, FormControlLabel, Checkbox, Typography, IconButton, Alert, Paper, Divider } from '@mui/material';
 import { Add as AddIcon, ArrowUpward as UpIcon, ArrowDownward as DownIcon, Image as ImageIcon } from '@mui/icons-material';
 
 function SlideForm({ initial, onSubmit, onCancel, saving }) {
@@ -72,7 +72,7 @@ export default function AdminMarquee() {
           <SlideForm initial={editing === 'new' ? { imageUrl: '', title: '', sortOrder: items.length + 1, isActive: true } : items.find((s) => s.key === editing)} onSubmit={save} onCancel={() => setEditing(null)} saving={saving} />
         </Card>
       )}
-      {slides.loading && <Skeleton variant="rounded" height={80} />}
+      {slides.loading && <ListRowSkeleton count={4} circularAvatar={false} avatarWidth={64} avatarHeight={48} />}
       {slides.error && <Alert severity="error">خطا: {slides.error} <Button onClick={slides.reload} size="small">تلاش مجدد</Button></Alert>}
       {slides.isEmpty && !editing && <Alert severity="info">اسلایدی ثبت نشده است.</Alert>}
       <Stack spacing={1.5}>

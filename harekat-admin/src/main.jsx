@@ -15,7 +15,7 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 })
 
-function ThemedApp() {
+export function ThemedApp() {
   const [mode, setMode] = useState(() => localStorage.getItem('adminTheme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
   const theme = useMemo(() => (mode === 'dark' ? darkTheme : lightTheme), [mode])
 

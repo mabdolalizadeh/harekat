@@ -178,19 +178,82 @@ export const adminApi = {
     createSubscription: (payload) => post('/subscriptions', payload, { auth: true, tokenKind: 'adminToken' }),
     updateSubscription: (id, payload) => put(`/subscriptions/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
     deleteSubscription: (id) => del(`/subscriptions/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    // packages
+    listPackages: () => get('/packages/admin', { auth: true, tokenKind: 'adminToken' }),
+    createPackage: (payload) => post('/packages', payload, { auth: true, tokenKind: 'adminToken' }),
+    updatePackage: (id, payload) => put(`/packages/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    deletePackage: (id) => del(`/packages/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    // sessions
+    listSessions: (courseId) => get(`/sessions/course/${courseId}/admin`, { auth: true, tokenKind: 'adminToken' }),
+    createSession: (courseId, payload) => post(`/sessions/course/${courseId}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    updateSession: (id, payload) => put(`/sessions/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    deleteSession: (id) => del(`/sessions/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    // exams & grading
+    getExam: (courseId) => get(`/exams/course/${courseId}/submissions`, { auth: true, tokenKind: 'adminToken' }),
+    upsertExam: (courseId, payload) => put(`/exams/course/${courseId}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    listSubmissions: (courseId) => get(`/exams/course/${courseId}/submissions`, { auth: true, tokenKind: 'adminToken' }),
+    gradeSubmission: (resultId, payload) => post(`/exams/submissions/${resultId}/grade`, payload, { auth: true, tokenKind: 'adminToken' }),
+    // licenses
+    listLicenses: () => get('/licenses', { auth: true, tokenKind: 'adminToken' }),
+    updateLicenseStatus: (id, payload) => put(`/licenses/${id}/status`, payload, { auth: true, tokenKind: 'adminToken' }),
+    // tickets
+    listTickets: () => get('/tickets', { auth: true, tokenKind: 'adminToken' }),
+    getTicket: (id) => get(`/tickets/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    replyTicket: (id, payload) => post(`/tickets/${id}/messages`, payload, { auth: true, tokenKind: 'adminToken' }),
+    updateTicket: (id, payload) => put(`/tickets/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    // orders & payments
+    listOrders: () => get('/orders', { auth: true, tokenKind: 'adminToken' }),
+    updateOrderStatus: (id, payload) => put(`/orders/${id}/status`, payload, { auth: true, tokenKind: 'adminToken' }),
+    listPayments: () => get('/payments', { auth: true, tokenKind: 'adminToken' }),
+    updatePayment: (id, payload) => put(`/payments/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    verifyPayment: (id) => post(`/payments/${id}/verify`, {}, { auth: true, tokenKind: 'adminToken' }),
+    // TAs management
+    listTAs: () => get('/tas', { auth: true, tokenKind: 'adminToken' }),
+    createTA: (payload) => post('/tas', payload, { auth: true, tokenKind: 'adminToken' }),
+    updateTA: (id, payload) => put(`/tas/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    deleteTA: (id) => del(`/tas/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    getTaProfile: () => get('/tas/me', { auth: true, tokenKind: 'adminToken' }),
+    // Students & Access
+    listStudents: () => get('/users', { auth: true, tokenKind: 'adminToken' }),
+    inspectStudentAccess: (userId) => get(`/access/student/${userId}`, { auth: true, tokenKind: 'adminToken' }),
+    grantAccess: (payload) => post('/access/grant', payload, { auth: true, tokenKind: 'adminToken' }),
+    revokeAccess: (payload) => post('/access/revoke', payload, { auth: true, tokenKind: 'adminToken' }),
+    getRecommendedCourse: () => get('/access/recommended', { auth: true, tokenKind: 'adminToken' }),
+    setRecommendedCourse: (courseId) => post('/access/recommended', { courseId }, { auth: true, tokenKind: 'adminToken' }),
     // overview
     dashboard: async () => {
-        const [courses, categories, coupons, menu, content, teachers] = await Promise.all([
+        const [courses, categories, coupons, menu, content, teachers, orders, payments] = await Promise.all([
             get('/courses').catch(() => ({ data: [] })),
             get('/categories').catch(() => ({ data: [] })),
             get('/coupons', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
             get('/cms/admin/header-menu', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
             get('/cms/admin/content', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
             get('/teachers').catch(() => ({ data: [] })),
+            get('/orders', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
+            get('/payments', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
         ]);
-        return { courses, categories, coupons, menu, content, teachers };
+        return { courses, categories, coupons, menu, content, teachers, orders, payments };
     },
 };
+
+export function getAdminUser() {
+    try {
+        const raw = localStorage.getItem('adminUser');
+        return raw ? JSON.parse(raw) : null;
+    } catch {
+        return null;
+    }
+}
+
+export function isTA() {
+    const u = getAdminUser();
+    return u?.role === 'ta';
+}
+
+export function isSuperAdmin() {
+    const u = getAdminUser();
+    return !u || u?.role === 'superadmin' || u?.role === 'admin';
+}
 
 export function isAdminLoggedIn() {
     return !!getToken('adminToken');

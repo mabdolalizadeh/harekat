@@ -35,13 +35,42 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <Grid container spacing={2}>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Grid key={i} size={{ xs: 6, lg: 4 }}>
-            <Skeleton variant="rounded" height={120} sx={{ borderRadius: 3 }} />
-          </Grid>
-        ))}
-      </Grid>
+      <Stack spacing={3}>
+        <Box>
+          <Skeleton variant="text" width={160} height={36} sx={{ borderRadius: 1 }} />
+          <Skeleton variant="text" width={240} height={20} sx={{ borderRadius: 1, mt: 0.5 }} />
+        </Box>
+
+        <Grid container spacing={2}>
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Grid key={i} size={{ xs: 6, md: 4, lg: 3 }}>
+              <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider', height: '100%', p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" mb={1.5}>
+                  <Skeleton variant="rounded" width={40} height={40} sx={{ borderRadius: 2 }} />
+                  <Skeleton variant="rounded" width={44} height={20} sx={{ borderRadius: 1 }} />
+                </Stack>
+                <Skeleton variant="text" width={60} height={40} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="text" width={110} height={18} sx={{ borderRadius: 1 }} />
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
+          <CardContent sx={{ p: 3 }}>
+            <Skeleton variant="text" width={120} height={28} sx={{ mb: 1.5 }} />
+            <Divider sx={{ mb: 2 }} />
+            <Stack spacing={1.5}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Stack key={i} direction="row" spacing={1.5} alignItems="center">
+                  <Skeleton variant="circular" width={18} height={18} />
+                  <Skeleton variant="text" width={`${85 - i * 10}%`} height={20} />
+                </Stack>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Stack>
     );
   }
   if (error) {

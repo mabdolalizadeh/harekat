@@ -4,19 +4,18 @@ import { motion } from "motion/react";
 import Chip from "../components/ui/Chip.jsx";
 import Box from "../components/ui/Box.jsx";
 import { H1, H2, H3, P } from "../components/ui/Headings.jsx";
-import { ArrowButton, PrimaryButton } from "../components/ui/Buttons.jsx";
+import { ArrowButton } from "../components/ui/Buttons.jsx";
 import MarqueeLayout from "../layouts/MarqueeLayout.jsx";
 import { useNavigate } from "react-router-dom";
 import Img from "../components/ui/Img.jsx";
 import { CourseCard, SubscriptionCard } from "../components/contents/Cards.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
-import TeacherCard from "../components/contents/TeacherCard.jsx";
 import StepCard from "../components/contents/StepCard.jsx";
 import TestimonialCard from "../components/contents/TestimonialCard.jsx";
 import { AccordionCard } from "../components/contents/Cards.jsx";
 import { Mail, MapPin } from "lucide-react";
-import Footer from "../components/ui/Footer.jsx";
 import Slideshow from "../components/ui/Slideshow.jsx";
+import { CourseCardSkeleton, SubscriptionCardSkeleton, HeroSlideshowSkeleton } from "../components/ui/Skeleton.jsx";
 import { useEffect, useState } from "react";
 import { storeApi } from "../services/api.js";
 
@@ -56,10 +55,6 @@ const courses = [
         price: '',
         registrationStatus: ''
     }
-];
-
-const teachers = [
-    { name: '', role: '', avatar: '' }
 ];
 
 const steps = [
@@ -119,18 +114,37 @@ const faqItems = [
 
 function mapApiCourse(course) {
     const teacher = course.teacher ? `${course.teacher.firstName ?? ''} ${course.teacher.lastName ?? ''}`.trim() : '';
-    return { id: course.id, title: course.name, imgSrc: course.image, category: course.categories?.[0]?.name ?? '', level: course.level ?? '', duration: course.duration ?? '', courseType: course.typeOfAttendence ?? '', teacher: teacher || '—', price: course.price, salePrice: course.salePrice, registrationStatus: course.statusOfRegistration ?? '' };
+    return {
+        id: course.id,
+        title: course.name,
+        imgSrc: course.image,
+        category: course.categories?.[0]?.name ?? '',
+        level: course.level ?? '',
+        duration: course.duration ?? '',
+        courseType: course.typeOfAttendence ?? '',
+        teacher: teacher || '—',
+        price: course.price,
+        salePrice: course.salePrice,
+        registrationStatus: course.statusOfRegistration ?? '',
+        kind: course.kind || 'regular'
+    };
 }
 
-function mapApiTeacher(teacher) {
-    return { id: teacher.id, name: `${teacher.firstName ?? ''} ${teacher.lastName ?? ''}`.trim(), role: teacher.categories?.[0]?.name ?? 'مدرس', avatar: teacher.avatar };
-}
-
-function LevelSection({ id, eyebrow, title, courses: items }) {
-    if (!items.length) return null;
+function LevelSection({ id, eyebrow, title, courses: items, loading }) {
+    if (!loading && !items.length) return null;
     return <section id={id} className="w-full">
         <div className="mb-5 flex flex-col gap-1"><span className="text-xs font-bold uppercase tracking-[0.16em] text-muted">{eyebrow}</span><H2 className="text-foreground">{title}</H2></div>
-        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{items.map((course, index) => <motion.div key={course.id || course.title || index} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: index * 0.04 }}><CourseCard {...course} /></motion.div>)}</div>
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {loading ? (
+                Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
+            ) : (
+                items.map((course, index) => (
+                    <motion.div key={course.id || course.title || index} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: index * 0.04 }}>
+                        <CourseCard {...course} />
+                    </motion.div>
+                ))
+            )}
+        </div>
     </section>;
 }
 
@@ -138,19 +152,17 @@ export default function Landing() {
     const navigate = useNavigate();
     const [banners, setBanners] = useState([]);
     const [apiCourses, setApiCourses] = useState(null);
-    const [apiTeachers, setApiTeachers] = useState(null);
     const [apiSubscriptions, setApiSubscriptions] = useState(null);
     const [sectionIds, setSectionIds] = useState({ capsule: 'capsule-courses', skill: 'skill-packages', subscriptions: 'subscriptions' });
     const [contentMap, setContentMap] = useState({});
 
     useEffect(() => {
         let cancelled = false;
-        Promise.allSettled([storeApi.getBanners(), storeApi.getCourses(), storeApi.getTeachers(), storeApi.getSubscriptions(), storeApi.getCategories(), storeApi.getSiteContent()]).then((results) => {
+        Promise.allSettled([storeApi.getBanners(), storeApi.getCourses(), storeApi.getSubscriptions(), storeApi.getCategories(), storeApi.getSiteContent()]).then((results) => {
             if (cancelled) return;
-            const [bannerResult, courseResult, teacherResult, subscriptionResult, categoriesResult, contentResult] = results;
+            const [bannerResult, courseResult, subscriptionResult, categoriesResult, contentResult] = results;
             if (bannerResult.status === 'fulfilled') setBanners((bannerResult.value.data ?? []).filter((banner) => banner.isActive !== false).map((banner) => ({ image: banner.imageUrl, tabletImage: banner.tabletImageUrl || banner.imageUrl, mobileImage: banner.mobileImageUrl || banner.tabletImageUrl || banner.imageUrl, link: banner.linkUrl || undefined, duration: banner.duration, alt: 'بنر صفحه اصلی' })));
             if (courseResult.status === 'fulfilled') setApiCourses((courseResult.value.data ?? []).filter((course) => course.isActive !== false));
-            if (teacherResult.status === 'fulfilled') setApiTeachers((teacherResult.value.data ?? []).filter((teacher) => teacher.showOnLanding));
             if (subscriptionResult.status === 'fulfilled') setApiSubscriptions((subscriptionResult.value.data ?? []).filter((item) => item.isActive !== false));
             if (categoriesResult.status === 'fulfilled') {
                 const categories = categoriesResult.value.data ?? [];
@@ -162,9 +174,9 @@ export default function Landing() {
         return () => { cancelled = true; };
     }, []);
 
+    const isLoading = apiCourses === null;
     const heroSlides = banners.length > 0 ? banners : fallbackHeroSlides;
-    const displayCourses = apiCourses?.length ? apiCourses.map(mapApiCourse) : courses;
-    const displayTeachers = apiTeachers?.length ? apiTeachers.map(mapApiTeacher) : teachers;
+    const displayCourses = apiCourses?.length ? apiCourses.map(mapApiCourse) : (isLoading ? [] : courses);
     const apiCourseRows = apiCourses ?? [];
     const regularCourses = apiCourses?.length ? apiCourseRows.filter((course) => !course.kind || course.kind === 'regular').map(mapApiCourse) : displayCourses;
     const capsuleCourses = apiCourses?.length ? apiCourseRows.filter((course) => course.kind === 'capsule').map(mapApiCourse) : [];
@@ -180,7 +192,11 @@ export default function Landing() {
             <TopBarLayout />
 
             <div className="w-full pt-20 sm:pt-24">
-                <Slideshow slides={heroSlides} autoPlay interval={3000} className="mx-auto aspect-[4/5] max-w-[calc(100%-2rem)] rounded-[var(--radius-2xl)] sm:aspect-[4/3] md:aspect-[16/9]" />
+                {isLoading && banners.length === 0 ? (
+                    <HeroSlideshowSkeleton />
+                ) : (
+                    <Slideshow slides={heroSlides} autoPlay interval={3000} className="mx-auto aspect-[4/5] max-w-[calc(100%-2rem)] rounded-[var(--radius-2xl)] sm:aspect-[4/3] md:aspect-[16/9]" />
+                )}
             </div>
 
             {/* ============ HERO ============ */}
@@ -265,28 +281,46 @@ export default function Landing() {
                     مسیر هنری خودت رو کشف کن
                 </H2>
                 <div className="flex w-full flex-col gap-5">
-                    <LevelSection id="base-courses" eyebrow="سطح پایه" title="شروع از پایه" courses={baseCourses} />
-                    <LevelSection id="beginner-courses" eyebrow="سطح مقدماتی" title="ساختن مهارت‌های اصلی" courses={beginnerCourses} />
-                    <LevelSection id="advanced-courses" eyebrow="سطح پیشرفته" title="برای قدم‌های جدی‌تر" courses={advancedCourses} />
+                    <LevelSection id="base-courses" eyebrow="سطح پایه" title="شروع از پایه" courses={baseCourses} loading={isLoading} />
+                    <LevelSection id="beginner-courses" eyebrow="سطح مقدماتی" title="ساختن مهارت‌های اصلی" courses={beginnerCourses} loading={isLoading} />
+                    <LevelSection id="advanced-courses" eyebrow="سطح پیشرفته" title="برای قدم‌های جدی‌تر" courses={advancedCourses} loading={isLoading} />
                 </div>
             </Box>
 
-            {capsuleCourses.length > 0 && <Box id={'capsule-courses'} className="gap-4 py-12 sm:py-16">
+            {(isLoading || capsuleCourses.length > 0) && <Box id={'capsule-courses'} className="gap-4 py-12 sm:py-16">
                 <SectionTag>دوره‌های کپسولی</SectionTag>
                 <H2 className="text-center text-foreground">یادگیری کوتاه و کاربردی</H2>
-                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{capsuleCourses.map((course) => <CourseCard key={course.id || course.title} {...course} />)}</div>
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {isLoading ? (
+                        Array.from({ length: 4 }).map((_, i) => <CourseCardSkeleton key={i} />)
+                    ) : (
+                        capsuleCourses.map((course) => <CourseCard key={course.id || course.title} {...course} kind="capsule" />)
+                    )}
+                </div>
             </Box>}
 
-            {skillPackages.length > 0 && <Box id={'skill-packages'} className="gap-4 py-12 sm:py-16">
+            {(isLoading || skillPackages.length > 0) && <Box id={'skill-packages'} className="gap-4 py-12 sm:py-16">
                 <SectionTag>پکیج‌های مهارتی</SectionTag>
                 <H2 className="text-center text-foreground">مسیرهای کامل برای رشد</H2>
-                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{skillPackages.map((course) => <CourseCard key={course.id || course.title} {...course} productType="course" />)}</div>
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {isLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)
+                    ) : (
+                        skillPackages.map((course) => <CourseCard key={course.id || course.title} {...course} kind="skill" productType="course" />)
+                    )}
+                </div>
             </Box>}
 
-            {apiSubscriptions?.length > 0 && <Box id={'subscriptions'} className="gap-4 py-12 sm:py-16">
+            {(isLoading || (apiSubscriptions && apiSubscriptions.length > 0)) && <Box id={'subscriptions'} className="gap-4 py-12 sm:py-16">
                 <SectionTag>اشتراک‌ها</SectionTag>
                 <H2 className="text-center text-foreground">عضویت در مسیر یادگیری</H2>
-                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{apiSubscriptions.map((item) => <SubscriptionCard key={item.id} {...item} />)}</div>
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {isLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => <SubscriptionCardSkeleton key={i} />)
+                    ) : (
+                        apiSubscriptions.map((item) => <SubscriptionCard key={item.id} {...item} />)
+                    )}
+                </div>
             </Box>}
 
             {/* ============ MENTORS ============ */}

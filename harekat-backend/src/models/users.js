@@ -37,6 +37,22 @@ const Users = sequelize.define('Users', {
     avatar: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    nationalId: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    bio: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    jobTitle: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    education: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     updatedAt: true,

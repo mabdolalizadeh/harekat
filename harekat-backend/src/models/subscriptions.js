@@ -50,6 +50,26 @@ const Subscriptions = sequelize.define('Subscriptions', {
         type: DataTypes.STRING,
         allowNull: true,
         defaultValue: null
+    },
+    durationMonths: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1
+    },
+    durationDays: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 30
+    },
+    badgeLabel: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+    },
+    badgeIconSvg: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
     }
 }, {
     updatedAt: true,

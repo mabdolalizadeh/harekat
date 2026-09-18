@@ -12,6 +12,13 @@ import subscriptionsRouter from './subscriptions.js';
 import cartRouter from './cart.js';
 import ordersRouter from './orders.js';
 import bannersRouter from './banners.js';
+import sessionsRouter from './sessions.js';
+import examsRouter from './exams.js';
+import licensesRouter from './licenses.js';
+import ticketsRouter from './tickets.js';
+import tasRouter from './tas.js';
+import packagesRouter from './packages.js';
+import accessRouter from './access.js';
 
 const router = Router();
 
@@ -28,5 +35,12 @@ router.use('/subscriptions', subscriptionsRouter);
 router.use('/cart', cartRouter);
 router.use('/orders', ordersRouter);
 router.use('/banners', bannersRouter);
+router.use('/sessions', sessionsRouter);
+router.use('/exams', examsRouter);
+router.use('/licenses', licensesRouter);
+router.use('/tickets', ticketsRouter);
+router.use('/tas', tasRouter);
+router.use('/packages', packagesRouter);
+router.use('/access', accessRouter);
 
 export default router;

@@ -134,13 +134,27 @@ export default class AdminsController {
                 return res.status(401).json({ ok: false, message: 'invalid credentials' });
             }
 
+            const role = admin.role || 'superadmin';
             const token = jwt.sign(
-                { id: admin.id, role: 'admin' },
+                { id: admin.id, role },
                 configs.jwtKey,
                 { expiresIn: configs.jwtExpiry }
             );
-            logSecurityEvent('admin_auth_success', { adminId: admin.id, ip: req.ip });
-            return res.status(200).json({ ok: true, data: { token, admin: { id: admin.id, username: admin.username } } });
+            logSecurityEvent('admin_auth_success', { adminId: admin.id, role, ip: req.ip });
+            return res.status(200).json({
+                ok: true,
+                data: {
+                    token,
+                    admin: {
+                        id: admin.id,
+                        username: admin.username,
+                        role,
+                        name: admin.name || admin.username,
+                        email: admin.email || null,
+                        phoneNumber: admin.phoneNumber || null
+                    }
+                }
+            });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
         }

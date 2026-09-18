@@ -1,4 +1,5 @@
-import { Categories, Courses } from '../models/index.js';
+import { Categories, Courses, CourseCategories, TeacherCategories } from '../models/index.js';
+import { sequelize } from '../models/database.config.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
 export default class CategoriesController {
@@ -74,7 +75,11 @@ export default class CategoriesController {
             if (!category) {
                 return res.status(404).json({ ok: false, message: 'category not found' });
             }
-            await category.destroy();
+            await sequelize.transaction(async (t) => {
+                await CourseCategories.destroy({ where: { categoryId: id }, transaction: t });
+                await TeacherCategories.destroy({ where: { categoryId: id }, transaction: t });
+                await category.destroy({ transaction: t });
+            });
             logSecurityEvent('category_deleted', { categoryId: id, requesterId: req.user?.id, ip: req.ip });
             return res.status(200).json({ ok: true, message: 'category deleted' });
         } catch (err) {

@@ -17,6 +17,35 @@ const Admins = sequelize.define('Admins', {
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    role: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'superadmin',
+        validate: { isIn: [['superadmin', 'ta']] }
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'active',
+        validate: { isIn: [['active', 'inactive']] }
+    },
+    permissions: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
     }
 }, {
     createdAt: true,

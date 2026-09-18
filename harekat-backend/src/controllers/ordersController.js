@@ -84,14 +84,23 @@ export default class OrdersController {
 
     static async getOrders(req, res) {
         const userId = req.user?.id;
+        const role = req.user?.role;
         if (!userId) {
             return res.status(401).json({ ok: false, message: 'authentication required' });
         }
 
         try {
+            let whereClause = { userId };
+            if (role === 'admin' || role === 'superadmin') {
+                whereClause = req.query.userId ? { userId: req.query.userId } : {};
+            }
+
             const orders = await Orders.findAll({
-                where: { userId },
-                include: [{ model: OrderItems, as: 'items' }],
+                where: whereClause,
+                include: [
+                    { model: OrderItems, as: 'items' },
+                    { model: Users, as: 'user', attributes: ['id', 'firstName', 'lastName', 'phoneNumber'] }
+                ],
                 order: [['createdAt', 'DESC']]
             });
             return res.status(200).json({ ok: true, data: orders });
@@ -102,12 +111,17 @@ export default class OrdersController {
 
     static async getOrderById(req, res) {
         const userId = req.user?.id;
+        const role = req.user?.role;
         const { id } = req.params;
 
         try {
+            const whereClause = (role === 'admin' || role === 'superadmin') ? { id } : { id, userId };
             const order = await Orders.findOne({
-                where: { id, userId },
-                include: [{ model: OrderItems, as: 'items' }]
+                where: whereClause,
+                include: [
+                    { model: OrderItems, as: 'items' },
+                    { model: Users, as: 'user', attributes: ['id', 'firstName', 'lastName', 'phoneNumber'] }
+                ]
             });
             if (!order) {
                 return res.status(404).json({ ok: false, message: 'order not found' });

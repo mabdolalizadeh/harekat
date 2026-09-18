@@ -22,7 +22,7 @@ export default function AdminSettings() {
   const submit = async (event) => {
     event.preventDefault();
     setFeedback(null);
-    let admin = null;
+    let admin;
     try {
       admin = JSON.parse(localStorage.getItem('adminUser') || 'null');
     } catch {

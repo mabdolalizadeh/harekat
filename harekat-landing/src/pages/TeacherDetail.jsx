@@ -10,6 +10,7 @@ import { PrimaryButton } from "../components/ui/Buttons.jsx";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CourseCard } from "../components/contents/Cards.jsx";
+import { TeacherDetailSkeleton } from "../components/ui/Skeleton.jsx";
 
 function MarkdownContent({ content }) {
     if (!content?.trim()) return null;
@@ -57,7 +58,7 @@ export default function TeacherDetail() {
         return () => { cancelled = true; };
     }, [id]);
 
-    if (loading) return <MainLayout title="مدرس" sectionIds={null} contentMap={null}><TopBarLayout /><Box className="min-h-[50vh] pt-32"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></Box></MainLayout>;
+    if (loading) return <MainLayout title="مدرس" sectionIds={null} contentMap={null}><TopBarLayout /><TeacherDetailSkeleton /></MainLayout>;
     if (error || !teacher) return <MainLayout title="مدرس یافت نشد" sectionIds={null} contentMap={null}><TopBarLayout /><Box className="min-h-[50vh] pt-32 gap-4 text-center"><H1>مدرس یافت نشد</H1><PrimaryButton onClick={() => navigate('/')}>بازگشت</PrimaryButton></Box></MainLayout>;
 
     const fullName = `${teacher.firstName ?? ''} ${teacher.lastName ?? ''}`.trim() || '—';

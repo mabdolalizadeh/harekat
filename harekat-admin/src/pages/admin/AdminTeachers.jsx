@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, FormError, RowActions, PageHeader, Field } from './adminUi.jsx';
-import { Box, Stack, Button, TextField, Typography, Grid, Alert, Avatar, Chip, Skeleton, Paper, Divider, LinearProgress, Link, FormControlLabel, Switch } from '@mui/material';
+import { Card, FormError, RowActions, PageHeader, Field, TeacherCardSkeleton } from './adminUi.jsx';
+import { Box, Stack, Button, TextField, Typography, Grid, Alert, Avatar, Chip, Paper, Divider, LinearProgress, Link, FormControlLabel, Switch } from '@mui/material';
 import { Add as AddIcon, Person as PersonIcon, CloudUpload as CloudUploadIcon, Delete as DeleteIcon, Description as DescriptionIcon } from '@mui/icons-material';
 import ImagePicker from '../../components/ImagePicker.jsx';
 
@@ -115,7 +115,7 @@ export default function AdminTeachers() {
           <TeacherForm initial={editing === 'new' ? EMPTY : toForm(teachers.data?.find((t) => t.id === editing))} categories={categories.data ?? []} onSubmit={save} onCancel={() => setEditing(null)} saving={saving} />
         </Card>
       )}
-      {teachers.loading && <Skeleton variant="rounded" height={120} />}
+      {teachers.loading && <TeacherCardSkeleton count={4} />}
       {teachers.error && <Alert severity="error">خطا: {teachers.error} <Button onClick={teachers.reload} size="small">تلاش مجدد</Button></Alert>}
       {teachers.isEmpty && !editing && <Alert severity="info">مدرسی ثبت نشده است.</Alert>}
       <Grid container spacing={2}>

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, Field, FormError, RowActions, StatusDot, PageHeader } from './adminUi.jsx';
-import { Box, Stack, Button, TextField, FormControlLabel, Checkbox, Typography, Alert, Skeleton, Paper, Divider } from '@mui/material';
+import { Card, Field, FormError, RowActions, StatusDot, PageHeader, ListRowSkeleton } from './adminUi.jsx';
+import { Box, Stack, Button, TextField, FormControlLabel, Checkbox, Typography, Alert, Paper, Divider } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import ImagePicker from '../../components/ImagePicker.jsx';
 
@@ -59,7 +59,7 @@ export default function AdminContent() {
           <ContentForm initial={editing === 'new' ? EMPTY : blocks.find((b) => b.key === editing)} lockKey={editing !== 'new'} onSubmit={save} onCancel={() => setEditing(null)} saving={saving} />
         </Card>
       )}
-      {content.loading && <Skeleton variant="rounded" height={80} />}
+      {content.loading && <ListRowSkeleton count={4} showAvatar={false} circularAvatar={false} />}
       {content.error && <Alert severity="error">خطا: {content.error} <Button onClick={content.reload} size="small">تلاش مجدد</Button></Alert>}
       {content.isEmpty && !editing && <Alert severity="info">بلوکی ثبت نشده است.</Alert>}
       <Stack spacing={1.5}>

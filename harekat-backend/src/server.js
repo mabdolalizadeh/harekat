@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { sequelize } from './models/database.config.js';
 import app from './app.js';
 import { configs } from './config/config.js';
+import { migrateLmsSchema } from './models/migrateLms.js';
 
 async function repairCourseCategoryJoinTable() {
     const [rows] = await sequelize.query("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'CourseCategories'");
@@ -61,11 +62,9 @@ const gracefulShutdown = (signal) => {
 };
 
 repairCourseCategoryJoinTable()
-    // `alter: true` makes Sequelize recreate this composite join table with
-    // invalid single-column UNIQUE constraints. The explicit repair above
-    // handles the existing SQLite schema; normal sync creates new tables.
     .then(() => sequelize.sync())
     .then(() => addBannerResponsiveImageColumns())
+    .then(() => migrateLmsSchema())
     .then(() => {
         console.log('database synced');
         server = app.listen(PORT, () => {

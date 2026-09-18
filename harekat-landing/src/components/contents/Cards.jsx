@@ -60,13 +60,20 @@ export function AccordionCard({title, content, className, ...props}) {
 }
 
 export function CourseCard({
-    id, title, imgSrc, category, level, duration, courseType, teacher, price, salePrice, registrationStatus, productType = 'course', onAddToCart, className, ...props
+    id, title, imgSrc, category, level, duration, courseType, teacher, price, salePrice, registrationStatus, productType = 'course', kind = 'regular', onAddToCart, className, ...props
 }) {
     const [adding, setAdding] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const isSubscription = productType === 'subscription';
     const hasSale = salePrice !== null && salePrice !== undefined && salePrice !== '' && String(salePrice) !== String(price);
+
+    const getDetailPath = () => {
+        if (kind === 'capsule') return `/capsules/${id}`;
+        if (kind === 'skill') return `/packages/${id}`;
+        return `/courses/${id}`;
+    };
+
     const add = async (event) => {
         event.stopPropagation();
         if (!id || adding) return;
@@ -81,7 +88,7 @@ export function CourseCard({
     return (
         <motion.div
             whileHover={{y: -4}}
-            onClick={() => id && !isSubscription && (window.location.href = `/products/${id}`)}
+            onClick={() => id && !isSubscription && navigate(getDetailPath())}
             className={cn(
                 'bg-card border border-border/10 flex flex-col rounded-xl overflow-hidden',
                 'group transition-all duration-300 hover:border-border/20 hover:shadow-lg hover:shadow-black/20',
