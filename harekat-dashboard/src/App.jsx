@@ -10,7 +10,6 @@ import SubscriptionsPage from './pages/SubscriptionsPage.jsx';
 import OrdersPage from './pages/OrdersPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import SupportPage from './pages/SupportPage.jsx';
-import FaqPage from './pages/FaqPage.jsx';
 
 export default function App() {
   return (
@@ -41,7 +40,7 @@ export default function App() {
         <Route path="orders" element={<OrdersPage />} />
         <Route path="support" element={<SupportPage />} />
         <Route path="catalog" element={<Navigate to="/courses" replace />} />
-        <Route path="faq" element={<FaqPage />} />
+        <Route path="faq" element={<Navigate to="/tickets" replace />} />
       </Route>
 
       {/* Direct /dashboard routes to support landing page redirects */}
@@ -65,7 +64,7 @@ export default function App() {
         <Route path="orders" element={<OrdersPage />} />
         <Route path="support" element={<SupportPage />} />
         <Route path="catalog" element={<Navigate to="/courses" replace />} />
-        <Route path="faq" element={<FaqPage />} />
+        <Route path="faq" element={<Navigate to="/tickets" replace />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/overview" replace />} />

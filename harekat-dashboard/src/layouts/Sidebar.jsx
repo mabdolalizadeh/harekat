@@ -11,7 +11,6 @@ import HeadsetMicOutlinedIcon from '@mui/icons-material/HeadsetMicOutlined';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import CardMembershipOutlinedIcon from '@mui/icons-material/CardMembershipOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -34,10 +33,6 @@ export default function Sidebar({ onItemClick }) {
     { label: 'پکیج‌های من', path: '/packages', icon: <SchoolOutlinedIcon sx={{ fontSize: 20 }} /> },
     { label: 'پلن‌های اشتراک', path: '/subscriptions', icon: <CardMembershipOutlinedIcon sx={{ fontSize: 20 }} /> },
     { label: 'پرداخت‌ها', path: '/payments', icon: <ReceiptLongOutlinedIcon sx={{ fontSize: 20 }} /> }
-  ];
-
-  const secondaryNavItems = [
-    { label: 'سوالات متداول', path: '/faq', icon: <HelpOutlineOutlinedIcon sx={{ fontSize: 18 }} /> }
   ];
 
   return (
@@ -245,51 +240,6 @@ export default function Sidebar({ onItemClick }) {
                     }}
                   />
                 )}
-              </ListItemButton>
-            );
-          })}
-        </List>
-
-        <Divider sx={{ my: 1, borderColor: '#deddd7' }} />
-
-        {/* Secondary Links */}
-        <List disablePadding>
-          {secondaryNavItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <ListItemButton
-                key={item.path}
-                component={NavLink}
-                to={item.path}
-                onClick={onItemClick}
-                sx={{
-                  borderRadius: '12px',
-                  mb: 0.3,
-                  py: 0.6,
-                  px: 1.4,
-                  backgroundColor: isActive ? '#fff8ed' : 'transparent',
-                  color: isActive ? '#f47c20' : '#72726a',
-                  '&:hover': {
-                    backgroundColor: '#f7f5f0',
-                    color: '#171715'
-                  }
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 32,
-                    color: isActive ? '#f47c20' : '#9b9b92'
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    fontSize: '0.8rem',
-                    fontWeight: isActive ? 700 : 500
-                  }}
-                />
               </ListItemButton>
             );
           })}

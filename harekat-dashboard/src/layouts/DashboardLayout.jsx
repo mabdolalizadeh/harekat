@@ -27,8 +27,6 @@ export default function DashboardLayout() {
       case '/tickets':
       case '/support':
         return { title: 'پشتیبانی و تیکت', subtitle: 'ارسال پیام و پیگیری درخواست‌ها' };
-      case '/faq':
-        return { title: 'سوالات متداول', subtitle: 'راهنما و پرسش‌های پرتکرار' };
       default:
         return { title: 'مدرسه حرکت', subtitle: 'سامانه آموزش تخصصی هنر و رسانه' };
     }
