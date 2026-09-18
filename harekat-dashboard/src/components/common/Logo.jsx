@@ -60,7 +60,7 @@ export default function Logo({ sx, onClick }) {
             fontFamily: 'Vazirmatn, "Plus Jakarta Sans", sans-serif'
           }}
         >
-          حرکت اسکول
+          مدرسه حرکت
         </Typography>
         <Box
           sx={{

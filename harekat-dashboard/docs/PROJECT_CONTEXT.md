@@ -1,7 +1,7 @@
 # Harekat LMS Dashboard — Project Context
 
 ## 1. Project Purpose
-Harekat School (حرکت اسکول) is an educational media platform offering online/offline courses, skill packages, capsule trainings, and subscriptions.
+Harekat School (مدرسه حرکت) is an educational media platform offering online/offline courses, skill packages, capsule trainings, and subscriptions.
 
 ## 2. Dashboard Purpose
 This project is the dedicated **User Dashboard / LMS Panel** for students and registered users.

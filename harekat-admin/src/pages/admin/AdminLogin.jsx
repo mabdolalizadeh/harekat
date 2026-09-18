@@ -45,7 +45,7 @@ export default function AdminLogin() {
           <Stack direction="row" alignItems="center" spacing={1.5} mb={6}>
             <Box component="img" src="/favicon.svg" alt="حرکت" sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: '#fff', p: 0.5 }} />
             <Box>
-              <Typography fontWeight={800} fontSize={18}>حرکت</Typography>
+              <Typography fontWeight={800} fontSize={18}>مدرسه حرکت</Typography>
               <Typography variant="caption" sx={{ color: '#aabcf7' }}>مدیریت محتوا</Typography>
             </Box>
           </Stack>
@@ -82,7 +82,7 @@ export default function AdminLogin() {
           <Stack spacing={0.5} mb={3}>
             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1, mb: 1 }}>
               <Box component="img" src="/favicon.svg" alt="حرکت" sx={{ width: 34, height: 34, borderRadius: 2 }} />
-              <Typography fontWeight={800}>حرکت</Typography>
+              <Typography fontWeight={800}>مدرسه حرکت</Typography>
             </Box>
             <Typography variant="h5" fontWeight={800}>خوش آمدید</Typography>
             <Typography variant="body2" color="text.secondary" fontSize={13}>برای ورود به پنل مدیریت اطلاعات خود را وارد کنید.</Typography>

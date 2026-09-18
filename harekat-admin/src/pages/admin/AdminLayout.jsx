@@ -79,7 +79,7 @@ function SidebarContent({ onClose, onLogout, activePath, mobile }) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2.5, py: 2 }}>
         <Box component="img" src="/favicon.svg" alt="حرکت" sx={{ width: 40, height: 40, borderRadius: 2.5, flexShrink: 0 }} />
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography sx={{ fontWeight: 800, fontSize: 15, lineHeight: 1.2 }} noWrap>پنل مدیریت حرکت</Typography>
+          <Typography sx={{ fontWeight: 800, fontSize: 15, lineHeight: 1.2 }} noWrap>پنل مدیریت مدرسه حرکت</Typography>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: 11 }}>
             {ta ? 'دستیار آموزشی (TA)' : 'مدیر ارشد سیستم'}
           </Typography>

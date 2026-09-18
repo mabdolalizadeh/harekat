@@ -92,7 +92,7 @@ export default function CatalogPage() {
             کاوش دوره‌های آموزشی
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748b' }}>
-            دوره‌های تخصصی، بسته‌های مهارتی و آموزش‌های کپسولی حرکت اسکول ({toPersianDigits(courses.length)} دوره)
+            دوره‌های تخصصی، بسته‌های مهارتی و آموزش‌های کپسولی مدرسه حرکت ({toPersianDigits(courses.length)} دوره)
           </Typography>
         </Box>
 

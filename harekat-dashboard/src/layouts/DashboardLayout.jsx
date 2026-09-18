@@ -30,7 +30,7 @@ export default function DashboardLayout() {
       case '/faq':
         return { title: 'سوالات متداول', subtitle: 'راهنما و پرسش‌های پرتکرار' };
       default:
-        return { title: 'حرکت اسکول', subtitle: 'سامانه آموزش تخصصی هنر و رسانه' };
+        return { title: 'مدرسه حرکت', subtitle: 'سامانه آموزش تخصصی هنر و رسانه' };
     }
   };
 

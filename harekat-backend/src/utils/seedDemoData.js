@@ -158,7 +158,7 @@ async function seedHeaderMenu() {
 
 async function seedSiteContent() {
     const blocks = [
-        { key: 'hero-title', title: 'اینجا فقط یاد نمی‌گیری', body: 'مدرسه هنر و مهارت حرکت اسکول', sortOrder: 1 },
+        { key: 'hero-title', title: 'اینجا فقط یاد نمی‌گیری', body: 'مدرسه حرکت', sortOrder: 1 },
         { key: 'hero-cta', title: 'بریم شروع کنیم!', linkUrl: '/#courses', linkText: 'مشاهده دوره‌ها', sortOrder: 2 },
         { key: 'contact-email', title: 'ایمیل', body: 'info@harekatschool.com', sortOrder: 10 },
         { key: 'contact-phone', title: 'تلفن', body: '۰۲۱-۱۲۳۴۵۶۷۸', sortOrder: 11 },
@@ -166,7 +166,7 @@ async function seedSiteContent() {
         { key: 'social-instagram', title: 'اینستاگرام', linkUrl: 'https://instagram.com', linkText: 'اینستاگرام', sortOrder: 20 },
         { key: 'social-telegram', title: 'تلگرام', linkUrl: 'https://t.me', linkText: 'تلگرام', sortOrder: 21 },
         { key: 'social-linkedin', title: 'لینکدین', linkUrl: 'https://linkedin.com', linkText: 'لینکدین', sortOrder: 22 },
-        { key: 'footer-copyright', title: 'کپی‌رایت', body: '© ۱۴۰۵ حرکت اسکول', sortOrder: 30 },
+        { key: 'footer-copyright', title: 'کپی‌رایت', body: '© ۱۴۰۵ مدرسه حرکت', sortOrder: 30 },
         { key: 'announcement', title: 'اطلاعیه', body: '', isActive: false, sortOrder: 0 },
     ];
     for (const b of blocks) {

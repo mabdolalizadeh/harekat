@@ -59,7 +59,7 @@ async function main() {
     }
 
     const blocks = [
-        { key: 'hero-title', title: 'اینجا فقط یاد نمی‌گیری', body: 'مدرسه هنر و مهارت حرکت اسکول' },
+        { key: 'hero-title', title: 'اینجا فقط یاد نمی‌گیری', body: 'مدرسه حرکت' },
         { key: 'hero-cta', title: 'بریم شروع کنیم!', linkUrl: '/#courses', linkText: 'مشاهده دوره‌ها' },
         { key: 'contact-email', title: 'ایمیل', body: 'info@harekatschool.com' },
         { key: 'contact-phone', title: 'تلفن', body: '۰۲۱-۱۲۳۴۵۶۷۸' },
@@ -67,7 +67,7 @@ async function main() {
         { key: 'social-instagram', title: 'اینستاگرام', linkUrl: 'https://instagram.com', linkText: 'اینستاگرام' },
         { key: 'social-telegram', title: 'تلگرام', linkUrl: 'https://t.me', linkText: 'تلگرام' },
         { key: 'social-linkedin', title: 'لینکدین', linkUrl: 'https://linkedin.com', linkText: 'لینکدین' },
-        { key: 'footer-copyright', title: 'کپی‌رایت', body: '© ۱۴۰۵ حرکت اسکول' },
+        { key: 'footer-copyright', title: 'کپی‌رایت', body: '© ۱۴۰۵ مدرسه حرکت' },
     ];
     for (const b of blocks) {
         await SiteContent.findOrCreate({ where: { key: b.key }, defaults: b });

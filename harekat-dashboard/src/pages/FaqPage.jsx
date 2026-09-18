@@ -23,7 +23,7 @@ export default function FaqPage() {
         سوالات متداول (FAQ)
       </Typography>
       <Typography variant="body2" sx={{ color: '#64748b', mb: 3.5 }}>
-        پاسخ به سوالات پرتکرار دانش‌آموزان و همراهان حرکت اسکول
+        پاسخ به سوالات پرتکرار دانش‌آموزان و همراهان مدرسه حرکت
       </Typography>
 
       {faqs.map((item, i) => (

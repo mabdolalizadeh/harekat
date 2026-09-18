@@ -266,7 +266,7 @@ export default function SubscriptionsPage() {
                 </Typography>
 
                 <Typography variant="body2" sx={{ color: '#64748b', mb: 3, minHeight: 40, lineHeight: 1.6 }}>
-                  {sub.description || 'دسترسی کامل به محتواهای ویژه و وبینارهای تخصصی حرکت اسکول.'}
+                  {sub.description || 'دسترسی کامل به محتواهای ویژه و وبینارهای تخصصی مدرسه حرکت.'}
                 </Typography>
 
                 <Box sx={{ mb: 3 }}>

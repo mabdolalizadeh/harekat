@@ -157,8 +157,8 @@ Phase: **All Tasks Completed** ✅
   - Removed course search input and course catalog search from dashboard (`/catalog` redirected to `/courses`).
 - [x] **Dashboard Favicon**:
   - Copied landing SVG favicon to `harekat-dashboard/public/favicon.svg` and updated `index.html` link tag.
-- [x] **Full Project Rebranding (Harekat Media → Harekat School)**:
+- [x] **Full Project Rebranding (Harekat Media / حرکت مدیا → Harekat School / مدرسه حرکت)**:
   - Renamed all occurrences of "Harekat Media" / "harekatmedia" to "Harekat School" / "harekatschool" across codebase and docs.
-  - Renamed all Persian branding "حرکت مدیا" to "حرکت اسکول" across landing pages, dashboard components, seed data, and HTML titles.
-  - Verified 0 remaining occurrences across entire repository.
+  - Renamed all Persian branding to "مدرسه حرکت" across landing pages, dashboard components, admin panel, seed data, and HTML titles.
+  - Verified 0 remaining occurrences of old brand names across entire repository.
   - Confirmed all three frontend applications build cleanly with 0 errors.
