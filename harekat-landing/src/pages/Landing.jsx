@@ -11,7 +11,7 @@ import Img from "../components/ui/Img.jsx";
 import { CourseCard, SubscriptionCard } from "../components/contents/Cards.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
 import StepCard from "../components/contents/StepCard.jsx";
-import TestimonialCard from "../components/contents/TestimonialCard.jsx";
+import StudentReviewCard from "../components/contents/StudentReviewCard.jsx";
 import { AccordionCard } from "../components/contents/Cards.jsx";
 import { Mail, MapPin } from "lucide-react";
 import Slideshow from "../components/ui/Slideshow.jsx";
@@ -474,11 +474,9 @@ export default function Landing() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.06 }}
                         >
-                            <TestimonialCard
-                                quote={item.quote}
+                            <StudentReviewCard
+                                review={item.quote}
                                 name={item.name}
-                                role={item.role}
-                                avatar={item.avatar}
                             />
                         </motion.div>
                     ))}
