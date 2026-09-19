@@ -126,8 +126,8 @@ try {
 app.use('/api/v1', apiLimiter);
 
 // Images are uploaded separately from JSON payloads so large binary data does
-// not count against the JSON request limit.
-app.use('/api/v1/uploads/image', auth, adminOnly, express.raw({ type: ['image/*'], limit: '15mb' }), async (req, res) => {
+// not count against the JSON request limit. Any authenticated user (admin, TA, or student) can upload.
+app.use('/api/v1/uploads/image', auth, express.raw({ type: ['image/*'], limit: '15mb' }), async (req, res) => {
     try {
         if (!req.body || req.body.length === 0) {
             return res.status(400).json({ ok: false, message: 'No image data' });

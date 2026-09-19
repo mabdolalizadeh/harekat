@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -8,6 +8,7 @@ import {
   Avatar,
   TextField,
   Button,
+  IconButton,
   Divider,
   Alert,
   CircularProgress,
@@ -23,8 +24,12 @@ import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined';
 import CardMembershipOutlinedIcon from '@mui/icons-material/CardMembershipOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined';
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { userApi } from '../api/userApi.js';
 import { subscriptionsApi } from '../api/subscriptionsApi.js';
 import { sanitizeSvg } from '../utils/sanitizeSvg.js';
 import { assetUrl, formatDate, toPersianDigits } from '../utils/formatters.js';
@@ -42,7 +47,66 @@ export default function ProfilePage() {
   const [avatar, setAvatar] = useState(user?.avatar || '');
 
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [message, setMessage] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Sync avatar if user context changes
+  useEffect(() => {
+    if (user?.avatar !== undefined) {
+      setAvatar(user.avatar || '');
+    }
+  }, [user?.avatar]);
+
+  const handleAvatarFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'فقط فایل‌های تصویری (JPG, PNG, WebP و ...) مجاز هستند.' });
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'حجم تصویر نباید بیشتر از ۱۵ مگابایت باشد.' });
+      return;
+    }
+
+    try {
+      setUploadingAvatar(true);
+      setMessage(null);
+      const res = await userApi.uploadAvatar(file);
+      const newAvatarUrl = res?.data?.imageUrl;
+      if (newAvatarUrl) {
+        setAvatar(newAvatarUrl);
+        await updateProfile({ avatar: newAvatarUrl });
+        setMessage({ type: 'success', text: 'تصویر نمایه شما با موفقیت آپلود و ذخیره شد.' });
+      } else {
+        throw new Error('پاسخی از سرور دریافت نشد');
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message || 'خطا در بارگذاری تصویر نمایه' });
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    try {
+      setUploadingAvatar(true);
+      setMessage(null);
+      setAvatar('');
+      await updateProfile({ avatar: '' });
+      setMessage({ type: 'success', text: 'تصویر نمایه با موفقیت حذف شد.' });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message || 'خطا در حذف تصویر نمایه' });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   // Dynamic Subscription data from backend
   const [subData, setSubData] = useState(null);
@@ -136,23 +200,131 @@ export default function ProfilePage() {
               mb: 3
             }}
           >
-            <Avatar
-              src={assetUrl(avatar || user?.avatar)}
-              alt={firstName || 'کاربر'}
-              sx={{
-                width: 92,
-                height: 92,
-                mx: 'auto',
-                mb: 2,
-                border: '3px solid #f47c20',
-                backgroundColor: '#ffa33f',
-                boxShadow: '0 4px 14px rgba(244, 124, 32, 0.25)',
-                fontSize: '1.8rem',
-                fontWeight: 700
-              }}
-            >
-              {firstName?.[0] || 'ح'}
-            </Avatar>
+            {/* Interactive Avatar with Upload overlay & badge */}
+            <Box sx={{ position: 'relative', display: 'inline-block', mx: 'auto', mb: 1.5 }}>
+              <Avatar
+                src={assetUrl(avatar || user?.avatar)}
+                alt={firstName || 'کاربر'}
+                onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
+                sx={{
+                  width: 96,
+                  height: 96,
+                  mx: 'auto',
+                  border: '3px solid #f47c20',
+                  backgroundColor: '#ffa33f',
+                  boxShadow: '0 4px 14px rgba(244, 124, 32, 0.25)',
+                  fontSize: '1.8rem',
+                  fontWeight: 700,
+                  cursor: uploadingAvatar ? 'wait' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    opacity: 0.88,
+                    transform: 'scale(1.02)'
+                  }
+                }}
+              >
+                {firstName?.[0] || 'ح'}
+              </Avatar>
+
+              {uploadingAvatar ? (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(2px)'
+                  }}
+                >
+                  <CircularProgress size={30} sx={{ color: '#f47c20' }} />
+                </Box>
+              ) : (
+                <IconButton
+                  size="small"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="بارگذاری و تغییر تصویر آواتار"
+                  sx={{
+                    position: 'absolute',
+                    bottom: 2,
+                    left: 2,
+                    backgroundColor: '#f47c20',
+                    color: '#ffffff',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                    border: '2px solid #ffffff',
+                    width: 32,
+                    height: 32,
+                    '&:hover': {
+                      backgroundColor: '#df5b13'
+                    }
+                  }}
+                >
+                  <PhotoCameraOutlinedIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              )}
+            </Box>
+
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleAvatarFileSelect}
+            />
+
+            {/* Avatar action buttons */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, mb: 2 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={uploadingAvatar}
+                onClick={() => fileInputRef.current?.click()}
+                startIcon={uploadingAvatar ? <CircularProgress size={14} color="inherit" /> : <PhotoCameraOutlinedIcon sx={{ fontSize: 16 }} />}
+                sx={{
+                  borderRadius: '10px',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  borderColor: '#f47c20',
+                  color: '#f47c20',
+                  py: 0.4,
+                  px: 1.5,
+                  '&:hover': {
+                    borderColor: '#df5b13',
+                    backgroundColor: '#fff8ed'
+                  }
+                }}
+              >
+                {uploadingAvatar ? 'در حال آپلود...' : (avatar || user?.avatar ? 'تغییر تصویر' : 'آپلود تصویر')}
+              </Button>
+              {(avatar || user?.avatar) && (
+                <Button
+                  variant="text"
+                  size="small"
+                  disabled={uploadingAvatar}
+                  onClick={handleRemoveAvatar}
+                  startIcon={<DeleteOutlineIcon sx={{ fontSize: 16 }} />}
+                  sx={{
+                    borderRadius: '10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    color: '#dc2626',
+                    py: 0.4,
+                    px: 1,
+                    '&:hover': {
+                      backgroundColor: '#fee2e2'
+                    }
+                  }}
+                >
+                  حذف
+                </Button>
+              )}
+            </Box>
 
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', mb: 0.5 }}>
               {firstName && lastName ? `${firstName} ${lastName}` : 'کاربر حرکت'}
@@ -484,19 +656,51 @@ export default function ProfilePage() {
                   />
                 </Grid>
 
-                {/* Avatar URL */}
+                {/* Avatar URL & Direct Upload */}
                 <Grid item xs={12}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
-                    آدرس تصویر آواتار:
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: '#171715' }}>
+                      تصویر نمایه (آواتار):
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#6b6b63' }}>
+                      فرمت بهینه WebP خودکار
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={avatar}
+                      onChange={(e) => setAvatar(e.target.value)}
+                      placeholder="آدرس تصویر یا مسیر فایل آپلود شده..."
+                      dir="ltr"
+                    />
+                    <Button
+                      variant="outlined"
+                      disabled={uploadingAvatar}
+                      onClick={() => fileInputRef.current?.click()}
+                      startIcon={uploadingAvatar ? <CircularProgress size={16} color="inherit" /> : <CloudUploadOutlinedIcon />}
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        minWidth: '135px',
+                        height: '40px',
+                        borderRadius: '10px',
+                        fontWeight: 700,
+                        borderColor: '#f47c20',
+                        color: '#f47c20',
+                        flexShrink: 0,
+                        '&:hover': {
+                          borderColor: '#df5b13',
+                          backgroundColor: '#fff8ed'
+                        }
+                      }}
+                    >
+                      {uploadingAvatar ? 'در حال آپلود...' : 'آپلود فایل'}
+                    </Button>
+                  </Box>
+                  <Typography variant="caption" sx={{ color: '#9b9b92', mt: 0.8, display: 'block' }}>
+                    با انتخاب فایل، تصویر شما در سرور فشرده‌سازی شده و به فرمت بهینه WebP تبدیل و ذخیره می‌شود.
                   </Typography>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    value={avatar}
-                    onChange={(e) => setAvatar(e.target.value)}
-                    placeholder="https://..."
-                    dir="ltr"
-                  />
                 </Grid>
 
                 {/* Bio */}
