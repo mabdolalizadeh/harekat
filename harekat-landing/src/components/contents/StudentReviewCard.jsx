@@ -6,13 +6,9 @@ export default function StudentReviewCard({ review, quote, name, className, ...p
     return (
         <div
             className={cn(
-                'group relative flex flex-col justify-between h-full bg-card/65 dark:bg-card/45 backdrop-blur-xl border border-border/70 rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1',
+                'group relative flex flex-col justify-between h-full bg-card border border-border/70 rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:-translate-y-1',
                 className
             )}
-            style={{
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)'
-            }}
             {...props}
         >
             {/* Top quote decorative element */}

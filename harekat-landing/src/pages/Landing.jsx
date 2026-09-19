@@ -459,19 +459,13 @@ export default function Landing() {
             </Box>
 
             {/* ============ TESTIMONIALS ============ */}
-            <Box id={'reviews'} className={'relative py-16 sm:py-24 gap-4 sm:gap-6 overflow-hidden'}>
-                {/* Ambient glow behind reviews to accentuate card blur */}
-                <div className="absolute inset-0 -z-10 pointer-events-none flex items-center justify-center" aria-hidden="true">
-                    <div className="w-[520px] h-[320px] bg-primary/10 rounded-full blur-[110px] opacity-70" />
-                    <div className="w-[420px] h-[260px] bg-electric-500/10 rounded-full blur-[100px] opacity-50 -translate-x-24 translate-y-12" />
-                </div>
-
+            <Box id={'reviews'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
                 <SectionTag>نظرات دانش‌آموزان</SectionTag>
                 <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
                     دانش‌آموزان ما چه می‌گن
                 </H2>
 
-                <div className={'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full mt-4 relative z-10'}>
+                <div className={'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full mt-4'}>
                     {testimonials.map((item, index) => (
                         <motion.div
                             key={index}
