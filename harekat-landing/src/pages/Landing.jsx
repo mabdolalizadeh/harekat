@@ -18,6 +18,8 @@ import Slideshow from "../components/ui/Slideshow.jsx";
 import { CourseCardSkeleton, SubscriptionCardSkeleton, HeroSlideshowSkeleton } from "../components/ui/Skeleton.jsx";
 import { useEffect, useState } from "react";
 import { storeApi } from "../services/api.js";
+import TeacherCard from '../components/contents/TeacherCard.jsx';
+import { PrimaryButton } from "../components/ui/Buttons.jsx";
 
 const fallbackHeroSlides = [
     { image: '', alt: '' },
@@ -130,6 +132,17 @@ function mapApiCourse(course) {
     };
 }
 
+function mapApiTeacher(teacher) {
+    const name = `${teacher.firstName ?? ''} ${teacher.lastName ?? ''}`.trim() || 'استاد';
+    const role = teacher.categories?.[0]?.name || (teacher.resume ? teacher.resume.split('\n')[0].replace(/^#+\s*/, '') : '') || 'مدرس';
+    return {
+        id: teacher.id,
+        name,
+        role,
+        avatar: teacher.avatar
+    };
+}
+
 function LevelSection({ id, eyebrow, title, courses: items, loading }) {
     if (!loading && !items.length) return null;
     return <section id={id} className="w-full">
@@ -152,17 +165,26 @@ export default function Landing() {
     const navigate = useNavigate();
     const [banners, setBanners] = useState([]);
     const [apiCourses, setApiCourses] = useState(null);
+    const [apiTeachers, setApiTeachers] = useState(null);
     const [apiSubscriptions, setApiSubscriptions] = useState(null);
     const [sectionIds, setSectionIds] = useState({ capsule: 'capsule-courses', skill: 'skill-packages', subscriptions: 'subscriptions' });
     const [contentMap, setContentMap] = useState({});
 
     useEffect(() => {
         let cancelled = false;
-        Promise.allSettled([storeApi.getBanners(), storeApi.getCourses(), storeApi.getSubscriptions(), storeApi.getCategories(), storeApi.getSiteContent()]).then((results) => {
+        Promise.allSettled([
+            storeApi.getBanners(),
+            storeApi.getCourses(),
+            storeApi.getTeachers(),
+            storeApi.getSubscriptions(),
+            storeApi.getCategories(),
+            storeApi.getSiteContent()
+        ]).then((results) => {
             if (cancelled) return;
-            const [bannerResult, courseResult, subscriptionResult, categoriesResult, contentResult] = results;
+            const [bannerResult, courseResult, teacherResult, subscriptionResult, categoriesResult, contentResult] = results;
             if (bannerResult.status === 'fulfilled') setBanners((bannerResult.value.data ?? []).filter((banner) => banner.isActive !== false).map((banner) => ({ image: banner.imageUrl, tabletImage: banner.tabletImageUrl || banner.imageUrl, mobileImage: banner.mobileImageUrl || banner.tabletImageUrl || banner.imageUrl, link: banner.linkUrl || undefined, duration: banner.duration, alt: 'بنر صفحه اصلی' })));
             if (courseResult.status === 'fulfilled') setApiCourses((courseResult.value.data ?? []).filter((course) => course.isActive !== false));
+            if (teacherResult.status === 'fulfilled') setApiTeachers((teacherResult.value.data ?? []).filter((teacher) => teacher.showOnLanding !== false));
             if (subscriptionResult.status === 'fulfilled') setApiSubscriptions((subscriptionResult.value.data ?? []).filter((item) => item.isActive !== false));
             if (categoriesResult.status === 'fulfilled') {
                 const categories = categoriesResult.value.data ?? [];
@@ -177,6 +199,7 @@ export default function Landing() {
     const isLoading = apiCourses === null;
     const heroSlides = banners.length > 0 ? banners : fallbackHeroSlides;
     const displayCourses = apiCourses?.length ? apiCourses.map(mapApiCourse) : (isLoading ? [] : courses);
+    const displayTeachers = apiTeachers?.length ? apiTeachers.map(mapApiTeacher) : [];
     const apiCourseRows = apiCourses ?? [];
     const regularCourses = apiCourses?.length ? apiCourseRows.filter((course) => !course.kind || course.kind === 'regular').map(mapApiCourse) : displayCourses;
     const capsuleCourses = apiCourses?.length ? apiCourseRows.filter((course) => course.kind === 'capsule').map(mapApiCourse) : [];
@@ -324,38 +347,50 @@ export default function Landing() {
             </Box>}
 
             {/* ============ MENTORS ============ */}
-            {/* <Box id={'mentors'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
-                <SectionTag>اساتید</SectionTag>
-                <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
-                    از هنرمندان فعال یاد بگیر
-                </H2>
-                <P className={'text-center text-muted max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
-                    اساتیدی با تجربه‌های متفاوت، با روش، توجه و بلندمدت‌اندیشی مشترک
-                </P>
-                <PrimaryButton onClick={() => navigate('/contact-us')}>
-                    به عنوان استاد بپیوندید
-                </PrimaryButton>
+            {(isLoading || displayTeachers.length > 0) && (
+                <Box id={'mentors'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
+                    <SectionTag>اساتید</SectionTag>
+                    <H2 className={'text-[clamp(2rem,4vw,3.5rem)] text-center text-foreground max-w-[700px]'}>
+                        از هنرمندان فعال یاد بگیر
+                    </H2>
+                    <P className={'text-center text-muted max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
+                        اساتیدی با تجربه‌های متفاوت، با روش، توجه و بلندمدت‌اندیشی مشترک
+                    </P>
+                    <PrimaryButton onClick={() => navigate('/contact-us')}>
+                        به عنوان استاد بپیوندید
+                    </PrimaryButton>
 
-                <div className={'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 w-full mt-4'}>
-                    {displayTeachers.map((teacher, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{opacity: 0, y: 24}}
-                            whileInView={{opacity: 1, y: 0}}
-                            viewport={{once: true}}
-                            transition={{duration: 0.5, delay: index * 0.06}}
-                        >
-                            <TeacherCard
-                                name={teacher.name}
-                                role={teacher.role}
-                                avatar={teacher.avatar}
-                                onClick={() => teacher.id && (window.location.href = `/teachers/${teacher.id}`)}
-                                className={teacher.id ? 'cursor-pointer' : ''}
-                            />
-                        </motion.div>
-                    ))}
-                </div>
-            </Box> */}
+                    <div className={'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 w-full mt-4'}>
+                        {isLoading ? (
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i} className="flex flex-col items-center gap-4 animate-pulse">
+                                    <div className="w-full aspect-square rounded-2xl bg-surface-muted/60 border border-border" />
+                                    <div className="h-4 w-24 rounded bg-surface-muted/80" />
+                                    <div className="h-3 w-16 rounded bg-surface-muted/60" />
+                                </div>
+                            ))
+                        ) : (
+                            displayTeachers.map((teacher, index) => (
+                                <motion.div
+                                    key={teacher.id || index}
+                                    initial={{opacity: 0, y: 24}}
+                                    whileInView={{opacity: 1, y: 0}}
+                                    viewport={{once: true}}
+                                    transition={{duration: 0.5, delay: index * 0.06}}
+                                >
+                                    <TeacherCard
+                                        name={teacher.name}
+                                        role={teacher.role}
+                                        avatar={teacher.avatar}
+                                        onClick={() => teacher.id && (window.location.href = `/teachers/${teacher.id}`)}
+                                        className={teacher.id ? 'cursor-pointer' : ''}
+                                    />
+                                </motion.div>
+                            ))
+                        )}
+                    </div>
+                </Box>
+            )} 
 
             {/* ============ WHO IT'S FOR ============ */}
             <Box id={'who'} className={'py-16 sm:py-24 gap-4 sm:gap-6'}>
