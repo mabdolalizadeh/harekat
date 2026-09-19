@@ -185,9 +185,9 @@ export default function ProfilePage() {
         </Alert>
       )}
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
         {/* Left Column: Avatar + Profile Meter + Dynamic Subscription Badge */}
-        <Grid item xs={12} md={4.5}>
+        <Grid item xs={12} md={4.5} sx={{ display: 'flex', flexDirection: 'column' }}>
           {/* User ID & Profile completion card */}
           <Card
             sx={{
@@ -431,7 +431,10 @@ export default function ProfilePage() {
               borderRadius: '24px',
               border: hasActiveSub ? '2px solid #f47c20' : '1px solid #deddd7',
               backgroundColor: hasActiveSub ? '#fffdfa' : '#ffffff',
-              boxShadow: hasActiveSub ? '0 8px 24px -4px rgba(244, 124, 32, 0.15)' : 'none'
+              boxShadow: hasActiveSub ? '0 8px 24px -4px rgba(244, 124, 32, 0.15)' : 'none',
+              flex: { xs: 'none', md: 1 },
+              display: 'flex',
+              flexDirection: 'column'
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -442,79 +445,81 @@ export default function ProfilePage() {
             </Box>
 
             {loadingSub ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, py: 3 }}>
                 <CircularProgress size={24} />
               </Box>
             ) : hasActiveSub ? (
-              <Box>
-                {/* Dynamic Badge Display: Label + Sanitized SVG icon from backend */}
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: '18px',
-                    backgroundColor: '#fff8ed',
-                    border: '1px solid #ffdda8',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                    mb: 2
-                  }}
-                >
-                  {/* Dynamic SVG Icon rendered safely */}
-                  {sanitizedBadgeSvg ? (
-                    <Box
-                      sx={{
-                        width: 44,
-                        height: 44,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        '& svg': { width: '100%', height: '100%' }
-                      }}
-                      dangerouslySetInnerHTML={{ __html: sanitizedBadgeSvg }}
-                    />
-                  ) : (
-                    <VerifiedUserOutlinedIcon sx={{ fontSize: 36, color: '#f47c20' }} />
-                  )}
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <Box>
+                  {/* Dynamic Badge Display: Label + Sanitized SVG icon from backend */}
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: '18px',
+                      backgroundColor: '#fff8ed',
+                      border: '1px solid #ffdda8',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      mb: 2
+                    }}
+                  >
+                    {/* Dynamic SVG Icon rendered safely */}
+                    {sanitizedBadgeSvg ? (
+                      <Box
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          '& svg': { width: '100%', height: '100%' }
+                        }}
+                        dangerouslySetInnerHTML={{ __html: sanitizedBadgeSvg }}
+                      />
+                    ) : (
+                      <VerifiedUserOutlinedIcon sx={{ fontSize: 36, color: '#f47c20' }} />
+                    )}
 
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography variant="caption" sx={{ color: '#b94410', fontWeight: 600 }}>
-                      نشان ویژه شما:
-                    </Typography>
-                    <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#171715' }}>
-                      {badgeLabel || subData.subscription.title}
-                    </Typography>
-                  </Box>
-
-                  <Chip
-                    label="فعال"
-                    size="small"
-                    color="success"
-                    sx={{ fontWeight: 700 }}
-                  />
-                </Box>
-
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="caption" sx={{ color: '#6b6b63' }}>پلن اشتراک:</Typography>
-                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                      {subData.subscription.title}
-                    </Typography>
-                  </Box>
-                  {subData.userSubscription?.endDate && (
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="caption" sx={{ color: '#6b6b63' }}>اعتبار تا:</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                        {formatDate(subData.userSubscription.endDate)}
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Typography variant="caption" sx={{ color: '#b94410', fontWeight: 600 }}>
+                        نشان ویژه شما:
+                      </Typography>
+                      <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#171715' }}>
+                        {badgeLabel || subData.subscription.title}
                       </Typography>
                     </Box>
-                  )}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="caption" sx={{ color: '#6b6b63' }}>دوره‌های تحت پوشش:</Typography>
-                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                      {toPersianDigits(subData.includedCourses?.length || 0)} دوره
-                    </Typography>
+
+                    <Chip
+                      label="فعال"
+                      size="small"
+                      color="success"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  </Box>
+
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="caption" sx={{ color: '#6b6b63' }}>پلن اشتراک:</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                        {subData.subscription.title}
+                      </Typography>
+                    </Box>
+                    {subData.userSubscription?.endDate && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="caption" sx={{ color: '#6b6b63' }}>اعتبار تا:</Typography>
+                        <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                          {formatDate(subData.userSubscription.endDate)}
+                        </Typography>
+                      </Box>
+                    )}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="caption" sx={{ color: '#6b6b63' }}>دوره‌های تحت پوشش:</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                        {toPersianDigits(subData.includedCourses?.length || 0)} دوره
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
 
@@ -524,14 +529,14 @@ export default function ProfilePage() {
                   variant="outlined"
                   fullWidth
                   size="small"
-                  sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#f47c20' }}
+                  sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#f47c20', mt: 'auto' }}
                 >
                   مشاهده جزئیات اشتراک
                 </Button>
               </Box>
             ) : (
-              <Box sx={{ textAlign: 'center', py: 2 }}>
-                <Typography variant="body2" sx={{ color: '#6b6b63', mb: 2 }}>
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', textAlign: 'center', pt: 1, pb: 0 }}>
+                <Typography variant="body2" sx={{ color: '#6b6b63', mb: 2, lineHeight: 1.8 }}>
                   شما در حال حاضر فاقد اشتراک ویژه هستید. با فعال‌سازی اشتراک، نشان اختصاصی در کاربری شما درج خواهد شد.
                 </Typography>
                 <Button
@@ -543,6 +548,7 @@ export default function ProfilePage() {
                     borderRadius: '14px',
                     backgroundColor: '#f47c20',
                     fontWeight: 700,
+                    mt: 'auto',
                     '&:hover': { backgroundColor: '#df5b13' }
                   }}
                 >
@@ -554,21 +560,24 @@ export default function ProfilePage() {
         </Grid>
 
         {/* Right Column: Edit Profile Form */}
-        <Grid item xs={12} md={7.5}>
+        <Grid item xs={12} md={7.5} sx={{ display: 'flex', flexDirection: 'column' }}>
           <Card
             sx={{
               p: { xs: 2.5, sm: 3.5 },
               borderRadius: '24px',
               border: '1px solid #deddd7',
               backgroundColor: '#ffffff',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', mb: 3 }}>
               ویرایش اطلاعات هویتی و تحصیلی
             </Typography>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Grid container spacing={2.5}>
                 {/* First Name */}
                 <Grid item xs={12} sm={6}>
@@ -718,27 +727,28 @@ export default function ProfilePage() {
                   />
                 </Grid>
 
-                {/* Submit button */}
-                <Grid item xs={12} sx={{ pt: 1.5 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={saving}
-                    startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveOutlinedIcon />}
-                    sx={{
-                      py: 1.2,
-                      px: 4,
-                      borderRadius: '14px',
-                      backgroundColor: '#f47c20',
-                      color: '#ffffff',
-                      fontWeight: 700,
-                      '&:hover': { backgroundColor: '#df5b13' }
-                    }}
-                  >
-                    {saving ? 'در حال ذخیره اطلاعات...' : 'ذخیره تغییرات حساب'}
-                  </Button>
-                </Grid>
               </Grid>
+
+              {/* Submit button pinned to bottom */}
+              <Box sx={{ mt: 'auto', pt: 3, display: 'flex', justifyContent: 'flex-start' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={saving}
+                  startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveOutlinedIcon />}
+                  sx={{
+                    py: 1.2,
+                    px: 4,
+                    borderRadius: '14px',
+                    backgroundColor: '#f47c20',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    '&:hover': { backgroundColor: '#df5b13' }
+                  }}
+                >
+                  {saving ? 'در حال ذخیره اطلاعات...' : 'ذخیره تغییرات حساب'}
+                </Button>
+              </Box>
             </Box>
           </Card>
         </Grid>
