@@ -8,6 +8,7 @@ const router = Router();
 
 // Student routes
 router.post('/initiate', auth, PaymentsController.initiatePayment);
+router.post('/fake/process', auth, PaymentsController.processFakePayment);
 router.get('/my', auth, PaymentsController.getMyPayments);
 router.post('/:id/verify', auth, PaymentsController.verifyPayment);
 

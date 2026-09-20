@@ -247,6 +247,10 @@ export const adminApi = {
     revokeAccess: (payload) => post('/access/revoke', payload, { auth: true, tokenKind: 'adminToken' }),
     getRecommendedCourse: () => get('/access/recommended', { auth: true, tokenKind: 'adminToken' }),
     setRecommendedCourse: (courseId) => post('/access/recommended', { courseId }, { auth: true, tokenKind: 'adminToken' }),
+    // notifications
+    listNotifications: () => get('/notifications/sent', { auth: true, tokenKind: 'adminToken' }),
+    sendNotification: (payload) => post('/notifications', payload, { auth: true, tokenKind: 'adminToken' }),
+    deleteNotification: (id) => del(`/notifications/${id}`, { auth: true, tokenKind: 'adminToken' }),
     // overview
     dashboard: async () => {
         const [courses, categories, coupons, menu, content, teachers, orders, payments, students, subscriptions, tickets] = await Promise.all([

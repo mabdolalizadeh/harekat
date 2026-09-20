@@ -10,6 +10,7 @@ import {
   Chip,
   Avatar,
   CircularProgress,
+  LinearProgress,
   Divider,
   Alert,
   Dialog,
@@ -24,6 +25,8 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import VideoLibraryOutlinedIcon from '@mui/icons-material/VideoLibraryOutlined';
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
@@ -46,9 +49,11 @@ export default function CourseDetailPage() {
   const [accessDenied, setAccessDenied] = useState(false);
   const [courseData, setCourseData] = useState(null);
   const [sessions, setSessions] = useState([]);
+  const [stats, setStats] = useState({ totalSessions: 0, completedSessions: 0, completionPercentage: 0 });
   const [exam, setExam] = useState(null);
   const [license, setLicense] = useState(null);
   const [activeSession, setActiveSession] = useState(null);
+  const [updatingProgress, setUpdatingProgress] = useState(false);
 
   // Exam dialog state
   const [examDialogOpen, setExamDialogOpen] = useState(false);
@@ -69,6 +74,16 @@ export default function CourseDetailPage() {
           setCourseData(res.data.course);
           const rawSessions = res.data.sessions || [];
           setSessions(rawSessions);
+          if (res.data.stats) {
+            setStats(res.data.stats);
+          } else {
+            const completedCount = rawSessions.filter(s => s.isCompleted).length;
+            setStats({
+              totalSessions: rawSessions.length,
+              completedSessions: completedCount,
+              completionPercentage: rawSessions.length > 0 ? Math.round((completedCount / rawSessions.length) * 100) : 0
+            });
+          }
           setExam(res.data.exam || null);
           setLicense(res.data.license || null);
 
@@ -88,6 +103,39 @@ export default function CourseDetailPage() {
     }
     loadData();
   }, [id]);
+
+  const handleToggleSessionComplete = async (sessionId, currentCompleted) => {
+    try {
+      setUpdatingProgress(true);
+      const newStatus = !currentCompleted;
+      const res = await sessionsApi.updateProgress(sessionId, {
+        isCompleted: newStatus,
+        progressPercent: newStatus ? 100 : 0
+      });
+
+      if (res?.ok) {
+        setSessions(prev => {
+          const updated = prev.map(s => s.id === sessionId ? { ...s, isCompleted: newStatus, progressPercent: newStatus ? 100 : 0 } : s);
+          const completedCount = updated.filter(s => s.isCompleted).length;
+          setStats({
+            totalSessions: updated.length,
+            completedSessions: completedCount,
+            completionPercentage: updated.length > 0 ? Math.round((completedCount / updated.length) * 100) : 0
+          });
+          return updated;
+        });
+
+        if (activeSession?.id === sessionId) {
+          setActiveSession(prev => ({ ...prev, isCompleted: newStatus, progressPercent: newStatus ? 100 : 0 }));
+        }
+      }
+    } catch (err) {
+      console.error('Error updating session progress:', err);
+    } finally {
+      setUpdatingProgress(false);
+    }
+  };
+
 
   const handleSubmitExam = async () => {
     try {
@@ -251,86 +299,112 @@ export default function CourseDetailPage() {
               {activeSession?.description || courseData.description}
             </Typography>
 
-            {/* Quick Action Links for Active Session */}
+            {/* Quick Action Links & Completion Toggle for Active Session */}
             {activeSession && (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, pt: 2, borderTop: '1px solid #deddd7' }}>
-                {/* 1. Live Session Link */}
-                {activeSession.sessionLink && (
+              <Box sx={{ pt: 2, borderTop: '1px solid #deddd7' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
                   <Button
-                    variant="outlined"
-                    size="small"
-                    component="a"
-                    href={activeSession.sessionLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    startIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
-                    sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#f47c20' }}
+                    variant={activeSession.isCompleted ? 'contained' : 'outlined'}
+                    color={activeSession.isCompleted ? 'success' : 'inherit'}
+                    disabled={updatingProgress}
+                    onClick={() => handleToggleSessionComplete(activeSession.id, activeSession.isCompleted)}
+                    startIcon={activeSession.isCompleted ? <CheckCircleIcon /> : <RadioButtonUncheckedIcon />}
+                    sx={{
+                      borderRadius: '12px',
+                      fontWeight: 700,
+                      px: 2,
+                      py: 0.8,
+                      borderColor: '#deddd7',
+                      backgroundColor: activeSession.isCompleted ? '#16a34a' : 'transparent',
+                      color: activeSession.isCompleted ? '#ffffff' : '#55554f',
+                      '&:hover': {
+                        backgroundColor: activeSession.isCompleted ? '#15803d' : '#f4f4f0'
+                      }
+                    }}
                   >
-                    لینک کلاس آنلاین
+                    {activeSession.isCompleted ? 'جلسه تکمیل شد ✓' : 'علامت‌گذاری به عنوان تکمیل شده'}
                   </Button>
-                )}
+                </Box>
 
-                {/* 2. Google Drive Link */}
-                {activeSession.googleDriveLink && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    component="a"
-                    href={activeSession.googleDriveLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    startIcon={<CloudDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                    sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#2563eb' }}
-                  >
-                    فایل‌های درایو جلسه
-                  </Button>
-                )}
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+                  {/* 1. Live Session Link */}
+                  {activeSession.sessionLink && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      component="a"
+                      href={activeSession.sessionLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
+                      sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#f47c20' }}
+                    >
+                      لینک کلاس آنلاین
+                    </Button>
+                  )}
 
-                {/* 3. Group Link */}
-                {activeSession.groupLink && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    component="a"
-                    href={activeSession.groupLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    startIcon={<ForumOutlinedIcon sx={{ fontSize: 16 }} />}
-                    sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#16a34a' }}
-                  >
-                    گروه تعاملی کلاسی
-                  </Button>
-                )}
+                  {/* 2. Google Drive Link */}
+                  {activeSession.googleDriveLink && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      component="a"
+                      href={activeSession.googleDriveLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startIcon={<CloudDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                      sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#2563eb' }}
+                    >
+                      فایل‌های درایو جلسه
+                    </Button>
+                  )}
 
-                {/* 4. Porsline Link (Gated strictly on backend session >= 4) */}
-                {activeSession.porslineAvailable && activeSession.porslineLink ? (
-                  <Button
-                    variant="contained"
-                    size="small"
-                    component="a"
-                    href={activeSession.porslineLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    startIcon={<PollOutlinedIcon sx={{ fontSize: 16 }} />}
-                    sx={{ borderRadius: '12px', fontWeight: 700, backgroundColor: '#f47c20', '&:hover': { backgroundColor: '#df5b13' } }}
-                  >
-                    پرس‌لاین و نظرسنجی جلسه
-                  </Button>
-                ) : (
-                  <Tooltip title="فرم نظرسنجی پرس‌لاین از جلسه ۴ به بعد فعال می‌شود" arrow>
-                    <span>
-                      <Button
-                        variant="outlined"
-                        disabled
-                        size="small"
-                        startIcon={<LockOutlinedIcon sx={{ fontSize: 16 }} />}
-                        sx={{ borderRadius: '12px', fontWeight: 600 }}
-                      >
-                        پرس‌لاین (قفل تا جلسه ۴)
-                      </Button>
-                    </span>
-                  </Tooltip>
-                )}
+                  {/* 3. Group Link */}
+                  {activeSession.groupLink && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      component="a"
+                      href={activeSession.groupLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startIcon={<ForumOutlinedIcon sx={{ fontSize: 16 }} />}
+                      sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#16a34a' }}
+                    >
+                      گروه تعاملی کلاسی
+                    </Button>
+                  )}
+
+                  {/* 4. Porsline Link (Gated strictly on backend session >= 4) */}
+                  {activeSession.porslineAvailable && activeSession.porslineLink ? (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      component="a"
+                      href={activeSession.porslineLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startIcon={<PollOutlinedIcon sx={{ fontSize: 16 }} />}
+                      sx={{ borderRadius: '12px', fontWeight: 700, backgroundColor: '#f47c20', '&:hover': { backgroundColor: '#df5b13' } }}
+                    >
+                      پرس‌لاین و نظرسنجی جلسه
+                    </Button>
+                  ) : (
+                    <Tooltip title="فرم نظرسنجی پرس‌لاین از جلسه ۴ به بعد فعال می‌شود" arrow>
+                      <span>
+                        <Button
+                          variant="outlined"
+                          disabled
+                          size="small"
+                          startIcon={<LockOutlinedIcon sx={{ fontSize: 16 }} />}
+                          sx={{ borderRadius: '12px', fontWeight: 600 }}
+                        >
+                          پرس‌لاین (قفل تا جلسه ۴)
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  )}
+                </Box>
               </Box>
             )}
           </Card>
@@ -338,6 +412,38 @@ export default function CourseDetailPage() {
 
         {/* Right Column: Sessions List & Exam Card */}
         <Grid item xs={12} lg={4}>
+          {/* Course Progress Summary Card */}
+          <Card sx={{ p: 2.5, borderRadius: '24px', border: '1px solid #deddd7', backgroundColor: '#ffffff', mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#171715' }}>
+                پیشرفت یادگیری دوره
+              </Typography>
+              <Chip
+                label={`${toPersianDigits(stats.completionPercentage)}٪`}
+                size="small"
+                color={stats.completionPercentage === 100 ? 'success' : 'primary'}
+                sx={{ fontWeight: 800, borderRadius: '8px' }}
+              />
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={stats.completionPercentage}
+              sx={{
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: '#f1f0eb',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 5,
+                  backgroundColor: stats.completionPercentage === 100 ? '#16a34a' : '#f47c20'
+                },
+                mb: 1.5
+              }}
+            />
+            <Typography variant="caption" sx={{ color: '#72726a', fontWeight: 600 }}>
+              {toPersianDigits(stats.completedSessions)} جلسه از مجموع {toPersianDigits(stats.totalSessions)} جلسه تکمیل شده است.
+            </Typography>
+          </Card>
+
           {/* Sessions List Accordion / Card */}
           <Card sx={{ p: 2.5, borderRadius: '24px', border: '1px solid #deddd7', backgroundColor: '#ffffff', mb: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', mb: 2 }}>
@@ -365,7 +471,20 @@ export default function CourseDetailPage() {
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <PlayCircleOutlineIcon sx={{ fontSize: 18, color: isSelected ? '#f47c20' : '#72726a' }} />
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleSessionComplete(sess.id, sess.isCompleted);
+                          }}
+                          sx={{ p: 0.2 }}
+                        >
+                          {sess.isCompleted ? (
+                            <CheckCircleIcon sx={{ fontSize: 20, color: '#16a34a' }} />
+                          ) : (
+                            <RadioButtonUncheckedIcon sx={{ fontSize: 20, color: '#9b9b92' }} />
+                          )}
+                        </IconButton>
                         <Typography sx={{ fontWeight: 700, fontSize: '0.86rem', color: isSelected ? '#f47c20' : '#171715' }}>
                           جلسه {toPersianDigits(sess.sessionNumber)}: {sess.title}
                         </Typography>
@@ -379,7 +498,7 @@ export default function CourseDetailPage() {
                       )}
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pl: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pl: 3.5 }}>
                       {sess.porslineAvailable ? (
                         <Typography variant="caption" sx={{ color: '#15803d', fontWeight: 600 }}>
                           ✓ پرس‌لاین فعال
@@ -389,12 +508,18 @@ export default function CourseDetailPage() {
                           پرس‌لاین قفل
                         </Typography>
                       )}
+                      {sess.isCompleted && (
+                        <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 700 }}>
+                          تکمیل شده
+                        </Typography>
+                      )}
                     </Box>
                   </Box>
                 );
               })}
             </Box>
           </Card>
+
 
           {/* Exam Card (Locked until final session) */}
           <Card

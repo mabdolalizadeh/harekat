@@ -23,6 +23,8 @@ export default class AuthController {
             user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
             await user.save();
 
+            console.log(`\n========================================\n[TEST OTP]\nPhone: ${phoneNumber}\nOTP: ${user.otp}\n========================================\n`);
+
             logSecurityEvent('otp_generated', { userId: user.id, phoneNumber, ip: req.ip });
             return res.status(200).json({ ok: true, data: { userId: user.id } });
         } catch (err) {
@@ -91,10 +93,12 @@ export default class AuthController {
             user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
             await user.save();
 
+            console.log(`\n========================================\n[TEST OTP - PHONE CHANGE]\nPhone: ${phoneNumber}\nOTP: ${user.otp}\n========================================\n`);
+
             logSecurityEvent('phone_change_otp', { userId, newPhoneNumber: phoneNumber, ip: req.ip });
             return res.status(200).json({
                 ok: true,
-                data: { userId: user.id, otp: user.otp }
+                data: { userId: user.id }
             });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });

@@ -68,3 +68,46 @@ export function checkTaCourseAccess(courseIdGetter = (req) => req.params.courseI
         return res.status(403).json({ ok: false, message: 'forbidden' });
     };
 }
+
+/**
+ * Middleware to enforce TA course restriction when accessing a session by its ID
+ */
+export function checkTaSessionAccess() {
+    return async (req, res, next) => {
+        const role = req.user?.role;
+        if (role === 'admin' || role === 'superadmin') {
+            return next();
+        }
+
+        if (role === 'ta') {
+            const sessionId = req.params.id || req.params.sessionId;
+            if (!sessionId) {
+                return res.status(400).json({ ok: false, message: 'session ID required' });
+            }
+
+            const session = await Sessions.findByPk(sessionId);
+            if (!session) {
+                return res.status(404).json({ ok: false, message: 'session not found' });
+            }
+
+            const assignment = await TACourses.findOne({
+                where: { adminId: req.user.id, courseId: session.courseId }
+            });
+
+            if (assignment) {
+                req.assignedCourseId = session.courseId;
+                req.targetSession = session;
+                return next();
+            }
+
+            logSecurityEvent('ta_unauthorized_course_access', { taId: req.user.id, courseId: session.courseId, path: req.path, ip: req.ip });
+            return res.status(403).json({
+                ok: false,
+                message: 'دسترسی به این دوره برای حساب شما مجاز نیست'
+            });
+        }
+
+        return res.status(403).json({ ok: false, message: 'forbidden' });
+    };
+}
+

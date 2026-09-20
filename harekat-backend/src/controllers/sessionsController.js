@@ -1,4 +1,4 @@
-import { Sessions, Courses, Exams, ExamResults, Licenses } from '../models/index.js';
+import { Sessions, Courses, Exams, ExamResults, Licenses, UserLessonProgress, Users } from '../models/index.js';
 import { AccessService } from '../services/accessService.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
@@ -35,6 +35,13 @@ export default class SessionsController {
                 order: [['sessionNumber', 'ASC'], ['sortOrder', 'ASC']]
             });
 
+            // Fetch student progress for all sessions of this course
+            const progressList = await UserLessonProgress.findAll({
+                where: { userId, courseId }
+            });
+            const progressMap = new Map();
+            progressList.forEach(p => progressMap.set(p.sessionId, p));
+
             // Check if final exam exists and if student has taken it
             const exam = await Exams.findOne({ where: { courseId, status: 'published' } });
             let examStatus = null;
@@ -70,6 +77,7 @@ export default class SessionsController {
                 const sessionNum = s.sessionNumber || (index + 1);
                 const isPorslineAvailable = sessionNum >= 4 && !!s.porslineLink;
                 const isFinalSession = s.isFinal || index === sessions.length - 1;
+                const userProg = progressMap.get(s.id);
 
                 return {
                     id: s.id,
@@ -86,9 +94,16 @@ export default class SessionsController {
                     porslineAvailable: isPorslineAvailable,
                     porslineRule: sessionNum < 4 ? 'پرس‌لاین از جلسه ۴ به بعد فعال می‌شود' : null,
                     isFinal: isFinalSession,
-                    sortOrder: s.sortOrder
+                    sortOrder: s.sortOrder,
+                    isCompleted: userProg ? !!userProg.isCompleted : false,
+                    progressPercent: userProg ? (userProg.progressPercent || 0) : 0,
+                    lastWatchedAt: userProg ? userProg.lastWatchedAt : null
                 };
             });
+
+            const totalSessions = sanitizedSessions.length;
+            const completedSessions = sanitizedSessions.filter(s => s.isCompleted).length;
+            const completionPercentage = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
 
             return res.status(200).json({
                 ok: true,
@@ -105,6 +120,11 @@ export default class SessionsController {
                         longDescription: course.longDescription
                     },
                     sessions: sanitizedSessions,
+                    stats: {
+                        totalSessions,
+                        completedSessions,
+                        completionPercentage
+                    },
                     exam: examStatus,
                     license: license ? {
                         id: license.id,
@@ -119,6 +139,64 @@ export default class SessionsController {
             return res.status(500).json({ ok: false, message: err.message });
         }
     }
+
+    /**
+     * Student: update progress / toggle completion for a session
+     */
+    static async updateLessonProgress(req, res) {
+        const userId = req.user?.id;
+        const { sessionId } = req.params;
+        const { isCompleted, progressPercent } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ ok: false, message: 'authentication required' });
+        }
+
+        try {
+            const session = await Sessions.findByPk(sessionId);
+            if (!session) {
+                return res.status(404).json({ ok: false, message: 'session not found' });
+            }
+
+            // Verify student has access to the course of this session
+            const hasAccess = await AccessService.hasCourseAccess(userId, session.courseId);
+            if (!hasAccess) {
+                logSecurityEvent('unauthorized_session_progress_update', { userId, sessionId, courseId: session.courseId, ip: req.ip });
+                return res.status(403).json({ ok: false, message: 'شما دسترسی به این دوره ندارید' });
+            }
+
+            let [progress, created] = await UserLessonProgress.findOrCreate({
+                where: { userId, sessionId: session.id },
+                defaults: {
+                    userId,
+                    courseId: session.courseId,
+                    sessionId: session.id,
+                    isCompleted: isCompleted !== undefined ? !!isCompleted : false,
+                    progressPercent: progressPercent !== undefined ? Math.min(100, Math.max(0, Number(progressPercent))) : 0,
+                    lastWatchedAt: new Date()
+                }
+            });
+
+            if (!created) {
+                if (isCompleted !== undefined) {
+                    progress.isCompleted = !!isCompleted;
+                }
+                if (progressPercent !== undefined) {
+                    progress.progressPercent = Math.min(100, Math.max(0, Number(progressPercent)));
+                }
+                progress.lastWatchedAt = new Date();
+                await progress.save();
+            }
+
+            return res.status(200).json({
+                ok: true,
+                data: progress
+            });
+        } catch (err) {
+            return res.status(500).json({ ok: false, message: err.message });
+        }
+    }
+
 
     /**
      * Admin/TA view: all sessions for a course

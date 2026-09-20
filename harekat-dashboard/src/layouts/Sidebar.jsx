@@ -1,6 +1,7 @@
 import { Box, Typography, Avatar, LinearProgress, List, ListItemButton, ListItemIcon, ListItemText, Divider, Chip } from '@mui/material';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { assetUrl, toPersianDigits } from '../utils/formatters.js';
 
 // Icons
@@ -18,8 +19,10 @@ import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined';
 
 export default function Sidebar({ onItemClick }) {
   const { user, rubies, studyPoints, logout } = useAuth();
+  const { mode } = useThemeMode();
   const location = useLocation();
 
+  const isDark = mode === 'dark';
   const enrolledCount = user?.courses?.length || 0;
   const targetPoints = 300;
   const progressPercent = Math.min(100, Math.round((studyPoints / targetPoints) * 100));
@@ -43,6 +46,7 @@ export default function Sidebar({ onItemClick }) {
         height: '100%',
         width: '100%',
         p: 2,
+        backgroundColor: 'background.paper',
         boxSizing: 'border-box',
         overflow: 'hidden'
       }}
@@ -50,8 +54,9 @@ export default function Sidebar({ onItemClick }) {
       {/* Top Student Progress Card */}
       <Box
         sx={{
-          backgroundColor: '#fff8ed',
-          border: '1px solid #ffdda8',
+          backgroundColor: isDark ? '#1e293b' : '#fff8ed',
+          border: '1px solid',
+          borderColor: isDark ? '#334155' : '#ffdda8',
           borderRadius: '18px',
           p: 1.6,
           mb: 2,
@@ -81,7 +86,7 @@ export default function Sidebar({ onItemClick }) {
                   fontWeight: 700,
                   fontSize: '0.86rem',
                   lineHeight: 1.2,
-                  color: '#171715',
+                  color: 'text.primary',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
@@ -89,7 +94,7 @@ export default function Sidebar({ onItemClick }) {
               >
                 {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : (user?.phoneNumber || 'دانش‌آموز')}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#df5b13', fontWeight: 600, fontSize: '0.72rem' }}>
+              <Typography variant="caption" sx={{ color: '#f47c20', fontWeight: 600, fontSize: '0.72rem' }}>
                 دانش‌آموز فعال
               </Typography>
             </Box>
@@ -101,9 +106,10 @@ export default function Sidebar({ onItemClick }) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 0.5,
-              backgroundColor: '#ffefd3',
-              color: '#b94410',
-              border: '1px solid #ffdda8',
+              backgroundColor: isDark ? '#334155' : '#ffefd3',
+              color: isDark ? '#fed7aa' : '#b94410',
+              border: '1px solid',
+              borderColor: isDark ? '#475569' : '#ffdda8',
               borderRadius: '9999px',
               px: 1,
               py: 0.3,
@@ -122,11 +128,11 @@ export default function Sidebar({ onItemClick }) {
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
               <EmojiEventsOutlinedIcon sx={{ fontSize: 15, color: '#d99400' }} />
-              <Typography sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#171715' }}>
+              <Typography sx={{ fontWeight: 700, fontSize: '0.78rem', color: 'text.primary' }}>
                 {toPersianDigits(studyPoints)} امتیاز
               </Typography>
             </Box>
-            <Typography variant="caption" sx={{ color: '#72726a', fontSize: '0.7rem' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
               هدف {toPersianDigits(targetPoints)}
             </Typography>
           </Box>
@@ -137,7 +143,7 @@ export default function Sidebar({ onItemClick }) {
             sx={{
               height: 6,
               borderRadius: 3,
-              backgroundColor: '#ffdda8',
+              backgroundColor: isDark ? '#334155' : '#ffdda8',
               '& .MuiLinearProgress-bar': {
                 borderRadius: 3,
                 background: 'linear-gradient(90deg, #f47c20 0%, #df5b13 100%)'
@@ -146,9 +152,9 @@ export default function Sidebar({ onItemClick }) {
           />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.3 }}>
-            <Typography variant="caption" sx={{ color: '#9b9b92', fontSize: '0.62rem' }}>۱۰۰</Typography>
-            <Typography variant="caption" sx={{ color: '#9b9b92', fontSize: '0.62rem' }}>۲۰۰</Typography>
-            <Typography variant="caption" sx={{ color: '#9b9b92', fontSize: '0.62rem' }}>۳۰۰</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.62rem' }}>۱۰۰</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.62rem' }}>۲۰۰</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.62rem' }}>۳۰۰</Typography>
           </Box>
         </Box>
 
@@ -162,12 +168,13 @@ export default function Sidebar({ onItemClick }) {
             alignItems: 'center',
             justifyContent: 'space-between',
             textDecoration: 'none',
-            color: '#df5b13',
+            color: '#f47c20',
             fontSize: '0.76rem',
             fontWeight: 700,
             mt: 1,
             pt: 0.8,
-            borderTop: '1px dashed #ffdda8',
+            borderTop: '1px dashed',
+            borderColor: isDark ? '#334155' : '#ffdda8',
             '&:hover': { textDecoration: 'underline' }
           }}
         >
@@ -183,7 +190,7 @@ export default function Sidebar({ onItemClick }) {
           overflowY: 'auto',
           pr: 0.5,
           '&::-webkit-scrollbar': { width: 4 },
-          '&::-webkit-scrollbar-thumb': { backgroundColor: '#deddd7', borderRadius: 2 }
+          '&::-webkit-scrollbar-thumb': { backgroundColor: isDark ? '#334155' : '#deddd7', borderRadius: 2 }
         }}
       >
         <List disablePadding sx={{ mb: 2 }}>
@@ -203,19 +210,19 @@ export default function Sidebar({ onItemClick }) {
                   mb: 0.4,
                   py: 0.9,
                   px: 1.4,
-                  backgroundColor: isActive ? '#fff8ed' : 'transparent',
-                  color: isActive ? '#f47c20' : '#55554f',
+                  backgroundColor: isActive ? (isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed') : 'transparent',
+                  color: isActive ? '#f47c20' : 'text.primary',
                   borderRight: isActive ? '3px solid #f47c20' : '3px solid transparent',
                   '&:hover': {
-                    backgroundColor: isActive ? '#fff8ed' : '#f7f5f0',
-                    color: isActive ? '#df5b13' : '#171715'
+                    backgroundColor: isActive ? (isDark ? 'rgba(244, 124, 32, 0.2)' : '#fff8ed') : (isDark ? '#1e293b' : '#f7f5f0'),
+                    color: isActive ? '#df5b13' : 'text.primary'
                   }
                 }}
               >
                 <ListItemIcon
                   sx={{
                     minWidth: 34,
-                    color: isActive ? '#f47c20' : '#72726a'
+                    color: isActive ? '#f47c20' : 'text.secondary'
                   }}
                 >
                   {item.icon}
@@ -234,8 +241,8 @@ export default function Sidebar({ onItemClick }) {
                     sx={{
                       height: 20,
                       fontSize: '0.7rem',
-                      backgroundColor: isActive ? '#f47c20' : '#deddd7',
-                      color: isActive ? '#ffffff' : '#55554f',
+                      backgroundColor: isActive ? '#f47c20' : (isDark ? '#334155' : '#deddd7'),
+                      color: isActive ? '#ffffff' : (isDark ? '#cbd5e1' : '#55554f'),
                       fontWeight: 700
                     }}
                   />
@@ -247,7 +254,7 @@ export default function Sidebar({ onItemClick }) {
       </Box>
 
       {/* Pinned Footer: Logout */}
-      <Box sx={{ pt: 1, borderTop: '1px solid #deddd7', flexShrink: 0 }}>
+      <Box sx={{ pt: 1, borderTop: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
         <ListItemButton
           onClick={() => {
             logout();
@@ -258,7 +265,7 @@ export default function Sidebar({ onItemClick }) {
             py: 0.7,
             px: 1.4,
             color: '#e5484d',
-            '&:hover': { backgroundColor: '#fff5f5' }
+            '&:hover': { backgroundColor: isDark ? 'rgba(229, 72, 77, 0.1)' : '#fff5f5' }
           }}
         >
           <ListItemIcon sx={{ minWidth: 32, color: '#e5484d' }}>

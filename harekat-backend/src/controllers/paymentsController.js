@@ -2,8 +2,6 @@ import { Payments, Users, Orders, OrderItems } from '../models/index.js';
 import { PaymentGateway } from '../services/paymentGateway.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
-const PAYMENT_TYPES = ['paid', 'pending', 'failed', 'refunded'];
-
 export default class PaymentsController {
     /**
      * Student: Initiate checkout payment session (Gateway integration placeholder)
@@ -29,14 +27,73 @@ export default class PaymentsController {
     }
 
     /**
+     * Fake / Test Payment Gateway process endpoint
+     * Handles explicit [ پرداخت ] (pay) and [ لغو پرداخت ] (cancel) actions
+     */
+    static async processFakePayment(req, res) {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+        const { paymentId, action = 'pay', transactionId, reason } = req.body;
+
+        if (!paymentId) {
+            return res.status(400).json({ ok: false, message: 'paymentId is required' });
+        }
+
+        try {
+            const payment = await Payments.findByPk(paymentId);
+            if (!payment) {
+                return res.status(404).json({ ok: false, message: 'پرداخت یافت نشد' });
+            }
+
+            const isAdmin = role === 'admin' || role === 'superadmin';
+            if (!isAdmin && payment.userId !== userId) {
+                return res.status(403).json({ ok: false, message: 'forbidden' });
+            }
+
+            if (action === 'pay') {
+                const simulatedTxn = transactionId || `SIM-${Date.now()}`;
+                const result = await PaymentGateway.processSuccessfulPayment(paymentId, { transactionId: simulatedTxn });
+                return res.status(200).json({
+                    ok: true,
+                    message: 'پرداخت با موفقیت انجام شد و دوره‌ها برای شما فعال شدند',
+                    data: result
+                });
+            } else if (action === 'cancel') {
+                const result = await PaymentGateway.processCancelledPayment(paymentId, { reason: reason || 'پرداخت توسط کاربر لغو گردید' });
+                return res.status(200).json({
+                    ok: true,
+                    message: 'پرداخت لغو گردید',
+                    data: result
+                });
+            } else {
+                return res.status(400).json({ ok: false, message: 'عملیات نامعتبر است (pay یا cancel مجاز است)' });
+            }
+        } catch (err) {
+            return res.status(500).json({ ok: false, message: err.message });
+        }
+    }
+
+    /**
      * Verify payment (e.g. gateway callback placeholder / admin simulation)
      * Automatically grants courses / packages / subscriptions upon verified success
      */
     static async verifyPayment(req, res) {
         const { id } = req.params; // paymentId
         const { transactionId, metadata } = req.body;
+        const userId = req.user?.id;
+        const role = req.user?.role;
 
         try {
+            const payment = await Payments.findByPk(id);
+            if (!payment) {
+                return res.status(404).json({ ok: false, message: 'payment not found' });
+            }
+
+            const isAdmin = role === 'admin' || role === 'superadmin';
+            if (!isAdmin && payment.userId !== userId) {
+                return res.status(403).json({ ok: false, message: 'forbidden' });
+            }
+
             const result = await PaymentGateway.processSuccessfulPayment(id, { transactionId, metadata });
             return res.status(200).json({
                 ok: true,

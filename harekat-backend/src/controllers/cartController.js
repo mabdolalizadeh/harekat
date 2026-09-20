@@ -1,10 +1,14 @@
 import { Cart, CartItem, Users, Courses, Subscriptions } from '../models/index.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
+function getSessionId(req) {
+    return req.headers['x-session-id'] || req.query?.sessionId || req.body?.sessionId || null;
+}
+
 export default class CartController {
     static async getOrCreateCart(req, res) {
         const userId = req.user?.id;
-        const sessionId = req.headers['x-session-id'] || req.body.sessionId;
+        const sessionId = getSessionId(req);
 
         try {
             let cart;
@@ -31,11 +35,11 @@ export default class CartController {
 
     static async addToCart(req, res) {
         const userId = req.user?.id;
-        const sessionId = req.headers['x-session-id'] || req.body.sessionId;
-        const { productId, productType, quantity, price } = req.body;
+        const sessionId = getSessionId(req);
+        const { productId, productType, quantity } = req.body;
 
-        if (!productId || !productType || !price) {
-            return res.status(400).json({ ok: false, message: 'productId, productType, and price are required' });
+        if (!productId || !productType) {
+            return res.status(400).json({ ok: false, message: 'productId and productType are required' });
         }
 
         if (!['course', 'subscription'].includes(productType)) {
@@ -43,6 +47,29 @@ export default class CartController {
         }
 
         try {
+            // Determine canonical server-side price from database
+            let canonicalPrice = '0';
+            let productName = '';
+            let productImage = '';
+
+            if (productType === 'course') {
+                const course = await Courses.findByPk(productId);
+                if (!course) {
+                    return res.status(404).json({ ok: false, message: 'course not found' });
+                }
+                canonicalPrice = course.salePrice || course.price;
+                productName = course.name;
+                productImage = course.image;
+            } else if (productType === 'subscription') {
+                const sub = await Subscriptions.findByPk(productId);
+                if (!sub) {
+                    return res.status(404).json({ ok: false, message: 'subscription not found' });
+                }
+                canonicalPrice = sub.salePrice || sub.price;
+                productName = sub.name;
+                productImage = sub.image;
+            }
+
             let cart;
             if (userId) {
                 cart = await Cart.findOne({ where: { userId } });
@@ -58,17 +85,19 @@ export default class CartController {
                 where: { cartId: cart.id, productId, productType }
             });
 
+            const qty = Math.max(1, parseInt(quantity, 10) || 1);
+
             if (existingItem) {
-                existingItem.quantity += quantity || 1;
-                existingItem.price = price;
+                existingItem.quantity += qty;
+                existingItem.price = canonicalPrice;
                 await existingItem.save();
             } else {
                 existingItem = await CartItem.create({
                     cartId: cart.id,
                     productId,
                     productType,
-                    quantity: quantity || 1,
-                    price
+                    quantity: qty,
+                    price: canonicalPrice
                 });
             }
 
@@ -82,7 +111,7 @@ export default class CartController {
 
     static async updateCartItem(req, res) {
         const userId = req.user?.id;
-        const sessionId = req.headers['x-session-id'] || req.body.sessionId;
+        const sessionId = getSessionId(req);
         const { itemId } = req.params;
         const { quantity } = req.body;
 
@@ -122,7 +151,7 @@ export default class CartController {
 
     static async removeFromCart(req, res) {
         const userId = req.user?.id;
-        const sessionId = req.headers['x-session-id'] || req.body.sessionId;
+        const sessionId = getSessionId(req);
         const { itemId } = req.params;
 
         try {
@@ -156,7 +185,7 @@ export default class CartController {
 
     static async clearCart(req, res) {
         const userId = req.user?.id;
-        const sessionId = req.headers['x-session-id'] || req.body.sessionId;
+        const sessionId = getSessionId(req);
 
         try {
             let cart;

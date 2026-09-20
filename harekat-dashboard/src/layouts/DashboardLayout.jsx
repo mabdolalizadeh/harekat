@@ -38,7 +38,8 @@ export default function DashboardLayout() {
         width: '100vw',
         height: '100vh',
         minHeight: '100vh',
-        backgroundColor: '#f7f5f0',
+        backgroundColor: 'background.default',
+        color: 'text.primary',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -76,8 +77,9 @@ export default function DashboardLayout() {
               maxWidth: 280,
               flexShrink: 0,
               height: '100%',
-              backgroundColor: '#ffffff',
-              borderLeft: '1px solid #deddd7',
+              backgroundColor: 'background.paper',
+              borderLeft: '1px solid',
+              borderColor: 'divider',
               overflow: 'hidden'
             }}
           >
@@ -92,7 +94,7 @@ export default function DashboardLayout() {
             flex: 1,
             height: '100%',
             overflowY: 'auto',
-            backgroundColor: '#f7f5f0',
+            backgroundColor: 'background.default',
             p: { xs: 2, sm: 2.5, md: 3.5 },
             display: 'flex',
             flexDirection: 'column'
@@ -113,8 +115,9 @@ export default function DashboardLayout() {
         PaperProps={{
           sx: {
             width: 290,
-            backgroundColor: '#ffffff',
-            borderLeft: '1px solid #deddd7'
+            backgroundColor: 'background.paper',
+            borderLeft: '1px solid',
+            borderColor: 'divider'
           }
         }}
       >

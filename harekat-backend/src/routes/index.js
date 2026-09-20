@@ -19,6 +19,7 @@ import ticketsRouter from './tickets.js';
 import tasRouter from './tas.js';
 import packagesRouter from './packages.js';
 import accessRouter from './access.js';
+import notificationsRouter from './notifications.js';
 
 const router = Router();
 
@@ -42,5 +43,6 @@ router.use('/tickets', ticketsRouter);
 router.use('/tas', tasRouter);
 router.use('/packages', packagesRouter);
 router.use('/access', accessRouter);
+router.use('/notifications', notificationsRouter);
 
 export default router;

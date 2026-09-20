@@ -3,7 +3,7 @@ import { logSecurityEvent } from '../utils/logger.js';
 
 export default class UsersController {
     static async createUser(req, res) {
-        const { phoneNumber } = req.body;
+        const { phoneNumber, firstName, lastName, rubies } = req.body;
         if (!phoneNumber) {
             return res.status(400).json({ ok: false, message: 'phoneNumber is required' });
         }
@@ -14,7 +14,12 @@ export default class UsersController {
                 return res.status(409).json({ ok: false, message: 'user with this phone number already exists' });
             }
 
-            const user = await Users.create({ phoneNumber });
+            const user = await Users.create({
+                phoneNumber,
+                firstName: firstName || null,
+                lastName: lastName || null,
+                rubies: rubies !== undefined ? Number(rubies) : 0
+            });
             logSecurityEvent('user_created', { userId: user.id, ip: req.ip });
             return res.status(201).json({ ok: true, data: user });
         } catch (err) {
@@ -28,7 +33,8 @@ export default class UsersController {
                 include: [
                     { model: Courses, as: 'courses', through: { attributes: [] } },
                     { model: Payments, as: 'payments' }
-                ]
+                ],
+                order: [['createdAt', 'DESC']]
             });
             return res.status(200).json({ ok: true, data: users });
         } catch (err) {
@@ -38,7 +44,8 @@ export default class UsersController {
 
     static async getUserById(req, res) {
         const { id } = req.params;
-        if (req.user?.role !== 'admin' && req.user?.id !== id) {
+        const isAdmin = req.user?.role === 'admin' || req.user?.role === 'superadmin';
+        if (!isAdmin && req.user?.id !== id) {
             return res.status(403).json({ ok: false, message: 'forbidden' });
         }
 
@@ -61,11 +68,12 @@ export default class UsersController {
 
     static async updateUser(req, res) {
         const { id } = req.params;
-        if (req.user?.role !== 'admin' && req.user?.id !== id) {
+        const isAdmin = req.user?.role === 'admin' || req.user?.role === 'superadmin';
+        if (!isAdmin && req.user?.id !== id) {
             return res.status(403).json({ ok: false, message: 'forbidden' });
         }
 
-        const { firstName, lastName, phoneNumber, courseIds, paymentIds, avatar, nationalId, bio, jobTitle, education } = req.body;
+        const { firstName, lastName, phoneNumber, courseIds, paymentIds, avatar, nationalId, bio, jobTitle, education, rubies } = req.body;
 
         try {
             const user = await Users.findByPk(id);
@@ -82,21 +90,28 @@ export default class UsersController {
             if (education !== undefined) user.education = education;
             if (phoneNumber !== undefined && phoneNumber !== user.phoneNumber) {
                 const existing = await Users.findOne({ where: { phoneNumber } });
-                if (existing) {
+                if (existing && existing.id !== id) {
                     return res.status(409).json({ ok: false, message: 'phone number already in use' });
                 }
                 user.phoneNumber = phoneNumber;
             }
 
+            // Only administrative roles can update rubies, course grants, or payment relations
+            if (isAdmin) {
+                if (rubies !== undefined) user.rubies = Number(rubies) || 0;
+            }
+
             await user.save();
 
-            if (Array.isArray(courseIds)) {
-                const courses = await Courses.findAll({ where: { id: courseIds } });
-                await user.setCourses(courses);
-            }
-            if (Array.isArray(paymentIds)) {
-                const payments = await Payments.findAll({ where: { id: paymentIds } });
-                await user.setPayments(payments);
+            if (isAdmin) {
+                if (Array.isArray(courseIds)) {
+                    const courses = await Courses.findAll({ where: { id: courseIds } });
+                    await user.setCourses(courses);
+                }
+                if (Array.isArray(paymentIds)) {
+                    const payments = await Payments.findAll({ where: { id: paymentIds } });
+                    await user.setPayments(payments);
+                }
             }
 
             const updated = await Users.findByPk(id, {
@@ -114,7 +129,8 @@ export default class UsersController {
 
     static async deleteUser(req, res) {
         const { id } = req.params;
-        if (req.user?.role !== 'admin' && req.user?.id !== id) {
+        const isAdmin = req.user?.role === 'admin' || req.user?.role === 'superadmin';
+        if (!isAdmin && req.user?.id !== id) {
             return res.status(403).json({ ok: false, message: 'forbidden' });
         }
 

@@ -1,35 +1,35 @@
-import { Box, Typography, Popover, Button, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider } from '@mui/material';
+import { Box, Typography, Popover, Button, List, ListItem, ListItemAvatar, Avatar, ListItemText, Chip } from '@mui/material';
 import MilitaryTechOutlinedIcon from '@mui/icons-material/MilitaryTechOutlined';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import { useNotifications } from '../../contexts/NotificationContext.jsx';
-import { NavLink } from 'react-router-dom';
+import { formatDate } from '../../utils/formatters.js';
 
 export default function NotificationPopover({ anchorEl, open, onClose }) {
-  const { notifications, markAllAsRead, clearAllNotifications } = useNotifications();
+  const { notifications, markAllAsRead, markAsRead } = useNotifications();
 
-  const getIcon = (type) => {
-    switch (type) {
-      case 'points':
-        return (
-          <Avatar sx={{ bgcolor: '#d1fae5', color: '#059669', width: 38, height: 38, borderRadius: '12px' }}>
-            <MilitaryTechOutlinedIcon sx={{ fontSize: 20 }} />
-          </Avatar>
-        );
-      case 'course':
-        return (
-          <Avatar sx={{ bgcolor: '#e0f2fe', color: '#0284c7', width: 38, height: 38, borderRadius: '12px' }}>
-            <SchoolOutlinedIcon sx={{ fontSize: 20 }} />
-          </Avatar>
-        );
-      default:
-        return (
-          <Avatar sx={{ bgcolor: '#f1f5f9', color: '#64748b', width: 38, height: 38, borderRadius: '12px' }}>
-            <InfoOutlinedIcon sx={{ fontSize: 20 }} />
-          </Avatar>
-        );
+  const getIcon = (type, senderRole) => {
+    if (senderRole === 'ta' || type === 'course') {
+      return (
+        <Avatar sx={{ bgcolor: '#eff6ff', color: '#2563eb', width: 36, height: 36, borderRadius: '12px' }}>
+          <SchoolOutlinedIcon sx={{ fontSize: 18 }} />
+        </Avatar>
+      );
     }
+    if (type === 'system') {
+      return (
+        <Avatar sx={{ bgcolor: '#fff1f2', color: '#e11d48', width: 36, height: 36, borderRadius: '12px' }}>
+          <CampaignOutlinedIcon sx={{ fontSize: 18 }} />
+        </Avatar>
+      );
+    }
+    return (
+      <Avatar sx={{ bgcolor: '#fff8ed', color: '#f47c20', width: 36, height: 36, borderRadius: '12px' }}>
+        <InfoOutlinedIcon sx={{ fontSize: 18 }} />
+      </Avatar>
+    );
   };
 
   return (
@@ -47,7 +47,7 @@ export default function NotificationPopover({ anchorEl, open, onClose }) {
       }}
       PaperProps={{
         sx: {
-          width: 320,
+          width: 360,
           p: 0,
           borderRadius: '24px',
           boxShadow: '0 20px 40px -8px rgba(15, 23, 42, 0.15)',
@@ -57,28 +57,18 @@ export default function NotificationPopover({ anchorEl, open, onClose }) {
         }
       }}
     >
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9' }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f4f9' }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 800, fontSize: '0.92rem' }}>
           پیام‌ها و اعلان‌ها
         </Typography>
         {notifications.length > 0 && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Button
-              size="small"
-              onClick={markAllAsRead}
-              sx={{ fontSize: '0.75rem', color: '#64748b', p: 0, minWidth: 'auto' }}
-            >
-              خوانده شد همه
-            </Button>
-            <Typography variant="caption" sx={{ color: '#cbd5e1' }}>•</Typography>
-            <Button
-              size="small"
-              onClick={clearAllNotifications}
-              sx={{ fontSize: '0.75rem', color: '#dc2626', p: 0, minWidth: 'auto' }}
-            >
-              پاک‌سازی
-            </Button>
-          </Box>
+          <Button
+            size="small"
+            onClick={markAllAsRead}
+            sx={{ fontSize: '0.75rem', color: '#64748b', p: 0, minWidth: 'auto', fontWeight: 600 }}
+          >
+            خوانده شدن همه
+          </Button>
         )}
       </Box>
 
@@ -89,39 +79,66 @@ export default function NotificationPopover({ anchorEl, open, onClose }) {
             هیچ اعلان جدیدی وجود ندارد
           </Typography>
           <Typography variant="caption" sx={{ color: '#94a3b8', mt: 0.5, display: 'block', fontSize: '0.75rem' }}>
-            اعلان‌های مربوط به دوره‌ها و فعالیت‌های شما در اینجا قرار می‌گیرند.
+            پیام‌های ارسالی از سوی مدیریت و استادیاران دوره‌ها در اینجا نمایش داده می‌شوند.
           </Typography>
         </Box>
       ) : (
-        <List disablePadding sx={{ maxHeight: 340, overflowY: 'auto' }}>
-          {notifications.slice(0, 4).map((n) => (
+        <List disablePadding sx={{ maxHeight: 380, overflowY: 'auto' }}>
+          {notifications.map((n) => (
             <ListItem
               key={n.id}
+              onClick={() => {
+                if (!n.isRead) markAsRead(n.id);
+              }}
               sx={{
                 p: 2,
+                cursor: 'pointer',
                 backgroundColor: n.isRead ? '#ffffff' : '#f8fafc',
-                borderBottom: '1px solid #f1f5f9',
+                borderBottom: '1px solid #f1f4f9',
                 alignItems: 'flex-start',
-                gap: 1.5
+                gap: 1.5,
+                transition: 'background-color 0.15s',
+                '&:hover': {
+                  backgroundColor: '#f1f5f9'
+                }
               }}
             >
-              <ListItemAvatar sx={{ minWidth: 38 }}>
-                {getIcon(n.type)}
+              <ListItemAvatar sx={{ minWidth: 36 }}>
+                {getIcon(n.type, n.senderRole)}
               </ListItemAvatar>
               <ListItemText
                 primary={
-                  <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#1e293b' }}>
-                    {n.title}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, mb: 0.5 }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.86rem', color: '#1e293b' }}>
+                      {n.title}
+                    </Typography>
+                    {!n.isRead && (
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#f47c20', flexShrink: 0 }} />
+                    )}
+                  </Box>
                 }
                 secondary={
                   <Box component="span">
-                    <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.3, fontSize: '0.78rem' }}>
-                      {n.description}
+                    <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.3, fontSize: '0.8rem', lineHeight: 1.5 }}>
+                      {n.description || n.body}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.7rem', mt: 0.5, display: 'block' }}>
-                      {n.date}
-                    </Typography>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+                      <Chip
+                        label={n.senderLabel || (n.senderRole === 'ta' ? 'استادیار دوره' : 'مدیریت حرکت')}
+                        size="small"
+                        sx={{
+                          height: 20,
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          bgcolor: n.senderRole === 'ta' ? '#eff6ff' : '#fff8ed',
+                          color: n.senderRole === 'ta' ? '#1d4ed8' : '#c2410c'
+                        }}
+                      />
+                      <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.7rem' }}>
+                        {formatDate(n.createdAt || n.date)}
+                      </Typography>
+                    </Box>
                   </Box>
                 }
               />
@@ -129,25 +146,6 @@ export default function NotificationPopover({ anchorEl, open, onClose }) {
           ))}
         </List>
       )}
-
-      {/* Blue link "All notifications" as in Dribbble reference */}
-      <Box sx={{ p: 1.5, textAlign: 'center', backgroundColor: '#ffffff' }}>
-        <Button
-          component={NavLink}
-          to="/profile"
-          onClick={onClose}
-          fullWidth
-          sx={{
-            color: '#2563eb',
-            fontWeight: 700,
-            fontSize: '0.82rem',
-            py: 0.8,
-            '&:hover': { backgroundColor: '#eff6ff' }
-          }}
-        >
-          تمام اعلان‌ها
-        </Button>
-      </Box>
     </Popover>
   );
 }

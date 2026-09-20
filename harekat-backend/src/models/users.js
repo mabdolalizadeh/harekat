@@ -53,6 +53,11 @@ const Users = sequelize.define('Users', {
     education: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    rubies: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
     }
 }, {
     updatedAt: true,

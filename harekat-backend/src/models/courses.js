@@ -43,9 +43,7 @@ const Courses = sequelize.define('Courses', {
     level: {
         type: DataTypes.STRING,
         allowNull: false,
-        // Skill packages intentionally do not have a level; they store an
-        // empty string for compatibility with the existing SQLite schema.
-        validate: { isIn: [['', 'پایه', 'مقدماتی', 'پیشرفته', 'مبتدی']] }
+        validate: { isIn: [['', 'پایه', 'مقدماتی', 'متوسط', 'پیشرفته', 'مبتدی', 'همه سطوح', 'جامع']] }
     },
     duration: {
         type: DataTypes.STRING,
@@ -54,7 +52,7 @@ const Courses = sequelize.define('Courses', {
     typeOfAttendence: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: { isIn: [['آنلاین', 'آفلاین']] }
+        validate: { isIn: [['آنلاین', 'آفلاین', 'حضوری', 'ترکیبی']] }
     },
     kind: {
         type: DataTypes.STRING,
@@ -64,7 +62,8 @@ const Courses = sequelize.define('Courses', {
     },
     statusOfRegistration: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: { isIn: [['open', 'closed', 'soon', 'completed', 'در حال ثبت‌نام', 'به اتمام رسیده', 'به زودی', 'تکمیل ظرفیت']] }
     },
     videoUrl: {
         type: DataTypes.STRING,

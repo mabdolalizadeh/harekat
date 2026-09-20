@@ -16,8 +16,13 @@ async function clearData() {
 }
 
 async function seedAdmins() {
-    await Admins.create({ username: 'admin', password: 'admin123' });
-    await Admins.create({ username: 'superadmin', password: 'super123' });
+    await Admins.create({
+        username: 'superadmin',
+        password: 'superadmin',
+        role: 'superadmin',
+        name: 'مدیر کل سیستم',
+        status: 'active'
+    });
 }
 
 async function seedUsers() {

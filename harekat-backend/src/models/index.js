@@ -24,6 +24,8 @@ import ExamResults from "./examResults.js";
 import Licenses from "./licenses.js";
 import { Tickets, TicketMessages } from "./tickets.js";
 import TACourses from "./taCourses.js";
+import { Notifications, UserNotificationRead } from "./notifications.js";
+import UserLessonProgress from "./userLessonProgress.js";
 import { sequelize } from "./database.config.js";
 
 // Users <-> Courses (many-to-many legacy compatibility)
@@ -322,6 +324,71 @@ Courses.belongsToMany(Admins, {
     otherKey: "adminId"
 });
 
+// Notifications associations
+Admins.hasMany(Notifications, {
+    foreignKey: "senderId",
+    as: "sentNotifications"
+});
+Notifications.belongsTo(Admins, {
+    foreignKey: "senderId",
+    as: "sender"
+});
+Courses.hasMany(Notifications, {
+    foreignKey: "courseId",
+    as: "notifications"
+});
+Notifications.belongsTo(Courses, {
+    foreignKey: "courseId",
+    as: "course"
+});
+Notifications.hasMany(UserNotificationRead, {
+    foreignKey: "notificationId",
+    as: "reads",
+    onDelete: "CASCADE"
+});
+UserNotificationRead.belongsTo(Notifications, {
+    foreignKey: "notificationId",
+    as: "notification"
+});
+Users.hasMany(UserNotificationRead, {
+    foreignKey: "userId",
+    as: "readNotifications",
+    onDelete: "CASCADE"
+});
+UserNotificationRead.belongsTo(Users, {
+    foreignKey: "userId",
+    as: "user"
+});
+
+// UserLessonProgress associations
+Users.hasMany(UserLessonProgress, {
+    foreignKey: "userId",
+    as: "lessonProgresses",
+    onDelete: "CASCADE"
+});
+UserLessonProgress.belongsTo(Users, {
+    foreignKey: "userId",
+    as: "user"
+});
+Sessions.hasMany(UserLessonProgress, {
+    foreignKey: "sessionId",
+    as: "progresses",
+    onDelete: "CASCADE"
+});
+UserLessonProgress.belongsTo(Sessions, {
+    foreignKey: "sessionId",
+    as: "session"
+});
+Courses.hasMany(UserLessonProgress, {
+    foreignKey: "courseId",
+    as: "lessonProgresses",
+    onDelete: "CASCADE"
+});
+UserLessonProgress.belongsTo(Courses, {
+    foreignKey: "courseId",
+    as: "course"
+});
+
 export {
     Users,
     Courses,
@@ -352,5 +419,8 @@ export {
     Tickets,
     TicketMessages,
     TACourses,
+    Notifications,
+    UserNotificationRead,
+    UserLessonProgress,
     sequelize
 };

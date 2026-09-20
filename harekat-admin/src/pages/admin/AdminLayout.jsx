@@ -76,6 +76,7 @@ const SUPER_ADMIN_GROUPS = [
     title: 'کاربران و پشتیبانی',
     items: [
       { to: '/students', label: 'دانشجویان و دسترسی‌ها', icon: StudentsIcon },
+      { to: '/notifications', label: 'ارسال اعلان و پیام', icon: CampaignIcon },
       { to: '/tickets', label: 'تیکت‌های پشتیبانی', icon: HelpIcon },
       { to: '/tas', label: 'دستیاران آموزشی (TAs)', icon: TAIcon },
     ],
@@ -117,6 +118,7 @@ const TA_GROUPS = [
     title: 'آموزش و آزمون',
     items: [
       { to: '/courses', label: 'دوره‌های من', icon: SchoolIcon },
+      { to: '/notifications', label: 'ارسال پیام به دانشجویان', icon: CampaignIcon },
       { to: '/tickets', label: 'تیکت‌های دوره‌های من', icon: HelpIcon },
       { to: '/exams', label: 'آزمون‌ها و ثبت نمره', icon: ExamIcon },
       { to: '/licenses', label: 'گواهینامه‌های دوره‌ها', icon: LicenseIcon },

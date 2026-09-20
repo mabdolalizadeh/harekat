@@ -84,12 +84,13 @@ export default function OverviewPage() {
                 lessonNumber: s.sessionNumber,
                 title: s.title,
                 duration: '۴۵ دقیقه',
-                timeInfo: s.sessionNumber <= 2 ? 'تکمیل شده' : (s.sessionNumber === 3 ? 'در حال یادگیری' : 'به زودی'),
+                timeInfo: s.isCompleted ? 'تکمیل شده' : 'در حال یادگیری',
                 image: myCourses[0].image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400',
                 videoUrl: s.videoLink || 'https://www.youtube.com/embed/dQw4w9WgXcQ',
                 description: s.description || 'جلسه آموزشی دوره آنلاین مدرسه حرکت',
                 longDescription: s.description || '',
-                initialStatus: s.sessionNumber <= 2 ? 'completed' : (s.sessionNumber === 3 ? 'in_progress' : 'soon'),
+                initialStatus: s.isCompleted ? 'completed' : 'in_progress',
+                isCompleted: s.isCompleted,
                 sessionLink: s.sessionLink,
                 googleDriveLink: s.googleDriveLink,
                 groupLink: s.groupLink,
@@ -114,20 +115,38 @@ export default function OverviewPage() {
     loadDashboardData();
   }, []);
 
-  const toggleLessonComplete = (lessonId) => {
+  const toggleLessonComplete = async (lessonId) => {
+    const current = upcomingSessions.find((s) => s.id === lessonId);
+    const newStatus = !(current?.isCompleted || completedLessonIds.includes(lessonId));
+
+    try {
+      await sessionsApi.updateProgress(lessonId, { isCompleted: newStatus, progressPercent: newStatus ? 100 : 0 });
+    } catch (e) {
+      console.warn('Could not sync progress to backend:', e);
+    }
+
+    setUpcomingSessions((prev) =>
+      prev.map((s) =>
+        s.id === lessonId
+          ? { ...s, isCompleted: newStatus, initialStatus: newStatus ? 'completed' : 'in_progress', timeInfo: newStatus ? 'تکمیل شده' : 'در حال یادگیری' }
+          : s
+      )
+    );
+
     setCompletedLessonIds((prev) => {
       const exists = prev.includes(lessonId);
-      const updated = exists ? prev.filter((id) => id !== lessonId) : [...prev, lessonId];
+      const updated = newStatus ? (exists ? prev : [...prev, lessonId]) : prev.filter((id) => id !== lessonId);
       localStorage.setItem('completedLessons', JSON.stringify(updated));
       return updated;
     });
   };
 
   // Divide sessions into Kanban columns
-  const soonLessons = upcomingSessions.filter((l) => l.initialStatus === 'soon' && !completedLessonIds.includes(l.id));
-  const inProgressLessons = upcomingSessions.filter((l) => l.initialStatus === 'in_progress' && !completedLessonIds.includes(l.id));
-  const onCheckLessons = upcomingSessions.filter((l) => l.initialStatus === 'on_check' && !completedLessonIds.includes(l.id));
-  const completedLessons = upcomingSessions.filter((l) => completedLessonIds.includes(l.id) || l.initialStatus === 'completed');
+  const soonLessons = upcomingSessions.filter((l) => !l.isCompleted && l.initialStatus === 'soon' && !completedLessonIds.includes(l.id));
+  const inProgressLessons = upcomingSessions.filter((l) => !l.isCompleted && l.initialStatus === 'in_progress' && !completedLessonIds.includes(l.id));
+  const onCheckLessons = upcomingSessions.filter((l) => !l.isCompleted && l.initialStatus === 'on_check' && !completedLessonIds.includes(l.id));
+  const completedLessons = upcomingSessions.filter((l) => l.isCompleted || completedLessonIds.includes(l.id) || l.initialStatus === 'completed');
+
 
   if (loading) {
     return (

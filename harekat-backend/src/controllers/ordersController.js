@@ -1,4 +1,4 @@
-import { Orders, OrderItems, Cart, CartItem, Users, Courses, Subscriptions, Payments } from '../models/index.js';
+import { Orders, OrderItems, Cart, CartItem, Users, Courses, Subscriptions, Payments, Coupon } from '../models/index.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
 function parsePrice(value) {
@@ -22,18 +22,70 @@ export default class OrdersController {
                 return res.status(400).json({ ok: false, message: 'سبد خرید خالی است' });
             }
 
+            // Fetch canonical products and calculate subtotal securely
             let subtotal = 0;
+            const itemsData = [];
+
             for (const item of cart.items) {
-                subtotal += parsePrice(item.price) * item.quantity;
+                let canonicalPrice = '0';
+                let productName = '';
+                let productImage = '';
+
+                if (item.productType === 'course') {
+                    const course = await Courses.findByPk(item.productId);
+                    if (course) {
+                        canonicalPrice = course.salePrice || course.price;
+                        productName = course.name;
+                        productImage = course.image;
+                    }
+                } else if (item.productType === 'subscription') {
+                    const sub = await Subscriptions.findByPk(item.productId);
+                    if (sub) {
+                        canonicalPrice = sub.salePrice || sub.price;
+                        productName = sub.name;
+                        productImage = sub.image;
+                    }
+                }
+
+                const priceNum = parsePrice(canonicalPrice);
+                const quantity = Math.max(1, item.quantity || 1);
+                subtotal += priceNum * quantity;
+
+                itemsData.push({
+                    productId: item.productId,
+                    productType: item.productType,
+                    quantity,
+                    price: String(priceNum),
+                    productName: productName || item.productName || 'دوره حرکت',
+                    productImage: productImage || item.productImage || null
+                });
             }
 
+            // Server-side coupon discount calculation (MED-07)
             let discountAmount = 0;
-            if (couponCode) {
-                // Coupon validation would go here
-                // For now, skip coupon logic
+            let appliedCouponCode = null;
+
+            if (couponCode && typeof couponCode === 'string' && couponCode.trim()) {
+                const code = couponCode.trim();
+                const coupon = await Coupon.findOne({ where: { code, isActive: true } });
+
+                if (coupon) {
+                    const isExpired = coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
+                    const isOverLimit = coupon.usageLimit && coupon.usageCount >= coupon.usageLimit;
+                    const isUnderMinAmount = coupon.minimumOrderAmount && subtotal < Number(coupon.minimumOrderAmount);
+
+                    if (!isExpired && !isOverLimit && !isUnderMinAmount) {
+                        if (coupon.discountType === 'percent') {
+                            discountAmount = Math.round((subtotal * Number(coupon.discountValue)) / 100);
+                        } else if (coupon.discountType === 'fixed') {
+                            discountAmount = Math.min(subtotal, Math.round(Number(coupon.discountValue)));
+                        }
+                        appliedCouponCode = code;
+                    }
+                }
             }
 
-            const finalAmount = subtotal - discountAmount;
+            const finalAmount = Math.max(0, subtotal - discountAmount);
 
             const order = await Orders.create({
                 userId,
@@ -41,41 +93,45 @@ export default class OrdersController {
                 totalAmount: String(subtotal),
                 discountAmount: String(discountAmount),
                 finalAmount: String(finalAmount),
-                couponCode: couponCode ?? null
+                couponCode: appliedCouponCode
             });
 
-            for (const item of cart.items) {
-                let productName = '';
-                let productImage = '';
-                if (item.productType === 'course') {
-                    const course = await Courses.findByPk(item.productId);
-                    if (course) {
-                        productName = course.name;
-                        productImage = course.image;
-                    }
-                } else if (item.productType === 'subscription') {
-                    const sub = await Subscriptions.findByPk(item.productId);
-                    if (sub) {
-                        productName = sub.name;
-                        productImage = sub.image;
-                    }
-                }
-
+            for (const item of itemsData) {
                 await OrderItems.create({
                     orderId: order.id,
                     productId: item.productId,
                     productType: item.productType,
                     quantity: item.quantity,
                     price: item.price,
-                    productName,
-                    productImage
+                    productName: item.productName,
+                    productImage: item.productImage
                 });
             }
 
+            // Initialize pending payment entry for this order
+            const payment = await Payments.create({
+                userId,
+                orderId: order.id,
+                amount: String(finalAmount),
+                status: 'pending',
+                type: 'pending',
+                gateway: 'mock'
+            });
+
+            order.paymentId = payment.id;
+            await order.save();
+
+            // Clear user's cart
             await CartItem.destroy({ where: { cartId: cart.id } });
 
-            const createdOrder = await Orders.findByPk(order.id, { include: [{ model: OrderItems, as: 'items' }] });
-            logSecurityEvent('order_created', { orderId: order.id, userId, requesterId: userId, ip: req.ip });
+            const createdOrder = await Orders.findByPk(order.id, {
+                include: [
+                    { model: OrderItems, as: 'items' },
+                    { model: Payments, as: 'payment' }
+                ]
+            });
+
+            logSecurityEvent('order_created', { orderId: order.id, paymentId: payment.id, userId, requesterId: userId, ip: req.ip });
             return res.status(201).json({ ok: true, data: createdOrder });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
@@ -99,7 +155,8 @@ export default class OrdersController {
                 where: whereClause,
                 include: [
                     { model: OrderItems, as: 'items' },
-                    { model: Users, as: 'user', attributes: ['id', 'firstName', 'lastName', 'phoneNumber'] }
+                    { model: Users, as: 'user', attributes: ['id', 'firstName', 'lastName', 'phoneNumber'] },
+                    { model: Payments, as: 'payment' }
                 ],
                 order: [['createdAt', 'DESC']]
             });
@@ -120,7 +177,8 @@ export default class OrdersController {
                 where: whereClause,
                 include: [
                     { model: OrderItems, as: 'items' },
-                    { model: Users, as: 'user', attributes: ['id', 'firstName', 'lastName', 'phoneNumber'] }
+                    { model: Users, as: 'user', attributes: ['id', 'firstName', 'lastName', 'phoneNumber'] },
+                    { model: Payments, as: 'payment' }
                 ]
             });
             if (!order) {
@@ -151,7 +209,12 @@ export default class OrdersController {
             if (paymentId !== undefined) order.paymentId = paymentId;
             await order.save();
 
-            const updated = await Orders.findByPk(id, { include: [{ model: OrderItems, as: 'items' }] });
+            const updated = await Orders.findByPk(id, {
+                include: [
+                    { model: OrderItems, as: 'items' },
+                    { model: Payments, as: 'payment' }
+                ]
+            });
             logSecurityEvent('order_status_updated', { orderId: id, status, requesterId: req.user?.id, ip: req.ip });
             return res.status(200).json({ ok: true, data: updated });
         } catch (err) {

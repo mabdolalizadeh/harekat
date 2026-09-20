@@ -23,6 +23,7 @@ const AdminTickets = lazy(() => import('./pages/admin/AdminTickets.jsx'));
 const AdminExams = lazy(() => import('./pages/admin/AdminExams.jsx'));
 const AdminLicenses = lazy(() => import('./pages/admin/AdminLicenses.jsx'));
 const AdminTAs = lazy(() => import('./pages/admin/AdminTAs.jsx'));
+const AdminNotifications = lazy(() => import('./pages/admin/AdminNotifications.jsx'));
 
 function PageLoader() {
   return (
@@ -161,6 +162,14 @@ export default function App({ mode, onToggleTheme }) {
           element={
             <Suspense fallback={<PageLoader />}>
               <AdminTAs />
+            </Suspense>
+          }
+        />
+        <Route
+          path="notifications"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminNotifications />
             </Suspense>
           }
         />

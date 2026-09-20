@@ -94,10 +94,11 @@ export default function MyCoursesPage() {
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {courses.map((course, index) => {
-            const progress = 45 + ((index * 23) % 50); // Student progress
+          {courses.map((course) => {
+            const progress = course.progress !== undefined ? course.progress : 0;
             return (
               <Grid item xs={12} sm={6} lg={4} key={course.id}>
+
                 <Card
                   sx={{
                     borderRadius: '24px',

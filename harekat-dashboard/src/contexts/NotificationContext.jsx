@@ -1,61 +1,70 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import notificationsApi from '../api/notificationsApi.js';
+import { useAuth } from './AuthContext.jsx';
 
 const NotificationContext = createContext(null);
 
-const INITIAL_NOTIFICATIONS = [];
-
 export function NotificationProvider({ children }) {
-  const [notifications, setNotifications] = useState(() => {
-    try {
-      const saved = localStorage.getItem('notifications');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
+  const { isAuthenticated } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated) {
+      setNotifications([]);
+      return;
     }
-  });
+    try {
+      setLoading(true);
+      const res = await notificationsApi.getMyNotifications();
+      if (res?.ok && Array.isArray(res.data)) {
+        setNotifications(res.data);
+      }
+    } catch (err) {
+      console.warn('Failed to load notifications:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchNotifications();
+    // Periodically poll notifications every 60 seconds
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => {
-      const updated = prev.map((n) => ({ ...n, isRead: true }));
-      try { localStorage.setItem('notifications', JSON.stringify(updated)); } catch {}
-      return updated;
-    });
+  const markAllAsRead = async () => {
+    try {
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      await notificationsApi.markAllAsRead();
+    } catch (err) {
+      console.warn('Error marking all read:', err.message);
+    }
   };
 
-  const markAsRead = (id) => {
-    setNotifications((prev) => {
-      const updated = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
-      try { localStorage.setItem('notifications', JSON.stringify(updated)); } catch {}
-      return updated;
-    });
-  };
-
-  const addNotification = (notif) => {
-    setNotifications((prev) => {
-      const updated = [
-        { id: `n_${Date.now()}`, isRead: false, date: 'همین الان', ...notif },
-        ...prev
-      ];
-      try { localStorage.setItem('notifications', JSON.stringify(updated)); } catch {}
-      return updated;
-    });
+  const markAsRead = async (id) => {
+    try {
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+      await notificationsApi.markAsRead(id);
+    } catch (err) {
+      console.warn('Error marking read:', err.message);
+    }
   };
 
   const clearAllNotifications = () => {
-    setNotifications([]);
-    try {
-      localStorage.removeItem('notifications');
-    } catch {}
+    markAllAsRead();
   };
 
   const value = {
     notifications,
     unreadCount,
+    loading,
+    refreshNotifications: fetchNotifications,
     markAllAsRead,
     markAsRead,
-    addNotification,
     clearAllNotifications
   };
 

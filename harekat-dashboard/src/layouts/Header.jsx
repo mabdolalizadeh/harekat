@@ -16,12 +16,15 @@ import {
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotifications } from '../contexts/NotificationContext.jsx';
+import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { assetUrl, toPersianDigits } from '../utils/formatters.js';
 import NotificationPopover from '../components/common/NotificationPopover.jsx';
 import Logo from '../components/common/Logo.jsx';
 
 // Icons
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -34,6 +37,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
   const navigate = useNavigate();
   const { user, isPreviewMode, logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { mode, toggleTheme } = useThemeMode();
 
   const [notifAnchor, setNotifAnchor] = useState(null);
   const [profileAnchor, setProfileAnchor] = useState(null);
@@ -58,8 +62,9 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
         alignItems: 'center',
         justifyContent: 'space-between',
         px: { xs: 2, md: 3 },
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid #deddd7',
+        backgroundColor: 'background.paper',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
         zIndex: 1100,
         flexShrink: 0
       }}
@@ -153,18 +158,36 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
 
       {/* Left side (RTL end): Notification + Profile */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
+        {/* Theme mode toggle button */}
+        <Tooltip title={mode === 'dark' ? 'حالت روشن' : 'حالت تاریک'}>
+          <IconButton
+            onClick={toggleTheme}
+            size="small"
+            sx={{
+              color: 'text.primary',
+              backgroundColor: mode === 'dark' ? '#1e293b' : '#f7f5f0',
+              border: `1px solid ${mode === 'dark' ? '#334155' : '#deddd7'}`,
+              borderRadius: '12px',
+              p: 0.9,
+              '&:hover': { backgroundColor: mode === 'dark' ? '#334155' : '#efede7' }
+            }}
+          >
+            {mode === 'dark' ? <LightModeOutlinedIcon sx={{ fontSize: 20, color: '#f59e0b' }} /> : <DarkModeOutlinedIcon sx={{ fontSize: 20 }} />}
+          </IconButton>
+        </Tooltip>
+
         {/* Notification bell */}
         <Tooltip title="اعلان‌ها">
           <IconButton
             onClick={handleOpenNotif}
             size="small"
             sx={{
-              color: '#171715',
-              backgroundColor: '#f7f5f0',
-              border: '1px solid #deddd7',
+              color: 'text.primary',
+              backgroundColor: mode === 'dark' ? '#1e293b' : '#f7f5f0',
+              border: `1px solid ${mode === 'dark' ? '#334155' : '#deddd7'}`,
               borderRadius: '12px',
               p: 0.9,
-              '&:hover': { backgroundColor: '#efede7' }
+              '&:hover': { backgroundColor: mode === 'dark' ? '#334155' : '#efede7' }
             }}
           >
             <Badge
@@ -206,10 +229,10 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             cursor: 'pointer',
             p: '4px 8px 4px 6px',
             borderRadius: '14px',
-            backgroundColor: '#f7f5f0',
-            border: '1px solid #deddd7',
+            backgroundColor: mode === 'dark' ? '#1e293b' : '#f7f5f0',
+            border: `1px solid ${mode === 'dark' ? '#334155' : '#deddd7'}`,
             transition: 'background-color 0.15s ease',
-            '&:hover': { backgroundColor: '#efede7' }
+            '&:hover': { backgroundColor: mode === 'dark' ? '#334155' : '#efede7' }
           }}
         >
           <Avatar
@@ -231,7 +254,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
               display: { xs: 'none', sm: 'block' },
               fontSize: '0.84rem',
               fontWeight: 600,
-              color: '#171715',
+              color: 'text.primary',
               maxWidth: 120,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -240,7 +263,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
           >
             {displayName}
           </Typography>
-          <KeyboardArrowDownIcon sx={{ fontSize: 16, color: '#6b6b63' }} />
+          <KeyboardArrowDownIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
         </Box>
 
         {/* Profile Menu Dropdown */}
@@ -255,8 +278,10 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
               mt: 1,
               width: 200,
               borderRadius: '16px',
-              border: '1px solid #deddd7',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+              border: '1px solid',
+              borderColor: 'divider',
+              backgroundColor: 'background.paper',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
               p: 0.5
             }
           }}

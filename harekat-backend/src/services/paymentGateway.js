@@ -1,4 +1,4 @@
-import { Orders, OrderItems, Payments, Courses } from '../models/index.js';
+import { Orders, OrderItems, Payments, Courses, Coupon } from '../models/index.js';
 import { AccessService } from './accessService.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
@@ -78,6 +78,19 @@ export class PaymentGateway {
         order.status = 'paid';
         await order.save();
 
+        // Increment coupon usage count if coupon was used
+        if (order.couponCode) {
+            try {
+                const coupon = await Coupon.findOne({ where: { code: order.couponCode } });
+                if (coupon) {
+                    coupon.usageCount = (coupon.usageCount || 0) + 1;
+                    await coupon.save();
+                }
+            } catch (e) {
+                console.warn('Coupon usage count increment warning:', e.message);
+            }
+        }
+
         // Automatically grant access based on purchased order items
         for (const item of order.items || []) {
             if (item.productType === 'course') {
@@ -108,6 +121,35 @@ export class PaymentGateway {
             payment,
             order,
             success: true
+        };
+    }
+
+    /**
+     * Process user-cancelled or failed payment
+     */
+    static async processCancelledPayment(paymentId, { reason = 'پرداخت توسط کاربر لغو شد' } = {}) {
+        const payment = await Payments.findByPk(paymentId, {
+            include: [{ model: Orders, as: 'order' }]
+        });
+
+        if (!payment) throw new Error('Payment not found');
+
+        payment.status = 'cancelled';
+        payment.type = 'cancelled';
+        payment.metadata = typeof reason === 'object' ? JSON.stringify(reason) : JSON.stringify({ reason });
+        await payment.save();
+
+        if (payment.order) {
+            payment.order.status = 'cancelled';
+            await payment.order.save();
+        }
+
+        logSecurityEvent('payment_cancelled', { paymentId: payment.id, orderId: payment.order?.id, userId: payment.userId });
+
+        return {
+            payment,
+            order: payment.order,
+            success: false
         };
     }
 }

@@ -22,16 +22,19 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
 import { paymentsApi } from '../api/paymentsApi.js';
 import { formatPrice, formatDate, toPersianDigits } from '../utils/formatters.js';
+import FakePaymentModal from '../components/payment/FakePaymentModal.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 export default function OrdersPage() {
+  const { refreshUser } = useAuth();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [verifyingId, setVerifyingId] = useState(null);
-  const [verifyMessage, setVerifyMessage] = useState(null);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState(null);
 
   const loadPayments = async () => {
     try {
@@ -51,21 +54,26 @@ export default function OrdersPage() {
     loadPayments();
   }, []);
 
-  const handleSimulatePayment = async (payment) => {
-    try {
-      setVerifyingId(payment.id);
-      setVerifyMessage(null);
-      const simulatedRef = `SIM-${Date.now()}`;
-      const res = await paymentsApi.verifyPayment(payment.id, simulatedRef);
-      if (res?.ok) {
-        setVerifyMessage({ type: 'success', text: 'پرداخت با موفقیت تایید شد و دسترسی به دوره‌ها بلافاصله فعال گردید!' });
-        await loadPayments();
-      }
-    } catch (err) {
-      setVerifyMessage({ type: 'error', text: err.message || 'خطا در تایید پرداخت' });
-    } finally {
-      setVerifyingId(null);
-    }
+  const handleOpenPaymentModal = (payment) => {
+    setSelectedPayment(payment);
+    setModalOpen(true);
+  };
+
+  const handlePaymentSuccess = async (data) => {
+    setFeedbackMessage({
+      type: 'success',
+      text: 'پرداخت با موفقیت انجام شد و دوره‌ها و بسته‌های آموزشی بلافاصله برای شما فعال گردیدند!'
+    });
+    refreshUser();
+    await loadPayments();
+  };
+
+  const handlePaymentCancelled = async (data) => {
+    setFeedbackMessage({
+      type: 'warning',
+      text: 'پرداخت توسط شما لغو شد. سفارش به حالت لغو شده تغییر یافت.'
+    });
+    await loadPayments();
   };
 
   const getStatusChip = (status) => {
@@ -133,13 +141,17 @@ export default function OrdersPage() {
           تاریخچه پرداخت‌ها و تراکنش‌ها
         </Typography>
         <Typography variant="body2" sx={{ color: '#6b6b63' }}>
-          گزارش کامل سفارش‌ها، شهریه دوره‌ها، وضعیت درگاه و کد رهگیری پرداخت
+          گزارش کامل سفارش‌ها، وضعیت درگاه و کد رهگیری تراکنش‌ها
         </Typography>
       </Box>
 
-      {verifyMessage && (
-        <Alert severity={verifyMessage.type} sx={{ mb: 3, borderRadius: '16px' }}>
-          {verifyMessage.text}
+      {feedbackMessage && (
+        <Alert
+          severity={feedbackMessage.type}
+          onClose={() => setFeedbackMessage(null)}
+          sx={{ mb: 3, borderRadius: '16px' }}
+        >
+          {feedbackMessage.text}
         </Alert>
       )}
 
@@ -214,9 +226,8 @@ export default function OrdersPage() {
                         <Button
                           size="small"
                           variant="contained"
-                          disabled={verifyingId === p.id}
-                          onClick={() => handleSimulatePayment(p)}
-                          startIcon={verifyingId === p.id ? <CircularProgress size={14} color="inherit" /> : <CreditCardOutlinedIcon sx={{ fontSize: 16 }} />}
+                          onClick={() => handleOpenPaymentModal(p)}
+                          startIcon={<CreditCardOutlinedIcon sx={{ fontSize: 16 }} />}
                           sx={{
                             borderRadius: '10px',
                             fontWeight: 700,
@@ -225,13 +236,18 @@ export default function OrdersPage() {
                             '&:hover': { backgroundColor: '#df5b13' }
                           }}
                         >
-                          پرداخت و فعال‌سازی
+                          پرداخت در درگاه
                         </Button>
                       ) : (
                         <Chip
-                          label="تکمیل شده"
+                          label={p.status === 'paid' ? 'پرداخت موفق' : 'لغو شده'}
                           size="small"
-                          sx={{ height: 24, fontSize: '0.72rem', backgroundColor: '#f1f5f9', color: '#64748b' }}
+                          sx={{
+                            height: 24,
+                            fontSize: '0.72rem',
+                            backgroundColor: p.status === 'paid' ? '#dcfce7' : '#f1f5f9',
+                            color: p.status === 'paid' ? '#15803d' : '#64748b'
+                          }}
                         />
                       )}
                     </TableCell>
@@ -242,6 +258,15 @@ export default function OrdersPage() {
           </Table>
         </TableContainer>
       )}
+
+      {/* Fake Payment Gateway Modal */}
+      <FakePaymentModal
+        open={modalOpen}
+        payment={selectedPayment}
+        onClose={() => setModalOpen(false)}
+        onSuccess={handlePaymentSuccess}
+        onCancelled={handlePaymentCancelled}
+      />
     </Box>
   );
 }

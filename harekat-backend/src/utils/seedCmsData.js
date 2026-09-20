@@ -7,7 +7,7 @@ import { Categories, Courses, Coupon, HeaderMenuItem, SiteContent } from '../mod
 
 async function main() {
     await sequelize.authenticate();
-    await sequelize.sync({ alter: true }); // adds new tables/columns without dropping data
+    await sequelize.sync();
     // SQLite can't ADD a UNIQUE column via ALTER, so enforce slug uniqueness with an index.
     await sequelize.query('CREATE UNIQUE INDEX IF NOT EXISTS categories_slug_unique ON Categories (slug)').catch(() => {});
 

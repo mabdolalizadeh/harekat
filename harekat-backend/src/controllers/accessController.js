@@ -1,10 +1,10 @@
 import { AccessService } from '../services/accessService.js';
-import { Courses, Users, SiteContent } from '../models/index.js';
+import { Courses, Users, SiteContent, Sessions, UserLessonProgress } from '../models/index.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
 export default class AccessController {
     /**
-     * Student: Get only accessible courses for current student
+     * Student: Get only accessible courses for current student with progress
      */
     static async getMyAccessibleCourses(req, res) {
         const userId = req.user?.id;
@@ -17,11 +17,28 @@ export default class AccessController {
                 order: [['createdAt', 'DESC']]
             });
 
-            return res.status(200).json({ ok: true, data: courses });
+            const enrichedCourses = await Promise.all(
+                courses.map(async (course) => {
+                    const totalSessions = await Sessions.count({ where: { courseId: course.id } });
+                    const completedSessions = await UserLessonProgress.count({
+                        where: { userId, courseId: course.id, isCompleted: true }
+                    });
+                    const progress = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+                    return {
+                        ...course.toJSON(),
+                        totalSessions,
+                        completedSessions,
+                        progress
+                    };
+                })
+            );
+
+            return res.status(200).json({ ok: true, data: enrichedCourses });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
         }
     }
+
 
     /**
      * Student: Get single recommended course that student does NOT have access to

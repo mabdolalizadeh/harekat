@@ -9,6 +9,7 @@ export async function migrateLmsSchema() {
         if (!existing.has('bio')) await sequelize.query("ALTER TABLE Users ADD COLUMN bio TEXT");
         if (!existing.has('jobTitle')) await sequelize.query("ALTER TABLE Users ADD COLUMN jobTitle VARCHAR(255)");
         if (!existing.has('education')) await sequelize.query("ALTER TABLE Users ADD COLUMN education VARCHAR(255)");
+        if (!existing.has('rubies')) await sequelize.query("ALTER TABLE Users ADD COLUMN rubies INTEGER DEFAULT 0");
     }
 
     // 2. Admins new columns

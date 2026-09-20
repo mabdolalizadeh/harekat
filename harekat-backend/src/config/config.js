@@ -9,8 +9,8 @@ dotenv.config(path.join(__dirname, "..", ".env"));
 
 const configs = {
     jwtKey: process.env.JWT_KEY,
-    jwtExpiry: process.env.JWT_EXPIRY || '1d',
-    userJwtExpiry: process.env.USER_JWT_EXPIRY || '15m',
+    jwtExpiry: process.env.JWT_EXPIRY || '7d',
+    userJwtExpiry: process.env.USER_JWT_EXPIRY || '7d',
     corsOrigin: process.env.CORS_ORIGIN || '*',
     nodeEnv: String(process.env.NODE_ENV || 'production').toLowerCase()
 };

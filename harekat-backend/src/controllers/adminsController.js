@@ -25,7 +25,7 @@ const validatePassword = (password) => {
 
 export default class AdminsController {
     static async createAdmin(req, res) {
-        const { username, password, currentPassword } = req.body;
+        const { username, password, role = 'superadmin', name, email, phoneNumber, status = 'active' } = req.body;
         if (!username || !password) {
             return res.status(400).json({ ok: false, message: 'username and password are required' });
         }
@@ -41,11 +41,27 @@ export default class AdminsController {
                 return res.status(409).json({ ok: false, message: 'admin with this username already exists' });
             }
 
-            const admin = await Admins.create({ username, password });
-            logSecurityEvent('admin_created', { adminId: admin.id, username: admin.username });
+            const admin = await Admins.create({
+                username,
+                password,
+                role: ['superadmin', 'ta'].includes(role) ? role : 'superadmin',
+                name: name || null,
+                email: email || null,
+                phoneNumber: phoneNumber || null,
+                status: ['active', 'inactive'].includes(status) ? status : 'active'
+            });
+            logSecurityEvent('admin_created', { adminId: admin.id, username: admin.username, role: admin.role });
             return res.status(201).json({
                 ok: true,
-                data: { id: admin.id, username: admin.username }
+                data: {
+                    id: admin.id,
+                    username: admin.username,
+                    role: admin.role,
+                    name: admin.name,
+                    email: admin.email,
+                    phoneNumber: admin.phoneNumber,
+                    status: admin.status
+                }
             });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
@@ -54,6 +70,11 @@ export default class AdminsController {
 
     static async getAdminById(req, res) {
         const { id } = req.params;
+        const requester = req.user;
+        if (requester?.role !== 'superadmin' && requester?.role !== 'admin' && requester?.id !== id) {
+            return res.status(403).json({ ok: false, message: 'forbidden' });
+        }
+
         try {
             const admin = await Admins.findByPk(id, {
                 attributes: { exclude: ['password'] }
@@ -69,7 +90,15 @@ export default class AdminsController {
 
     static async updateAdmin(req, res) {
         const { id } = req.params;
-        const { username, password, currentPassword } = req.body;
+        const requester = req.user;
+        const isSuper = requester?.role === 'superadmin' || requester?.role === 'admin';
+        const isSelf = requester?.id === id;
+
+        if (!isSuper && !isSelf) {
+            return res.status(403).json({ ok: false, message: 'forbidden' });
+        }
+
+        const { username, password, currentPassword, role, name, email, phoneNumber, status } = req.body;
 
         try {
             const admin = await Admins.findByPk(id);
@@ -77,16 +106,33 @@ export default class AdminsController {
                 return res.status(404).json({ ok: false, message: 'admin not found' });
             }
 
-            if (username !== undefined) {
+            if (username !== undefined && username !== admin.username) {
                 const existing = await Admins.findOne({ where: { username } });
                 if (existing && existing.id !== id) {
                     return res.status(409).json({ ok: false, message: 'username already in use' });
                 }
                 admin.username = username;
             }
+
+            if (name !== undefined) admin.name = name;
+            if (email !== undefined) admin.email = email;
+            if (phoneNumber !== undefined) admin.phoneNumber = phoneNumber;
+
+            if (isSuper) {
+                if (role !== undefined && ['superadmin', 'ta'].includes(role)) {
+                    admin.role = role;
+                }
+                if (status !== undefined && ['active', 'inactive'].includes(status)) {
+                    admin.status = status;
+                }
+            }
+
             if (password !== undefined) {
-                if (!currentPassword || !(await bcrypt.compare(currentPassword, admin.password))) {
-                    return res.status(401).json({ ok: false, message: 'current password is incorrect' });
+                // If user is updating their own password, verify currentPassword
+                if (isSelf) {
+                    if (!currentPassword || !(await bcrypt.compare(currentPassword, admin.password))) {
+                        return res.status(401).json({ ok: false, message: 'current password is incorrect' });
+                    }
                 }
                 const passwordError = validatePassword(password);
                 if (passwordError) {
@@ -96,10 +142,18 @@ export default class AdminsController {
             }
 
             await admin.save();
-            logSecurityEvent('admin_updated', { adminId: admin.id });
+            logSecurityEvent('admin_updated', { adminId: admin.id, requesterId: requester?.id });
             return res.status(200).json({
                 ok: true,
-                data: { id: admin.id, username: admin.username }
+                data: {
+                    id: admin.id,
+                    username: admin.username,
+                    role: admin.role,
+                    name: admin.name,
+                    email: admin.email,
+                    phoneNumber: admin.phoneNumber,
+                    status: admin.status
+                }
             });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
