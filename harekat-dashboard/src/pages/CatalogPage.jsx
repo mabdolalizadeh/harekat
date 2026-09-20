@@ -20,6 +20,7 @@ import { NavLink } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { coursesApi } from '../api/coursesApi.js';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
@@ -237,9 +238,9 @@ export default function CatalogPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Avatar
                         src={assetUrl(course.teacher?.avatar)}
-                        sx={{ width: 28, height: 28, fontSize: '0.8rem', backgroundColor: '#f47c20' }}
+                        sx={{ width: 28, height: 28, backgroundColor: '#f47c20', color: '#ffffff' }}
                       >
-                        {course.teacher?.firstName?.[0] || 'م'}
+                        <PersonOutlineIcon sx={{ fontSize: 16 }} />
                       </Avatar>
                       <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary' }}>
                         {course.teacher ? `${course.teacher.firstName} ${course.teacher.lastName}` : 'استاد حرکت'}

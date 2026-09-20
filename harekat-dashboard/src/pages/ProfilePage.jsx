@@ -217,8 +217,6 @@ export default function ProfilePage() {
                   border: '3px solid #f47c20',
                   backgroundColor: '#ffa33f',
                   boxShadow: '0 4px 14px rgba(244, 124, 32, 0.25)',
-                  fontSize: '1.8rem',
-                  fontWeight: 700,
                   cursor: uploadingAvatar ? 'wait' : 'pointer',
                   transition: 'all 0.2s ease',
                   '&:hover': {
@@ -227,7 +225,7 @@ export default function ProfilePage() {
                   }
                 }}
               >
-                {firstName?.[0] || 'ح'}
+                <PersonOutlineIcon sx={{ fontSize: 52, color: '#ffffff' }} />
               </Avatar>
 
               {uploadingAvatar ? (

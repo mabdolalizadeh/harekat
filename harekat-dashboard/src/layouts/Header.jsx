@@ -3,6 +3,7 @@ import {
   Box,
   Typography,
   IconButton,
+  Button,
   Badge,
   Avatar,
   Tooltip,
@@ -18,6 +19,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotifications } from '../contexts/NotificationContext.jsx';
 import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { assetUrl, toPersianDigits } from '../utils/formatters.js';
+import { getLandingUrl } from '../utils/landingUrl.js';
 import NotificationPopover from '../components/common/NotificationPopover.jsx';
 import Logo from '../components/common/Logo.jsx';
 
@@ -32,6 +34,7 @@ import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined';
 
 export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobileDrawer, activeContext }) {
   const navigate = useNavigate();
@@ -49,9 +52,9 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
   const handleOpenProfile = (e) => setProfileAnchor(e.currentTarget);
   const handleCloseProfile = () => setProfileAnchor(null);
 
-  const displayName = user?.firstName && user?.lastName
-    ? `${user.firstName} ${user.lastName}`
-    : (user?.phoneNumber || 'کاربر مهمان');
+  const userName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || user?.name || '';
+  const userPhone = user?.phoneNumber || user?.phone || '';
+  const displayName = userName || userPhone || 'کاربر';
 
   return (
     <Box
@@ -144,6 +147,34 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
       {/* Left side (RTL end): Notification + Profile */}
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
+        {/* Landing Page link button */}
+        <Tooltip title="مشاهده وب‌سایت اصلی">
+          <Button
+            component="a"
+            href={getLandingUrl('/')}
+            size="small"
+            startIcon={<LanguageOutlinedIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              display: { xs: 'none', sm: 'inline-flex' },
+              borderRadius: '12px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              px: 1.5,
+              py: 0.7,
+              color: 'text.primary',
+              backgroundColor: mode === 'dark' ? '#1e293b' : '#f7f5f0',
+              border: `1px solid ${mode === 'dark' ? '#334155' : '#deddd7'}`,
+              textDecoration: 'none',
+              '&:hover': {
+                backgroundColor: mode === 'dark' ? '#334155' : '#efede7',
+                textDecoration: 'none'
+              }
+            }}
+          >
+            وب‌سایت اصلی
+          </Button>
+        </Tooltip>
+
         {/* Theme mode toggle button */}
         <Tooltip title={mode === 'dark' ? 'حالت روشن' : 'حالت تاریک'}>
           <IconButton
@@ -228,12 +259,10 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
               width: 32,
               height: 32,
               backgroundColor: '#f47c20',
-              color: '#ffffff',
-              fontSize: '0.85rem',
-              fontWeight: 700
+              color: '#ffffff'
             }}
           >
-            {(user?.firstName?.[0] || 'ح')}
+            <PersonOutlineIcon sx={{ fontSize: 20 }} />
           </Avatar>
           <Typography
             sx={{
@@ -309,6 +338,18 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
               <ReceiptLongOutlinedIcon sx={{ fontSize: 19 }} />
             </ListItemIcon>
             <ListItemText primary="سفارشات من" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }} />
+          </MenuItem>
+
+          <MenuItem
+            component="a"
+            href={getLandingUrl('/')}
+            onClick={handleCloseProfile}
+            sx={{ borderRadius: '10px', py: 1, textDecoration: 'none', color: 'inherit' }}
+          >
+            <ListItemIcon sx={{ minWidth: 32, color: 'text.secondary' }}>
+              <LanguageOutlinedIcon sx={{ fontSize: 19 }} />
+            </ListItemIcon>
+            <ListItemText primary="مشاهده وب‌سایت" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }} />
           </MenuItem>
 
           <Divider sx={{ my: 0.5, borderColor: 'divider' }} />

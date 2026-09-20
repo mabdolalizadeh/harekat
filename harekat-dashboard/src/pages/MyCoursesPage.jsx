@@ -16,6 +16,7 @@ import { NavLink } from 'react-router-dom';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { accessApi } from '../api/accessApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { assetUrl, toPersianDigits } from '../utils/formatters.js';
@@ -199,9 +200,9 @@ export default function MyCoursesPage() {
                         <Avatar
                           src={assetUrl(course.teacher?.avatar)}
                           alt={course.teacher?.firstName || 'مدرس'}
-                          sx={{ width: 28, height: 28, fontSize: '0.75rem', bgcolor: 'primary.light' }}
+                          sx={{ width: 28, height: 28, bgcolor: 'primary.light', color: '#ffffff' }}
                         >
-                          {(course.teacher?.firstName?.[0] || 'ح')}
+                          <PersonOutlineIcon sx={{ fontSize: 16 }} />
                         </Avatar>
                         <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }} noWrap>
                           {course.teacher ? `${course.teacher.firstName} ${course.teacher.lastName}` : 'مدرس حرکت'}

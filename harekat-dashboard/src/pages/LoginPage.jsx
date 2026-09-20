@@ -264,7 +264,7 @@ export default function LoginPage() {
             component="a"
             href={LANDING_URL}
             size="small"
-            endIcon={<ArrowBackIcon size={0.5} />}
+            endIcon={<ArrowBackIcon size={18} />}
             sx={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600 }}
           >
             بازگشت به وب‌سایت اصلی حرکت

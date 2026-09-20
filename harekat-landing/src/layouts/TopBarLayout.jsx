@@ -138,8 +138,9 @@ export default function TopBarLayout() {
         }
     }, [location]);
 
-    const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim();
-    const displayName = fullName || user?.name || user?.full_name || user?.phoneNumber || user?.phone_number || user?.phone || 'پروفایل';
+    const userName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || user?.name || user?.full_name || '';
+    const userPhone = user?.phoneNumber || user?.phone_number || user?.phone || '';
+    const displayName = userName || userPhone || 'حساب کاربری';
 
     return (
         <div className={cn('fixed top-0 z-50 w-full transition-all duration-300', scrolled ? 'pt-3' : 'pt-5')}>

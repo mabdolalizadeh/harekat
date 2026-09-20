@@ -3,9 +3,11 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { assetUrl, toPersianDigits } from '../utils/formatters.js';
+import { getLandingUrl } from '../utils/landingUrl.js';
 
 // Icons
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
 import HeadsetMicOutlinedIcon from '@mui/icons-material/HeadsetMicOutlined';
@@ -16,6 +18,7 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined';
+import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined';
 
 export default function Sidebar({ onItemClick }) {
   const { user, rubies, studyPoints, logout } = useAuth();
@@ -73,12 +76,10 @@ export default function Sidebar({ onItemClick }) {
                 height: 40,
                 border: '2px solid #f47c20',
                 backgroundColor: '#ffa33f',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '0.9rem'
+                color: '#ffffff'
               }}
             >
-              {(user?.firstName?.[0] || 'ح')}
+              <PersonOutlineIcon sx={{ fontSize: 22 }} />
             </Avatar>
             <Box sx={{ minWidth: 0 }}>
               <Typography
@@ -253,8 +254,34 @@ export default function Sidebar({ onItemClick }) {
         </List>
       </Box>
 
-      {/* Pinned Footer: Logout */}
+      {/* Pinned Footer: Landing Link & Logout */}
       <Box sx={{ pt: 1, borderTop: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
+        <ListItemButton
+          component="a"
+          href={getLandingUrl('/')}
+          sx={{
+            borderRadius: '12px',
+            py: 0.7,
+            px: 1.4,
+            mb: 0.5,
+            color: 'text.secondary',
+            textDecoration: 'none',
+            '&:hover': {
+              backgroundColor: isDark ? '#1e293b' : '#f7f5f0',
+              color: 'text.primary',
+              textDecoration: 'none'
+            }
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 32, color: 'text.secondary' }}>
+            <LanguageOutlinedIcon sx={{ fontSize: 19 }} />
+          </ListItemIcon>
+          <ListItemText
+            primary="مشاهده وب‌سایت"
+            primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }}
+          />
+        </ListItemButton>
+
         <ListItemButton
           onClick={() => {
             logout();
