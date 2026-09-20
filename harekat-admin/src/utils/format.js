@@ -26,3 +26,19 @@ export function getEffectivePrice(course) {
     const percent = hasDiscount ? Math.round(((price - sale) / price) * 100) : 0;
     return { price, sale: hasDiscount ? sale : null, hasDiscount, percent };
 }
+
+export function formatDate(dateString) {
+    if (!dateString) return '';
+    try {
+        const d = new Date(dateString);
+        if (Number.isNaN(d.getTime())) return String(dateString);
+        return new Intl.DateTimeFormat('fa-IR', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        }).format(d);
+    } catch {
+        return String(dateString);
+    }
+}
+
