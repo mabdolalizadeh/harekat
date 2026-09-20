@@ -254,18 +254,18 @@ export default function TopBarLayout() {
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: 8, scale: 0.96 }}
                                                 transition={{ duration: 0.15 }}
-                                                className="absolute left-0 top-full z-50 mt-2 flex min-w-48 flex-col rounded-2xl border border-[var(--border)] bg-background/95 backdrop-blur-xl p-1.5 shadow-xl"
+                                                className="absolute left-0 top-full z-50 mt-2 flex min-w-48 flex-col rounded-2xl border border-zinc-800 bg-[#141416] p-1.5 shadow-2xl shadow-black/60"
                                             >
-                                                <div className="px-3 py-2 border-b border-[var(--border)]/60 mb-1">
-                                                    <p className="text-xs font-bold text-foreground truncate">{displayName}</p>
+                                                <div className="px-3 py-2 border-b border-zinc-800/80 mb-1">
+                                                    <p className="text-xs font-bold text-zinc-100 truncate">{displayName}</p>
                                                     {user?.phoneNumber && (
-                                                        <p className="text-[11px] text-muted dir-ltr text-right mt-0.5">{user.phoneNumber}</p>
+                                                        <p className="text-[11px] text-zinc-400 dir-ltr text-right mt-0.5">{user.phoneNumber}</p>
                                                     )}
                                                 </div>
 
                                                 <button
                                                     type="button"
-                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800/70 transition-colors cursor-pointer"
                                                     onClick={() => {
                                                         setProfileOpen(false);
                                                         window.location.href = getDashboardUrl('/overview');
@@ -277,7 +277,7 @@ export default function TopBarLayout() {
 
                                                 <button
                                                     type="button"
-                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800/70 transition-colors cursor-pointer"
                                                     onClick={() => {
                                                         setProfileOpen(false);
                                                         window.location.href = getDashboardUrl('/courses');
@@ -289,7 +289,7 @@ export default function TopBarLayout() {
 
                                                 <button
                                                     type="button"
-                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800/70 transition-colors cursor-pointer"
                                                     onClick={() => {
                                                         setProfileOpen(false);
                                                         window.location.href = getDashboardUrl('/payments');
@@ -299,11 +299,11 @@ export default function TopBarLayout() {
                                                     <span>سفارشات و پرداخت‌ها</span>
                                                 </button>
 
-                                                <div className="border-t border-[var(--border)]/60 my-1" />
+                                                <div className="border-t border-zinc-800/80 my-1" />
 
                                                 <button
                                                     type="button"
-                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-bold text-danger-600 hover:bg-danger-500/10 transition-colors cursor-pointer"
+                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-bold text-red-400 hover:bg-red-500/15 transition-colors cursor-pointer"
                                                     onClick={handleLogout}
                                                 >
                                                     <LogOut size={15} />
