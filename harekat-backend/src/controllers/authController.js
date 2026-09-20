@@ -63,8 +63,37 @@ export default class AuthController {
                 configs.jwtKey,
                 { expiresIn: configs.userJwtExpiry }
             );
+
+            const isProd = configs.nodeEnv === 'production';
+            const cookieDomain = req.hostname && req.hostname.includes('.') && !req.hostname.includes('localhost') && !req.hostname.match(/^\d+\.\d+\.\d+\.\d+$/)
+                ? '.' + req.hostname.split('.').slice(-2).join('.')
+                : undefined;
+
+            res.cookie('auth_token', token, {
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+                httpOnly: false,
+                secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+                sameSite: 'lax',
+                domain: cookieDomain,
+                path: '/'
+            });
+
             logSecurityEvent('otp_validate_success', { userId: user.id, ip: req.ip });
             return res.status(200).json({ ok: true, data: { token, user } });
+        } catch (err) {
+            return res.status(500).json({ ok: false, message: err.message });
+        }
+    }
+
+    static async getMe(req, res) {
+        try {
+            const user = await Users.findByPk(req.user.id, {
+                attributes: ['id', 'phoneNumber', 'firstName', 'lastName', 'nationalId', 'avatar', 'bio', 'jobTitle', 'education', 'role', 'status', 'createdAt']
+            });
+            if (!user) {
+                return res.status(404).json({ ok: false, message: 'User not found' });
+            }
+            return res.status(200).json({ ok: true, data: { user } });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
         }

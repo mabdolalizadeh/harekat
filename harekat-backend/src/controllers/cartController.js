@@ -13,12 +13,39 @@ export default class CartController {
         try {
             let cart;
             if (userId) {
-                cart = await Cart.findOne({ where: { userId }, include: [{ model: CartItem, as: 'items' }] });
+                cart = await Cart.findOne({ where: { userId } });
                 if (!cart) {
                     cart = await Cart.create({ userId });
                 }
+
+                // If guest session cart exists, merge items into user cart
+                if (sessionId) {
+                    const guestCart = await Cart.findOne({ where: { sessionId } });
+                    if (guestCart && guestCart.id !== cart.id) {
+                        const guestItems = await CartItem.findAll({ where: { cartId: guestCart.id } });
+                        for (const gItem of guestItems) {
+                            const existing = await CartItem.findOne({
+                                where: { cartId: cart.id, productId: gItem.productId, productType: gItem.productType }
+                            });
+                            if (existing) {
+                                existing.quantity += gItem.quantity;
+                                await existing.save();
+                            } else {
+                                await CartItem.create({
+                                    cartId: cart.id,
+                                    productId: gItem.productId,
+                                    productType: gItem.productType,
+                                    quantity: gItem.quantity,
+                                    price: gItem.price
+                                });
+                            }
+                        }
+                        await CartItem.destroy({ where: { cartId: guestCart.id } });
+                        await guestCart.destroy();
+                    }
+                }
             } else if (sessionId) {
-                cart = await Cart.findOne({ where: { sessionId }, include: [{ model: CartItem, as: 'items' }] });
+                cart = await Cart.findOne({ where: { sessionId } });
                 if (!cart) {
                     cart = await Cart.create({ sessionId });
                 }

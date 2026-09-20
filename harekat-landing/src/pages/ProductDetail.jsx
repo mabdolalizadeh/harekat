@@ -96,21 +96,13 @@ export default function ProductDetail({ type }) {
         : null;
 
     const add = async () => {
-        if (!localStorage.getItem('token')) {
-            navigate('/auth', {
-                state: {
-                    from: `${location.pathname}${location.search}${location.hash}`,
-                    autoAddCourseId: course.id,
-                    autoAddType: 'course',
-                    autoAddPrice: discounted ? course.salePrice : course.price
-                }
-            });
-            return;
+        try {
+            await customerApi.addToCart(course.id, type === 'package' ? 'course' : (type || 'course'), 1, discounted ? course.salePrice : course.price);
+            setAdded(true);
+        } catch (err) {
+            console.error('Add to cart failed:', err);
         }
-        await customerApi.addToCart(course.id, 'course', 1, discounted ? course.salePrice : course.price);
-        setAdded(true);
     };
-
 
     return (
         <MainLayout title={course.name} sectionIds={null} contentMap={null}>
@@ -177,10 +169,26 @@ export default function ProductDetail({ type }) {
                                     {price(discounted ? course.salePrice : course.price)}
                                 </span>
                             </div>
-                            <PrimaryButton onClick={add} className="w-full flex items-center justify-center gap-2 py-3">
-                                <ShoppingCart size={18} />
-                                {added ? 'به سبد اضافه شد ✓' : 'افزودن به سبد خرید'}
-                            </PrimaryButton>
+                            {added ? (
+                                <div className="flex flex-col gap-2">
+                                    <PrimaryButton onClick={() => navigate('/cart')} className="w-full flex items-center justify-center gap-2 py-3 bg-success-600 hover:bg-success-700">
+                                        <ShoppingCart size={18} />
+                                        مشاهده سبد خرید و پرداخت
+                                    </PrimaryButton>
+                                    <button
+                                        type="button"
+                                        onClick={add}
+                                        className="text-xs text-muted hover:text-foreground text-center py-1"
+                                    >
+                                        افزودن مجدد به سبد
+                                    </button>
+                                </div>
+                            ) : (
+                                <PrimaryButton onClick={add} className="w-full flex items-center justify-center gap-2 py-3">
+                                    <ShoppingCart size={18} />
+                                    افزودن به سبد خرید
+                                </PrimaryButton>
+                            )}
                         </div>
                     </div>
                 </div>

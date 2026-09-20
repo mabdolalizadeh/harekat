@@ -10,6 +10,7 @@ import ProductDetail from "./pages/ProductDetail.jsx";
 import CoursesPage from "./pages/CoursesPage.jsx";
 import CapsulesPage from "./pages/CapsulesPage.jsx";
 import PackagesPage from "./pages/PackagesPage.jsx";
+import CartPage from "./pages/CartPage.jsx";
 import { getDashboardUrl } from "./utils/dashboardUrl.js";
 
 function ExternalDashboardRedirect() {
@@ -23,6 +24,7 @@ export default function App() {
     return (
         <Routes>
             <Route path='/' element={<Landing/>}/>
+            <Route path='/cart' element={<CartPage/>}/>
             <Route path='/contact-us' element={<ContactUs/>}/>
             <Route path='/about-us' element={<AboutUs/>}/>
             <Route path='/auth' element={<Auth/>}/>

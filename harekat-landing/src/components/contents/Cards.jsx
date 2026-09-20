@@ -80,21 +80,16 @@ export function CourseCard({
     const add = async (event) => {
         event.stopPropagation();
         if (!id || adding) return;
-        if (!localStorage.getItem('token')) {
-            navigate('/auth', {
-                state: {
-                    from: `${location.pathname}${location.search}${location.hash}`,
-                    autoAddCourseId: id,
-                    autoAddType: productType,
-                    autoAddPrice: hasSale ? salePrice : price
-                }
-            });
-            return;
-        }
 
         setAdding(true);
-        try { await customerApi.addToCart(id, productType, 1, hasSale ? salePrice : price); onAddToCart?.(); }
-        finally { setAdding(false); }
+        try {
+            await customerApi.addToCart(id, productType, 1, hasSale ? salePrice : price);
+            onAddToCart?.();
+        } catch (err) {
+            console.error('Failed to add to cart:', err);
+        } finally {
+            setAdding(false);
+        }
     };
     return (
         <motion.div
