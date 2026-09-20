@@ -7,59 +7,6 @@ const AuthContext = createContext(null);
 const LANDING_URL = import.meta.env?.VITE_LANDING_URL || (import.meta.env?.DEV ? 'http://localhost:5173' : '');
 export const LANDING_AUTH_URL = `${LANDING_URL}/auth`;
 
-// Default Mockup User for Preview Mode (matches Dribbble reference & seeded database data)
-export const MOCK_PREVIEW_USER = {
-  id: '681252e1-34e1-485e-ad5d-cb4fc4b5b4b8',
-  firstName: 'علی',
-  lastName: 'محمدی',
-  phoneNumber: '09123456789',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-  courses: [
-    {
-      id: 'b72a92b8-73b9-4188-b946-a9d62d8a16d2',
-      name: 'آموزش جامع React.js و اکوسیستم فرانت‌اند',
-      price: '450000',
-      salePrice: null,
-      description: 'یادگیری عمیق کامپوننت‌ها، هوک‌ها، معماری مدرن و اتصال به بک‌اند.',
-      image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400',
-      level: 'مبتدی',
-      duration: '۲۰ ساعت',
-      typeOfAttendence: 'آنلاین',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-      longDescription: '# دوره جامع React.js\n\n- مفاهیم پایه‌ای و پیشرفته کامپوننت‌ها\n- مدیریت وضعیت با Context و هوک‌های سفارشی\n- اتصال به REST API و بهینه‌سازی رندر\n- تمرین‌ها و پروژه‌های عملی',
-      teacher: { firstName: 'حمید', lastName: 'رضایی', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100' }
-    },
-    {
-      id: '57a81119-4311-463f-a6e6-840417c2a584',
-      name: 'دوره جامع Node.js و طراحی وب‌سرویس',
-      price: '520000',
-      salePrice: null,
-      description: 'معماری بک‌اند، دیتابیس، احراز هویت JWT و پیاده‌سازی API.',
-      image: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400',
-      level: 'پیشرفته',
-      duration: '۲۵ ساعت',
-      typeOfAttendence: 'آفلاین',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-      longDescription: '# دوره Node.js و Express\n\n- مدل‌سازی داده با Sequelize و SQLite/Postgres\n- سیستم احراز هویت امن و Rate Limiting\n- استقرار و بیلد سرور',
-      teacher: { firstName: 'محمد', lastName: 'احمدی', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100' }
-    },
-    {
-      id: 'c-ui-ux-design',
-      name: 'طراحی رابط کاربری و تجربه کاربری (UI/UX)',
-      price: '380000',
-      salePrice: null,
-      description: 'طراحی سیستم دیزاین، کار با فیگما و پروتوتایپ استانداردهای بصری.',
-      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400',
-      level: 'مقدماتی',
-      duration: '۱۸ ساعت',
-      typeOfAttendence: 'آنلاین',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-      longDescription: '# دوره طراحی محصول\n\n- اصول تایپوگرافی و تئوری رنگ‌ها\n- ساخت کامپوننت‌های ماژولار در Figma\n- تست کاربردپذیری و تحویل به توسعه‌دهنده',
-      teacher: { firstName: 'سارا', lastName: 'محمدی', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' }
-    }
-  ]
-};
-
 // Helper to decode JWT token payload without external libraries
 export function parseJwt(token) {
   if (!token || typeof token !== 'string') return null;
@@ -88,7 +35,7 @@ export function redirectToLandingLogin(returnUrl) {
 }
 
 export function AuthProvider({ children }) {
-  // 1. Check for token passed from Landing Page via URL query param or hash
+  // 1. Check for token passed via URL query param or stored in localStorage
   const getInitialToken = () => {
     try {
       if (typeof window !== 'undefined') {
@@ -98,7 +45,6 @@ export function AuthProvider({ children }) {
 
         if (queryToken) {
           localStorage.setItem('token', queryToken);
-          // Clean token from URL address bar for security
           const cleanUrl = new URL(window.location.href);
           cleanUrl.searchParams.delete('token');
           cleanUrl.searchParams.delete('auth_token');
@@ -115,22 +61,20 @@ export function AuthProvider({ children }) {
 
   const [token, setToken] = useState(getInitialToken);
 
-  // If no saved user or token, default to MOCK_PREVIEW_USER so user can preview the UI immediately
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem('user');
-      return saved ? JSON.parse(saved) : MOCK_PREVIEW_USER;
+      return saved ? JSON.parse(saved) : null;
     } catch {
-      return MOCK_PREVIEW_USER;
+      return null;
     }
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Flag indicating whether we are in preview mode (no real JWT token stored)
-  const isPreviewMode = !token;
+  const isAuthenticated = Boolean(token && user);
 
-  // Load fresh user data including enrolled courses from the backend if token exists
+  // Load fresh user data including enrolled courses from the backend
   const refreshUser = useCallback(async (userId, currentToken) => {
     const effectiveToken = currentToken || token;
     let effectiveId = userId || user?.id;
@@ -141,14 +85,16 @@ export function AuthProvider({ children }) {
     }
 
     if (!effectiveToken || !effectiveId) {
+      setLoading(false);
       return;
     }
 
     // Check token expiration
     const payload = parseJwt(effectiveToken);
     if (payload?.exp && payload.exp * 1000 < Date.now()) {
-      console.warn('Auth token has expired. Resetting to preview mode.');
+      console.warn('Auth token has expired.');
       logout(false);
+      setLoading(false);
       return;
     }
 
@@ -163,6 +109,8 @@ export function AuthProvider({ children }) {
       if (err.status === 401 || err.status === 403) {
         logout(false);
       }
+    } finally {
+      setLoading(false);
     }
   }, [token, user?.id]);
 
@@ -173,7 +121,11 @@ export function AuthProvider({ children }) {
       const userId = user?.id || payload?.id;
       if (userId) {
         refreshUser(userId, effectiveToken);
+      } else {
+        setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -203,14 +155,6 @@ export function AuthProvider({ children }) {
   };
 
   const updateProfile = async (userData) => {
-    // If in preview mode, update local state directly so the preview is interactive
-    if (isPreviewMode) {
-      const updated = { ...user, ...userData };
-      setUser(updated);
-      localStorage.setItem('user', JSON.stringify(updated));
-      return updated;
-    }
-
     if (!user?.id) throw new Error('کاربر وارد نشده است');
     const res = await userApi.updateUser(user.id, userData);
     if (res?.ok && res.data) {
@@ -223,7 +167,7 @@ export function AuthProvider({ children }) {
 
   const logout = (redirect = true) => {
     setToken(null);
-    setUser(MOCK_PREVIEW_USER);
+    setUser(null);
     try {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -231,20 +175,18 @@ export function AuthProvider({ children }) {
       // ignore
     }
     if (redirect) {
-      window.location.href = `${LANDING_URL}/`;
+      window.location.href = '/login';
     }
   };
 
-  // Learning points / rubies calculation for Dribbble reference display
-  const enrolledCount = user?.courses?.length || 3;
-  const rubies = 28;
-  const studyPoints = 112;
+  // Real Rubies & Study Points from user model
+  const rubies = user?.rubies || 0;
+  const studyPoints = rubies * 5;
 
   const value = {
     token,
     user,
-    isAuthenticated: true, // Always allow previewing the mockup without blocking
-    isPreviewMode,
+    isAuthenticated,
     loading,
     requestOtp,
     validateOtp,
@@ -269,3 +211,4 @@ export function useAuth() {
 }
 
 export default AuthContext;
+

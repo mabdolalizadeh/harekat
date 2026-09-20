@@ -9,28 +9,27 @@ import {
   Alert,
   CircularProgress,
   Divider,
-  Collapse,
-  Chip
+  Link
 } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import PhoneIphoneOutlinedIcon from '@mui/icons-material/PhoneIphoneOutlined';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import CodeIcon from '@mui/icons-material/Code';
+import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { toPersianDigits } from '../utils/formatters.js';
 
+const LANDING_URL = import.meta.env?.VITE_LANDING_URL || (import.meta.env?.DEV ? 'http://localhost:5173' : '/');
+
 export default function LoginPage() {
-  const { requestOtp, validateOtp, isAuthenticated, landingAuthUrl } = useAuth();
+  const { requestOtp, validateOtp, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [step, setStep] = useState(1);
-  const [phoneNumber, setPhoneNumber] = useState('09123456789');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [devOtpHint, setDevOtpHint] = useState(null);
-  const [showDevForm, setShowDevForm] = useState(false);
 
   const queryParams = new URLSearchParams(location.search);
   const redirectTarget = queryParams.get('redirect') || queryParams.get('from') || location.state?.from?.pathname || location.state?.from || '/overview';
@@ -47,24 +46,18 @@ export default function LoginPage() {
 
   const handleRequestOtp = async (e) => {
     e.preventDefault();
-    if (!phoneNumber.trim()) {
-      setError('لطفاً شماره موبایل خود را وارد کنید');
+    const cleanPhone = phoneNumber.trim();
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setError('لطفاً شماره موبایل معتبر وارد کنید (مثال: ۰۹۱۲۳۴۵۶۷۸۹)');
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      const res = await requestOtp(phoneNumber.trim());
+      const res = await requestOtp(cleanPhone);
       if (res?.ok) {
         setStep(2);
-        if (res.data?.otp) {
-          setDevOtpHint(res.data.otp);
-          setOtp(res.data.otp);
-        } else {
-          setDevOtpHint('123456');
-          setOtp('123456');
-        }
       } else {
         setError(res?.message || 'خطا در ارسال کد ورود');
       }
@@ -77,7 +70,8 @@ export default function LoginPage() {
 
   const handleValidateOtp = async (e) => {
     e.preventDefault();
-    if (!otp.trim()) {
+    const cleanOtp = otp.trim();
+    if (!cleanOtp || cleanOtp.length < 4) {
       setError('لطفاً کد تایید را وارد کنید');
       return;
     }
@@ -85,7 +79,7 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError(null);
-      await validateOtp(phoneNumber.trim(), otp.trim());
+      await validateOtp(phoneNumber.trim(), cleanOtp);
       if (redirectTarget.startsWith('http://') || redirectTarget.startsWith('https://')) {
         window.location.href = redirectTarget;
       } else {
@@ -97,7 +91,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
 
   return (
     <Box
@@ -113,10 +106,10 @@ export default function LoginPage() {
       <Card
         sx={{
           width: '100%',
-          maxWidth: 460,
-          borderRadius: '32px',
+          maxWidth: 440,
+          borderRadius: '28px',
           p: { xs: 3, sm: 4.5 },
-          boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.12)',
+          boxShadow: '0 20px 50px -15px rgba(15, 23, 42, 0.12)',
           border: '1px solid #eef2f7',
           textAlign: 'center'
         }}
@@ -127,130 +120,139 @@ export default function LoginPage() {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 64,
-            height: 64,
-            borderRadius: '22px',
-            backgroundColor: '#eff6ff',
-            color: '#2563eb',
+            width: 60,
+            height: 60,
+            borderRadius: '20px',
+            backgroundColor: '#fff8ed',
+            color: '#f47c20',
             mb: 2.5
           }}
         >
-          <LoginIcon sx={{ fontSize: 32 }} />
+          <LoginIcon sx={{ fontSize: 30 }} />
         </Box>
 
         <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#0f172a' }}>
-          ورود به پنل مدرسه حرکت
+          ورود به پنل کاربری حرکت
         </Typography>
         <Typography variant="body2" sx={{ color: '#64748b', mb: 3.5, lineHeight: 1.7 }}>
-          احراز هویت و دریافت توکن دسترسی از طریق صفحه اصلی (Landing Page) انجام می‌شود و سپس به این داشبورد هدایت می‌شوید.
+          {step === 1
+            ? 'جهت ورود یا ثبت‌نام، شماره تلفن همراه خود را وارد فرمایید.'
+            : `کد تایید پیامک‌شده به شماره ${toPersianDigits(phoneNumber)} را وارد نمایید.`}
         </Typography>
 
-        {/* Primary Action: Go to Landing Page Auth */}
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          href={landingAuthUrl}
-          startIcon={<LoginIcon />}
-          sx={{
-            py: 1.5,
-            borderRadius: '16px',
-            fontWeight: 800,
-            fontSize: '1rem',
-            mb: 2,
-            background: 'linear-gradient(135deg, #f47c20 0%, #df5b13 100%)'
-          }}
-        >
-          ورود از طریق وب‌سایت اصلی حرکت
-        </Button>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2.5, borderRadius: '14px', textAlign: 'right', fontSize: '0.85rem' }}>
+            {error}
+          </Alert>
+        )}
 
-        <Divider sx={{ my: 3 }}>
-          <Chip
-            label="یا ورود آزمایشی محیط توسعه"
-            size="small"
-            onClick={() => setShowDevForm(!showDevForm)}
-            sx={{ cursor: 'pointer', fontSize: '0.72rem', backgroundColor: '#f1f5f9' }}
-          />
-        </Divider>
-
-        {/* Collapsible Local Dev Bypass */}
-        <Collapse in={showDevForm}>
-          <Box sx={{ mt: 2, textAlign: 'right', p: 2.5, backgroundColor: '#f8fafc', borderRadius: '20px', border: '1px solid #eef2f7' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <CodeIcon sx={{ fontSize: 18, color: '#64748b' }} />
-              <Typography variant="caption" sx={{ fontWeight: 700, color: '#475569' }}>
-                فرم ورود مستقیم برای تست محلی
-              </Typography>
-            </Box>
-
-            {error && (
-              <Alert severity="error" sx={{ mb: 2, borderRadius: '12px', fontSize: '0.8rem' }}>
-                {error}
-              </Alert>
-            )}
-
-            {step === 1 ? (
-              <Box component="form" onSubmit={handleRequestOtp}>
-                <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
-                  شماره موبایل دمو:
-                </Typography>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="09123456789"
-                  sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: '12px', backgroundColor: '#ffffff' } }}
-                />
-                <Button
-                  type="submit"
-                  variant="outlined"
-                  fullWidth
-                  disabled={loading}
-                  sx={{ borderRadius: '12px', fontWeight: 700 }}
-                >
-                  {loading ? <CircularProgress size={20} /> : 'دریافت کد تایید'}
-                </Button>
-              </Box>
-            ) : (
-              <Box component="form" onSubmit={handleValidateOtp}>
-                <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
-                  کد تایید OTP:
-                </Typography>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="123456"
-                  sx={{ mb: 1.5, '& .MuiOutlinedInput-root': { borderRadius: '12px', backgroundColor: '#ffffff' } }}
-                />
-                {devOtpHint && (
-                  <Typography variant="caption" sx={{ color: '#15803d', display: 'block', mb: 1.5, fontWeight: 600 }}>
-                    کد آماده: {devOtpHint}
-                  </Typography>
-                )}
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  disabled={loading}
-                  sx={{ borderRadius: '12px', fontWeight: 700, mb: 1 }}
-                >
-                  {loading ? <CircularProgress size={20} color="inherit" /> : 'ورود مستقیم'}
-                </Button>
-                <Button
-                  size="small"
-                  onClick={() => setStep(1)}
-                  sx={{ color: '#64748b', fontSize: '0.75rem', width: '100%' }}
-                >
-                  تغییر شماره
-                </Button>
-              </Box>
-            )}
+        {step === 1 ? (
+          <Box component="form" onSubmit={handleRequestOtp} sx={{ textAlign: 'right' }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#334155', display: 'block', mb: 0.8 }}>
+              شماره موبایل:
+            </Typography>
+            <TextField
+              fullWidth
+              size="medium"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+              autoFocus
+              InputProps={{
+                startAdornment: <PhoneIphoneOutlinedIcon sx={{ color: '#94a3b8', mr: 1, ml: -0.5 }} />
+              }}
+              sx={{
+                mb: 2.5,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '16px',
+                  backgroundColor: '#ffffff'
+                }
+              }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              fullWidth
+              disabled={loading}
+              sx={{
+                py: 1.4,
+                borderRadius: '16px',
+                fontWeight: 800,
+                fontSize: '1rem',
+                backgroundColor: '#f47c20',
+                '&:hover': { backgroundColor: '#df5b13' }
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'ارسال کد تایید'}
+            </Button>
           </Box>
-        </Collapse>
+        ) : (
+          <Box component="form" onSubmit={handleValidateOtp} sx={{ textAlign: 'right' }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#334155', display: 'block', mb: 0.8 }}>
+              کد ۶ رقمی تایید:
+            </Typography>
+            <TextField
+              fullWidth
+              size="medium"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="۱۲۳۴۵۶"
+              autoFocus
+              InputProps={{
+                startAdornment: <KeyOutlinedIcon sx={{ color: '#94a3b8', mr: 1, ml: -0.5 }} />
+              }}
+              sx={{
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '16px',
+                  backgroundColor: '#ffffff'
+                }
+              }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              fullWidth
+              disabled={loading}
+              sx={{
+                py: 1.4,
+                borderRadius: '16px',
+                fontWeight: 800,
+                fontSize: '1rem',
+                backgroundColor: '#f47c20',
+                '&:hover': { backgroundColor: '#df5b13' },
+                mb: 1.5
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'ورود به حساب کاربری'}
+            </Button>
+            <Button
+              size="small"
+              onClick={() => { setStep(1); setError(null); }}
+              sx={{ color: '#64748b', fontSize: '0.8rem', width: '100%', borderRadius: '12px' }}
+            >
+              ویرایش شماره موبایل
+            </Button>
+          </Box>
+        )}
+
+        <Divider sx={{ my: 3, borderColor: '#e2e8f0' }} />
+
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Button
+            component="a"
+            href={LANDING_URL}
+            size="small"
+            startIcon={<ArrowBackIcon />}
+            sx={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600 }}
+          >
+            بازگشت به وب‌سایت اصلی حرکت
+          </Button>
+        </Box>
       </Card>
     </Box>
   );
 }
+

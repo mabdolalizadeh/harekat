@@ -35,8 +35,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobileDrawer, activeContext }) {
   const navigate = useNavigate();
-  const { user, isPreviewMode, logout } = useAuth();
+  const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
+
   const { mode, toggleTheme } = useThemeMode();
 
   const [notifAnchor, setNotifAnchor] = useState(null);
@@ -137,26 +138,10 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             </Typography>
           )}
         </Box>
-
-        {/* Preview badge */}
-        {isPreviewMode && (
-          <Chip
-            label="پیش‌نمایش موکاپ"
-            size="small"
-            sx={{
-              display: { xs: 'none', md: 'inline-flex' },
-              backgroundColor: '#fff8ed',
-              color: '#b94410',
-              border: '1px solid #ffdda8',
-              fontWeight: 700,
-              fontSize: '0.7rem',
-              height: 22
-            }}
-          />
-        )}
       </Box>
 
       {/* Left side (RTL end): Notification + Profile */}
+
       <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
         {/* Theme mode toggle button */}
         <Tooltip title={mode === 'dark' ? 'حالت روشن' : 'حالت تاریک'}>
