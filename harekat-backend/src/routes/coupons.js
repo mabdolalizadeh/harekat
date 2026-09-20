@@ -1,14 +1,13 @@
 import { Router } from 'express';
 import CouponsController from '../controllers/couponsController.js';
-import { auth } from '../middleware/auth.js';
+import { auth, optionalAuth } from '../middleware/auth.js';
 import adminAuth from '../middleware/adminAuth.js';
 import { adminOnly } from '../middleware/ownerCheck.js';
 
 const router = Router();
 
-// Customer-facing validation: public but rate-limited at app level via /api/v1.
-// Requires no auth so guests can check coupons at checkout; calculation is server-side.
-router.post('/validate', CouponsController.validateCoupon);
+// Customer-facing validation: public / optionalAuth so authenticated students/users have access to targeted coupons.
+router.post('/validate', optionalAuth, CouponsController.validateCoupon);
 router.post('/redeem', auth, CouponsController.redeemCoupon);
 
 // Admin CRUD (protected) — keep after /validate so 'validate' isn't captured by /:id

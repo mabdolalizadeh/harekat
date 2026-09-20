@@ -431,6 +431,10 @@ CourseEvaluationResponses.belongsTo(Users, { foreignKey: "userId", as: "user" })
 Courses.hasMany(CourseEvaluationResponses, { foreignKey: "courseId", as: "evaluationResponses", onDelete: "CASCADE" });
 CourseEvaluationResponses.belongsTo(Courses, { foreignKey: "courseId", as: "course" });
 
+// Coupons <-> Courses
+Coupon.belongsTo(Courses, { foreignKey: "targetCourseId", as: "targetCourse", onDelete: "SET NULL" });
+Courses.hasMany(Coupon, { foreignKey: "targetCourseId", as: "coupons" });
+
 export {
     Users,
     Courses,

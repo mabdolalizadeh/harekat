@@ -1,5 +1,6 @@
 import { Orders, OrderItems, Cart, CartItem, Users, Courses, Subscriptions, Payments, Coupon } from '../models/index.js';
 import { logSecurityEvent } from '../utils/logger.js';
+import { checkUsable } from './couponsController.js';
 
 function parsePrice(value) {
     if (value === null || value === undefined || value === '') return 0;
@@ -66,15 +67,12 @@ export default class OrdersController {
             let appliedCouponCode = null;
 
             if (couponCode && typeof couponCode === 'string' && couponCode.trim()) {
-                const code = couponCode.trim();
+                const code = couponCode.trim().toUpperCase();
                 const coupon = await Coupon.findOne({ where: { code, isActive: true } });
 
                 if (coupon) {
-                    const isExpired = coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
-                    const isOverLimit = coupon.usageLimit && coupon.usageCount >= coupon.usageLimit;
-                    const isUnderMinAmount = coupon.minimumOrderAmount && subtotal < Number(coupon.minimumOrderAmount);
-
-                    if (!isExpired && !isOverLimit && !isUnderMinAmount) {
+                    const problem = await checkUsable(coupon, subtotal, userId);
+                    if (!problem) {
                         if (coupon.discountType === 'percent') {
                             discountAmount = Math.round((subtotal * Number(coupon.discountValue)) / 100);
                         } else if (coupon.discountType === 'fixed') {

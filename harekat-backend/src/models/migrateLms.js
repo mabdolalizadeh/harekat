@@ -55,4 +55,13 @@ export async function migrateLmsSchema() {
         if (!existing.has('evaluationRequired')) await sequelize.query("ALTER TABLE Courses ADD COLUMN evaluationRequired BOOLEAN DEFAULT 0");
         if (!existing.has('evaluationTriggerSession')) await sequelize.query("ALTER TABLE Courses ADD COLUMN evaluationTriggerSession INTEGER DEFAULT 4");
     }
+
+    // 6. Coupons targeting columns
+    const [couponCols] = await sequelize.query("PRAGMA table_info('Coupons')");
+    if (couponCols?.length) {
+        const existing = new Set(couponCols.map((c) => c.name));
+        if (!existing.has('targetType')) await sequelize.query("ALTER TABLE Coupons ADD COLUMN targetType VARCHAR(50) DEFAULT 'all'");
+        if (!existing.has('targetCourseId')) await sequelize.query("ALTER TABLE Coupons ADD COLUMN targetCourseId UUID");
+        if (!existing.has('targetUserIds')) await sequelize.query("ALTER TABLE Coupons ADD COLUMN targetUserIds TEXT");
+    }
 }

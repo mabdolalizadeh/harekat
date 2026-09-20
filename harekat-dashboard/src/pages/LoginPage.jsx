@@ -166,7 +166,7 @@ export default function LoginPage() {
         )}
 
         {step === 1 ? (
-          <Box component="form" onSubmit={handleRequestOtp} sx={{ textAlign: 'right' }}>
+          <Box component="form" onSubmit={handleRequestOtp} sx={{ textAlign: 'left' }}>
             <Typography variant="caption" sx={{ fontWeight: 700, color: '#334155', display: 'block', mb: 0.8 }}>
               شماره موبایل:
             </Typography>
@@ -264,7 +264,7 @@ export default function LoginPage() {
             component="a"
             href={LANDING_URL}
             size="small"
-            startIcon={<ArrowBackIcon />}
+            endIcon={<ArrowBackIcon size={0.5} />}
             sx={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600 }}
           >
             بازگشت به وب‌سایت اصلی حرکت

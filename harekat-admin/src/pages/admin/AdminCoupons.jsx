@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Stack,
@@ -21,12 +21,20 @@ import {
   Tooltip,
   Avatar,
   CircularProgress,
+  Autocomplete,
+  RadioGroup,
+  Radio,
+  FormLabel,
+  Paper,
 } from '@mui/material';
 import {
   Add as AddIcon,
   LocalOffer as CouponIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  People as PeopleIcon,
+  School as SchoolIcon,
+  Public as PublicIcon,
 } from '@mui/icons-material';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
@@ -41,16 +49,67 @@ const EMPTY_COUPON = {
   code: '',
   discountType: 'percent',
   discountValue: '',
+  targetType: 'all',
+  targetCourseId: '',
+  targetUserIds: [],
   isActive: true,
   expiresAt: '',
   usageLimit: '',
   minimumOrderAmount: '',
 };
 
+function parseUserIds(val) {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 function CouponModal({ open, initial, onClose, onSaved }) {
   const { showSuccess, showError } = useNotification();
-  const [form, setForm] = useState(initial || EMPTY_COUPON);
+  const [form, setForm] = useState(() => {
+    if (initial) {
+      return {
+        ...initial,
+        targetType: initial.targetType || 'all',
+        targetCourseId: initial.targetCourseId || '',
+        targetUserIds: parseUserIds(initial.targetUserIds),
+      };
+    }
+    return EMPTY_COUPON;
+  });
+
   const [saving, setSaving] = useState(false);
+  const [coursesList, setCoursesList] = useState([]);
+  const [studentsList, setStudentsList] = useState([]);
+  const [loadingLookups, setLoadingLookups] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingLookups(true);
+    Promise.all([
+      adminApi.listCourses().catch(() => ({ data: [] })),
+      adminApi.listStudents().catch(() => ({ data: [] })),
+    ])
+      .then(([coursesRes, studentsRes]) => {
+        if (!cancelled) {
+          setCoursesList(coursesRes?.data || []);
+          setStudentsList(studentsRes?.data || []);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingLookups(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const set = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
 
@@ -62,12 +121,23 @@ function CouponModal({ open, initial, onClose, onSaved }) {
     if (!Number.isFinite(v) || v <= 0) return showError('مقدار تخفیف باید عددی مثبت باشد');
     if (form.discountType === 'percent' && v > 100) return showError('درصد تخفیف حداکثر ۱۰۰ درصد است');
 
+    if (form.targetType === 'course' && !form.targetCourseId) {
+      return showError('لطفاً دوره آموزشی هدف را انتخاب نمایید');
+    }
+
+    if (form.targetType === 'users' && (!form.targetUserIds || form.targetUserIds.length === 0)) {
+      return showError('لطفاً حداقل یک کاربر را انتخاب نمایید');
+    }
+
     setSaving(true);
     try {
       const payload = {
         code: form.code.trim().toUpperCase(),
         discountType: form.discountType,
         discountValue: v,
+        targetType: form.targetType,
+        targetCourseId: form.targetType === 'course' ? form.targetCourseId : null,
+        targetUserIds: form.targetType === 'users' ? form.targetUserIds : null,
         isActive: !!form.isActive,
         expiresAt: form.expiresAt || null,
         usageLimit: form.usageLimit === '' ? null : Number(form.usageLimit),
@@ -90,8 +160,13 @@ function CouponModal({ open, initial, onClose, onSaved }) {
     }
   };
 
+  const selectedStudents = useMemo(() => {
+    const ids = new Set(form.targetUserIds || []);
+    return studentsList.filter((s) => ids.has(s.id));
+  }, [form.targetUserIds, studentsList]);
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth dir="rtl">
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth dir="rtl">
       <DialogTitle sx={{ pb: 1 }}>
         <Typography variant="h6" fontWeight={700}>
           {initial?.id ? 'ویرایش کد تخفیف' : 'تعریف کد تخفیف جدید'}
@@ -100,7 +175,8 @@ function CouponModal({ open, initial, onClose, onSaved }) {
 
       <Box component="form" id="coupon-form" onSubmit={handleSubmit}>
         <DialogContent dividers sx={{ p: 3 }}>
-          <Grid container spacing={2}>
+          <Grid container spacing={2.5}>
+            {/* Code */}
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label="کد تخفیف *"
@@ -108,10 +184,11 @@ function CouponModal({ open, initial, onClose, onSaved }) {
                 onChange={(e) => set('code', e.target.value.toUpperCase())}
                 dir="ltr"
                 placeholder="NOROOZ1404"
-                helperText="حروف بزرگ انگلیسی"
+                helperText="حروف بزرگ انگلیسی و اعداد"
               />
             </Grid>
 
+            {/* Discount Type */}
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>نوع محاسبه تخفیف</InputLabel>
@@ -126,6 +203,7 @@ function CouponModal({ open, initial, onClose, onSaved }) {
               </FormControl>
             </Grid>
 
+            {/* Discount Value */}
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label="مقدار تخفیف *"
@@ -138,6 +216,7 @@ function CouponModal({ open, initial, onClose, onSaved }) {
               />
             </Grid>
 
+            {/* Expires At */}
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label="تاریخ انقضا"
@@ -146,9 +225,131 @@ function CouponModal({ open, initial, onClose, onSaved }) {
                 onChange={(e) => set('expiresAt', e.target.value)}
                 dir="ltr"
                 slotProps={{ inputLabel: { shrink: true } }}
+                helperText="خالی = بدون انقضا"
               />
             </Grid>
 
+            {/* Target Audience Section */}
+            <Grid size={12}>
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: 'background.default' }}>
+                <FormControl component="fieldset" fullWidth>
+                  <FormLabel component="legend" sx={{ fontWeight: 700, fontSize: '0.88rem', mb: 1, color: 'text.primary' }}>
+                    جامعه هدف و دسترسی کد تخفیف
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    value={form.targetType}
+                    onChange={(e) => set('targetType', e.target.value)}
+                    sx={{ gap: 2, mb: 1.5 }}
+                  >
+                    <FormControlLabel
+                      value="all"
+                      control={<Radio size="small" />}
+                      label={
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                          <PublicIcon fontSize="small" color="primary" />
+                          <Typography fontSize="0.84rem" fontWeight={600}>همه کاربران (عمومی)</Typography>
+                        </Stack>
+                      }
+                    />
+                    <FormControlLabel
+                      value="course"
+                      control={<Radio size="small" />}
+                      label={
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                          <SchoolIcon fontSize="small" color="info" />
+                          <Typography fontSize="0.84rem" fontWeight={600}>دانشجویان یک دوره خاص</Typography>
+                        </Stack>
+                      }
+                    />
+                    <FormControlLabel
+                      value="users"
+                      control={<Radio size="small" />}
+                      label={
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                          <PeopleIcon fontSize="small" color="secondary" />
+                          <Typography fontSize="0.84rem" fontWeight={600}>کاربران خاص (منتخب)</Typography>
+                        </Stack>
+                      }
+                    />
+                  </RadioGroup>
+                </FormControl>
+
+                {/* Targeted Course Dropdown */}
+                {form.targetType === 'course' && (
+                  <Box sx={{ mt: 1 }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>انتخاب دوره آموزشی هدف *</InputLabel>
+                      <Select
+                        value={form.targetCourseId}
+                        label="انتخاب دوره آموزشی هدف *"
+                        onChange={(e) => set('targetCourseId', e.target.value)}
+                        disabled={loadingLookups}
+                      >
+                        {coursesList.map((course) => (
+                          <MenuItem key={course.id} value={course.id}>
+                            <Typography fontSize="0.85rem">
+                              {course.name} {course.level ? `(${course.level})` : ''}
+                            </Typography>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                      فقط دانشجویانی که ثبت‌نام فعال در این دوره دارند می‌توانند از این کد استفاده نمایند.
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Targeted Specific Users Multi-select */}
+                {form.targetType === 'users' && (
+                  <Box sx={{ mt: 1 }}>
+                    <Autocomplete
+                      multiple
+                      options={studentsList}
+                      getOptionLabel={(option) => {
+                        const name = [option.firstName, option.lastName].filter(Boolean).join(' ') || option.name || '';
+                        const phone = option.phoneNumber || option.phone || '';
+                        return `${name} (${phone})`.trim();
+                      }}
+                      value={selectedStudents}
+                      onChange={(_, newValue) => {
+                        set('targetUserIds', newValue.map((u) => u.id));
+                      }}
+                      isOptionEqualToValue={(option, val) => option.id === val.id}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="انتخاب کاربران مجاز *"
+                          placeholder="جستجوی نام یا شماره همراه دانشجو..."
+                          size="small"
+                        />
+                      )}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => {
+                          const name = [option.firstName, option.lastName].filter(Boolean).join(' ') || option.phoneNumber || 'کاربر';
+                          return (
+                            <Chip
+                              {...getTagProps({ index })}
+                              key={option.id}
+                              label={name}
+                              size="small"
+                              variant="outlined"
+                            />
+                          );
+                        })
+                      }
+                      disabled={loadingLookups}
+                    />
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                      فقط کاربران انتخاب‌شده در این لیست هنگام ورود به حساب خود امکان اعمال کد را دارند.
+                    </Typography>
+                  </Box>
+                )}
+              </Paper>
+            </Grid>
+
+            {/* Usage Limit */}
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label="سقف دفعات استفاده"
@@ -160,6 +361,7 @@ function CouponModal({ open, initial, onClose, onSaved }) {
               />
             </Grid>
 
+            {/* Minimum Order Amount */}
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label="حداقل مبلغ سفارش (تومان)"
@@ -171,6 +373,7 @@ function CouponModal({ open, initial, onClose, onSaved }) {
               />
             </Grid>
 
+            {/* Active Toggle */}
             <Grid size={12}>
               <FormControlLabel
                 control={<Checkbox checked={!!form.isActive} onChange={(e) => set('isActive', e.target.checked)} />}
@@ -238,6 +441,48 @@ export default function AdminCoupons() {
           />
         </Stack>
       ),
+    },
+    {
+      id: 'targetType',
+      label: 'جامعه هدف',
+      render: (row) => {
+        const targetType = row.targetType || 'all';
+        if (targetType === 'course') {
+          return (
+            <Chip
+              size="small"
+              icon={<SchoolIcon sx={{ fontSize: '14px !important' }} />}
+              label={`دانشجویان: ${row.targetCourse?.name || 'دوره خاص'}`}
+              color="info"
+              variant="outlined"
+              sx={{ fontWeight: 600, fontSize: '0.76rem' }}
+            />
+          );
+        }
+        if (targetType === 'users') {
+          const count = parseUserIds(row.targetUserIds).length;
+          return (
+            <Chip
+              size="small"
+              icon={<PeopleIcon sx={{ fontSize: '14px !important' }} />}
+              label={`${count} کاربر منتخب`}
+              color="secondary"
+              variant="outlined"
+              sx={{ fontWeight: 600, fontSize: '0.76rem' }}
+            />
+          );
+        }
+        return (
+          <Chip
+            size="small"
+            icon={<PublicIcon sx={{ fontSize: '14px !important' }} />}
+            label="همه کاربران"
+            color="primary"
+            variant="outlined"
+            sx={{ fontWeight: 600, fontSize: '0.76rem' }}
+          />
+        );
+      },
     },
     {
       id: 'discountValue',
@@ -323,7 +568,7 @@ export default function AdminCoupons() {
     <Stack spacing={3.5}>
       <PageHeader
         title="کدهای تخفیف"
-        subtitle="تعریف، سقف‌گذاری و مدیریت کدهای تخفیف درصدی و ریالی برای سبد خرید"
+        subtitle="تعریف، سقف‌گذاری و هدفمندسازی کدهای تخفیف عمومی، ویژه دانشجویان یک دوره یا کاربران منتخب"
         action={
           <Button
             variant="contained"

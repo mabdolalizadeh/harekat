@@ -218,6 +218,89 @@ test('3. Cart Pricing & Server-side Coupon Calculation', async () => {
     assert.equal(Number(orderData.data.totalAmount), 1000000);
     assert.equal(Number(orderData.data.discountAmount), 200000);
     assert.equal(Number(orderData.data.finalAmount), 800000);
+
+    // 3. Test Course-Targeted Coupon
+    const targetCourseCoupon = `COURSE_ONLY_${Date.now()}`;
+    await Coupon.create({
+        code: targetCourseCoupon,
+        discountType: 'fixed',
+        discountValue: 150000,
+        targetType: 'course',
+        targetCourseId: course.id,
+        isActive: true
+    });
+
+    // Other non-enrolled student trying to validate course-targeted coupon
+    const otherStudent = await Users.create({
+        phoneNumber: `0912${Math.floor(1000000 + Math.random() * 9000000)}`,
+        name: 'دانشجوی دوم'
+    });
+    const otherStudentToken = jwt.sign({ id: otherStudent.id, phoneNumber: otherStudent.phoneNumber }, configs.jwtKey);
+
+    const failCourseValRes = await fetch(`${baseUrl}/coupons/validate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${otherStudentToken}`
+        },
+        body: JSON.stringify({ code: targetCourseCoupon, orderAmount: 500000 })
+    });
+    assert.equal(failCourseValRes.status, 400);
+
+    // Grant enrollment to other student
+    await CourseAccess.create({
+        userId: otherStudent.id,
+        courseId: course.id,
+        status: 'active',
+        grantedAt: new Date()
+    });
+
+    const successCourseValRes = await fetch(`${baseUrl}/coupons/validate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${otherStudentToken}`
+        },
+        body: JSON.stringify({ code: targetCourseCoupon, orderAmount: 500000 })
+    });
+    assert.equal(successCourseValRes.status, 200);
+    const successCourseValData = await successCourseValRes.json();
+    assert.equal(successCourseValData.data.discount, 150000);
+
+    // 4. Test User-Targeted Coupon
+    const userTargetCoupon = `VIP_USER_${Date.now()}`;
+    await Coupon.create({
+        code: userTargetCoupon,
+        discountType: 'percent',
+        discountValue: 50,
+        targetType: 'users',
+        targetUserIds: JSON.stringify([otherStudent.id]),
+        isActive: true
+    });
+
+    // Student 1 (not in target list) attempts validation
+    const failUserValRes = await fetch(`${baseUrl}/coupons/validate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${studentToken}`
+        },
+        body: JSON.stringify({ code: userTargetCoupon, orderAmount: 500000 })
+    });
+    assert.equal(failUserValRes.status, 400);
+
+    // Student 2 (in target list) attempts validation
+    const successUserValRes = await fetch(`${baseUrl}/coupons/validate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${otherStudentToken}`
+        },
+        body: JSON.stringify({ code: userTargetCoupon, orderAmount: 500000 })
+    });
+    assert.equal(successUserValRes.status, 200);
+    const successUserValData = await successUserValRes.json();
+    assert.equal(successUserValData.data.discount, 250000);
 });
 
 test('4. Notifications System & Sender Attribution', async () => {

@@ -11,7 +11,7 @@ export const cartApi = {
   clearCart: () =>
     del('/cart/clear', { auth: true }),
   validateCoupon: (code, orderAmount) =>
-    post('/coupons/validate', { code, orderAmount }, { auth: false })
+    post('/coupons/validate', { code, orderAmount }, { auth: true })
 };
 
 export default cartApi;

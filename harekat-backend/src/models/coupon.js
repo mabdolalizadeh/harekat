@@ -22,6 +22,21 @@ const Coupon = sequelize.define('Coupon', {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false
     },
+    targetType: {
+        type: DataTypes.ENUM('all', 'course', 'users'),
+        allowNull: false,
+        defaultValue: 'all'
+    },
+    targetCourseId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        defaultValue: null
+    },
+    targetUserIds: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
+    },
     isActive: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
