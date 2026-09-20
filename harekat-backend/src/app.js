@@ -75,16 +75,25 @@ app.use((err, req, res, next) => {
 
 const frontendDist = path.resolve(__dirname, '../../harekat-landing/dist');
 const adminDist = path.resolve(__dirname, '../../harekat-admin/dist');
+const dashboardDist = path.resolve(__dirname, '../../harekat-dashboard/dist');
+
 const configuredAdminHost = String(process.env.ADMIN_HOSTNAME || process.env.ADMIN_HOST || '').trim().toLowerCase();
+const configuredDashboardHost = String(process.env.DASHBOARD_HOSTNAME || process.env.DASHBOARD_HOST || '').trim().toLowerCase();
 
 function isAdminHost(req) {
     const hostname = String(req.hostname || '').toLowerCase();
     return (configuredAdminHost && hostname === configuredAdminHost) || hostname.startsWith('admin.');
 }
 
+function isDashboardHost(req) {
+    const hostname = String(req.hostname || '').toLowerCase();
+    return (configuredDashboardHost && hostname === configuredDashboardHost) || hostname.startsWith('dashboard.');
+}
+
 function isLegacyAdminPath(req) {
     return req.path === '/admin' || req.path.startsWith('/admin/');
 }
+
 
 // Persistent upload directory — MUST be outside `dist`.
 // `dist` is gitignored and wiped on every `vite build` (emptyOutDir:true),
@@ -218,10 +227,24 @@ if (fs.existsSync(path.join(adminDist, 'index.html'))) {
     });
 }
 
+// Serve the student dashboard SPA from the dashboard hostname at its root. The hostname is
+// configured with DASHBOARD_HOSTNAME (for example dashboard.domain.tld); the
+// dashboard.* fallback also makes local subdomain testing straightforward.
+if (fs.existsSync(path.join(dashboardDist, 'index.html'))) {
+    app.use((req, res, next) => {
+        if (!isDashboardHost(req) || req.path.startsWith('/api/v1')) return next();
+        express.static(dashboardDist)(req, res, (err) => {
+            if (err) return next(err);
+            if (req.method === 'GET') return res.sendFile(path.join(dashboardDist, 'index.html'));
+            next();
+        });
+    });
+}
+
 // The public landing SPA is served from the root hostname. Do not let an
-// admin-host request fall through to the public app.
+// admin-host or dashboard-host request fall through to the public app.
 app.use((req, res, next) => {
-    if (isAdminHost(req)) return next();
+    if (isAdminHost(req) || isDashboardHost(req)) return next();
     express.static(frontendDist)(req, res, next);
 });
 
@@ -230,11 +253,16 @@ app.use((req, res, next) => {
         if (isAdminHost(req) && fs.existsSync(path.join(adminDist, 'index.html'))) {
             return res.sendFile(path.join(adminDist, 'index.html'));
         }
-        res.sendFile(path.join(frontendDist, 'index.html'));
-    } else {
-        next();
+        if (isDashboardHost(req) && fs.existsSync(path.join(dashboardDist, 'index.html'))) {
+            return res.sendFile(path.join(dashboardDist, 'index.html'));
+        }
+        if (fs.existsSync(path.join(frontendDist, 'index.html'))) {
+            return res.sendFile(path.join(frontendDist, 'index.html'));
+        }
     }
+    next();
 });
+
 
 app.use((req, res) => {
     logSecurityEvent('route_not_found', { path: req.path, method: req.method, ip: req.ip });

@@ -10,6 +10,8 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {ArrowLeft, Phone, KeyRound} from "lucide-react";
 import {cn} from "../utils/cn.js";
 import {authApi} from "../services/api.js";
+import {getDashboardUrl} from "../utils/dashboardUrl.js";
+
 
 const errorTranslations = {
     'Too many attempts. Please try again later.': 'تعداد تلاش‌های شما بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید.',
@@ -58,13 +60,13 @@ export default function Auth() {
             localStorage.setItem('token', json.data.token);
             localStorage.setItem('user', JSON.stringify(json.data.user));
             const from = location.state?.from;
-            const destination = typeof from === 'string'
-                ? from
-                : from?.pathname
-                    ? `${from.pathname}${from.search || ''}${from.hash || ''}`
-                    : '/dashboard';
-            navigate(destination, {replace: true});
+            if (from && typeof from === 'string' && from !== '/dashboard') {
+                navigate(from, {replace: true});
+            } else {
+                window.location.href = getDashboardUrl();
+            }
         } catch (err) {
+
             setError(translateError(err.message) || 'کد تایید نادرست است');
         } finally {
             setLoading(false);

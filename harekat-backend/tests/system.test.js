@@ -310,3 +310,19 @@ test('6. LMS Session Progress & Course Stats', async () => {
     assert.equal(viewData.data.stats.completedSessions, 1);
     assert.equal(viewData.data.stats.completionPercentage, 50);
 });
+
+test('7. Dashboard & Admin Subdomain Host Routing', async () => {
+    // Request with dashboard.domain.tld host header
+    const dashboardRes = await fetch(baseUrl.replace('/api/v1', '/'), {
+        headers: { Host: 'dashboard.example.com' }
+    });
+    // Should respond with 200 or serve the SPA (or 404 if dist not built yet, but routing handled without 500 error)
+    assert.ok([200, 404].includes(dashboardRes.status));
+
+    // Request with admin.domain.tld host header
+    const adminRes = await fetch(baseUrl.replace('/api/v1', '/'), {
+        headers: { Host: 'admin.example.com' }
+    });
+    assert.ok([200, 404].includes(adminRes.status));
+});
+

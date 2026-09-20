@@ -8,6 +8,8 @@ import {useState, useEffect} from "react";
 import {cn} from "../utils/cn.js";
 import {useTheme} from "../contexts/ThemeContext.jsx";
 import {storeApi, customerApi} from "../services/api.js";
+import {getDashboardUrl} from "../utils/dashboardUrl.js";
+
 
 function scrollToId(id) {
     const el = document.getElementById(id);
@@ -160,7 +162,7 @@ export default function TopBarLayout() {
                             {theme === 'dark' ? <Sun size={16}/> : <Moon size={16}/>}
                         </button>
                         {isLoggedIn ? (<>
-                            <button type="button" onClick={() => navigate('/dashboard')} className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-surface-muted text-foreground" title="سبد خرید">
+                            <button type="button" onClick={() => { window.location.href = getDashboardUrl('/payments'); }} className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-surface-muted text-foreground" title="سبد خرید و سفارشات">
                                 <ShoppingCart size={16} />{cartCount > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-primary px-1 text-[10px] text-primary-foreground">{cartCount}</span>}
                             </button>
                             <div className="relative">
@@ -168,12 +170,12 @@ export default function TopBarLayout() {
                                     <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-primary/15 text-primary">{user?.avatar ? <img src={user.avatar} alt="" className="h-full w-full object-cover" /> : <UserRound size={15} />}</span><ChevronDown size={13} />
                                 </button>
                                 {profileOpen && <div className="absolute left-0 top-full z-50 mt-2 flex min-w-36 flex-col gap-1 rounded-xl border border-[var(--border)] bg-background p-2 shadow-lg">
-                                    <button type="button" className="rounded-lg px-3 py-2 text-right text-xs hover:bg-surface-muted" onClick={() => navigate('/dashboard')}>داشبورد</button>
+                                    <button type="button" className="rounded-lg px-3 py-2 text-right text-xs hover:bg-surface-muted" onClick={() => { window.location.href = getDashboardUrl('/overview'); }}>داشبورد</button>
                                     <button type="button" className="rounded-lg px-3 py-2 text-right text-xs text-danger-600 hover:bg-surface-muted" onClick={logout}>خروج</button>
                                 </div>}
                             </div>
                         </>) : (
-                            <SecondaryButton onClick={() => navigate('/auth')}>
+                            <SecondaryButton onClick={() => { window.location.href = getDashboardUrl('/login'); }}>
                                 ثبت نام یا ورود
                             </SecondaryButton>
                         )}
@@ -222,7 +224,7 @@ export default function TopBarLayout() {
                             </button>
                             <SecondaryButton onClick={() => {
                                 setMobileOpen(false);
-                                navigate(isLoggedIn ? '/dashboard' : '/auth');
+                                window.location.href = isLoggedIn ? getDashboardUrl('/overview') : getDashboardUrl('/login');
                             }}>
                                 {isLoggedIn ? 'داشبورد' : 'ثبت نام یا ورود'}
                             </SecondaryButton>
@@ -233,3 +235,4 @@ export default function TopBarLayout() {
         </div>
     );
 }
+

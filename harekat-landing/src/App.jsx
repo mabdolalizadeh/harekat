@@ -1,16 +1,23 @@
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Landing from "./pages/Landing.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 import Auth from "./pages/Auth.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
 import Products from "./pages/Products.jsx";
 import TeacherDetail from "./pages/TeacherDetail.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import CoursesPage from "./pages/CoursesPage.jsx";
 import CapsulesPage from "./pages/CapsulesPage.jsx";
 import PackagesPage from "./pages/PackagesPage.jsx";
-import { AuthGuard } from "./components/AuthGuard.jsx";
+import { getDashboardUrl } from "./utils/dashboardUrl.js";
+
+function ExternalDashboardRedirect() {
+    useEffect(() => {
+        window.location.href = getDashboardUrl();
+    }, []);
+    return null;
+}
 
 export default function App() {
     return (
@@ -19,7 +26,8 @@ export default function App() {
             <Route path='/contact-us' element={<ContactUs/>}/>
             <Route path='/about-us' element={<AboutUs/>}/>
             <Route path='/auth' element={<Auth/>}/>
-            <Route path='/dashboard' element={<AuthGuard><Dashboard/></AuthGuard>}/>
+            <Route path='/dashboard' element={<ExternalDashboardRedirect/>}/>
+
 
             {/* Dedicated separated routes for courses, capsules, and packages */}
             <Route path='/courses' element={<CoursesPage/>}/>
