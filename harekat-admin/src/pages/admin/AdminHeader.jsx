@@ -1,82 +1,335 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import {
+  Box,
+  Stack,
+  Button,
+  TextField,
+  Typography,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Menu as MenuIcon,
+  ArrowUpward as UpIcon,
+  ArrowDownward as DownIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, FormError, RowActions, StatusDot, PageHeader, ListRowSkeleton } from './adminUi.jsx';
-import { Box, Stack, Button, TextField, FormControlLabel, Checkbox, Typography, IconButton, Alert, Paper, Divider } from '@mui/material';
-import { Add as AddIcon, ArrowUpward as UpIcon, ArrowDownward as DownIcon } from '@mui/icons-material';
+import { useNotification } from '../../context/NotificationContext.jsx';
+import PageHeader from '../../components/admin/PageHeader.jsx';
+import DataTable from '../../components/admin/DataTable.jsx';
+import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
+import StatusChip from '../../components/admin/StatusChip.jsx';
 
-const EMPTY = { label: '', link: '', scrollId: '', sortOrder: 0, isActive: true };
+const EMPTY_MENU = {
+  label: '',
+  link: '',
+  scrollId: '',
+  sortOrder: 0,
+  isActive: true,
+};
 
-function MenuForm({ initial, onSubmit, onCancel, saving }) {
-  const [form, setForm] = useState(initial);
-  const [error, setError] = useState(null);
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const submit = async (e) => {
+function MenuItemModal({ open, initial, onClose, onSaved }) {
+  const { showSuccess, showError } = useNotification();
+  const [form, setForm] = useState(initial || EMPTY_MENU);
+  const [saving, setSaving] = useState(false);
+
+  const set = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.label.trim() || !form.link.trim()) { setError('عنوان و لینک الزامی است'); return; }
-    setError(null);
-    await onSubmit({ ...form, scrollId: form.scrollId || null, sortOrder: Number(form.sortOrder) || 0 }, setError);
+    if (!form.label.trim() || !form.link.trim()) {
+      showError('عنوان و لینک الزامی هستند');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        ...form,
+        label: form.label.trim(),
+        link: form.link.trim(),
+        scrollId: form.scrollId?.trim() || null,
+        sortOrder: Number(form.sortOrder) || 0,
+      };
+
+      if (initial?.id) {
+        await adminApi.updateMenuItem(initial.id, payload);
+        showSuccess('آیتم منو با موفقیت ویرایش شد');
+      } else {
+        await adminApi.createMenuItem(payload);
+        showSuccess('آیتم منو جدید با موفقیت اضافه شد');
+      }
+      onSaved();
+      onClose();
+    } catch (err) {
+      showError(err.message || 'خطا در ذخیره آیتم منو');
+    } finally {
+      setSaving(false);
+    }
   };
+
   return (
-    <Box component="form" onSubmit={submit}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-        <TextField label="عنوان *" value={form.label} onChange={(e) => set('label', e.target.value)} placeholder="دوره‌ها" />
-        <TextField label="لینک *" value={form.link} onChange={(e) => set('link', e.target.value)} dir="ltr" placeholder="/#courses" />
-        <TextField label="شناسه اسکرول (اختیاری)" value={form.scrollId ?? ''} onChange={(e) => set('scrollId', e.target.value)} dir="ltr" placeholder="courses" />
-        <TextField label="ترتیب" type="number" value={form.sortOrder} onChange={(e) => set('sortOrder', e.target.value)} dir="ltr" />
-        <FormControlLabel control={<Checkbox checked={!!form.isActive} onChange={(e) => set('isActive', e.target.checked)} />} label="فعال (نمایش در سربرگ)" />
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth dir="rtl">
+      <DialogTitle sx={{ pb: 1 }}>
+        <Typography variant="h6" fontWeight={700}>
+          {initial?.id ? 'ویرایش آیتم منو' : 'افزودن آیتم جدید به سربرگ'}
+        </Typography>
+      </DialogTitle>
+
+      <Box component="form" id="menu-form" onSubmit={handleSubmit}>
+        <DialogContent dividers sx={{ p: 3 }}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="عنوان آیتم *"
+                value={form.label}
+                onChange={(e) => set('label', e.target.value)}
+                placeholder="مثال: دوره‌ها"
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="لینک مقصد *"
+                dir="ltr"
+                value={form.link}
+                onChange={(e) => set('link', e.target.value)}
+                placeholder="/courses یا /#courses"
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="شناسه اسکرول (اختیاری)"
+                dir="ltr"
+                value={form.scrollId ?? ''}
+                onChange={(e) => set('scrollId', e.target.value)}
+                placeholder="courses"
+                helperText="برای اسکرول نرم به بخش خاصی از صفحه"
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="ترتیب نمایش"
+                type="number"
+                value={form.sortOrder}
+                onChange={(e) => set('sortOrder', e.target.value)}
+                dir="ltr"
+              />
+            </Grid>
+
+            <Grid size={12}>
+              <FormControlLabel
+                control={<Checkbox checked={!!form.isActive} onChange={(e) => set('isActive', e.target.checked)} />}
+                label="فعال (نمایش در منوی سربرگ وب‌سایت)"
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button onClick={onClose} variant="outlined">
+            انصراف
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={saving}
+            startIcon={saving && <CircularProgress size={16} color="inherit" />}
+          >
+            {saving ? 'در حال ذخیره...' : 'ذخیره آیتم'}
+          </Button>
+        </DialogActions>
       </Box>
-      <Box mt={2}><FormError error={error} /></Box>
-      <Stack direction="row" spacing={1} mt={2}>
-        <Button type="submit" variant="contained" disabled={saving}>{saving ? '...' : 'ذخیره'}</Button>
-        <Button variant="text" onClick={onCancel}>انصراف</Button>
-      </Stack>
-    </Box>
+    </Dialog>
   );
 }
 
 export default function AdminHeader() {
-  const [editing, setEditing] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const { showSuccess, showError } = useNotification();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   const menu = useApi(() => adminApi.listMenu());
-  const items = [...(menu.data ?? [])].sort((a, b) => (a.sortOrder - b.sortOrder));
-  const save = async (payload, setError) => {
-    setSaving(true);
+
+  const items = useMemo(() => {
+    return [...(menu.data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+  }, [menu.data]);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      if (editing === 'new') await adminApi.createMenuItem(payload);
-      else await adminApi.updateMenuItem(editing, payload);
-      setEditing(null); menu.reload();
-    } catch (e) { setError(e.message); } finally { setSaving(false); }
+      await adminApi.deleteMenuItem(deleteTarget.id);
+      showSuccess('آیتم منو با موفقیت حذف شد');
+      setDeleteTarget(null);
+      menu.reload();
+    } catch (err) {
+      showError(err.message || 'خطا در حذف آیتم');
+    } finally {
+      setDeleting(false);
+    }
   };
-  const remove = async (id) => { if (!window.confirm('حذف شود؟')) return; await adminApi.deleteMenuItem(id).then(() => menu.reload()).catch(() => {}); };
-  const move = async (item, dir) => { await adminApi.updateMenuItem(item.id, { sortOrder: (item.sortOrder ?? 0) + dir }).then(() => menu.reload()).catch(() => {}); };
+
+  const handleMove = useCallback(async (item, dir) => {
+    try {
+      await adminApi.updateMenuItem(item.id, {
+        sortOrder: (item.sortOrder ?? 0) + dir,
+      });
+      menu.reload();
+    } catch (err) {
+      showError(err.message || 'خطا در جابجایی');
+    }
+  }, [menu, showError]);
+
+  const columns = useMemo(() => [
+    {
+      id: 'label',
+      label: 'عنوان آیتم منو',
+      render: (row) => (
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <MenuIcon color="primary" fontSize="small" />
+          <Typography fontWeight={700} fontSize="0.84rem">
+            {row.label}
+          </Typography>
+        </Stack>
+      ),
+    },
+    {
+      id: 'link',
+      label: 'آدرس لینک و اسکرول',
+      render: (row) => (
+        <Typography dir="ltr" variant="caption" sx={{ fontFamily: 'monospace' }}>
+          {row.link}{row.scrollId ? ` (#${row.scrollId})` : ''}
+        </Typography>
+      ),
+    },
+    {
+      id: 'sortOrder',
+      label: 'ترتیب نمایش',
+      render: (row) => (
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <IconButton size="small" onClick={() => handleMove(row, -1)} title="انتقال به بالا">
+            <UpIcon fontSize="small" />
+          </IconButton>
+          <Typography sx={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>
+            {row.sortOrder}
+          </Typography>
+          <IconButton size="small" onClick={() => handleMove(row, 1)} title="انتقال به پایین">
+            <DownIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+      ),
+    },
+    {
+      id: 'isActive',
+      label: 'وضعیت',
+      render: (row) => <StatusChip status={!!row.isActive} />,
+    },
+    {
+      id: 'actions',
+      label: 'عملیات',
+      sortable: false,
+      align: 'left',
+      render: (row) => (
+        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+          <Tooltip title="ویرایش">
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => {
+                setEditingItem(row);
+                setModalOpen(true);
+              }}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="حذف">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => setDeleteTarget(row)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+  ], [handleMove]);
+
   return (
-    <Stack spacing={3}>
-      <PageHeader title="مدیریت سربرگ" subtitle="ترتیب آیتم‌ها با «ترتیب» یا دکمه‌های بالا/پایین تغییر می‌کند. آیتم غیرفعال در سایت نمایش داده نمی‌شود." action={!editing && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing('new')}>آیتم جدید</Button>} />
-      {editing && (
-        <Card><Typography fontWeight={700} mb={2}>{editing === 'new' ? 'آیتم جدید' : 'ویرایش آیتم'}</Typography><Divider sx={{ mb: 2.5 }} />
-          <MenuForm initial={editing === 'new' ? EMPTY : items.find((m) => m.id === editing)} onSubmit={save} onCancel={() => setEditing(null)} saving={saving} />
-        </Card>
+    <Stack spacing={3.5}>
+      <PageHeader
+        title="مدیریت سربرگ و منو"
+        subtitle="تنظیم عناوین، ترتیب و پیوندهای منوی اصلی بالای وب‌سایت"
+        action={
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setEditingItem(null);
+              setModalOpen(true);
+            }}
+          >
+            آیتم جدید
+          </Button>
+        }
+      />
+
+      {/* Menu DataTable */}
+      <DataTable
+        columns={columns}
+        rows={items}
+        loading={menu.loading}
+        error={menu.error}
+        onReload={menu.reload}
+        searchPlaceholder="جستجوی عنوان منو..."
+        searchFilter={(row, term) => (row.label || '').toLowerCase().includes(term) || (row.link || '').toLowerCase().includes(term)}
+        emptyTitle="آیتمی برای سربرگ ثبت نشده است"
+        emptyDescription="برای اضافه کردن اولین گزینه به منوی بالای سایت، روی دکمه آیتم جدید کلیک کنید."
+      />
+
+      {/* Create / Edit Modal */}
+      {modalOpen && (
+        <MenuItemModal
+          open={modalOpen}
+          initial={editingItem}
+          onClose={() => {
+            setModalOpen(false);
+            setEditingItem(null);
+          }}
+          onSaved={() => menu.reload()}
+        />
       )}
-      {menu.loading && <ListRowSkeleton count={4} showAvatar={false} circularAvatar={false} />}
-      {menu.error && <Alert severity="error">خطا: {menu.error}</Alert>}
-      {menu.isEmpty && !editing && <Alert severity="info">آیتمی ثبت نشده است.</Alert>}
-      <Stack spacing={1.5}>
-        {items.map((m) => (
-          <Paper key={m.id} elevation={0} sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2.5, opacity: m.isActive ? 1 : 0.6 }}>
-            <Box sx={{ minWidth: 0 }}>
-              <Typography fontWeight={600} fontSize={14}>{m.label}</Typography>
-              <Typography variant="caption" color="text.secondary" dir="ltr" noWrap display="block">{m.link}{m.scrollId ? ` (#${m.scrollId})` : ''} · ترتیب {m.sortOrder}</Typography>
-            </Box>
-            <Stack direction="row" alignItems="center" spacing={0.5} flexShrink={0}>
-              <IconButton size="small" onClick={() => move(m, -1)}><UpIcon fontSize="small" /></IconButton>
-              <IconButton size="small" onClick={() => move(m, 1)}><DownIcon fontSize="small" /></IconButton>
-              <StatusDot active={m.isActive} />
-              <RowActions onEdit={() => setEditing(m.id)} onDelete={() => remove(m.id)} />
-            </Stack>
-          </Paper>
-        ))}
-      </Stack>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="حذف آیتم منو"
+        message={`آیا مطمئن هستید که می‌خواهید «${deleteTarget?.label}» را از سربرگ حذف کنید؟`}
+        confirmText="حذف آیتم"
+        cancelText="انصراف"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </Stack>
   );
 }

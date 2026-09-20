@@ -1,38 +1,42 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import {
+  Box,
+  Stack,
+  Button,
+  TextField,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  ArrowUpward as UpIcon,
+  ArrowDownward as DownIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, FormError, RowActions, StatusDot, PageHeader, ListRowSkeleton } from './adminUi.jsx';
-import { Box, Stack, Button, TextField, FormControlLabel, Checkbox, Typography, IconButton, Alert, Paper, Divider } from '@mui/material';
-import { Add as AddIcon, ArrowUpward as UpIcon, ArrowDownward as DownIcon, Image as ImageIcon } from '@mui/icons-material';
+import { useNotification } from '../../context/NotificationContext.jsx';
+import PageHeader from '../../components/admin/PageHeader.jsx';
+import DataTable from '../../components/admin/DataTable.jsx';
+import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
+import StatusChip from '../../components/admin/StatusChip.jsx';
+import ImagePicker from '../../components/ImagePicker.jsx';
 
-function SlideForm({ initial, onSubmit, onCancel, saving }) {
-  const [form, setForm] = useState(initial);
-  const [error, setError] = useState(null);
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!form.imageUrl.trim()) { setError('آدرس تصویر اسلاید الزامی است'); return; }
-    setError(null);
-    await onSubmit({ ...form, title: form.title.trim() || null, sortOrder: Number(form.sortOrder) || 0 }, setError);
-  };
-  return (
-    <Box component="form" onSubmit={submit}>
-      <Stack spacing={2}>
-        <TextField label="آدرس تصویر *" dir="ltr" value={form.imageUrl} onChange={(e) => set('imageUrl', e.target.value)} placeholder="https://images.unsplash.com/..." />
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-          <TextField label="عنوان (اختیاری — متن جایگزین)" value={form.title ?? ''} onChange={(e) => set('title', e.target.value)} placeholder="کارگاه خلاقیت" />
-          <TextField label="ترتیب" type="number" dir="ltr" value={form.sortOrder} onChange={(e) => set('sortOrder', e.target.value)} />
-        </Box>
-        <FormControlLabel control={<Checkbox checked={!!form.isActive} onChange={(e) => set('isActive', e.target.checked)} />} label="فعال (نمایش در نوار متحرک)" />
-        <FormError error={error} />
-        <Stack direction="row" spacing={1}>
-          <Button type="submit" variant="contained" disabled={saving}>{saving ? 'در حال ذخیره...' : 'ذخیره'}</Button>
-          <Button variant="text" onClick={onCancel}>انصراف</Button>
-        </Stack>
-      </Stack>
-    </Box>
-  );
-}
+const EMPTY_SLIDE = {
+  imageUrl: '',
+  title: '',
+  sortOrder: 0,
+  isActive: true,
+};
 
 function nextSlideKey(slides) {
   let max = 0;
@@ -43,57 +47,283 @@ function nextSlideKey(slides) {
   return `marquee-${max + 1}`;
 }
 
-export default function AdminMarquee() {
-  const [editing, setEditing] = useState(null);
+function MarqueeModal({ open, initial, allSlides, onClose, onSaved }) {
+  const { showSuccess, showError } = useNotification();
+  const [form, setForm] = useState(initial || EMPTY_SLIDE);
   const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState(null);
-  const slides = useApi(() => adminApi.listMarqueeSlides());
-  const items = [...(slides.data ?? [])].sort((a, b) => (a.sortOrder - b.sortOrder) || a.key.localeCompare(b.key));
-  const save = async (payload, setError) => {
+
+  const set = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.imageUrl?.trim()) return showError('آدرس یا فایل تصویر الزامی است');
+
     setSaving(true);
     try {
-      if (editing === 'new') {
-        const key = nextSlideKey(items);
-        await adminApi.upsertContent({ ...payload, key });
-      } else {
-        await adminApi.upsertContent({ ...payload, key: editing });
-      }
-      setEditing(null); setNotice('اسلاید ذخیره شد'); slides.reload();
-    } catch (e) { setError(e.message); } finally { setSaving(false); }
+      const key = initial?.key || nextSlideKey(allSlides);
+      const payload = {
+        ...form,
+        key,
+        title: form.title?.trim() || null,
+        sortOrder: Number(form.sortOrder) || 0,
+      };
+
+      await adminApi.upsertContent(payload);
+      showSuccess('اسلاید نوار متحرک با موفقیت ذخیره شد');
+      onSaved();
+      onClose();
+    } catch (err) {
+      showError(err.message || 'خطا در ذخیره اسلاید');
+    } finally {
+      setSaving(false);
+    }
   };
-  const remove = async (key) => { if (!window.confirm(`اسلاید «${key}» حذف شود؟`)) return; await adminApi.deleteContent(key).then(() => slides.reload()).catch(() => {}); };
-  const move = async (item, dir) => { await adminApi.upsertContent({ key: item.key, sortOrder: (item.sortOrder ?? 0) + dir }).then(() => slides.reload()).catch(() => {}); };
+
   return (
-    <Stack spacing={3}>
-      <PageHeader title="نوار متحرک (مارکی)" subtitle="تصاویر در نوار متحرک بالای سایت نمایش داده می‌شوند." action={!editing && <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditing('new'); setNotice(null); }}>اسلاید جدید</Button>} />
-      {notice && <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert>}
-      {editing && (
-        <Card><Typography fontWeight={700} mb={2}>{editing === 'new' ? 'اسلاید جدید' : `ویرایش ${editing}`}</Typography><Divider sx={{ mb: 2.5 }} />
-          <SlideForm initial={editing === 'new' ? { imageUrl: '', title: '', sortOrder: items.length + 1, isActive: true } : items.find((s) => s.key === editing)} onSubmit={save} onCancel={() => setEditing(null)} saving={saving} />
-        </Card>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth dir="rtl">
+      <DialogTitle sx={{ pb: 1 }}>
+        <Typography variant="h6" fontWeight={700}>
+          {initial?.key ? 'ویرایش اسلاید نوار متحرک' : 'افزودن اسلاید جدید'}
+        </Typography>
+      </DialogTitle>
+
+      <Box component="form" id="marquee-form" onSubmit={handleSubmit}>
+        <DialogContent dividers sx={{ p: 3 }}>
+          <Stack spacing={2.5}>
+            <Box>
+              <Typography variant="caption" fontWeight={700} color="text.secondary" mb={0.5} display="block">
+                تصویر لوگو یا کارگاه *
+              </Typography>
+              <ImagePicker value={form.imageUrl} onChange={(url) => set('imageUrl', url)} alt="تصویر اسلاید" />
+            </Box>
+
+            <TextField
+              label="عنوان / متن جایگزین (اختیاری)"
+              value={form.title || ''}
+              onChange={(e) => set('title', e.target.value)}
+              placeholder="مثال: کارگاه آموزش خلاقیت"
+            />
+
+            <TextField
+              label="ترتیب نمایش"
+              type="number"
+              value={form.sortOrder}
+              onChange={(e) => set('sortOrder', e.target.value)}
+              dir="ltr"
+            />
+
+            <FormControlLabel
+              control={<Checkbox checked={!!form.isActive} onChange={(e) => set('isActive', e.target.checked)} />}
+              label="فعال (نمایش در نوار متحرک بالای سایت)"
+            />
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button onClick={onClose} variant="outlined">
+            انصراف
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={saving}
+            startIcon={saving && <CircularProgress size={16} color="inherit" />}
+          >
+            {saving ? 'در حال ذخیره...' : 'ذخیره اسلاید'}
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
+  );
+}
+
+export default function AdminMarquee() {
+  const { showSuccess, showError } = useNotification();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingSlide, setEditingSlide] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const slides = useApi(() => adminApi.listMarqueeSlides());
+
+  const items = useMemo(() => {
+    return [...(slides.data ?? [])].sort((a, b) => (a.sortOrder - b.sortOrder) || a.key.localeCompare(b.key));
+  }, [slides.data]);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await adminApi.deleteContent(deleteTarget.key);
+      showSuccess('اسلاید با موفقیت حذف شد');
+      setDeleteTarget(null);
+      slides.reload();
+    } catch (err) {
+      showError(err.message || 'خطا در حذف اسلاید');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleMove = useCallback(async (item, dir) => {
+    try {
+      await adminApi.upsertContent({
+        key: item.key,
+        sortOrder: (item.sortOrder ?? 0) + dir,
+      });
+      slides.reload();
+    } catch (err) {
+      showError(err.message || 'خطا در جابجایی');
+    }
+  }, [slides, showError]);
+
+  const columns = useMemo(() => [
+    {
+      id: 'image',
+      label: 'تصویر اسلاید',
+      render: (row) => (
+        <Box
+          component="img"
+          src={row.imageUrl}
+          alt={row.title || row.key}
+          sx={{
+            width: 64,
+            height: 48,
+            borderRadius: 1.5,
+            objectFit: 'cover',
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'action.hover',
+          }}
+        />
+      ),
+    },
+    {
+      id: 'title',
+      label: 'عنوان',
+      render: (row) => (
+        <Box>
+          <Typography fontWeight={700} fontSize="0.84rem">
+            {row.title || '(بدون عنوان)'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" dir="ltr" sx={{ fontFamily: 'monospace' }}>
+            {row.key}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      id: 'sortOrder',
+      label: 'ترتیب نمایش',
+      render: (row) => (
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <IconButton size="small" onClick={() => handleMove(row, -1)} title="انتقال به بالا">
+            <UpIcon fontSize="small" />
+          </IconButton>
+          <Typography sx={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>
+            {row.sortOrder}
+          </Typography>
+          <IconButton size="small" onClick={() => handleMove(row, 1)} title="انتقال به پایین">
+            <DownIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+      ),
+    },
+    {
+      id: 'isActive',
+      label: 'وضعیت',
+      render: (row) => <StatusChip status={!!row.isActive} />,
+    },
+    {
+      id: 'actions',
+      label: 'عملیات',
+      sortable: false,
+      align: 'left',
+      render: (row) => (
+        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+          <Tooltip title="ویرایش">
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => {
+                setEditingSlide(row);
+                setModalOpen(true);
+              }}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="حذف">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => setDeleteTarget(row)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+  ], [handleMove]);
+
+  return (
+    <Stack spacing={3.5}>
+      <PageHeader
+        title="نوار متحرک (مارکی)"
+        subtitle="مدیریت اسلایدها و لوگوهای متحرکی که در بالای وب‌سایت به حرکت درمی‌آیند"
+        action={
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setEditingSlide(null);
+              setModalOpen(true);
+            }}
+          >
+            اسلاید جدید
+          </Button>
+        }
+      />
+
+      {/* Marquee DataTable */}
+      <DataTable
+        columns={columns}
+        rows={items}
+        loading={slides.loading}
+        error={slides.error}
+        onReload={slides.reload}
+        searchPlaceholder="جستجوی عنوان اسلاید..."
+        searchFilter={(row, term) => (row.title || '').toLowerCase().includes(term) || (row.key || '').toLowerCase().includes(term)}
+        emptyTitle="اسلایدی ثبت نشده است"
+        emptyDescription="هنوز اسلایدی برای نوار متحرک ایجاد نگردیده است."
+      />
+
+      {/* Create / Edit Modal */}
+      {modalOpen && (
+        <MarqueeModal
+          open={modalOpen}
+          initial={editingSlide}
+          allSlides={items}
+          onClose={() => {
+            setModalOpen(false);
+            setEditingSlide(null);
+          }}
+          onSaved={() => slides.reload()}
+        />
       )}
-      {slides.loading && <ListRowSkeleton count={4} circularAvatar={false} avatarWidth={64} avatarHeight={48} />}
-      {slides.error && <Alert severity="error">خطا: {slides.error} <Button onClick={slides.reload} size="small">تلاش مجدد</Button></Alert>}
-      {slides.isEmpty && !editing && <Alert severity="info">اسلایدی ثبت نشده است.</Alert>}
-      <Stack spacing={1.5}>
-        {items.map((s) => (
-          <Paper key={s.key} elevation={0} sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2.5, opacity: s.isActive ? 1 : 0.6 }}>
-            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ minWidth: 0, flex: 1 }}>
-              {s.imageUrl ? <Box component="img" src={s.imageUrl} alt={s.title ?? s.key} sx={{ width: 64, height: 48, borderRadius: 1.5, objectFit: 'cover', border: '1px solid', borderColor: 'divider', flexShrink: 0 }} /> : <Box sx={{ width: 64, height: 48, borderRadius: 1.5, bgcolor: 'action.hover', display: 'grid', placeItems: 'center', flexShrink: 0 }}><ImageIcon color="disabled" /></Box>}
-              <Box sx={{ minWidth: 0 }}>
-                <Typography fontWeight={500} fontSize={14} noWrap>{s.title || '(بدون عنوان)'}</Typography>
-                <Typography variant="caption" color="text.secondary" dir="ltr" noWrap display="block">{s.key} · ترتیب {s.sortOrder}</Typography>
-              </Box>
-            </Stack>
-            <Stack direction="row" alignItems="center" spacing={0.5} flexShrink={0}>
-              <IconButton size="small" onClick={() => move(s, -1)}><UpIcon fontSize="small" /></IconButton>
-              <IconButton size="small" onClick={() => move(s, 1)}><DownIcon fontSize="small" /></IconButton>
-              <StatusDot active={s.isActive} />
-              <RowActions onEdit={() => setEditing(s.key)} onDelete={() => remove(s.key)} />
-            </Stack>
-          </Paper>
-        ))}
-      </Stack>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="حذف اسلاید"
+        message={`آیا مطمئن هستید که می‌خواهید اسلاید «${deleteTarget?.title || deleteTarget?.key}» را حذف کنید؟`}
+        confirmText="حذف اسلاید"
+        cancelText="انصراف"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </Stack>
   );
 }

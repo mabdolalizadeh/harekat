@@ -69,7 +69,7 @@ export default class AdminsController {
 
     static async updateAdmin(req, res) {
         const { id } = req.params;
-        const { username, password } = req.body;
+        const { username, password, currentPassword } = req.body;
 
         try {
             const admin = await Admins.findByPk(id);

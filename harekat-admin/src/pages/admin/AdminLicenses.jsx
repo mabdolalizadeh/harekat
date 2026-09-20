@@ -1,20 +1,41 @@
-import { useState } from 'react';
-import { adminApi, isSuperAdmin } from '../../services/api.js';
-import { useApi } from '../../hooks/useApi.js';
-import { Card, PageHeader, ListRowSkeleton } from './adminUi.jsx';
+import { useState, useMemo } from 'react';
 import {
-  Box, Stack, Typography, Grid, Alert, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, Button, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, Select, MenuItem, FormControl, InputLabel
+  Box,
+  Stack,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  IconButton,
+  Tooltip,
+  Avatar,
+  CircularProgress,
 } from '@mui/material';
-import { Verified as CertIcon, Edit as EditIcon } from '@mui/icons-material';
+import {
+  WorkspacePremium as LicenseIcon,
+  Edit as EditIcon,
+  OpenInNew as LinkIcon,
+} from '@mui/icons-material';
+import { adminApi } from '../../services/api.js';
+import { useApi } from '../../hooks/useApi.js';
+import { useNotification } from '../../context/NotificationContext.jsx';
+import PageHeader from '../../components/admin/PageHeader.jsx';
+import DataTable from '../../components/admin/DataTable.jsx';
+import StatusChip from '../../components/admin/StatusChip.jsx';
 
 export default function AdminLicenses() {
+  const { showSuccess, showError } = useNotification();
   const [editingLicense, setEditingLicense] = useState(null);
   const [certUrl, setCertUrl] = useState('');
   const [status, setStatus] = useState('available');
   const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState(null);
 
   const licenses = useApi(() => adminApi.listLicenses());
 
@@ -24,145 +45,197 @@ export default function AdminLicenses() {
     setStatus(lic.status || 'available');
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    e.preventDefault();
     if (!editingLicense) return;
     setSaving(true);
     try {
       await adminApi.updateLicenseStatus(editingLicense.id, {
         status,
-        certificateUrl: certUrl.trim() || null
+        certificateUrl: certUrl.trim() || null,
       });
-      setNotice('اطلاعات مدرک با موفقیت بروزرسانی شد');
+      showSuccess('اطلاعات گواهینامه با موفقیت بروزرسانی شد');
       setEditingLicense(null);
       licenses.reload();
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در بروزرسانی مدرک');
     } finally {
       setSaving(false);
     }
   };
 
+  const columns = useMemo(() => [
+    {
+      id: 'licenseNumber',
+      label: 'شماره سریال گواهینامه',
+      render: (row) => (
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar sx={{ width: 34, height: 34, bgcolor: 'warning.light', color: 'warning.dark', borderRadius: 2 }}>
+            <LicenseIcon sx={{ fontSize: 18 }} />
+          </Avatar>
+          <Typography dir="ltr" sx={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.84rem' }}>
+            {row.licenseNumber}
+          </Typography>
+        </Stack>
+      ),
+    },
+    {
+      id: 'user',
+      label: 'دانشجو',
+      render: (row) => {
+        const user = row.user;
+        const name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.phoneNumber : '—';
+        return (
+          <Box>
+            <Typography fontWeight={700} fontSize="0.84rem">
+              {name}
+            </Typography>
+            {user?.nationalId && (
+              <Typography variant="caption" color="text.secondary" dir="ltr" display="block">
+                کد ملی: {user.nationalId}
+              </Typography>
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      id: 'course',
+      label: 'دوره آموزشی',
+      render: (row) => (
+        <Typography fontWeight={600} fontSize="0.84rem">
+          {row.course?.name || '—'}
+        </Typography>
+      ),
+    },
+    {
+      id: 'score',
+      label: 'نمره قبولی',
+      render: (row) => (
+        <Typography fontWeight={700} color="success.main" fontSize="0.84rem">
+          {row.examResult?.score !== undefined ? `${row.examResult.score} / ۱۰۰` : 'تایید شده'}
+        </Typography>
+      ),
+    },
+    {
+      id: 'status',
+      label: 'وضعیت مدرک',
+      render: (row) => <StatusChip status={row.status || 'available'} />,
+    },
+    {
+      id: 'createdAt',
+      label: 'تاریخ صدور',
+      render: (row) => (
+        <Typography variant="caption" color="text.secondary">
+          {row.createdAt ? new Date(row.createdAt).toLocaleDateString('fa-IR') : '—'}
+        </Typography>
+      ),
+    },
+    {
+      id: 'actions',
+      label: 'عملیات',
+      sortable: false,
+      align: 'left',
+      render: (row) => (
+        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+          {row.certificateUrl && (
+            <Tooltip title="مشاهده فایل گواهینامه">
+              <IconButton
+                size="small"
+                component="a"
+                href={row.certificateUrl}
+                target="_blank"
+                rel="noreferrer"
+                color="info"
+              >
+                <LinkIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          <Tooltip title="ویرایش مدرک">
+            <IconButton size="small" color="primary" onClick={() => handleOpenEdit(row)}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+  ], []);
+
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3.5}>
       <PageHeader
         title="مدارک و گواهینامه‌ها"
-        subtitle="مشاهده گواهینامه‌های صادرشده برای دانشجویان پذیرفته شده در آزمون‌ها"
+        subtitle="مشاهده و مدیریت گواهینامه‌های رسمی صادرشده برای دانشجویانی که در آزمون‌ها نمره قبولی کسب کرده‌اند"
       />
 
-      {notice && <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert>}
-
-      <Card>
-        {licenses.loading && <ListRowSkeleton count={4} />}
-        {licenses.error && (
-          <Alert severity="error">
-            خطا: {licenses.error} <Button size="small" onClick={licenses.reload}>تلاش مجدد</Button>
-          </Alert>
-        )}
-
-        {!licenses.loading && licenses.isEmpty && (
-          <Alert severity="info">هیچ مدرکی تاکنون صادر نشده است.</Alert>
-        )}
-
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>شماره گواهینامه</TableCell>
-              <TableCell>دانشجو</TableCell>
-              <TableCell>کد ملی</TableCell>
-              <TableCell>دوره</TableCell>
-              <TableCell>نمره آزمون</TableCell>
-              <TableCell>تاریخ صدور</TableCell>
-              <TableCell>وضعیت</TableCell>
-              <TableCell align="left">ویرایش</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {(licenses.data || []).map((lic) => {
-              const user = lic.user;
-              const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.phoneNumber : '—';
-
-              return (
-                <TableRow key={lic.id}>
-                  <TableCell dir="ltr" sx={{ fontWeight: 700, fontSize: 12 }}>
-                    {lic.licenseNumber}
-                  </TableCell>
-                  <TableCell>
-                    <Typography fontWeight={600} fontSize={13}>{userName}</Typography>
-                    {user?.phoneNumber && (
-                      <Typography variant="caption" color="text.secondary" dir="ltr" display="block">
-                        {user.phoneNumber}
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell dir="ltr">{user?.nationalId || '—'}</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>{lic.course?.name || '—'}</TableCell>
-                  <TableCell>
-                    {lic.examResult?.score !== undefined ? (
-                      <Chip label={lic.examResult.score} color="success" size="small" sx={{ fontWeight: 700 }} />
-                    ) : '—'}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 12 }}>
-                    {lic.issueDate ? new Date(lic.issueDate).toLocaleDateString('fa-IR') : '—'}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      size="small"
-                      label={lic.status === 'available' ? 'معتبر / فعال' : 'لغو شده'}
-                      color={lic.status === 'available' ? 'success' : 'error'}
-                    />
-                  </TableCell>
-                  <TableCell align="left">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<EditIcon />}
-                      onClick={() => handleOpenEdit(lic)}
-                    >
-                      ویرایش
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Card>
+      {/* Licenses DataTable */}
+      <DataTable
+        columns={columns}
+        rows={licenses.data || []}
+        loading={licenses.loading}
+        error={licenses.error}
+        onReload={licenses.reload}
+        searchPlaceholder="جستجوی شماره گواهینامه، نام دانشجو..."
+        searchFilter={(row, term) => {
+          const lic = (row.licenseNumber || '').toLowerCase();
+          const user = row.user;
+          const name = `${user?.firstName || ''} ${user?.lastName || ''}`.toLowerCase();
+          const natId = (user?.nationalId || '').toLowerCase();
+          const crs = (row.course?.name || '').toLowerCase();
+          return lic.includes(term) || name.includes(term) || natId.includes(term) || crs.includes(term);
+        }}
+        emptyTitle="گواهینامه‌ای صادر نشده است"
+        emptyDescription="هنوز برای دوره‌ای گواهینامه صادر نگردیده است."
+      />
 
       {/* Edit License Modal */}
       {editingLicense && (
-        <Dialog open onClose={() => setEditingLicense(null)} maxWidth="sm" fullWidth dir="rtl">
-          <DialogTitle fontWeight={700}>
-            ویرایش مدرک {editingLicense.licenseNumber}
+        <Dialog open onClose={() => setEditingLicense(null)} maxWidth="xs" fullWidth dir="rtl">
+          <DialogTitle sx={{ pb: 1 }}>
+            <Typography variant="h6" fontWeight={700}>
+              ویرایش گواهینامه #{editingLicense.licenseNumber}
+            </Typography>
           </DialogTitle>
-          <DialogContent dividers>
-            <Stack spacing={2} mt={1}>
-              <TextField
-                label="لینک فایل دانلودی گواهینامه (PDF یا تصویر)"
-                value={certUrl}
-                onChange={(e) => setCertUrl(e.target.value)}
-                dir="ltr"
-                placeholder="https://.../certificate.pdf"
-                fullWidth
-              />
-              <FormControl fullWidth size="small">
-                <InputLabel>وضعیت گواهینامه</InputLabel>
-                <Select
-                  value={status}
-                  label="وضعیت گواهینامه"
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <MenuItem value="available">معتبر و قابل دریافت (Available)</MenuItem>
-                  <MenuItem value="revoked">لغو شده (Revoked)</MenuItem>
-                </Select>
-              </FormControl>
-            </Stack>
-          </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setEditingLicense(null)}>انصراف</Button>
-            <Button variant="contained" disabled={saving} onClick={handleSave}>
-              {saving ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
-            </Button>
-          </DialogActions>
+          <Box component="form" onSubmit={handleSave}>
+            <DialogContent dividers sx={{ p: 3 }}>
+              <Stack spacing={2.5}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>وضعیت مدرک</InputLabel>
+                  <Select
+                    value={status}
+                    label="وضعیت مدرک"
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <MenuItem value="available">معتبر و صادرشده</MenuItem>
+                    <MenuItem value="revoked">باطل شده</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  label="آدرس فایل گواهینامه (PDF یا تصویر)"
+                  dir="ltr"
+                  value={certUrl}
+                  onChange={(e) => setCertUrl(e.target.value)}
+                  placeholder="https://.../cert.pdf"
+                  helperText="لینک مستقیم جهت دانلود مدرک توسط دانشجو"
+                />
+              </Stack>
+            </DialogContent>
+            <DialogActions sx={{ p: 2 }}>
+              <Button onClick={() => setEditingLicense(null)} variant="outlined">
+                انصراف
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={saving}
+                startIcon={saving && <CircularProgress size={16} color="inherit" />}
+              >
+                {saving ? 'در حال ذخیره...' : 'ذخیره مدرک'}
+              </Button>
+            </DialogActions>
+          </Box>
         </Dialog>
       )}
     </Stack>

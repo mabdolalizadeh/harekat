@@ -1,13 +1,40 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import {
+  Box,
+  Stack,
+  Button,
+  TextField,
+  Typography,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  Checkbox,
+  ListItemText,
+  IconButton,
+  Tooltip,
+  Avatar,
+  CircularProgress,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { adminApi, isSuperAdmin } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, Field, FormError, RowActions, StatusDot, PageHeader, ListRowSkeleton } from './adminUi.jsx';
-import {
-  Box, Stack, Button, TextField, Typography, Grid, Alert, Paper, Divider,
-  Dialog, DialogTitle, DialogContent, DialogActions, Chip, FormControl, InputLabel,
-  Select, MenuItem, OutlinedInput, Checkbox, ListItemText
-} from '@mui/material';
-import { Add as AddIcon, SupervisorAccount as TAIcon } from '@mui/icons-material';
+import { useNotification } from '../../context/NotificationContext.jsx';
+import PageHeader from '../../components/admin/PageHeader.jsx';
+import DataTable from '../../components/admin/DataTable.jsx';
+import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
+import StatusChip from '../../components/admin/StatusChip.jsx';
 
 const EMPTY_TA = {
   username: '',
@@ -16,33 +43,44 @@ const EMPTY_TA = {
   email: '',
   phoneNumber: '',
   status: 'active',
-  courseIds: []
+  courseIds: [],
 };
 
 function TAModal({ open, initial, courses, onClose, onSaved }) {
+  const { showSuccess, showError } = useNotification();
   const [form, setForm] = useState(initial || EMPTY_TA);
-  const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
 
-  const submit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username?.trim()) return setError('نام کاربری الزامی است');
-    if (!initial?.id && !form.password) return setError('رمز عبور الزامی است');
+    if (!form.username?.trim()) return showError('نام کاربری الزامی است');
+    if (!initial?.id && !form.password) return showError('رمز عبور الزامی است');
 
     setSaving(true);
-    setError(null);
     try {
+      const payload = {
+        ...form,
+        username: form.username.trim(),
+        name: form.name.trim() || null,
+        email: form.email.trim() || null,
+        phoneNumber: form.phoneNumber.trim() || null,
+        courseIds: form.courseIds || [],
+      };
+
       if (initial?.id) {
-        await adminApi.updateTA(initial.id, form);
+        if (!payload.password) delete payload.password;
+        await adminApi.updateTA(initial.id, payload);
+        showSuccess('دستیار آموزشی با موفقیت ویرایش شد');
       } else {
-        await adminApi.createTA(form);
+        await adminApi.createTA(payload);
+        showSuccess('دستیار آموزشی جدید با موفقیت ایجاد شد');
       }
       onSaved();
       onClose();
     } catch (err) {
-      setError(err.message || 'خطا در ذخیره اطلاعات');
+      showError(err.message || 'خطا در ثبت اطلاعات دستیار آموزشی');
     } finally {
       setSaving(false);
     }
@@ -50,160 +88,259 @@ function TAModal({ open, initial, courses, onClose, onSaved }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth dir="rtl">
-      <DialogTitle fontWeight={700}>
-        {initial?.id ? 'ویرایش دستیار آموزشی' : 'تعریف دستیار آموزشی جدید'}
+      <DialogTitle sx={{ pb: 1 }}>
+        <Typography variant="h6" fontWeight={700}>
+          {initial?.id ? 'ویرایش دستیار آموزشی' : 'تعریف دستیار آموزشی جدید'}
+        </Typography>
       </DialogTitle>
-      <DialogContent dividers>
-        <Box component="form" id="ta-form" onSubmit={submit}>
-          <Stack spacing={2} mt={1}>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  label="نام و نام خانوادگی"
-                  value={form.name || ''}
-                  onChange={(e) => set('name', e.target.value)}
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  label="نام کاربری *"
-                  value={form.username || ''}
-                  onChange={(e) => set('username', e.target.value)}
-                  dir="ltr"
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  label={initial?.id ? 'رمز عبور جدید (اختیاری)' : 'رمز عبور *'}
-                  type="password"
-                  value={form.password || ''}
-                  onChange={(e) => set('password', e.target.value)}
-                  dir="ltr"
-                  placeholder="حداقل ۸ کاراکتر"
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  label="شماره موبایل"
-                  value={form.phoneNumber || ''}
-                  onChange={(e) => set('phoneNumber', e.target.value)}
-                  dir="ltr"
-                  placeholder="0912..."
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  label="ایمیل"
-                  value={form.email || ''}
-                  onChange={(e) => set('email', e.target.value)}
-                  dir="ltr"
-                  placeholder="user@example.com"
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>وضعیت</InputLabel>
-                  <Select
-                    value={form.status || 'active'}
-                    label="وضعیت"
-                    onChange={(e) => set('status', e.target.value)}
-                  >
-                    <MenuItem value="active">فعال</MenuItem>
-                    <MenuItem value="inactive">غیرفعال</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={12}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>دوره‌های اختصاص‌یافته</InputLabel>
-                  <Select
-                    multiple
-                    value={form.courseIds || []}
-                    onChange={(e) => set('courseIds', e.target.value)}
-                    input={<OutlinedInput label="دوره‌های اختصاص‌یافته" />}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((cId) => {
-                          const course = (courses || []).find((c) => c.id === cId);
-                          return <Chip key={cId} size="small" label={course?.name || cId} />;
-                        })}
-                      </Box>
-                    )}
-                  >
-                    {(courses || []).map((c) => (
-                      <MenuItem key={c.id} value={c.id}>
-                        <Checkbox checked={(form.courseIds || []).includes(c.id)} />
-                        <ListItemText primary={c.name} secondary={c.level ? `سطح: ${c.level}` : ''} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                  دستیار آموزشی فقط به دوره‌های انتخاب شده دسترسی خواهد داشت.
-                </Typography>
-              </Grid>
+
+      <Box component="form" id="ta-form" onSubmit={handleSubmit}>
+        <DialogContent dividers sx={{ p: 3 }}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="نام و نام خانوادگی"
+                value={form.name || ''}
+                onChange={(e) => set('name', e.target.value)}
+                placeholder="مثال: علی احمدی"
+              />
             </Grid>
-            <FormError error={error} />
-          </Stack>
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose}>انصراف</Button>
-        <Button type="submit" form="ta-form" variant="contained" disabled={saving}>
-          {saving ? 'در حال ذخیره...' : 'ذخیره دستیار'}
-        </Button>
-      </DialogActions>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="نام کاربری *"
+                value={form.username || ''}
+                onChange={(e) => set('username', e.target.value)}
+                dir="ltr"
+                placeholder="ta_user"
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label={initial?.id ? 'رمز عبور جدید (اختیاری)' : 'رمز عبور *'}
+                type="password"
+                value={form.password || ''}
+                onChange={(e) => set('password', e.target.value)}
+                dir="ltr"
+                placeholder="حداقل ۸ کاراکتر"
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="شماره موبایل"
+                value={form.phoneNumber || ''}
+                onChange={(e) => set('phoneNumber', e.target.value)}
+                dir="ltr"
+                placeholder="0912..."
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label="ایمیل"
+                type="email"
+                value={form.email || ''}
+                onChange={(e) => set('email', e.target.value)}
+                dir="ltr"
+                placeholder="ta@example.com"
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>وضعیت دسترسی</InputLabel>
+                <Select
+                  value={form.status || 'active'}
+                  label="وضعیت دسترسی"
+                  onChange={(e) => set('status', e.target.value)}
+                >
+                  <MenuItem value="active">فعال</MenuItem>
+                  <MenuItem value="inactive">غیرفعال / مسدود</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid size={12}>
+              <FormControl fullWidth size="small">
+                <InputLabel>دوره‌های اختصاص‌یافته به این TA</InputLabel>
+                <Select
+                  multiple
+                  value={form.courseIds || []}
+                  onChange={(e) => set('courseIds', e.target.value)}
+                  input={<OutlinedInput label="دوره‌های اختصاص‌یافته به این TA" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((val) => {
+                        const crs = courses.find((c) => c.id === val);
+                        return <Chip key={val} label={crs?.name || val} size="small" />;
+                      })}
+                    </Box>
+                  )}
+                >
+                  {courses.map((c) => (
+                    <MenuItem key={c.id} value={c.id}>
+                      <Checkbox checked={(form.courseIds || []).includes(c.id)} />
+                      <ListItemText primary={c.name} secondary={c.level || 'عمومی'} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                دستیار آموزشی فقط به تیکت‌ها، جلسات و آزمون‌های دوره‌های انتخاب‌شده فوق دسترسی خواهد داشت.
+              </Typography>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button onClick={onClose} variant="outlined">
+            انصراف
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={saving}
+            startIcon={saving && <CircularProgress size={16} color="inherit" />}
+          >
+            {saving ? 'در حال ذخیره...' : 'ذخیره دستیار'}
+          </Button>
+        </DialogActions>
+      </Box>
     </Dialog>
   );
 }
 
 export default function AdminTAs() {
+  const { showSuccess, showError } = useNotification();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTA, setEditingTA] = useState(null);
-  const [notice, setNotice] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const tas = useApi(() => adminApi.listTAs());
   const courses = useApi(() => adminApi.listCourses());
 
-  if (!isSuperAdmin()) {
-    return <Alert severity="warning">دسترسی به این بخش فقط برای مدیر ارشد مجاز است.</Alert>;
-  }
+  const allCourses = courses.data || [];
 
-  const handleEdit = (ta) => {
-    const courseIds = (ta.taAssignedCourses || []).map((c) => c.id);
-    setEditingTA({
-      id: ta.id,
-      username: ta.username,
-      name: ta.name || '',
-      email: ta.email || '',
-      phoneNumber: ta.phoneNumber || '',
-      status: ta.status || 'active',
-      courseIds
-    });
-    setModalOpen(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('آیا از حذف این دستیار آموزشی اطمینان دارید؟')) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await adminApi.deleteTA(id);
-      setNotice('دستیار آموزشی با موفقیت حذف شد');
+      await adminApi.deleteTA(deleteTarget.id);
+      showSuccess('دستیار آموزشی با موفقیت حذف شد');
+      setDeleteTarget(null);
       tas.reload();
     } catch (err) {
-      setNotice(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در حذف دستیار آموزشی');
+    } finally {
+      setDeleting(false);
     }
   };
 
+  const columns = useMemo(() => [
+    {
+      id: 'name',
+      label: 'دستیار آموزشی (TA)',
+      render: (row) => (
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar sx={{ width: 34, height: 34, bgcolor: 'secondary.light', fontWeight: 700 }}>
+            {row.name?.[0] || row.username?.[0]?.toUpperCase()}
+          </Avatar>
+          <Box>
+            <Typography fontWeight={700} fontSize="0.84rem">
+              {row.name || 'بدون نام'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" dir="ltr" display="block">
+              @{row.username}
+            </Typography>
+          </Box>
+        </Stack>
+      ),
+    },
+    {
+      id: 'phoneNumber',
+      label: 'شماره تماس و ایمیل',
+      render: (row) => (
+        <Box>
+          <Typography dir="ltr" sx={{ fontFamily: 'monospace', fontSize: '0.84rem' }}>
+            {row.phoneNumber || '—'}
+          </Typography>
+          {row.email && (
+            <Typography variant="caption" color="text.secondary" dir="ltr" display="block">
+              {row.email}
+            </Typography>
+          )}
+        </Box>
+      ),
+    },
+    {
+      id: 'courses',
+      label: 'دوره‌های تحت نظارت',
+      render: (row) => {
+        const list = row.courses || [];
+        return (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: 260 }}>
+            {list.length > 0 ? (
+              list.map((c) => <Chip key={c.id} label={c.name} size="small" variant="outlined" />)
+            ) : (
+              <Typography variant="caption" color="text.disabled">بدون دوره</Typography>
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      id: 'status',
+      label: 'وضعیت',
+      render: (row) => <StatusChip status={row.status === 'active'} label={row.status === 'active' ? 'فعال' : 'غیرفعال'} />,
+    },
+    {
+      id: 'actions',
+      label: 'عملیات',
+      sortable: false,
+      align: 'left',
+      render: (row) => (
+        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+          <Tooltip title="ویرایش دستیار">
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => {
+                setEditingTA(row);
+                setModalOpen(true);
+              }}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="حذف دستیار">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => setDeleteTarget(row)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+  ], []);
+
+  if (!isSuperAdmin()) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography color="warning.main">مدیریت دستیاران آموزشی فقط برای مدیر ارشد مجاز است.</Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3.5}>
       <PageHeader
         title="دستیاران آموزشی (TAs)"
-        subtitle="مدیریت دستیاران و انتساب دوره‌های مجاز برای نظارت و تدریس"
+        subtitle="مدیریت حساب‌های کاربری دستیاران آموزشی و تخصیص دسترسی به دوره‌ها جهت نظارت بر تیکت‌ها و آزمون‌ها"
         action={
           <Button
             variant="contained"
@@ -218,107 +355,49 @@ export default function AdminTAs() {
         }
       />
 
-      {notice && <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert>}
+      {/* TAs DataTable */}
+      <DataTable
+        columns={columns}
+        rows={tas.data || []}
+        loading={tas.loading}
+        error={tas.error}
+        onReload={tas.reload}
+        searchPlaceholder="جستجوی نام، نام کاربری یا شماره تماس..."
+        searchFilter={(row, term) => {
+          const name = (row.name || '').toLowerCase();
+          const username = (row.username || '').toLowerCase();
+          const phone = (row.phoneNumber || '').toLowerCase();
+          return name.includes(term) || username.includes(term) || phone.includes(term);
+        }}
+        emptyTitle="دستیار آموزشی یافت نشد"
+        emptyDescription="هنوز هیچ دستیار آموزشی در سامانه تعریف نشده است."
+      />
 
-      {tas.loading && <ListRowSkeleton count={3} />}
-      {tas.error && (
-        <Alert severity="error">
-          خطا: {tas.error} <Button size="small" onClick={tas.reload}>تلاش مجدد</Button>
-        </Alert>
-      )}
-
-      {!tas.loading && tas.isEmpty && (
-        <Alert severity="info">هیچ دستیار آموزشی ثبت نشده است.</Alert>
-      )}
-
-      <Grid container spacing={1.5}>
-        {(tas.data || []).map((ta) => (
-          <Grid key={ta.id} size={12}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: 3,
-                flexWrap: { xs: 'wrap', md: 'nowrap' },
-                gap: 2
-              }}
-            >
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ minWidth: 0 }}>
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: '50%',
-                    bgcolor: 'primary.light',
-                    color: 'primary.dark',
-                    display: 'grid',
-                    placeItems: 'center',
-                    flexShrink: 0
-                  }}
-                >
-                  <TAIcon />
-                </Box>
-                <Box sx={{ minWidth: 0 }}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography fontWeight={700} fontSize={15} noWrap>
-                      {ta.name || ta.username}
-                    </Typography>
-                    <Chip
-                      size="small"
-                      label={ta.status === 'active' ? 'فعال' : 'غیرفعال'}
-                      color={ta.status === 'active' ? 'success' : 'default'}
-                      sx={{ height: 20, fontSize: 11 }}
-                    />
-                  </Stack>
-                  <Typography variant="caption" color="text.secondary" dir="ltr" sx={{ display: 'block', mt: 0.25 }}>
-                    @{ta.username} {ta.phoneNumber ? `| ${ta.phoneNumber}` : ''} {ta.email ? `| ${ta.email}` : ''}
-                  </Typography>
-                </Box>
-              </Stack>
-
-              <Box sx={{ flex: 1, px: { md: 2 } }}>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                  دوره‌های مجاز ({(ta.taAssignedCourses || []).length}):
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {(ta.taAssignedCourses || []).length > 0 ? (
-                    ta.taAssignedCourses.map((c) => (
-                      <Chip key={c.id} label={c.name} size="small" variant="outlined" />
-                    ))
-                  ) : (
-                    <Typography variant="caption" color="text.secondary">
-                      دوره‌ای اختصاص نیافته
-                    </Typography>
-                  )}
-                </Box>
-              </Box>
-
-              <RowActions
-                onEdit={() => handleEdit(ta)}
-                onDelete={() => handleDelete(ta.id)}
-              />
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
+      {/* Create / Edit Modal */}
       {modalOpen && (
         <TAModal
           open={modalOpen}
           initial={editingTA}
-          courses={courses.data || []}
-          onClose={() => setModalOpen(false)}
-          onSaved={() => {
-            tas.reload();
-            setNotice('اطلاعات دستیار آموزشی با موفقیت بروزرسانی شد');
+          courses={allCourses}
+          onClose={() => {
+            setModalOpen(false);
+            setEditingTA(null);
           }}
+          onSaved={() => tas.reload()}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="حذف حساب دستیار آموزشی"
+        message={`آیا مطمئن هستید که می‌خواهید دستیار آموزشی «${deleteTarget?.name || deleteTarget?.username}» را حذف کنید؟`}
+        confirmText="حذف دستیار"
+        cancelText="انصراف"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </Stack>
   );
 }

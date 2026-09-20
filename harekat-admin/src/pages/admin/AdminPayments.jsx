@@ -1,141 +1,224 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import {
+  Box,
+  Stack,
+  Typography,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  Avatar,
+} from '@mui/material';
+import {
+  CheckCircle as VerifyIcon,
+  Payment as PayIcon,
+} from '@mui/icons-material';
 import { adminApi, isSuperAdmin } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
 import { formatToman } from '../../utils/format.js';
-import { Card, PageHeader, ListRowSkeleton } from './adminUi.jsx';
-import {
-  Box, Stack, Typography, Grid, Alert, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, Button, Dialog, DialogTitle,
-  DialogContent, DialogActions, Select, MenuItem, FormControl, InputLabel, Tooltip
-} from '@mui/material';
-import { CheckCircle as VerifyIcon, Payment as PayIcon } from '@mui/icons-material';
-
-const STATUS_MAP = {
-  pending: { label: 'در انتظار پرداخت', color: 'warning' },
-  paid: { label: 'پرداخت موفق', color: 'success' },
-  failed: { label: 'ناموفق', color: 'error' },
-  cancelled: { label: 'لغو شده', color: 'default' },
-  refunded: { label: 'مسترد شده', color: 'info' }
-};
+import { useNotification } from '../../context/NotificationContext.jsx';
+import PageHeader from '../../components/admin/PageHeader.jsx';
+import DataTable from '../../components/admin/DataTable.jsx';
+import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
+import StatusChip from '../../components/admin/StatusChip.jsx';
 
 export default function AdminPayments() {
-  const [notice, setNotice] = useState(null);
-  const [verifyingId, setVerifyingId] = useState(null);
+  const { showSuccess, showError } = useNotification();
+  const [verifyingTarget, setVerifyingTarget] = useState(null);
+  const [verifying, setVerifying] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const payments = useApi(() => adminApi.listPayments());
 
-  if (!isSuperAdmin()) {
-    return <Alert severity="warning">دسترسی به بخش پرداخت‌ها فقط برای مدیر ارشد مجاز است.</Alert>;
-  }
-
-  const handleVerify = async (paymentId) => {
-    if (!window.confirm('آیا از تایید این تراکنش و اعطای خودکار دسترسی دوره‌ها به کاربر اطمینان دارید؟')) return;
-    setVerifyingId(paymentId);
+  const handleConfirmVerify = async () => {
+    if (!verifyingTarget) return;
+    setVerifying(true);
     try {
-      await adminApi.verifyPayment(paymentId);
-      setNotice('پرداخت با موفقیت تایید و دسترسی‌های دوره فعال شدند');
+      await adminApi.verifyPayment(verifyingTarget.id);
+      showSuccess('پرداخت با موفقیت تایید شد و دسترسی‌های دوره برای کاربر فعال گردیدند');
+      setVerifyingTarget(null);
       payments.reload();
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در تایید تراکنش');
     } finally {
-      setVerifyingId(null);
+      setVerifying(false);
     }
   };
 
+  const filteredPayments = useMemo(() => {
+    const list = payments.data || [];
+    if (statusFilter === 'all') return list;
+    return list.filter((p) => (p.status || p.type) === statusFilter);
+  }, [payments.data, statusFilter]);
+
+  const columns = useMemo(() => [
+    {
+      id: 'transactionId',
+      label: 'شناسه تراکنش / درگاه',
+      render: (row) => (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Avatar sx={{ width: 32, height: 32, bgcolor: 'success.light', borderRadius: 1.5 }}>
+            <PayIcon sx={{ fontSize: 16 }} />
+          </Avatar>
+          <Box>
+            <Typography dir="ltr" sx={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.8rem' }}>
+              {row.transactionId || row.id.slice(0, 10)}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" display="block">
+              درگاه: {row.gateway || 'mock'}
+            </Typography>
+          </Box>
+        </Stack>
+      ),
+    },
+    {
+      id: 'user',
+      label: 'کاربر / دانشجو',
+      render: (row) => {
+        const user = row.user;
+        const name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.phoneNumber : '—';
+        return (
+          <Box>
+            <Typography fontWeight={700} fontSize="0.84rem">
+              {name}
+            </Typography>
+            {user?.phoneNumber && (
+              <Typography variant="caption" color="text.secondary" dir="ltr" display="block">
+                {user.phoneNumber}
+              </Typography>
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      id: 'orderId',
+      label: 'سفارش مربوطه',
+      render: (row) => (
+        row.orderId ? (
+          <Chip
+            label={`#${row.orderId.slice(0, 8)}`}
+            size="small"
+            variant="outlined"
+            sx={{ fontFamily: 'monospace', fontSize: '0.7rem' }}
+          />
+        ) : (
+          <Typography variant="caption" color="text.disabled">—</Typography>
+        )
+      ),
+    },
+    {
+      id: 'amount',
+      label: 'مبلغ پرداختی',
+      render: (row) => (
+        <Typography fontWeight={700} fontSize="0.84rem">
+          {formatToman(row.amount)}
+        </Typography>
+      ),
+    },
+    {
+      id: 'status',
+      label: 'وضعیت',
+      render: (row) => <StatusChip status={row.status || row.type} />,
+    },
+    {
+      id: 'createdAt',
+      label: 'تاریخ تراکنش',
+      render: (row) => (
+        <Typography variant="caption" color="text.secondary">
+          {row.createdAt ? new Date(row.createdAt).toLocaleDateString('fa-IR') : '—'}
+        </Typography>
+      ),
+    },
+    {
+      id: 'actions',
+      label: 'عملیات',
+      sortable: false,
+      align: 'left',
+      render: (row) => {
+        const isPaid = (row.status === 'paid' || row.type === 'paid');
+        return isPaid ? (
+          <Chip size="small" label="تایید شده" color="success" variant="outlined" />
+        ) : (
+          <Button
+            size="small"
+            variant="contained"
+            color="success"
+            startIcon={<VerifyIcon fontSize="small" />}
+            onClick={() => setVerifyingTarget(row)}
+            sx={{ borderRadius: 2 }}
+          >
+            تایید تراکنش
+          </Button>
+        );
+      },
+    },
+  ], []);
+
+  if (!isSuperAdmin()) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography color="warning.main">دسترسی به بخش پرداخت‌ها فقط برای مدیر ارشد مجاز است.</Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3.5}>
       <PageHeader
         title="پرداخت‌ها و تراکنش‌ها"
-        subtitle="سوابق تراکنش‌های درگاه، وضعیت پرداخت‌ها و اعطای خودکار دسترسی پس از تایید"
+        subtitle="سوابق تراکنش‌های پرداخت، وضعیت درگاه و اعطای خودکار دسترسی دوره‌ها پس از تایید"
       />
 
-      {notice && <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert>}
+      {/* Payments DataTable */}
+      <DataTable
+        columns={columns}
+        rows={filteredPayments}
+        loading={payments.loading}
+        error={payments.error}
+        onReload={payments.reload}
+        searchPlaceholder="جستجوی شناسه تراکنش، نام یا شماره تماس..."
+        searchFilter={(row, term) => {
+          const user = row.user;
+          const name = `${user?.firstName || ''} ${user?.lastName || ''}`.toLowerCase();
+          const phone = (user?.phoneNumber || '').toLowerCase();
+          const txId = (row.transactionId || '').toLowerCase();
+          return name.includes(term) || phone.includes(term) || txId.includes(term);
+        }}
+        filterSlot={
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>فیلتر وضعیت</InputLabel>
+            <Select
+              value={statusFilter}
+              label="فیلتر وضعیت"
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <MenuItem value="all">همه وضعیت‌ها</MenuItem>
+              <MenuItem value="paid">پرداخت موفق</MenuItem>
+              <MenuItem value="pending">در انتظار پرداخت</MenuItem>
+              <MenuItem value="failed">ناموفق</MenuItem>
+              <MenuItem value="refunded">مسترد شده</MenuItem>
+            </Select>
+          </FormControl>
+        }
+        emptyTitle="تراکنشی یافت نشد"
+        emptyDescription="هیچ پرداختی مطابق با فیلترهای انتخابی یافت نشد."
+      />
 
-      <Card>
-        {payments.loading && <ListRowSkeleton count={5} />}
-        {payments.error && (
-          <Alert severity="error">
-            خطا: {payments.error} <Button size="small" onClick={payments.reload}>تلاش مجدد</Button>
-          </Alert>
-        )}
-
-        {!payments.loading && payments.isEmpty && (
-          <Alert severity="info">هیچ تراکنشی یافت نشد.</Alert>
-        )}
-
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>شناسه تراکنش</TableCell>
-              <TableCell>کاربر / دانشجو</TableCell>
-              <TableCell>سفارش مربوطه</TableCell>
-              <TableCell>مبلغ</TableCell>
-              <TableCell>درگاه</TableCell>
-              <TableCell>وضعیت</TableCell>
-              <TableCell>تاریخ</TableCell>
-              <TableCell align="left">عملیات</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {(payments.data || []).map((p) => {
-              const st = STATUS_MAP[p.status || p.type] || { label: p.status || p.type, color: 'default' };
-              const user = p.user;
-              const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.phoneNumber : '—';
-              const isPaid = (p.status === 'paid' || p.type === 'paid');
-
-              return (
-                <TableRow key={p.id}>
-                  <TableCell dir="ltr" sx={{ fontSize: 11, fontWeight: 600 }}>
-                    {p.transactionId || p.id.slice(0, 10)}
-                  </TableCell>
-                  <TableCell>
-                    <Typography fontWeight={600} fontSize={13}>{userName}</Typography>
-                    {user?.phoneNumber && (
-                      <Typography variant="caption" color="text.secondary" dir="ltr" display="block">
-                        {user.phoneNumber}
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell dir="ltr" sx={{ fontSize: 12 }}>
-                    {p.orderId ? `#${p.orderId.slice(0, 8)}` : '—'}
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>
-                    {p.amount ? formatToman(p.amount) : (p.order ? formatToman(p.order.finalAmount) : '—')}
-                  </TableCell>
-                  <TableCell dir="ltr">
-                    <Chip size="small" label={p.gateway || 'mock'} variant="outlined" />
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={st.label} color={st.color} size="small" sx={{ fontWeight: 600 }} />
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 12 }}>
-                    {p.createdAt ? new Date(p.createdAt).toLocaleDateString('fa-IR') : '—'}
-                  </TableCell>
-                  <TableCell align="left">
-                    {!isPaid && (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="success"
-                        startIcon={<VerifyIcon />}
-                        disabled={verifyingId === p.id}
-                        onClick={() => handleVerify(p.id)}
-                      >
-                        {verifyingId === p.id ? '...' : 'تایید پرداخت'}
-                      </Button>
-                    )}
-                    {isPaid && (
-                      <Typography variant="caption" color="success.main" fontWeight={700}>
-                        تایید شده
-                      </Typography>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Card>
+      {/* Verify Confirmation Modal */}
+      <ConfirmDialog
+        open={Boolean(verifyingTarget)}
+        title="تایید تراکنش و اعطای دسترسی"
+        message={`آیا از تایید این تراکنش و فعال‌سازی خودکار دوره‌ها / اشتراک‌ها برای کاربر «${verifyingTarget?.user ? `${verifyingTarget.user.firstName || ''} ${verifyingTarget.user.lastName || ''}`.trim() || verifyingTarget.user.phoneNumber : ''}» اطمینان دارید؟`}
+        confirmText="تایید پرداخت و فعال‌سازی"
+        cancelText="انصراف"
+        severity="info"
+        loading={verifying}
+        onConfirm={handleConfirmVerify}
+        onClose={() => setVerifyingTarget(null)}
+      />
     </Stack>
   );
 }

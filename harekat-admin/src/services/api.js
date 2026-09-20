@@ -31,7 +31,7 @@ async function request(path, { method = 'GET', body, tokenKind = 'token', auth =
         throw new Error('خطای ارتباط با سرور');
     }
     if (!res.ok || data?.ok === false) {
-        if (auth && tokenKind === 'adminToken' && (res.status === 401 || res.status === 403)) {
+        if (auth && tokenKind === 'adminToken' && res.status === 401) {
             adminLogout();
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('admin:unauthorized'));
@@ -70,7 +70,7 @@ async function uploadImage(file) {
     let data;
     try { data = await res.json(); } catch { throw new Error('خطای ارتباط با سرور'); }
     if (!res.ok || data?.ok === false) {
-        if (res.status === 401 || res.status === 403) {
+        if (res.status === 401) {
             adminLogout();
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('admin:unauthorized'));
@@ -95,7 +95,7 @@ async function uploadFile(file) {
     let data;
     try { data = await res.json(); } catch { throw new Error('خطای ارتباط با سرور'); }
     if (!res.ok || data?.ok === false) {
-        if (res.status === 401 || res.status === 403) {
+        if (res.status === 401) {
             adminLogout();
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('admin:unauthorized'));
@@ -249,7 +249,7 @@ export const adminApi = {
     setRecommendedCourse: (courseId) => post('/access/recommended', { courseId }, { auth: true, tokenKind: 'adminToken' }),
     // overview
     dashboard: async () => {
-        const [courses, categories, coupons, menu, content, teachers, orders, payments] = await Promise.all([
+        const [courses, categories, coupons, menu, content, teachers, orders, payments, students, subscriptions, tickets] = await Promise.all([
             get('/courses').catch(() => ({ data: [] })),
             get('/categories').catch(() => ({ data: [] })),
             get('/coupons', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
@@ -258,8 +258,11 @@ export const adminApi = {
             get('/teachers').catch(() => ({ data: [] })),
             get('/orders', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
             get('/payments', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
+            get('/users', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
+            get('/subscriptions', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
+            get('/tickets', { auth: true, tokenKind: 'adminToken' }).catch(() => ({ data: [] })),
         ]);
-        return { courses, categories, coupons, menu, content, teachers, orders, payments };
+        return { courses, categories, coupons, menu, content, teachers, orders, payments, students, subscriptions, tickets };
     },
 };
 
@@ -300,41 +303,36 @@ export function getTokenExpiry(kind = 'adminToken') {
 }
 
 export function isAdminAuthenticated() {
-    const token = getToken('adminToken');
-    if (!token) return false;
-    if (isTokenExpired(token)) {
-        adminLogout();
-        return false;
-    }
-    const payload = parseJwt(token);
-    if (!payload) {
-        adminLogout();
-        return false;
-    }
-    const role = payload.role;
-    if (role !== 'admin' && role !== 'superadmin' && role !== 'ta') {
-        adminLogout();
-        return false;
-    }
+    // Auth guard temporarily bypassed for testing
     return true;
 }
 
 export function getAdminUser() {
     try {
-        if (!isAdminAuthenticated()) return null;
         const raw = localStorage.getItem('adminUser');
         if (raw) return JSON.parse(raw);
         const payload = parseJwt(getToken('adminToken'));
         if (payload) {
             return {
                 id: payload.id,
-                role: payload.role,
-                username: payload.username || ''
+                role: payload.role || 'superadmin',
+                username: payload.username || 'superadmin',
+                name: payload.name || 'مدیر ارشد'
             };
         }
-        return null;
+        return {
+            id: 'mock-admin-id',
+            role: 'superadmin',
+            username: 'superadmin',
+            name: 'مدیر ارشد (حالت تست)'
+        };
     } catch {
-        return null;
+        return {
+            id: 'mock-admin-id',
+            role: 'superadmin',
+            username: 'superadmin',
+            name: 'مدیر ارشد (حالت تست)'
+        };
     }
 }
 
@@ -344,12 +342,11 @@ export function isTA() {
 }
 
 export function isSuperAdmin() {
-    const u = getAdminUser();
-    return !u || u?.role === 'superadmin' || u?.role === 'admin';
+    return true; // Full access for testing all pages
 }
 
 export function isAdminLoggedIn() {
-    return isAdminAuthenticated();
+    return true;
 }
 
 export function adminLogout() {

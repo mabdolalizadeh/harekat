@@ -1,33 +1,90 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { adminApi, isTA } from '../../services/api.js';
-import { useApi } from '../../hooks/useApi.js';
-import { formatToman } from '../../utils/format.js';
-import { Card, Field, FormError, RowActions, StatusDot, PageHeader, ListRowSkeleton, CategoryListSkeleton } from './adminUi.jsx';
-import ImagePicker from '../../components/ImagePicker.jsx';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Box, Stack, Tabs, Tab, Button, TextField, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Chip, Grid, Alert, Divider, FormControl, InputLabel, Checkbox, FormControlLabel, Paper,
-  Table, TableHead, TableRow, TableCell, TableBody, OutlinedInput, ListItemText, IconButton, Tooltip
+  Box,
+  Stack,
+  Tabs,
+  Tab,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Chip,
+  Grid,
+  FormControl,
+  InputLabel,
+  Checkbox,
+  FormControlLabel,
+  Paper,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+  Avatar,
+  OutlinedInput,
+  ListItemText,
 } from '@mui/material';
 import {
   Add as AddIcon,
   VideoLibrary as VideoLibraryIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  School as CourseIcon,
+  Bolt as CapsuleIcon,
+  Workspaces as PackageIcon,
+  Category as CategoryIcon,
+  Link as LinkIcon,
 } from '@mui/icons-material';
+import { adminApi } from '../../services/api.js';
+import { useApi } from '../../hooks/useApi.js';
+import { formatToman } from '../../utils/format.js';
+import { useNotification } from '../../context/NotificationContext.jsx';
+import PageHeader from '../../components/admin/PageHeader.jsx';
+import DataTable from '../../components/admin/DataTable.jsx';
+import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
+import StatusChip from '../../components/admin/StatusChip.jsx';
+import EmptyState from '../../components/admin/EmptyState.jsx';
+import ImagePicker from '../../components/ImagePicker.jsx';
 
 const EMPTY_PRODUCT = {
-  name: '', price: '', salePrice: '', image: '', level: 'مقدماتی',
-  duration: '', typeOfAttendence: 'آنلاین', statusOfRegistration: 'در حال ثبت نام',
-  description: '', videoUrl: '', longDescription: '', teacherId: '', teacherIds: [],
-  includedCourseIds: [], isActive: true, sortOrder: 0, categoryIds: [], kind: 'regular',
+  name: '',
+  price: '',
+  salePrice: '',
+  image: '',
+  level: 'مقدماتی',
+  duration: '',
+  typeOfAttendence: 'آنلاین',
+  statusOfRegistration: 'در حال ثبت نام',
+  description: '',
+  videoUrl: '',
+  longDescription: '',
+  teacherId: '',
+  teacherIds: [],
+  includedCourseIds: [],
+  isActive: true,
+  sortOrder: 0,
+  categoryIds: [],
+  kind: 'regular',
 };
 
+// Sessions Management Dialog
 function SessionsDialog({ open, course, onClose }) {
+  const { showSuccess, showError } = useNotification();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingSession, setEditingSession] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
+
   const [sessionForm, setSessionForm] = useState({
     sessionNumber: 1,
     title: '',
@@ -38,35 +95,47 @@ function SessionsDialog({ open, course, onClose }) {
     groupLink: '',
     porslineLink: '',
     isFinal: false,
-    sortOrder: 0
+    sortOrder: 0,
   });
-  const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState(null);
 
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     if (!course?.id) return;
     setLoading(true);
     try {
       const res = await adminApi.listSessions(course.id);
       setSessions(res.data || []);
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در بارگذاری جلسات');
     } finally {
       setLoading(false);
     }
-  };
+  }, [course, showError]);
 
   useEffect(() => {
-    if (open && course) {
-      fetchSessions();
-      setEditingSession(null);
-      setNotice(null);
+    let ignore = false;
+    if (open && course?.id) {
+      adminApi.listSessions(course.id)
+        .then((res) => {
+          if (!ignore) {
+            setSessions(res.data || []);
+            setEditingSession(null);
+          }
+        })
+        .catch((err) => {
+          if (!ignore) showError(err.message || 'خطا در بارگذاری جلسات');
+        })
+        .finally(() => {
+          if (!ignore) setLoading(false);
+        });
     }
-  }, [open, course]);
+    return () => {
+      ignore = true;
+    };
+  }, [open, course?.id, showError]);
 
   const handleOpenCreate = () => {
     setSessionForm({
-      sessionNumber: (sessions.length + 1),
+      sessionNumber: sessions.length + 1,
       title: `جلسه ${sessions.length + 1}`,
       description: '',
       sessionLink: '',
@@ -75,7 +144,7 @@ function SessionsDialog({ open, course, onClose }) {
       groupLink: '',
       porslineLink: '',
       isFinal: false,
-      sortOrder: sessions.length + 1
+      sortOrder: sessions.length + 1,
     });
     setEditingSession('new');
   };
@@ -91,825 +160,997 @@ function SessionsDialog({ open, course, onClose }) {
       groupLink: s.groupLink || '',
       porslineLink: s.porslineLink || '',
       isFinal: !!s.isFinal,
-      sortOrder: s.sortOrder || 0
+      sortOrder: s.sortOrder || 0,
     });
     setEditingSession(s);
   };
 
   const handleSaveSession = async (e) => {
     e.preventDefault();
-    if (!sessionForm.title?.trim()) return alert('عنوان جلسه الزامی است');
+    if (!sessionForm.title.trim()) {
+      showError('عنوان جلسه الزامی است');
+      return;
+    }
     setSaving(true);
     try {
-      if (editingSession && editingSession !== 'new') {
-        await adminApi.updateSession(editingSession.id, sessionForm);
-      } else {
+      if (editingSession === 'new') {
         await adminApi.createSession(course.id, sessionForm);
+        showSuccess('جلسه جدید با موفقیت اضافه شد');
+      } else {
+        await adminApi.updateSession(editingSession.id, sessionForm);
+        showSuccess('جلسه با موفقیت ویرایش شد');
       }
       setEditingSession(null);
-      setNotice('جلسه با موفقیت ذخیره شد');
-      await fetchSessions();
+      fetchSessions();
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در ذخیره جلسه');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteSession = async (id) => {
-    if (!window.confirm('آیا از حذف این جلسه اطمینان دارید؟')) return;
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await adminApi.deleteSession(id);
+      await adminApi.deleteSession(deleteTarget.id);
+      showSuccess('جلسه با موفقیت حذف شد');
+      setDeleteTarget(null);
       fetchSessions();
-      setNotice('جلسه با موفقیت حذف شد');
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در حذف جلسه');
+    } finally {
+      setDeleting(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth dir="rtl">
-      <DialogTitle fontWeight={700}>
-        مدیریت جلسات دوره — {course?.name}
-      </DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={2.5}>
-          {notice && <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert>}
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth dir="rtl">
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <VideoLibraryIcon color="primary" />
+            <Box>
+              <Typography variant="h6" fontWeight={700}>
+                جلسات آموزشی دوره: {course?.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                مجموع {sessions.length} جلسه تعریف‌شده
+              </Typography>
+            </Box>
+          </Stack>
 
           {!editingSession && (
-            <Box>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleOpenCreate}
-                size="small"
-              >
-                افزودن جلسه جدید
-              </Button>
-            </Box>
+            <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={handleOpenCreate}>
+              جلسه جدید
+            </Button>
           )}
+        </DialogTitle>
 
-          {editingSession && (
-            <Paper elevation={0} sx={{ p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
-              <Typography fontWeight={700} fontSize={14} mb={2}>
-                {editingSession === 'new' ? 'جلسه جدید' : 'ویرایش جلسه'}
+        <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
+          {editingSession ? (
+            <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'action.hover', borderRadius: 2.5 }}>
+              <Typography fontWeight={700} fontSize="0.95rem" mb={2}>
+                {editingSession === 'new' ? 'افزودن جلسه جدید' : `ویرایش جلسه: ${sessionForm.title}`}
               </Typography>
+
               <Box component="form" onSubmit={handleSaveSession}>
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, sm: 3 }}>
                     <TextField
-                      label="شماره جلسه *"
+                      label="شماره جلسه"
                       type="number"
-                      size="small"
                       value={sessionForm.sessionNumber}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, sessionNumber: Number(e.target.value) }))}
+                      onChange={(e) => setSessionForm({ ...sessionForm, sessionNumber: Number(e.target.value) })}
                       dir="ltr"
-                      fullWidth
                     />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 9 }}>
                     <TextField
                       label="عنوان جلسه *"
-                      size="small"
                       value={sessionForm.title}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, title: e.target.value }))}
-                      fullWidth
+                      onChange={(e) => setSessionForm({ ...sessionForm, title: e.target.value })}
                     />
                   </Grid>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="لینک ویدیو (آپارات / یوتیوب / مستقیم)"
+                      dir="ltr"
+                      value={sessionForm.videoLink}
+                      onChange={(e) => setSessionForm({ ...sessionForm, videoLink: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="لینک گوگل درایو فایل‌ها"
+                      dir="ltr"
+                      value={sessionForm.googleDriveLink}
+                      onChange={(e) => setSessionForm({ ...sessionForm, googleDriveLink: e.target.value })}
+                      placeholder="https://drive.google.com/..."
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="لینک گروه پرسش و پاسخ"
+                      dir="ltr"
+                      value={sessionForm.groupLink}
+                      onChange={(e) => setSessionForm({ ...sessionForm, groupLink: e.target.value })}
+                      placeholder="https://t.me/..."
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="لینک پرس‌لاین (کوییز / نظرسنجی)"
+                      dir="ltr"
+                      value={sessionForm.porslineLink}
+                      onChange={(e) => setSessionForm({ ...sessionForm, porslineLink: e.target.value })}
+                      placeholder="https://survey.porsline.ir/..."
+                    />
+                  </Grid>
+
                   <Grid size={12}>
                     <TextField
                       label="توضیحات جلسه"
-                      size="small"
                       multiline
                       rows={2}
                       value={sessionForm.description}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, description: e.target.value }))}
-                      fullWidth
+                      onChange={(e) => setSessionForm({ ...sessionForm, description: e.target.value })}
                     />
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      label="لینک ورود به کلاس آنلاین (Session Link)"
-                      size="small"
-                      value={sessionForm.sessionLink}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, sessionLink: e.target.value }))}
-                      dir="ltr"
-                      placeholder="https://skyroom.online/..."
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      label="لینک استریم / دانلود ویدیو (Video Link)"
-                      size="small"
-                      value={sessionForm.videoLink}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, videoLink: e.target.value }))}
-                      dir="ltr"
-                      placeholder="https://.../lesson.mp4"
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      label="لینک ویدیو گوگل درایو (Google Drive Link)"
-                      size="small"
-                      value={sessionForm.googleDriveLink}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, googleDriveLink: e.target.value }))}
-                      dir="ltr"
-                      placeholder="https://drive.google.com/..."
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      label="لینک گروه پشتیبانی/ارتباطی (Group Link)"
-                      size="small"
-                      value={sessionForm.groupLink}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, groupLink: e.target.value }))}
-                      dir="ltr"
-                      placeholder="https://t.me/... یا ایتا"
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid size={12}>
-                    <TextField
-                      label="لینک فرم نظرسنجی پرس‌لاین (Porsline Link)"
-                      size="small"
-                      value={sessionForm.porslineLink}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, porslineLink: e.target.value }))}
-                      dir="ltr"
-                      placeholder="https://survey.porsline.ir/..."
-                      fullWidth
-                      helperText="قانون دسترسی: لینک پرس‌لاین فقط از جلسه ۴ به بعد به صورت خودکار توسط سرور در اختیار دانشجو قرار می‌گیرد."
-                    />
-                  </Grid>
+
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <FormControlLabel
                       control={
                         <Checkbox
                           checked={sessionForm.isFinal}
-                          onChange={(e) => setSessionForm((f) => ({ ...f, isFinal: e.target.checked }))}
+                          onChange={(e) => setSessionForm({ ...sessionForm, isFinal: e.target.checked })}
                         />
                       }
-                      label="این جلسه، جلسه پایانی دوره است (فعال‌کننده آزمون)"
+                      label="جلسه پایانی (آزمون نهایی)"
                     />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       label="ترتیب نمایش"
                       type="number"
-                      size="small"
                       value={sessionForm.sortOrder}
-                      onChange={(e) => setSessionForm((f) => ({ ...f, sortOrder: Number(e.target.value) }))}
+                      onChange={(e) => setSessionForm({ ...sessionForm, sortOrder: Number(e.target.value) })}
                       dir="ltr"
-                      fullWidth
                     />
                   </Grid>
+
                   <Grid size={12}>
-                    <Stack direction="row" spacing={1}>
-                      <Button type="submit" variant="contained" disabled={saving}>
+                    <Stack direction="row" spacing={1.5} justifyContent="flex-end" mt={1}>
+                      <Button variant="outlined" onClick={() => setEditingSession(null)}>
+                        انصراف
+                      </Button>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={saving}
+                        startIcon={saving && <CircularProgress size={16} color="inherit" />}
+                      >
                         {saving ? 'در حال ذخیره...' : 'ذخیره جلسه'}
                       </Button>
-                      <Button variant="text" onClick={() => setEditingSession(null)}>انصراف</Button>
                     </Stack>
                   </Grid>
                 </Grid>
               </Box>
             </Paper>
-          )}
-
-          {/* Sessions Table */}
-          {loading ? (
-            <Typography variant="body2">در حال بارگذاری جلسات...</Typography>
           ) : (
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell width={70}>جلسه</TableCell>
-                  <TableCell>عنوان</TableCell>
-                  <TableCell>لینک‌ها</TableCell>
-                  <TableCell>پرس‌لاین</TableCell>
-                  <TableCell>پایانی</TableCell>
-                  <TableCell align="left">عملیات</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {sessions.length > 0 ? (
-                  sessions.map((s) => (
-                    <TableRow key={s.id}>
-                      <TableCell sx={{ fontWeight: 700 }}>#{s.sessionNumber}</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>{s.title}</TableCell>
-                      <TableCell>
-                        <Stack direction="row" spacing={0.5}>
-                          {s.sessionLink && <Chip label="کلاس" size="small" variant="outlined" />}
-                          {s.videoLink && <Chip label="ویدیو" size="small" color="primary" variant="outlined" />}
-                          {s.googleDriveLink && <Chip label="درایو" size="small" color="info" variant="outlined" />}
-                          {s.groupLink && <Chip label="گروه" size="small" color="success" variant="outlined" />}
-                        </Stack>
-                      </TableCell>
-                      <TableCell>
-                        {s.porslineLink ? (
-                          <Chip
-                            label={s.sessionNumber >= 4 ? 'فعال (جلسه ۴+)' : 'قفل سرور (<۴)'}
-                            size="small"
-                            color={s.sessionNumber >= 4 ? 'success' : 'default'}
-                          />
-                        ) : '—'}
-                      </TableCell>
-                      <TableCell>
-                        {s.isFinal ? <Chip label="جلسه آخر" size="small" color="secondary" /> : '—'}
-                      </TableCell>
-                      <TableCell align="left">
-                        <Stack direction="row" spacing={0.5}>
-                          <IconButton size="small" onClick={() => handleOpenEdit(s)}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton size="small" color="error" onClick={() => handleDeleteSession(s.id)}>
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
-                      </TableCell>
+            <Box>
+              {loading ? (
+                <Box sx={{ py: 4, textAlign: 'center' }}>
+                  <CircularProgress size={30} />
+                </Box>
+              ) : sessions.length > 0 ? (
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell width={60}>شماره</TableCell>
+                      <TableCell>عنوان جلسه</TableCell>
+                      <TableCell>لینک ویدیو</TableCell>
+                      <TableCell>فایل‌ها</TableCell>
+                      <TableCell>پایانی</TableCell>
+                      <TableCell align="left">عملیات</TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 3, color: 'text.secondary' }}>
-                      جلسه‌ای برای این دوره تعریف نشده است.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  </TableHead>
+                  <TableBody>
+                    {sessions.map((s) => (
+                      <TableRow key={s.id} hover>
+                        <TableCell sx={{ fontWeight: 700 }}>{s.sessionNumber}</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>{s.title}</TableCell>
+                        <TableCell>
+                          {s.videoLink ? (
+                            <Chip size="small" label="ویدیو" color="primary" variant="outlined" icon={<LinkIcon />} />
+                          ) : (
+                            '—'
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {s.googleDriveLink ? (
+                            <Chip size="small" label="درایو" color="info" variant="outlined" icon={<LinkIcon />} />
+                          ) : (
+                            '—'
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {s.isFinal && <Chip size="small" label="پایانی" color="warning" />}
+                        </TableCell>
+                        <TableCell align="left">
+                          <Stack direction="row" spacing={0.5}>
+                            <IconButton size="small" color="primary" onClick={() => handleOpenEdit(s)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" color="error" onClick={() => setDeleteTarget(s)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <EmptyState
+                  title="جلسه‌ای تعریف نشده است"
+                  description="برای این دوره هنوز جلسه‌ای ثبت نشده است. می‌توانید با دکمه بالا جلسه جدید اضافه کنید."
+                  actionText="افزودن اولین جلسه"
+                  onAction={handleOpenCreate}
+                />
+              )}
+            </Box>
           )}
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose}>بستن</Button>
-      </DialogActions>
-    </Dialog>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={onClose} variant="outlined">
+            بستن
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete session confirm */}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="حذف جلسه آموزشی"
+        message={`آیا مطمئن هستید که می‌خواهید جلسه «${deleteTarget?.title}» را حذف کنید؟`}
+        confirmText="حذف جلسه"
+        cancelText="انصراف"
+        loading={deleting}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
+    </>
   );
 }
 
-function TeacherModal({ onClose, onCreated }) {
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', resume: '', avatar: '' });
-  const [error, setError] = useState(null);
+// Product Form Modal (Used for Course, Capsule, and Skill Package)
+function ProductFormModal({ open, initial, categories, teachers, allCourses, kind = 'regular', onClose, onSaved }) {
+  const { showSuccess, showError } = useNotification();
+  const [form, setForm] = useState(initial || EMPTY_PRODUCT);
   const [saving, setSaving] = useState(false);
-  const set = (k, v) => setForm((c) => ({ ...c, [k]: v }));
-  const submit = async () => {
-    if (!form.firstName.trim() && !form.lastName.trim()) return setError('نام یا نام خانوادگی الزامی است');
-    if (!form.resume.trim()) return setError('رزومه/سوابق الزامی است');
-    if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email.trim())) return setError('ایمیل معتبر نیست');
-    setSaving(true); setError(null);
-    try {
-      const res = await adminApi.createTeacher(Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v.trim() || null])));
-      onCreated(res.data);
-    } catch (e) { setError(e.message); } finally { setSaving(false); }
-  };
-  return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth dir="rtl">
-      <DialogTitle>تعریف مدرس جدید</DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={2} mt={1}>
-          <Typography variant="caption" color="text.secondary">مدرس ساخته می‌شود و برای این دوره انتخاب خواهد شد.</Typography>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6 }}><TextField label="نام" value={form.firstName} onChange={(e) => set('firstName', e.target.value)} fullWidth /></Grid>
-            <Grid size={{ xs: 12, sm: 6 }}><TextField label="نام خانوادگی" value={form.lastName} onChange={(e) => set('lastName', e.target.value)} fullWidth /></Grid>
-            <Grid size={{ xs: 12, sm: 6 }}><TextField label="ایمیل" dir="ltr" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="name@example.com" fullWidth /></Grid>
-            <Grid size={{ xs: 12, sm: 6 }}><TextField label="تصویر (URL)" dir="ltr" value={form.avatar} onChange={(e) => set('avatar', e.target.value)} placeholder="https://..." fullWidth /></Grid>
-            <Grid size={12}><TextField label="سوابق / رزومه *" multiline rows={3} value={form.resume} onChange={(e) => set('resume', e.target.value)} fullWidth /></Grid>
-          </Grid>
-          <FormError error={error} />
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose}>انصراف</Button>
-        <Button variant="contained" onClick={submit} disabled={saving}>{saving ? 'در حال ذخیره...' : 'تعریف و انتخاب'}</Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
+  const [tabIndex, setTabIndex] = useState(0);
 
-function ProductForm({ initial, categories, teachers, allCourses, onTeacherCreated, onSubmit, onCancel, saving }) {
-  const [form, setForm] = useState(initial);
-  const [error, setError] = useState(null);
-  const [teacherModalOpen, setTeacherModalOpen] = useState(false);
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const toggleCategory = (id) => setForm((f) => ({ ...f, categoryIds: f.categoryIds.includes(id) ? f.categoryIds.filter((c) => c !== id) : [...f.categoryIds, id] }));
+  const isPackage = kind === 'skill';
 
-  const submit = async (e) => {
+  const set = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.price.toString().trim()) { setError('نام و قیمت اصلی الزامی است'); return; }
-    if (form.salePrice !== '' && form.salePrice !== null) {
-      const p = Number(String(form.price).replace(/[,٬]/g, ''));
-      const s = Number(String(form.salePrice).replace(/[,٬]/g, ''));
-      if (!Number.isFinite(s) || s < 0) { setError('قیمت فروش معتبر نیست'); return; }
-      if (Number.isFinite(p) && s > p) { setError('قیمت فروش نباید از قیمت اصلی بیشتر باشد'); return; }
+    if (!form.name?.trim()) {
+      showError('نام دوره الزامی است');
+      return;
     }
-    setError(null);
-    const selectedTeacherIds = form.kind === 'skill' ? (form.teacherIds ?? []) : (form.teacherId ? [form.teacherId] : []);
-    if (form.kind === 'skill' && selectedTeacherIds.length === 0) { setError('پکیج مهارتی باید حداقل یک مدرس داشته باشد'); return; }
-    const payload = {
-      ...form,
-      teacherId: selectedTeacherIds[0] || null,
-      teacherIds: selectedTeacherIds,
-      level: form.kind === 'skill' ? '' : form.level,
-      salePrice: form.salePrice === '' ? null : form.salePrice,
-      sortOrder: Number(form.sortOrder) || 0
-    };
-    await onSubmit(payload, setError);
+    if (!form.price?.toString().trim()) {
+      showError('قیمت اصلی الزامی است');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        ...form,
+        kind,
+        price: String(form.price).replace(/[,٬]/g, ''),
+        salePrice: form.salePrice ? String(form.salePrice).replace(/[,٬]/g, '') : null,
+        sortOrder: Number(form.sortOrder) || 0,
+        teacherId: form.teacherId || null,
+        categoryIds: form.categoryIds || [],
+        teacherIds: form.teacherIds || [],
+        includedCourseIds: isPackage ? form.includedCourseIds || [] : [],
+      };
+
+      if (initial?.id) {
+        await adminApi.updateCourse(initial.id, payload);
+        showSuccess('دوره با موفقیت ویرایش شد');
+      } else {
+        await adminApi.createCourse(payload);
+        showSuccess('دوره جدید با موفقیت ایجاد شد');
+      }
+      onSaved();
+      onClose();
+    } catch (err) {
+      showError(err.message || 'خطا در ذخیره اطلاعات دوره');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <Box component="form" onSubmit={submit}>
-      <Stack spacing={2.5}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}><Field label="نام محصول *"><TextField value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="دوره جامع حرکت" fullWidth /></Field></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><Field label="قیمت اصلی *"><TextField value={form.price} onChange={(e) => set('price', e.target.value)} placeholder="450000" dir="ltr" fullWidth /></Field></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><Field label="قیمت فروش (خالی = بدون تخفیف)"><TextField value={form.salePrice ?? ''} onChange={(e) => set('salePrice', e.target.value)} placeholder="360000" dir="ltr" fullWidth /></Field></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><Field label="تصویر"><ImagePicker value={form.image} onChange={(v) => set('image', v)} /></Field></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><Field label="لینک ویدیو پیش‌نمایش (اختیاری)"><TextField value={form.videoUrl ?? ''} onChange={(e) => set('videoUrl', e.target.value)} dir="ltr" placeholder="https://..." fullWidth /></Field></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <Field label={form.kind === 'skill' ? 'مدرس‌ها (حداقل یک مدرس)' : 'مدرس'}>
-              <FormControl fullWidth size="small">
-                <InputLabel>{form.kind === 'skill' ? 'مدرس‌ها' : 'مدرس'}</InputLabel>
-                <Select
-                  multiple={form.kind === 'skill'}
-                  value={form.kind === 'skill' ? (form.teacherIds ?? []) : (form.teacherId ?? '')}
-                  label={form.kind === 'skill' ? 'مدرس‌ها' : 'مدرس'}
-                  onChange={(e) => form.kind === 'skill' ? set('teacherIds', e.target.value) : set('teacherId', e.target.value || null)}
-                  renderValue={form.kind === 'skill' ? (selected) => (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {selected.map((id) => { const teacher = teachers.find((item) => item.id === id); return <Chip key={id} size="small" label={`${teacher?.firstName ?? ''} ${teacher?.lastName ?? ''}`.trim() || 'مدرس بدون نام'} />; })}
-                    </Box>
-                  ) : undefined}
-                >
-                  {form.kind !== 'skill' && <MenuItem value="">بدون مدرس</MenuItem>}
-                  {teachers.map((t) => <MenuItem key={t.id} value={t.id}>{form.kind === 'skill' && <Checkbox checked={(form.teacherIds ?? []).includes(t.id)} />}{`${t.firstName ?? ''} ${t.lastName ?? ''}`.trim() || 'مدرس بدون نام'}</MenuItem>)}
-                </Select>
-              </FormControl>
-              <Button size="small" onClick={() => setTeacherModalOpen(true)} sx={{ mt: 0.5, fontSize: 11 }}>مدرس در فهرست نیست؟ تعریف مدرس جدید</Button>
-            </Field>
-          </Grid>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth dir="rtl">
+      <DialogTitle sx={{ pb: 1 }}>
+        <Typography variant="h6" fontWeight={700}>
+          {initial?.id ? 'ویرایش دوره' : 'تعریف دوره جدید'} ({isPackage ? 'پکیج مهارتی' : kind === 'capsule' ? 'کپسولی' : 'دوره عادی'})
+        </Typography>
+      </DialogTitle>
 
-          {/* If package (skill), select included courses */}
-          {form.kind === 'skill' && (
-            <Grid size={12}>
-              <Field label="دوره‌های شامل این پکیج مهارتی">
+      <DialogContent dividers sx={{ p: 0 }}>
+        <Tabs
+          value={tabIndex}
+          onChange={(e, val) => setTabIndex(val)}
+          sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}
+        >
+          <Tab label="مشخصات اصلی" />
+          <Tab label="قیمت و ثبت‌نام" />
+          <Tab label="رسانه و تصویر" />
+          <Tab label="توضیحات" />
+          {isPackage && <Tab label="دوره‌های پکیج" />}
+        </Tabs>
+
+        <Box component="form" id="product-form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+          {tabIndex === 0 && (
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 8 }}>
+                <TextField
+                  label="نام دوره *"
+                  value={form.name}
+                  onChange={(e) => set('name', e.target.value)}
+                  placeholder="مثال: دوره جامع طراحی UI/UX"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>دوره‌های این پکیج</InputLabel>
+                  <InputLabel>سطح دوره</InputLabel>
+                  <Select value={form.level || 'مقدماتی'} label="سطح دوره" onChange={(e) => set('level', e.target.value)}>
+                    <MenuItem value="مقدماتی">مقدماتی</MenuItem>
+                    <MenuItem value="متوسط">متوسط</MenuItem>
+                    <MenuItem value="پیشرفته">پیشرفته</MenuItem>
+                    <MenuItem value="جامع">جامع</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>دسته‌بندی‌ها</InputLabel>
                   <Select
                     multiple
-                    value={form.includedCourseIds || []}
-                    onChange={(e) => set('includedCourseIds', e.target.value)}
-                    input={<OutlinedInput label="دوره‌های این پکیج" />}
+                    value={form.categoryIds || []}
+                    onChange={(e) => set('categoryIds', e.target.value)}
+                    input={<OutlinedInput label="دسته‌بندی‌ها" />}
                     renderValue={(selected) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((id) => {
-                          const c = (allCourses || []).find((item) => item.id === id);
-                          return <Chip key={id} size="small" label={c?.name || id} />;
+                        {selected.map((val) => {
+                          const cat = categories.find((c) => c.id === val);
+                          return <Chip key={val} label={cat?.name || val} size="small" />;
                         })}
                       </Box>
                     )}
                   >
-                    {(allCourses || []).filter((c) => c.kind !== 'skill').map((c) => (
+                    {categories.map((c) => (
                       <MenuItem key={c.id} value={c.id}>
-                        <Checkbox checked={(form.includedCourseIds || []).includes(c.id)} />
-                        <ListItemText primary={c.name} secondary={c.level || ''} />
+                        <Checkbox checked={(form.categoryIds || []).includes(c.id)} />
+                        <ListItemText primary={c.name} />
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                  دانشجو با خرید این پکیج، دسترسی به تک‌تک دوره‌های بالا را دریافت خواهد کرد.
-                </Typography>
-              </Field>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>مدرس (استاد)</InputLabel>
+                  <Select
+                    value={form.teacherId || ''}
+                    label="مدرس (استاد)"
+                    onChange={(e) => set('teacherId', e.target.value)}
+                  >
+                    <MenuItem value="">-- بدون مدرس خاص --</MenuItem>
+                    {teachers.map((t) => (
+                      <MenuItem key={t.id} value={t.id}>
+                        {t.firstName} {t.lastName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  label="ترتیب نمایش"
+                  type="number"
+                  value={form.sortOrder}
+                  onChange={(e) => set('sortOrder', e.target.value)}
+                  dir="ltr"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControlLabel
+                  control={<Checkbox checked={!!form.isActive} onChange={(e) => set('isActive', e.target.checked)} />}
+                  label="فعال (نمایش در سایت)"
+                  sx={{ mt: 1 }}
+                />
+              </Grid>
             </Grid>
           )}
 
-          {form.kind !== 'skill' && <Grid size={{ xs: 12, sm: 6 }}>
-            <Field label="سطح">
-              <FormControl fullWidth size="small">
-                <InputLabel>سطح</InputLabel>
-                <Select value={form.level ?? 'مقدماتی'} label="سطح" onChange={(e) => set('level', e.target.value)}>
-                  <MenuItem value="پایه">پایه</MenuItem>
-                  <MenuItem value="مقدماتی">مقدماتی</MenuItem>
-                  <MenuItem value="پیشرفته">پیشرفته</MenuItem>
-                </Select>
-              </FormControl>
-            </Field>
-          </Grid>}
-          <Grid size={{ xs: 12, sm: 6 }}><Field label="مدت"><TextField value={form.duration} onChange={(e) => set('duration', e.target.value)} placeholder="۵ ساعت" fullWidth /></Field></Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <Field label="نوع برگزاری">
-              <FormControl fullWidth size="small">
-                <InputLabel>نوع برگزاری</InputLabel>
-                <Select value={form.typeOfAttendence ?? 'آنلاین'} label="نوع برگزاری" onChange={(e) => set('typeOfAttendence', e.target.value)}>
-                  <MenuItem value="آنلاین">آنلاین</MenuItem>
-                  <MenuItem value="آفلاین">آفلاین</MenuItem>
-                </Select>
-              </FormControl>
-            </Field>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <Field label="وضعیت ثبت‌نام">
-              <FormControl fullWidth size="small">
-                <InputLabel>وضعیت</InputLabel>
-                <Select value={form.statusOfRegistration ?? ''} label="وضعیت" onChange={(e) => set('statusOfRegistration', e.target.value)}>
-                  <MenuItem value="">انتخاب وضعیت</MenuItem>
-                  <MenuItem value="در حال ثبت نام">در حال ثبت‌نام</MenuItem>
-                  <MenuItem value="تکمیل ظرفیت">تکمیل ظرفیت</MenuItem>
-                  <MenuItem value="به اتمام رسیده">به اتمام رسیده</MenuItem>
-                </Select>
-              </FormControl>
-            </Field>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}><Field label="ترتیب"><TextField type="number" value={form.sortOrder} onChange={(e) => set('sortOrder', e.target.value)} dir="ltr" fullWidth /></Field></Grid>
-          <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex', alignItems: 'center' }}><FormControlLabel control={<Checkbox checked={!!form.isActive} onChange={(e) => set('isActive', e.target.checked)} />} label="فعال باشد" /></Grid>
-        </Grid>
+          {tabIndex === 1 && (
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  label="قیمت اصلی (تومان) *"
+                  value={form.price}
+                  onChange={(e) => set('price', e.target.value)}
+                  placeholder="2500000"
+                  dir="ltr"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  label="قیمت فروش / تخفیف‌دار (تومان)"
+                  value={form.salePrice ?? ''}
+                  onChange={(e) => set('salePrice', e.target.value)}
+                  placeholder="1900000 (خالی = بدون تخفیف)"
+                  dir="ltr"
+                />
+              </Grid>
 
-        <Field label="توضیح کوتاه"><TextField multiline rows={2} value={form.description} onChange={(e) => set('description', e.target.value)} fullWidth /></Field>
-        <Field label="توضیحات کامل (Markdown)"><TextField multiline rows={5} value={form.longDescription} onChange={(e) => set('longDescription', e.target.value)} fullWidth /></Field>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>وضعیت ثبت‌نام</InputLabel>
+                  <Select
+                    value={form.statusOfRegistration || 'در حال ثبت نام'}
+                    label="وضعیت ثبت‌نام"
+                    onChange={(e) => set('statusOfRegistration', e.target.value)}
+                  >
+                    <MenuItem value="در حال ثبت نام">در حال ثبت نام</MenuItem>
+                    <MenuItem value="تکمیل ظرفیت">تکمیل ظرفیت</MenuItem>
+                    <MenuItem value="به زودی">به زودی</MenuItem>
+                    <MenuItem value="پایان دوره">پایان دوره</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
 
-        <Box>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>دسته‌بندی‌ها</Typography>
-          <Stack direction="row" flexWrap="wrap" gap={1}>
-            {categories.map((cat) => (
-              <Chip
-                key={cat.id}
-                label={cat.name}
-                clickable
-                color={form.categoryIds.includes(cat.id) ? 'primary' : 'default'}
-                variant={form.categoryIds.includes(cat.id) ? 'filled' : 'outlined'}
-                onClick={() => toggleCategory(cat.id)}
-              />
-            ))}
-          </Stack>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>نوع برگزاری</InputLabel>
+                  <Select
+                    value={form.typeOfAttendence || 'آنلاین'}
+                    label="نوع برگزاری"
+                    onChange={(e) => set('typeOfAttendence', e.target.value)}
+                  >
+                    <MenuItem value="آنلاین">آنلاین</MenuItem>
+                    <MenuItem value="حضوری">حضوری</MenuItem>
+                    <MenuItem value="آفلاین">آفلاین / ضبط‌شده</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  label="طول مدت دوره"
+                  value={form.duration || ''}
+                  onChange={(e) => set('duration', e.target.value)}
+                  placeholder="مثال: ۲۴ ساعت آموزش"
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {tabIndex === 2 && (
+            <Grid container spacing={2}>
+              <Grid size={12}>
+                <Typography variant="caption" fontWeight={700} color="text.secondary" mb={1} display="block">
+                  تصویر شاخص دوره
+                </Typography>
+                <ImagePicker value={form.image} onChange={(url) => set('image', url)} alt="تصویر دوره" />
+              </Grid>
+
+              <Grid size={12}>
+                <TextField
+                  label="آدرس ویدیو تیزر / معرفی دوره"
+                  dir="ltr"
+                  value={form.videoUrl || ''}
+                  onChange={(e) => set('videoUrl', e.target.value)}
+                  placeholder="https://aparat.com/v/..."
+                  helperText="لینک معرفی در صفحه نمایش دوره نمایش داده می‌شود"
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {tabIndex === 3 && (
+            <Grid container spacing={2}>
+              <Grid size={12}>
+                <TextField
+                  label="توضیح کوتاه (خلاصه دوره)"
+                  multiline
+                  rows={2}
+                  value={form.description || ''}
+                  onChange={(e) => set('description', e.target.value)}
+                  placeholder="خلاصه‌ای از دوره برای کارت دوره و نتایج جستجو..."
+                />
+              </Grid>
+
+              <Grid size={12}>
+                <TextField
+                  label="توضیحات جامع دوره (پشتیبانی از Markdown)"
+                  multiline
+                  rows={6}
+                  value={form.longDescription || ''}
+                  onChange={(e) => set('longDescription', e.target.value)}
+                  placeholder="سرفصل‌ها، پیش‌نیازها و اهداف آموزشی با قالب Markdown..."
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {isPackage && tabIndex === 4 && (
+            <Box>
+              <Typography fontWeight={700} fontSize="0.9rem" mb={1}>
+                انتخاب دوره‌های زیرمجموعه این پکیج
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                دانشجویی که این پکیج مهارتی را خریداری کند به تمام دوره‌های انتخاب‌شده زیر دسترسی خواهد داشت.
+              </Typography>
+              <FormControl fullWidth size="small">
+                <InputLabel>دوره‌های شامل</InputLabel>
+                <Select
+                  multiple
+                  value={form.includedCourseIds || []}
+                  onChange={(e) => set('includedCourseIds', e.target.value)}
+                  input={<OutlinedInput label="دوره‌های شامل" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((val) => {
+                        const crs = allCourses.find((c) => c.id === val);
+                        return <Chip key={val} label={crs?.name || val} size="small" />;
+                      })}
+                    </Box>
+                  )}
+                >
+                  {allCourses
+                    .filter((c) => c.id !== initial?.id)
+                    .map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        <Checkbox checked={(form.includedCourseIds || []).includes(c.id)} />
+                        <ListItemText primary={c.name} secondary={`${c.level || 'عمومی'} · ${formatToman(c.price)}`} />
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
         </Box>
+      </DialogContent>
 
-        <FormError error={error} />
-        <Stack direction="row" spacing={1}>
-          <Button type="submit" variant="contained" disabled={saving}>{saving ? '...' : 'ذخیره محصول'}</Button>
-          <Button variant="text" onClick={onCancel}>انصراف</Button>
-        </Stack>
-      </Stack>
-      {teacherModalOpen && <TeacherModal onClose={() => setTeacherModalOpen(false)} onCreated={(t) => { onTeacherCreated(t); set('teacherId', t.id); setTeacherModalOpen(false); }} />}
-    </Box>
+      <DialogActions sx={{ p: 2.5 }}>
+        <Button onClick={onClose} variant="outlined">
+          انصراف
+        </Button>
+        <Button
+          type="submit"
+          form="product-form"
+          variant="contained"
+          disabled={saving}
+          startIcon={saving && <CircularProgress size={16} color="inherit" />}
+        >
+          {saving ? 'در حال ذخیره...' : 'ذخیره دوره'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
-function CategoryForm({ initial, onSubmit, onCancel, saving }) {
-  const [form, setForm] = useState(initial);
-  const [error, setError] = useState(null);
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const submit = async (e) => {
+// Category Dialog
+function CategoryModal({ open, initial, onClose, onSaved }) {
+  const { showSuccess, showError } = useNotification();
+  const [name, setName] = useState(initial?.name || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) { setError('نام دسته الزامی است'); return; }
-    setError(null);
-    await onSubmit({ ...form, sortOrder: Number(form.sortOrder) || 0 }, setError);
+    if (!name.trim()) return showError('نام دسته‌بندی الزامی است');
+    setSaving(true);
+    try {
+      if (initial?.id) {
+        await adminApi.updateCategory(initial.id, { name: name.trim() });
+        showSuccess('دسته‌بندی با موفقیت ویرایش شد');
+      } else {
+        await adminApi.createCategory({ name: name.trim() });
+        showSuccess('دسته‌بندی با موفقیت ایجاد شد');
+      }
+      onSaved();
+      onClose();
+    } catch (err) {
+      showError(err.message || 'خطا در ثبت دسته‌بندی');
+    } finally {
+      setSaving(false);
+    }
   };
+
   return (
-    <Box component="form" onSubmit={submit}>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6 }}><TextField label="نام *" value={form.name} onChange={(e) => set('name', e.target.value)} fullWidth /></Grid>
-        <Grid size={{ xs: 12, sm: 6 }}><TextField label="اسلاگ (لاتین)" value={form.slug ?? ''} onChange={(e) => set('slug', e.target.value)} dir="ltr" placeholder="skill-packages" fullWidth /></Grid>
-        <Grid size={{ xs: 12, sm: 6 }}><TextField label="ترتیب" type="number" value={form.sortOrder ?? 0} onChange={(e) => set('sortOrder', e.target.value)} dir="ltr" fullWidth /></Grid>
-        <Grid size={{ xs: 12, sm: 6 }}><FormControlLabel control={<Checkbox checked={!!form.isActive} onChange={(e) => set('isActive', e.target.checked)} />} label="فعال" /></Grid>
-        <Grid size={12}><FormError error={error} /></Grid>
-        <Grid size={12}><Stack direction="row" spacing={1}><Button type="submit" variant="contained" disabled={saving}>{saving ? '...' : 'ذخیره'}</Button><Button variant="text" onClick={onCancel}>انصراف</Button></Stack></Grid>
-      </Grid>
-    </Box>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth dir="rtl">
+      <DialogTitle fontWeight={700}>
+        {initial?.id ? 'ویرایش دسته‌بندی' : 'دسته‌بندی جدید'}
+      </DialogTitle>
+      <Box component="form" onSubmit={handleSubmit}>
+        <DialogContent dividers>
+          <TextField
+            autoFocus
+            label="نام دسته‌بندی *"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={onClose} variant="outlined">
+            انصراف
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={saving || !name.trim()}
+            startIcon={saving && <CircularProgress size={16} color="inherit" />}
+          >
+            {saving ? 'در حال ثبت...' : 'ذخیره'}
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
   );
 }
 
 export default function AdminProducts({ defaultTab = 'products' }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { showSuccess, showError } = useNotification();
+  const [tabOverride, setTabOverride] = useState(null);
+  const [prevDefaultTab, setPrevDefaultTab] = useState(defaultTab);
 
-  const tab = location.pathname.startsWith('/capsules')
-    ? 'capsule'
-    : location.pathname.startsWith('/packages')
-    ? 'skill'
-    : location.pathname.startsWith('/categories')
-    ? 'categories'
-    : location.pathname.startsWith('/courses')
-    ? 'products'
-    : defaultTab;
+  if (prevDefaultTab !== defaultTab) {
+    setPrevDefaultTab(defaultTab);
+    setTabOverride(null);
+  }
 
-  const handleTabChange = (_, v) => {
-    setEditing(null);
-    const routes = {
-      products: '/courses',
-      capsule: '/capsules',
-      skill: '/packages',
-      categories: '/categories'
-    };
-    if (routes[v]) navigate(routes[v]);
-  };
+  const tab = tabOverride ?? defaultTab;
+  const setTab = setTabOverride;
 
-  const [editing, setEditing] = useState(null);
-  const [editingCat, setEditingCat] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState(null);
-
-  // Sessions modal state
+  // Dialog states
+  const [editingProduct, setEditingProduct] = useState(null);
   const [sessionsCourse, setSessionsCourse] = useState(null);
+  const [categoryModal, setCategoryModal] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const courses = useApi(() => adminApi.listCourses());
   const categories = useApi(() => adminApi.listCategories());
   const teachers = useApi(() => adminApi.listTeachers());
 
-  const saveProduct = async (payload, setError) => {
-    setSaving(true);
+  const allItems = useMemo(() => courses.data || [], [courses.data]);
+
+  // Filter items by current tab kind
+  const filteredProducts = useMemo(() => {
+    if (tab === 'capsule') {
+      return allItems.filter((c) => c.kind === 'capsule');
+    }
+    if (tab === 'skill') {
+      return allItems.filter((c) => c.kind === 'skill');
+    }
+    if (tab === 'products') {
+      return allItems.filter((c) => !c.kind || c.kind === 'regular');
+    }
+    return [];
+  }, [allItems, tab]);
+
+  const handleDeleteCourse = async () => {
+    if (!deleteConfirm) return;
+    setDeleting(true);
     try {
-      if (editing === 'new') await adminApi.createCourse(payload);
-      else await adminApi.updateCourse(editing, payload);
-      setEditing(null); setNotice('محصول با موفقیت ذخیره شد'); courses.reload();
-    } catch (e) { setError(e.message); } finally { setSaving(false); }
+      if (tab === 'categories') {
+        await adminApi.deleteCategory(deleteConfirm.id);
+        showSuccess('دسته‌بندی با موفقیت حذف شد');
+        categories.reload();
+      } else {
+        await adminApi.deleteCourse(deleteConfirm.id);
+        showSuccess('دوره با موفقیت حذف شد');
+        courses.reload();
+      }
+      setDeleteConfirm(null);
+    } catch (err) {
+      showError(err.message || 'خطا در حذف');
+    } finally {
+      setDeleting(false);
+    }
   };
 
-  const deleteProduct = async (id) => {
-    if (!window.confirm('آیا از حذف این مورد اطمینان دارید؟')) return;
-    try { await adminApi.deleteCourse(id); courses.reload(); setNotice('دوره با موفقیت حذف شد'); } catch (e) { setNotice(`خطا: ${e.message}`); }
+  const courseColumns = useMemo(() => [
+    {
+      id: 'name',
+      label: 'نام دوره و مشخصات',
+      render: (row) => (
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar
+            variant="rounded"
+            src={row.image}
+            sx={{ width: 44, height: 44, borderRadius: 1.5, bgcolor: 'action.hover' }}
+          >
+            <CourseIcon />
+          </Avatar>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography fontWeight={700} fontSize="0.84rem" noWrap>
+              {row.name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap display="block">
+              سطح: {row.level || 'عمومی'} · برگزاری: {row.typeOfAttendence || 'آنلاین'}
+            </Typography>
+          </Box>
+        </Stack>
+      ),
+    },
+    {
+      id: 'price',
+      label: 'قیمت و تخفیف',
+      render: (row) => (
+        <Box>
+          <Typography fontWeight={700} fontSize="0.84rem">
+            {formatToman(row.salePrice || row.price)}
+          </Typography>
+          {row.salePrice && (
+            <Typography
+              variant="caption"
+              color="text.disabled"
+              sx={{ textDecoration: 'line-through', display: 'block' }}
+            >
+              {formatToman(row.price)}
+            </Typography>
+          )}
+        </Box>
+      ),
+    },
+    {
+      id: 'statusOfRegistration',
+      label: 'وضعیت ثبت‌نام',
+      render: (row) => (
+        <Chip
+          size="small"
+          label={row.statusOfRegistration || 'در حال ثبت نام'}
+          color={row.statusOfRegistration === 'در حال ثبت نام' ? 'success' : 'default'}
+          variant="outlined"
+        />
+      ),
+    },
+    {
+      id: 'isActive',
+      label: 'وضعیت نمایش',
+      render: (row) => <StatusChip status={!!row.isActive} />,
+    },
+    {
+      id: 'actions',
+      label: 'عملیات',
+      sortable: false,
+      align: 'left',
+      render: (row) => (
+        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+          <Tooltip title="جلسات آموزشی">
+            <IconButton size="small" color="info" onClick={() => setSessionsCourse(row)}>
+              <VideoLibraryIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="ویرایش">
+            <IconButton size="small" color="primary" onClick={() => setEditingProduct(row)}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="حذف">
+            <IconButton size="small" color="error" onClick={() => setDeleteConfirm(row)}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+  ], []);
+
+  const categoryColumns = useMemo(() => [
+    {
+      id: 'name',
+      label: 'نام دسته‌بندی',
+      render: (row) => (
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <CategoryIcon color="primary" fontSize="small" />
+          <Typography fontWeight={700} fontSize="0.875rem">
+            {row.name}
+          </Typography>
+        </Stack>
+      ),
+    },
+    {
+      id: 'id',
+      label: 'شناسه',
+      render: (row) => (
+        <Typography dir="ltr" variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+          {row.id}
+        </Typography>
+      ),
+    },
+    {
+      id: 'actions',
+      label: 'عملیات',
+      sortable: false,
+      align: 'left',
+      render: (row) => (
+        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+          <Tooltip title="ویرایش">
+            <IconButton size="small" color="primary" onClick={() => setCategoryModal(row)}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="حذف">
+            <IconButton size="small" color="error" onClick={() => setDeleteConfirm(row)}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    },
+  ], []);
+
+  const getPageHeaderInfo = () => {
+    switch (tab) {
+      case 'capsule':
+        return {
+          title: 'دوره‌های کپسولی',
+          subtitle: 'مدیریت و انتشار آموزش‌های فشرده، پروژه‌محور و مهارت‌های کاربردی',
+        };
+      case 'skill':
+        return {
+          title: 'پکیج‌های مهارتی',
+          subtitle: 'مدیریت پکیج‌های جامع چنداستاده و مسیرهای یادگیری تخصص‌محور',
+        };
+      case 'categories':
+        return {
+          title: 'دسته‌بندی‌های موضوعی',
+          subtitle: 'مدیریت تگ‌ها و طبقه‌بندی‌های دوره‌ها و اساتید',
+        };
+      default:
+        return {
+          title: 'دوره‌های آموزشی',
+          subtitle: 'مدیریت و بارگذاری تمام دوره‌ها، جلسات آموزشی و محتوای ویدیویی',
+        };
+    }
   };
 
-  const saveCategory = async (payload, setError) => {
-    setSaving(true);
-    try {
-      if (editingCat === 'new') await adminApi.createCategory(payload);
-      else await adminApi.updateCategory(editingCat, payload);
-      setEditingCat(null); categories.reload(); setNotice('دسته‌بندی ذخیره شد');
-    } catch (e) { setError(e.message); } finally { setSaving(false); }
-  };
-
-  const deleteCategory = async (id) => {
-    if (!window.confirm('حذف شود؟')) return;
-    try { await adminApi.deleteCategory(id); categories.reload(); setNotice(`دسته حذف شد`); } catch (e) { setNotice(`خطا: ${e.message}`); }
-  };
-
-  const addTeacherToList = (t) => teachers.setData([...(teachers.data ?? []), t]);
-
-  const toForm = (c) => ({
-    name: c.name ?? '', price: c.price ?? '', salePrice: c.salePrice ?? '',
-    image: c.image ?? '', level: c.level ?? 'مقدماتی', duration: c.duration ?? '',
-    typeOfAttendence: c.typeOfAttendence ?? 'آنلاین', statusOfRegistration: c.statusOfRegistration === 'درحال ثبت نام' ? 'در حال ثبت نام' : (c.statusOfRegistration ?? ''),
-    description: c.description ?? '', videoUrl: c.videoUrl ?? '', longDescription: c.longDescription ?? '',
-    teacherId: c.teacherId ?? c.teacher?.id ?? '', teacherIds: (c.teachers?.length ? c.teachers : (c.teacher ? [c.teacher] : [])).map((teacher) => teacher.id),
-    includedCourseIds: (c.packageIncludedCourses || []).map((x) => x.id),
-    isActive: c.isActive ?? true, sortOrder: c.sortOrder ?? 0,
-    kind: c.kind ?? 'regular',
-    categoryIds: (c.categories ?? []).map((x) => x.id),
-  });
-
-  const filteredByKind = (kind) => (courses.data ?? []).filter((c) => (c.kind ?? 'regular') === kind);
-
-  const getPageTitle = () => {
-    if (tab === 'capsule') return { title: 'دوره‌های کپسولی', subtitle: 'مدیریت آموزش‌های فشرده و کاربردی کپسولی' };
-    if (tab === 'skill') return { title: 'پکیج‌های مهارتی', subtitle: 'مدیریت پکیج‌های جامع مهارتی و چند استاده' };
-    if (tab === 'categories') return { title: 'دسته‌بندی‌ها', subtitle: 'مدیریت دسته‌بندی‌های دوره‌ها و اساتید' };
-    return { title: 'دوره‌های آموزشی', subtitle: 'مدیریت دوره‌ها، جلسات و جزئیات آموزش‌ها' };
-  };
-  const pageMeta = getPageTitle();
+  const headerInfo = getPageHeaderInfo();
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3.5}>
       <PageHeader
-        title={pageMeta.title}
-        subtitle={pageMeta.subtitle}
+        title={headerInfo.title}
+        subtitle={headerInfo.subtitle}
         action={
-          <Paper elevation={0} sx={{ display: 'flex', p: 0.5, border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'auto' }}>
-            <Tabs value={tab} onChange={handleTabChange} sx={{ minHeight: 36 }} variant="scrollable" scrollButtons="auto">
-              <Tab label="دوره‌ها" value="products" />
-              <Tab label="کپسولی" value="capsule" />
-              <Tab label="پکیج مهارتی" value="skill" />
-              {!isTA() && <Tab label="دسته‌ها" value="categories" />}
-            </Tabs>
-          </Paper>
+          <Stack direction="row" spacing={1.5}>
+            {tab === 'categories' ? (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setCategoryModal('new')}
+              >
+                دسته‌بندی جدید
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setEditingProduct('new')}
+              >
+                {tab === 'capsule'
+                  ? 'دوره کپسولی جدید'
+                  : tab === 'skill'
+                  ? 'پکیج مهارتی جدید'
+                  : 'دوره جدید'}
+              </Button>
+            )}
+          </Stack>
         }
       />
-      {notice && <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert>}
 
-      {tab === 'products' && (
-        <Stack spacing={2}>
-          {!editing && <Box><Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditing('new'); setNotice(null); }}>دوره جدید</Button></Box>}
-          {editing && (
-            <Card>
-              <Typography sx={{ fontWeight: 700 }} mb={2}>{editing === 'new' ? 'دوره جدید' : 'ویرایش دوره'}</Typography>
-              <Divider sx={{ mb: 2.5 }} />
-              <ProductForm initial={editing === 'new' ? { ...EMPTY_PRODUCT, kind: 'regular' } : toForm(courses.data.find((c) => c.id === editing))} categories={categories.data ?? []} teachers={teachers.data ?? []} allCourses={courses.data ?? []} onTeacherCreated={addTeacherToList} onSubmit={saveProduct} onCancel={() => setEditing(null)} saving={saving} />
-            </Card>
-          )}
-          {courses.loading && <ListRowSkeleton count={4} circularAvatar={true} />}
-          {courses.error && <Alert severity="error">خطا: {courses.error} <Button onClick={courses.reload} size="small">تلاش مجدد</Button></Alert>}
-          {filteredByKind('regular').length === 0 && !courses.loading && !editing && <Alert severity="info">دوره‌ای در این بخش ثبت نشده است.</Alert>}
-          <Grid container spacing={1.5}>
-            {filteredByKind('regular').map((c) => (
-              <Grid key={c.id} size={12}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    px: { xs: 1.5, sm: 2 },
-                    py: 1.25,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: { xs: 1.25, sm: 2 },
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: 999,
-                    overflow: 'hidden',
-                    minWidth: 0,
-                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                  }}
-                >
-                  {c.image && (
-                    <Box
-                      component="img"
-                      src={c.image}
-                      alt={c.name}
-                      sx={{
-                        width: { xs: 40, sm: 44 },
-                        height: { xs: 40, sm: 44 },
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        flexShrink: 0,
-                      }}
-                    />
-                  )}
-                  <Box sx={{ minWidth: 0, flex: 1, textAlign: 'right' }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: 14 }} noWrap>
-                      {c.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ fontSize: 12, lineHeight: 1.6 }}>
-                      {formatToman(c.salePrice ?? c.price)}
-                      {c.salePrice && Number(c.salePrice) < Number(c.price) && (
-                        <Box component="span" sx={{ textDecoration: 'line-through', mr: 1 }}>
-                          {formatToman(c.price)}
-                        </Box>
-                      )}
-                      {' · '}{c.level} · {c.typeOfAttendence}
-                      {' · '}
-                      {(c.categories ?? []).map((x) => x.name).join('، ') || 'بدون دسته'}
-                    </Typography>
-                  </Box>
-                  <Stack
-                    direction="row"
-                    sx={{ alignItems: 'center' }}
-                    spacing={1}
-                    flexShrink={0}
-                  >
-                    <StatusDot active={c.isActive} />
-                    <RowActions
-                      extra={
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          startIcon={<VideoLibraryIcon sx={{ fontSize: 15 }} />}
-                          onClick={() => setSessionsCourse(c)}
-                          sx={{ fontSize: 11, py: 0.25, px: 1, height: 28 }}
-                        >
-                          جلسات ({(c.sessions || []).length})
-                        </Button>
-                      }
-                      onEdit={() => setEditing(c.id)}
-                      onDelete={() => deleteProduct(c.id)}
-                    />
-                  </Stack>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Stack>
+      {/* Tabs */}
+      <Paper elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', borderRadius: 2 }}>
+        <Tabs
+          value={tab}
+          onChange={(e, val) => setTab(val)}
+          sx={{ px: 2 }}
+        >
+          <Tab value="products" icon={<CourseIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="دوره‌های عادی" />
+          <Tab value="capsule" icon={<CapsuleIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="دوره‌های کپسولی" />
+          <Tab value="skill" icon={<PackageIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="پکیج‌های مهارتی" />
+          <Tab value="categories" icon={<CategoryIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="دسته‌بندی‌ها" />
+        </Tabs>
+      </Paper>
+
+      {/* Content Table */}
+      {tab === 'categories' ? (
+        <DataTable
+          columns={categoryColumns}
+          rows={categories.data || []}
+          loading={categories.loading}
+          error={categories.error}
+          onReload={categories.reload}
+          searchPlaceholder="جستجوی دسته‌بندی..."
+          emptyTitle="دسته‌بندی یافت نشد"
+          emptyDescription="هنوز هیچ دسته‌بندی ثبت نشده است."
+        />
+      ) : (
+        <DataTable
+          columns={courseColumns}
+          rows={filteredProducts}
+          loading={courses.loading}
+          error={courses.error}
+          onReload={courses.reload}
+          searchPlaceholder="جستجوی نام دوره..."
+          emptyTitle="دوره‌ای یافت نشد"
+          emptyDescription="هیچ دوره‌ای در این بخش ثبت نشده است."
+        />
       )}
 
-      {tab === 'capsule' && (
-        <Stack spacing={2}>
-          {!editing && <Box><Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditing('new'); setNotice(null); }}>آموزش کپسولی جدید</Button></Box>}
-          {editing && (
-            <Card>
-              <Typography sx={{ fontWeight: 700 }} mb={2}>{editing === 'new' ? 'آموزش کپسولی جدید' : 'ویرایش آموزش کپسولی'}</Typography>
-              <Divider sx={{ mb: 2.5 }} />
-              <ProductForm initial={editing === 'new' ? { ...EMPTY_PRODUCT, kind: 'capsule', duration: 'کپسولی' } : toForm(courses.data.find((c) => c.id === editing))} categories={categories.data ?? []} teachers={teachers.data ?? []} allCourses={courses.data ?? []} onTeacherCreated={addTeacherToList} onSubmit={saveProduct} onCancel={() => setEditing(null)} saving={saving} />
-            </Card>
-          )}
-          {courses.loading && <ListRowSkeleton count={4} circularAvatar={true} />}
-          {filteredByKind('capsule').length === 0 && !courses.loading && !editing && <Alert severity="info">آموزش کپسولی ثبت نشده است.</Alert>}
-          <Grid container spacing={1.5}>
-            {filteredByKind('capsule').map((c) => (
-              <Grid key={c.id} size={12}>
-                <Paper elevation={0} sx={{ px: { xs: 1.5, sm: 2 }, py: 1.25, display: 'flex', alignItems: 'center', gap: 2, border: '1px solid', borderColor: 'divider', borderRadius: 999 }}>
-                  {c.image && <Box component="img" src={c.image} alt={c.name} sx={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '1px solid', borderColor: 'divider' }} />}
-                  <Box sx={{ minWidth: 0, flex: 1 }}><Typography sx={{ fontWeight: 700, fontSize: 14 }} noWrap>{c.name}</Typography><Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ fontSize: 12 }}>{formatToman(c.salePrice ?? c.price)}{c.level ? ` · ${c.level}` : ''}</Typography></Box>
-                  <Stack direction="row" sx={{ alignItems: 'center' }} spacing={1}>
-                    <StatusDot active={c.isActive} />
-                    <RowActions
-                      extra={
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          startIcon={<VideoLibraryIcon sx={{ fontSize: 15 }} />}
-                          onClick={() => setSessionsCourse(c)}
-                          sx={{ fontSize: 11, py: 0.25, px: 1, height: 28 }}
-                        >
-                          جلسات ({(c.sessions || []).length})
-                        </Button>
-                      }
-                      onEdit={() => setEditing(c.id)}
-                      onDelete={() => deleteProduct(c.id)}
-                    />
-                  </Stack>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Stack>
-      )}
-
-      {tab === 'skill' && (
-        <Stack spacing={2}>
-          {!editing && <Box><Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditing('new'); setNotice(null); }}>پکیج مهارتی جدید</Button></Box>}
-          {editing && (
-            <Card>
-              <Typography sx={{ fontWeight: 700 }} mb={2}>{editing === 'new' ? 'پکیج مهارتی جدید' : 'ویرایش پکیج مهارتی'}</Typography>
-              <Divider sx={{ mb: 2.5 }} />
-              <ProductForm initial={editing === 'new' ? { ...EMPTY_PRODUCT, kind: 'skill' } : toForm(courses.data.find((c) => c.id === editing))} categories={categories.data ?? []} teachers={teachers.data ?? []} allCourses={courses.data ?? []} onTeacherCreated={addTeacherToList} onSubmit={saveProduct} onCancel={() => setEditing(null)} saving={saving} />
-            </Card>
-          )}
-          {courses.loading && <ListRowSkeleton count={4} circularAvatar={true} />}
-          {filteredByKind('skill').length === 0 && !courses.loading && !editing && <Alert severity="info">پکیج مهارتی ثبت نشده است.</Alert>}
-          <Grid container spacing={1.5}>
-            {filteredByKind('skill').map((c) => (
-              <Grid key={c.id} size={12}>
-                <Paper elevation={0} sx={{ px: { xs: 1.5, sm: 2 }, py: 1.25, display: 'flex', alignItems: 'center', gap: 2, border: '1px solid', borderColor: 'divider', borderRadius: 999 }}>
-                  {c.image && <Box component="img" src={c.image} alt={c.name} sx={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '1px solid', borderColor: 'divider' }} />}
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: 14 }} noWrap>{c.name}</Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ fontSize: 12 }}>
-                      {formatToman(c.salePrice ?? c.price)}
-                      {' · '}شامل {(c.packageIncludedCourses || []).length} دوره
-                    </Typography>
-                  </Box>
-                  <Stack direction="row" sx={{ alignItems: 'center' }} spacing={1}>
-                    <StatusDot active={c.isActive} />
-                    <RowActions
-                      extra={
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          startIcon={<VideoLibraryIcon sx={{ fontSize: 15 }} />}
-                          onClick={() => setSessionsCourse(c)}
-                          sx={{ fontSize: 11, py: 0.25, px: 1, height: 28 }}
-                        >
-                          جلسات ({(c.sessions || []).length})
-                        </Button>
-                      }
-                      onEdit={() => setEditing(c.id)}
-                      onDelete={() => deleteProduct(c.id)}
-                    />
-                  </Stack>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Stack>
-      )}
-
-      {tab === 'categories' && (
-        <Stack spacing={2}>
-          {!editingCat && <Box><Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditingCat('new')}>دسته جدید</Button></Box>}
-          {editingCat && (
-            <Card><Typography fontWeight={700} mb={2}>{editingCat === 'new' ? 'دسته جدید' : 'ویرایش دسته'}</Typography><Divider sx={{ mb: 2.5 }} />
-              <CategoryForm initial={editingCat === 'new' ? { name: '', slug: '', sortOrder: 0, isActive: true } : categories.data.find((c) => c.id === editingCat)} onSubmit={saveCategory} onCancel={() => setEditingCat(null)} saving={saving} />
-            </Card>
-          )}
-          {categories.loading && <CategoryListSkeleton count={4} />}
-          {categories.error && <Alert severity="error">خطا: {categories.error}</Alert>}
-          {(categories.data ?? []).map((c) => (
-            <Paper key={c.id} elevation={0} sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid', borderColor: 'divider', borderRadius: 2.5 }}>
-              <Box>
-                <Typography fontWeight={600} fontSize={14}>{c.name}</Typography>
-                <Typography variant="caption" color="text.secondary" dir="ltr">{c.slug ?? '—'}</Typography>
-              </Box>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <StatusDot active={c.isActive} />
-                <RowActions onEdit={() => setEditingCat(c.id)} onDelete={() => deleteCategory(c.id)} />
-              </Stack>
-            </Paper>
-          ))}
-        </Stack>
+      {/* Create / Edit Course Modal */}
+      {editingProduct && (
+        <ProductFormModal
+          open={Boolean(editingProduct)}
+          initial={editingProduct === 'new' ? EMPTY_PRODUCT : editingProduct}
+          kind={tab === 'capsule' ? 'capsule' : tab === 'skill' ? 'skill' : 'regular'}
+          categories={categories.data || []}
+          teachers={teachers.data || []}
+          allCourses={allItems}
+          onClose={() => setEditingProduct(null)}
+          onSaved={() => courses.reload()}
+        />
       )}
 
       {/* Sessions Dialog */}
       {sessionsCourse && (
         <SessionsDialog
-          open={!!sessionsCourse}
+          open={Boolean(sessionsCourse)}
           course={sessionsCourse}
-          onClose={() => {
-            setSessionsCourse(null);
-            courses.reload();
-          }}
+          onClose={() => setSessionsCourse(null)}
         />
       )}
+
+      {/* Category Modal */}
+      {categoryModal && (
+        <CategoryModal
+          open={Boolean(categoryModal)}
+          initial={categoryModal === 'new' ? null : categoryModal}
+          onClose={() => setCategoryModal(null)}
+          onSaved={() => categories.reload()}
+        />
+      )}
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={Boolean(deleteConfirm)}
+        title="تایید حذف"
+        message={`آیا مطمئن هستید که می‌خواهید «${deleteConfirm?.name}» را حذف کنید؟ این عمل غیرقابل بازگشت است.`}
+        confirmText="حذف مورد"
+        cancelText="انصراف"
+        loading={deleting}
+        onConfirm={handleDeleteCourse}
+        onClose={() => setDeleteConfirm(null)}
+      />
     </Stack>
   );
 }

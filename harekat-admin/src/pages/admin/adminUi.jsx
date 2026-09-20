@@ -1,13 +1,34 @@
-// MUI-based admin primitives — replaces previous Tailwind helpers
-import { Box, Paper, Stack, Chip, Alert, Typography, Button, Skeleton, Grid } from '@mui/material';
-import { CheckCircle as ActiveIcon, Cancel as InactiveIcon } from '@mui/icons-material';
+// MUI-based admin primitives & re-exports
+import {
+  Box,
+  Paper,
+  Stack,
+  Alert,
+  Typography,
+  Skeleton,
+  Grid,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 
-export function Card({ children, sx, ...props }) {
+// Re-export modern components
+export { default as PageHeader } from '../../components/admin/PageHeader.jsx';
+export { default as StatCard } from '../../components/admin/StatCard.jsx';
+export { default as DataTable } from '../../components/admin/DataTable.jsx';
+export { default as ConfirmDialog } from '../../components/admin/ConfirmDialog.jsx';
+export { default as StatusChip } from '../../components/admin/StatusChip.jsx';
+export { default as EmptyState } from '../../components/admin/EmptyState.jsx';
+
+export function Card({ children, sx = {}, ...props }) {
   return (
     <Paper
       elevation={0}
       sx={{
-        p: { xs: 2, sm: 2.5 },
+        p: { xs: 2.5, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
         borderRadius: 3,
@@ -21,55 +42,54 @@ export function Card({ children, sx, ...props }) {
   );
 }
 
-export function Field({ label, children, hint }) {
+export function Field({ label, children, hint, required }) {
   return (
     <Stack spacing={1}>
-      <Typography variant="caption" color="text.secondary" fontWeight={700} fontSize={12}>
-        {label}
-      </Typography>
+      {label && (
+        <Typography variant="caption" color="text.secondary" fontWeight={700} fontSize={12}>
+          {label} {required && <Box component="span" sx={{ color: 'error.main' }}>*</Box>}
+        </Typography>
+      )}
       {children}
       {hint && <Typography variant="caption" color="text.secondary" fontSize={11}>{hint}</Typography>}
     </Stack>
   );
 }
 
-export function RowActions({ onEdit, onDelete, extra }) {
+export function RowActions({ onEdit, onDelete, extra, editTooltip = 'ویرایش', deleteTooltip = 'حذف' }) {
   return (
     <Stack direction="row" spacing={0.5} alignItems="center">
       {extra}
-      {onEdit && <Button size="small" variant="text" onClick={onEdit} sx={{ minWidth: 52, fontSize: 12 }}>ویرایش</Button>}
-      {onDelete && <Button size="small" color="error" variant="text" onClick={onDelete} sx={{ minWidth: 52, fontSize: 12 }}>حذف</Button>}
+      {onEdit && (
+        <Tooltip title={editTooltip}>
+          <IconButton size="small" onClick={onEdit} color="primary">
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {onDelete && (
+        <Tooltip title={deleteTooltip}>
+          <IconButton size="small" onClick={onDelete} color="error">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
     </Stack>
   );
 }
 
+// Backward compatible StatusDot that uses StatusChip
+import StatusChip from '../../components/admin/StatusChip.jsx';
 export function StatusDot({ active, label }) {
-  return (
-    <Chip
-      size="small"
-      icon={active ? <ActiveIcon sx={{ fontSize: 14 }} /> : <InactiveIcon sx={{ fontSize: 14 }} />}
-      label={label ?? (active ? 'فعال' : 'غیرفعال')}
-      color={active ? 'success' : 'default'}
-      variant={active ? 'filled' : 'outlined'}
-      sx={{ height: 24, fontSize: 11.5, fontWeight: 700, px: 0.5, '& .MuiChip-icon': { fontSize: 14, marginInlineEnd: '-4px', marginInlineStart: '4px' } }}
-    />
-  );
+  return <StatusChip status={!!active} label={label} />;
 }
 
 export function FormError({ error }) {
   if (!error) return null;
-  return <Alert severity="error" variant="outlined" sx={{ py: 0.5, fontSize: 13 }}>{error}</Alert>;
-}
-
-export function PageHeader({ title, subtitle, action }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-      <Box>
-        <Typography variant="h5" fontWeight={800} letterSpacing={-0.5}>{title}</Typography>
-        {subtitle && <Typography variant="body2" color="text.secondary" mt={0.5} fontSize={13}>{subtitle}</Typography>}
-      </Box>
-      {action}
-    </Box>
+    <Alert severity="error" variant="outlined" sx={{ py: 0.5, fontSize: 13, borderRadius: 2 }}>
+      {error}
+    </Alert>
   );
 }
 
@@ -81,19 +101,19 @@ export function ListRowSkeleton({ count = 4, circularAvatar = true, showAvatar =
           key={i}
           elevation={0}
           sx={{
-            px: { xs: 1.5, sm: 2 },
-            py: 1.25,
+            px: { xs: 2, sm: 2.5 },
+            py: 1.5,
             display: 'flex',
             alignItems: 'center',
             gap: 2,
             border: '1px solid',
             borderColor: 'divider',
-            borderRadius: circularAvatar ? 999 : 2.5,
+            borderRadius: 2.5,
           }}
         >
           {showAvatar && (
             circularAvatar ? (
-              <Skeleton variant="circular" width={avatarWidth || 44} height={avatarHeight || 44} sx={{ flexShrink: 0 }} />
+              <Skeleton variant="circular" width={avatarWidth || 40} height={avatarHeight || 40} sx={{ flexShrink: 0 }} />
             ) : (
               <Skeleton variant="rounded" width={avatarWidth || 56} height={avatarHeight || 40} sx={{ borderRadius: 1.5, flexShrink: 0 }} />
             )
@@ -103,7 +123,7 @@ export function ListRowSkeleton({ count = 4, circularAvatar = true, showAvatar =
             <Skeleton variant="text" width={260} height={16} sx={{ borderRadius: 1, mt: 0.5 }} />
           </Box>
           <Stack direction="row" spacing={1} alignItems="center" flexShrink={0}>
-            <Skeleton variant="circular" width={12} height={12} />
+            <Skeleton variant="circular" width={20} height={20} />
             <Skeleton variant="circular" width={28} height={28} />
             <Skeleton variant="circular" width={28} height={28} />
           </Stack>
@@ -121,7 +141,7 @@ export function CategoryListSkeleton({ count = 4 }) {
           key={i}
           elevation={0}
           sx={{
-            p: 1.5,
+            p: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -135,7 +155,7 @@ export function CategoryListSkeleton({ count = 4 }) {
             <Skeleton variant="text" width={80} height={16} sx={{ borderRadius: 1, mt: 0.5 }} />
           </Box>
           <Stack direction="row" spacing={1} alignItems="center">
-            <Skeleton variant="circular" width={12} height={12} />
+            <Skeleton variant="circular" width={20} height={20} />
             <Skeleton variant="circular" width={28} height={28} />
             <Skeleton variant="circular" width={28} height={28} />
           </Stack>
@@ -153,7 +173,7 @@ export function TeacherCardSkeleton({ count = 4 }) {
           <Paper
             elevation={0}
             sx={{
-              p: 2,
+              p: 2.5,
               display: 'flex',
               gap: 2,
               alignItems: 'center',
@@ -189,7 +209,7 @@ export function BannerListSkeleton({ count = 3 }) {
           key={i}
           elevation={0}
           sx={{
-            p: 1.5,
+            p: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -207,7 +227,7 @@ export function BannerListSkeleton({ count = 3 }) {
             </Box>
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center">
-            <Skeleton variant="circular" width={12} height={12} />
+            <Skeleton variant="circular" width={20} height={20} />
             <Skeleton variant="circular" width={28} height={28} />
             <Skeleton variant="circular" width={28} height={28} />
           </Stack>
@@ -217,7 +237,6 @@ export function BannerListSkeleton({ count = 3 }) {
   );
 }
 
-// Re-export MUI inputs for old imports: inputCls no longer needed but keep for compat
 export const inputCls = '';
 export const btnPrimaryCls = '';
 export const btnGhostCls = '';

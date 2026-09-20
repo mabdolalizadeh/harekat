@@ -15,6 +15,8 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 })
 
+import { NotificationProvider } from './context/NotificationProvider.jsx'
+
 export function ThemedApp() {
   const [mode, setMode] = useState(() => localStorage.getItem('adminTheme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
   const theme = useMemo(() => (mode === 'dark' ? darkTheme : lightTheme), [mode])
@@ -38,7 +40,9 @@ export function ThemedApp() {
     <CacheProvider value={cacheRtl}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <App mode={mode} onToggleTheme={() => setMode((m) => (m === 'dark' ? 'light' : 'dark'))} />
+        <NotificationProvider>
+          <App mode={mode} onToggleTheme={() => setMode((m) => (m === 'dark' ? 'light' : 'dark'))} />
+        </NotificationProvider>
       </ThemeProvider>
     </CacheProvider>
   )

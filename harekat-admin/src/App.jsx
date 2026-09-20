@@ -1,57 +1,227 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import AdminLogin from "./pages/admin/AdminLogin.jsx";
-import AdminLayout from "./pages/admin/AdminLayout.jsx";
-import RequireAdminAuth from "./components/RequireAdminAuth.jsx";
-import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
-import AdminProducts from "./pages/admin/AdminProducts.jsx";
-import AdminCoupons from "./pages/admin/AdminCoupons.jsx";
-import AdminHeader from "./pages/admin/AdminHeader.jsx";
-import AdminContent from "./pages/admin/AdminContent.jsx";
-import AdminTeachers from "./pages/admin/AdminTeachers.jsx";
-import AdminMarquee from "./pages/admin/AdminMarquee.jsx";
-import AdminSubscriptions from "./pages/admin/AdminSubscriptions.jsx";
-import AdminBanners from "./pages/admin/AdminBanners.jsx";
-import AdminSettings from "./pages/admin/AdminSettings.jsx";
-import AdminStudents from "./pages/admin/AdminStudents.jsx";
-import AdminOrders from "./pages/admin/AdminOrders.jsx";
-import AdminPayments from "./pages/admin/AdminPayments.jsx";
-import AdminTickets from "./pages/admin/AdminTickets.jsx";
-import AdminExams from "./pages/admin/AdminExams.jsx";
-import AdminLicenses from "./pages/admin/AdminLicenses.jsx";
-import AdminTAs from "./pages/admin/AdminTAs.jsx";
+import { Box, CircularProgress } from '@mui/material';
+import AdminLogin from './pages/admin/AdminLogin.jsx';
+import AdminLayout from './pages/admin/AdminLayout.jsx';
+import RequireAdminAuth from './components/RequireAdminAuth.jsx';
+
+// Lazy-loaded pages for optimal performance and chunking
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard.jsx'));
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts.jsx'));
+const AdminCoupons = lazy(() => import('./pages/admin/AdminCoupons.jsx'));
+const AdminHeader = lazy(() => import('./pages/admin/AdminHeader.jsx'));
+const AdminContent = lazy(() => import('./pages/admin/AdminContent.jsx'));
+const AdminTeachers = lazy(() => import('./pages/admin/AdminTeachers.jsx'));
+const AdminMarquee = lazy(() => import('./pages/admin/AdminMarquee.jsx'));
+const AdminSubscriptions = lazy(() => import('./pages/admin/AdminSubscriptions.jsx'));
+const AdminBanners = lazy(() => import('./pages/admin/AdminBanners.jsx'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings.jsx'));
+const AdminStudents = lazy(() => import('./pages/admin/AdminStudents.jsx'));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders.jsx'));
+const AdminPayments = lazy(() => import('./pages/admin/AdminPayments.jsx'));
+const AdminTickets = lazy(() => import('./pages/admin/AdminTickets.jsx'));
+const AdminExams = lazy(() => import('./pages/admin/AdminExams.jsx'));
+const AdminLicenses = lazy(() => import('./pages/admin/AdminLicenses.jsx'));
+const AdminTAs = lazy(() => import('./pages/admin/AdminTAs.jsx'));
+
+function PageLoader() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '50vh',
+        width: '100%',
+      }}
+    >
+      <CircularProgress size={36} thickness={4} />
+    </Box>
+  );
+}
 
 export default function App({ mode, onToggleTheme }) {
-    return (
-        <Routes>
-            <Route path='/login' element={<AdminLogin />} />
-            <Route path='/' element={
-                <RequireAdminAuth>
-                    <AdminLayout mode={mode} onToggleTheme={onToggleTheme} />
-                </RequireAdminAuth>
-            }>
-                <Route index element={<AdminDashboard />} />
-                <Route path='students' element={<AdminStudents />} />
-                <Route path='courses' element={<AdminProducts defaultTab="products" />} />
-                <Route path='capsules' element={<AdminProducts defaultTab="capsule" />} />
-                <Route path='packages' element={<AdminProducts defaultTab="skill" />} />
-                <Route path='categories' element={<AdminProducts defaultTab="categories" />} />
-                <Route path='products' element={<AdminProducts />} />
-                <Route path='subscriptions' element={<AdminSubscriptions />} />
-                <Route path='orders' element={<AdminOrders />} />
-                <Route path='payments' element={<AdminPayments />} />
-                <Route path='tickets' element={<AdminTickets />} />
-                <Route path='exams' element={<AdminExams />} />
-                <Route path='licenses' element={<AdminLicenses />} />
-                <Route path='tas' element={<AdminTAs />} />
-                <Route path='teachers' element={<AdminTeachers />} />
-                <Route path='coupons' element={<AdminCoupons />} />
-                <Route path='marquee' element={<AdminMarquee />} />
-                <Route path='banners' element={<AdminBanners />} />
-                <Route path='header' element={<AdminHeader />} />
-                <Route path='content' element={<AdminContent />} />
-                <Route path='settings' element={<AdminSettings />} />
-            </Route>
-            <Route path='*' element={<Navigate to="/" replace />} />
-        </Routes>
-    );
+  return (
+    <Routes>
+      <Route path="/login" element={<AdminLogin />} />
+      <Route
+        path="/"
+        element={
+          <RequireAdminAuth>
+            <AdminLayout mode={mode} onToggleTheme={onToggleTheme} />
+          </RequireAdminAuth>
+        }
+      >
+        <Route
+          index
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminDashboard />
+            </Suspense>
+          }
+        />
+        <Route
+          path="students"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminStudents />
+            </Suspense>
+          }
+        />
+        <Route
+          path="courses"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminProducts defaultTab="products" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="capsules"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminProducts defaultTab="capsule" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="packages"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminProducts defaultTab="skill" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="categories"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminProducts defaultTab="categories" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="products"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminProducts />
+            </Suspense>
+          }
+        />
+        <Route
+          path="subscriptions"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminSubscriptions />
+            </Suspense>
+          }
+        />
+        <Route
+          path="orders"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminOrders />
+            </Suspense>
+          }
+        />
+        <Route
+          path="payments"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminPayments />
+            </Suspense>
+          }
+        />
+        <Route
+          path="tickets"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminTickets />
+            </Suspense>
+          }
+        />
+        <Route
+          path="exams"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminExams />
+            </Suspense>
+          }
+        />
+        <Route
+          path="licenses"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminLicenses />
+            </Suspense>
+          }
+        />
+        <Route
+          path="tas"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminTAs />
+            </Suspense>
+          }
+        />
+        <Route
+          path="teachers"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminTeachers />
+            </Suspense>
+          }
+        />
+        <Route
+          path="coupons"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminCoupons />
+            </Suspense>
+          }
+        />
+        <Route
+          path="marquee"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminMarquee />
+            </Suspense>
+          }
+        />
+        <Route
+          path="banners"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminBanners />
+            </Suspense>
+          }
+        />
+        <Route
+          path="header"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminHeader />
+            </Suspense>
+          }
+        />
+        <Route
+          path="content"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminContent />
+            </Suspense>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminSettings />
+            </Suspense>
+          }
+        />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }

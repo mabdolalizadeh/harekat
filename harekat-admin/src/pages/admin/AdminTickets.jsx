@@ -1,56 +1,67 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import {
+  Box,
+  Stack,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Avatar,
+  CircularProgress,
+  Paper,
+} from '@mui/material';
+import {
+  Chat as ChatIcon,
+  Send as SendIcon,
+  LiveHelp as HelpIcon,
+  Person as PersonIcon,
+  SupportAgent as StaffIcon,
+} from '@mui/icons-material';
 import { adminApi } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
-import { Card, PageHeader, ListRowSkeleton } from './adminUi.jsx';
-import {
-  Box, Stack, Typography, Grid, Alert, Paper, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, Button, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, Divider, FormControl, InputLabel, Select, MenuItem
-} from '@mui/material';
-import { Chat as ChatIcon, Send as SendIcon } from '@mui/icons-material';
-
-const STATUS_MAP = {
-  open: { label: 'باز', color: 'info' },
-  in_progress: { label: 'در حال بررسی', color: 'warning' },
-  answered: { label: 'پاسخ داده شده', color: 'success' },
-  closed: { label: 'بسته شده', color: 'default' }
-};
-
-const PRIORITY_MAP = {
-  low: { label: 'کم', color: 'default' },
-  medium: { label: 'متوسط', color: 'primary' },
-  high: { label: 'بالا', color: 'error' }
-};
+import { useNotification } from '../../context/NotificationContext.jsx';
+import PageHeader from '../../components/admin/PageHeader.jsx';
+import DataTable from '../../components/admin/DataTable.jsx';
+import StatusChip from '../../components/admin/StatusChip.jsx';
 
 export default function AdminTickets() {
+  const { showSuccess, showError } = useNotification();
   const [activeTicket, setActiveTicket] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
-  const [notice, setNotice] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const tickets = useApi(() => adminApi.listTickets());
 
-  const openConversation = async (t) => {
+  const openConversation = useCallback(async (t) => {
     try {
       const res = await adminApi.getTicket(t.id);
       setActiveTicket(res.data);
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در بارگذاری پیام‌های تیکت');
     }
-  };
+  }, [showError]);
 
   const handleSendReply = async () => {
     if (!replyText.trim() || !activeTicket) return;
     setSending(true);
     try {
-      await adminApi.replyTicket(activeTicket.id, { message: replyText });
+      await adminApi.replyTicket(activeTicket.id, { message: replyText.trim() });
       setReplyText('');
       const updated = await adminApi.getTicket(activeTicket.id);
       setActiveTicket(updated.data);
       tickets.reload();
-      setNotice('پاسخ با موفقیت ارسال شد');
+      showSuccess('پاسخ شما با موفقیت ثبت و ارسال شد');
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در ارسال پاسخ');
     } finally {
       setSending(false);
     }
@@ -63,147 +74,220 @@ export default function AdminTickets() {
       const updated = await adminApi.getTicket(activeTicket.id);
       setActiveTicket(updated.data);
       tickets.reload();
+      showSuccess('وضعیت تیکت تغییر کرد');
     } catch (err) {
-      alert(`خطا: ${err.message}`);
+      showError(err.message || 'خطا در تغییر وضعیت تیکت');
     }
   };
 
+  const filteredTickets = useMemo(() => {
+    const list = tickets.data || [];
+    if (statusFilter === 'all') return list;
+    return list.filter((t) => t.status === statusFilter);
+  }, [tickets.data, statusFilter]);
+
+  const columns = useMemo(() => [
+    {
+      id: 'subject',
+      label: 'موضوع تیکت',
+      render: (row) => (
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar sx={{ width: 34, height: 34, bgcolor: 'info.light', borderRadius: 2 }}>
+            <HelpIcon sx={{ fontSize: 18 }} />
+          </Avatar>
+          <Box>
+            <Typography fontWeight={700} fontSize="0.84rem">
+              {row.subject}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {row.course?.name ? `دوره: ${row.course.name}` : 'پشتیبانی عمومی'}
+            </Typography>
+          </Box>
+        </Stack>
+      ),
+    },
+    {
+      id: 'user',
+      label: 'کاربر / دانشجو',
+      render: (row) => {
+        const user = row.user;
+        const name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.phoneNumber : 'کاربر';
+        return (
+          <Box>
+            <Typography fontWeight={600} fontSize="0.84rem">
+              {name}
+            </Typography>
+            {user?.phoneNumber && (
+              <Typography variant="caption" color="text.secondary" dir="ltr" display="block">
+                {user.phoneNumber}
+              </Typography>
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      id: 'priority',
+      label: 'اولویت',
+      render: (row) => <StatusChip status={row.priority || 'medium'} />,
+    },
+    {
+      id: 'status',
+      label: 'وضعیت',
+      render: (row) => <StatusChip status={row.status || 'open'} />,
+    },
+    {
+      id: 'updatedAt',
+      label: 'آخرین بروزرسانی',
+      render: (row) => (
+        <Typography variant="caption" color="text.secondary">
+          {row.updatedAt ? new Date(row.updatedAt).toLocaleDateString('fa-IR') : '—'}
+        </Typography>
+      ),
+    },
+    {
+      id: 'actions',
+      label: 'گفتگو',
+      sortable: false,
+      align: 'left',
+      render: (row) => (
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<ChatIcon fontSize="small" />}
+          onClick={() => openConversation(row)}
+          sx={{ borderRadius: 2 }}
+        >
+          مشاهده پیام‌ها
+        </Button>
+      ),
+    },
+  ], [openConversation]);
+
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3.5}>
       <PageHeader
         title="تیکت‌های پشتیبانی"
-        subtitle="پاسخگویی و پیگیری تیکت‌های دانشجویان و دوره‌های آموزشی"
+        subtitle="پاسخگویی، بررسی سوالات آموزشی و پیگیری تیکت‌های مطرح‌شده توسط دانشجویان"
       />
 
-      {notice && <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert>}
-
-      <Card>
-        {tickets.loading && <ListRowSkeleton count={4} />}
-        {tickets.error && (
-          <Alert severity="error">
-            خطا: {tickets.error} <Button size="small" onClick={tickets.reload}>تلاش مجدد</Button>
-          </Alert>
-        )}
-
-        {!tickets.loading && tickets.isEmpty && (
-          <Alert severity="info">هیچ تیکت پشتیبانی ثبت نشده است.</Alert>
-        )}
-
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>موضوع</TableCell>
-              <TableCell>کاربر / دانشجو</TableCell>
-              <TableCell>دوره مربوطه</TableCell>
-              <TableCell>اولویت</TableCell>
-              <TableCell>وضعیت</TableCell>
-              <TableCell>آخرین بروزرسانی</TableCell>
-              <TableCell align="left">گفتگو</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {(tickets.data || []).map((t) => {
-              const st = STATUS_MAP[t.status] || { label: t.status, color: 'default' };
-              const pr = PRIORITY_MAP[t.priority] || { label: t.priority, color: 'default' };
-              const user = t.user;
-              const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.phoneNumber : 'کاربر';
-
-              return (
-                <TableRow key={t.id}>
-                  <TableCell sx={{ fontWeight: 600 }}>{t.subject}</TableCell>
-                  <TableCell>{userName}</TableCell>
-                  <TableCell>
-                    {t.course?.name ? (
-                      <Chip label={t.course.name} size="small" variant="outlined" />
-                    ) : 'عمومی'}
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={pr.label} color={pr.color} size="small" variant="outlined" />
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={st.label} color={st.color} size="small" sx={{ fontWeight: 600 }} />
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 12 }}>
-                    {t.updatedAt ? new Date(t.updatedAt).toLocaleDateString('fa-IR') : '—'}
-                  </TableCell>
-                  <TableCell align="left">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<ChatIcon />}
-                      onClick={() => openConversation(t)}
-                    >
-                      مشاهده تیکت
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Card>
+      {/* Tickets DataTable */}
+      <DataTable
+        columns={columns}
+        rows={filteredTickets}
+        loading={tickets.loading}
+        error={tickets.error}
+        onReload={tickets.reload}
+        searchPlaceholder="جستجوی موضوع، نام دانشجو..."
+        searchFilter={(row, term) => {
+          const user = row.user;
+          const name = `${user?.firstName || ''} ${user?.lastName || ''}`.toLowerCase();
+          const sub = (row.subject || '').toLowerCase();
+          const phone = (user?.phoneNumber || '').toLowerCase();
+          return name.includes(term) || sub.includes(term) || phone.includes(term);
+        }}
+        filterSlot={
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>فیلتر وضعیت</InputLabel>
+            <Select
+              value={statusFilter}
+              label="فیلتر وضعیت"
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <MenuItem value="all">همه تیکت‌ها</MenuItem>
+              <MenuItem value="open">باز</MenuItem>
+              <MenuItem value="in_progress">در حال بررسی</MenuItem>
+              <MenuItem value="answered">پاسخ داده شده</MenuItem>
+              <MenuItem value="closed">بسته شده</MenuItem>
+            </Select>
+          </FormControl>
+        }
+        emptyTitle="تیکت پشتیبانی یافت نشد"
+        emptyDescription="هیچ تیکت پشتیبانی مطابق با فیلترهای انتخابی یافت نشد."
+      />
 
       {/* Ticket Conversation Modal */}
       {activeTicket && (
         <Dialog open onClose={() => setActiveTicket(null)} maxWidth="md" fullWidth dir="rtl">
-          <DialogTitle fontWeight={700}>
-            {activeTicket.subject} {activeTicket.course?.name ? `(${activeTicket.course.name})` : ''}
-          </DialogTitle>
-          <DialogContent dividers>
-            <Stack spacing={2}>
-              <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-                <Box>
-                  <Chip
-                    label={STATUS_MAP[activeTicket.status]?.label || activeTicket.status}
-                    color={STATUS_MAP[activeTicket.status]?.color || 'default'}
-                    size="small"
-                    sx={{ mr: 1 }}
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    دانشجو: {activeTicket.user?.firstName} {activeTicket.user?.lastName} ({activeTicket.user?.phoneNumber})
-                  </Typography>
-                </Box>
-                <FormControl size="small" sx={{ minWidth: 140 }}>
-                  <InputLabel>تغییر وضعیت</InputLabel>
-                  <Select
-                    value={activeTicket.status}
-                    label="تغییر وضعیت"
-                    onChange={(e) => handleStatusChange(e.target.value)}
-                  >
-                    <MenuItem value="open">باز</MenuItem>
-                    <MenuItem value="in_progress">در حال بررسی</MenuItem>
-                    <MenuItem value="answered">پاسخ داده شده</MenuItem>
-                    <MenuItem value="closed">بسته شده</MenuItem>
-                  </Select>
-                </FormControl>
-              </Stack>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1.5 }}>
+            <Box>
+              <Typography variant="h6" fontWeight={700}>
+                {activeTicket.subject}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {activeTicket.course?.name ? `دوره: ${activeTicket.course.name} · ` : ''}
+                دانشجو: {activeTicket.user?.firstName || ''} {activeTicket.user?.lastName || ''} ({activeTicket.user?.phoneNumber || ''})
+              </Typography>
+            </Box>
 
-              {/* Messages Container */}
-              <Box sx={{ maxHeight: 360, overflowY: 'auto', p: 1 }}>
-                <Stack spacing={1.5}>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>وضعیت تیکت</InputLabel>
+              <Select
+                value={activeTicket.status || 'open'}
+                label="وضعیت تیکت"
+                onChange={(e) => handleStatusChange(e.target.value)}
+              >
+                <MenuItem value="open">باز</MenuItem>
+                <MenuItem value="in_progress">در حال بررسی</MenuItem>
+                <MenuItem value="answered">پاسخ داده شده</MenuItem>
+                <MenuItem value="closed">بسته شده</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogTitle>
+
+          <DialogContent dividers sx={{ p: 2.5 }}>
+            <Stack spacing={2.5}>
+              {/* Message Thread Container */}
+              <Box sx={{ maxHeight: 380, overflowY: 'auto', p: 1 }}>
+                <Stack spacing={2}>
                   {(activeTicket.messages || []).map((msg) => {
                     const isStaff = msg.senderType === 'admin' || msg.senderType === 'ta';
                     return (
                       <Box
                         key={msg.id}
                         sx={{
-                          alignSelf: isStaff ? 'flex-end' : 'flex-start',
-                          maxWidth: '80%',
-                          p: 1.5,
-                          borderRadius: 2,
-                          bgcolor: isStaff ? 'primary.light' : 'action.hover',
-                          color: isStaff ? 'primary.contrastText' : 'text.primary'
+                          display: 'flex',
+                          flexDirection: isStaff ? 'row-reverse' : 'row',
+                          alignItems: 'flex-start',
+                          gap: 1.5,
                         }}
                       >
-                        <Typography variant="caption" fontWeight={700} sx={{ display: 'block', mb: 0.5, opacity: 0.9 }}>
-                          {msg.senderName} ({isStaff ? 'پشتیبان' : 'دانشجو'})
-                        </Typography>
-                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-                          {msg.message}
-                        </Typography>
-                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, textAlign: 'left', opacity: 0.7 }}>
-                          {new Date(msg.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}
-                        </Typography>
+                        <Avatar
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            bgcolor: isStaff ? 'primary.main' : 'secondary.light',
+                            fontSize: '0.75rem',
+                          }}
+                        >
+                          {isStaff ? <StaffIcon sx={{ fontSize: 18 }} /> : <PersonIcon sx={{ fontSize: 18 }} />}
+                        </Avatar>
+
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            maxWidth: '75%',
+                            p: 2,
+                            borderRadius: 2.5,
+                            bgcolor: isStaff ? 'primary.main' : 'action.hover',
+                            color: isStaff ? 'primary.contrastText' : 'text.primary',
+                            border: '1px solid',
+                            borderColor: isStaff ? 'primary.dark' : 'divider',
+                          }}
+                        >
+                          <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" mb={0.5}>
+                            <Typography variant="caption" fontWeight={700} sx={{ opacity: 0.9 }}>
+                              {msg.senderName || (isStaff ? 'پشتیبان حرکت' : 'دانشجو')}
+                            </Typography>
+                            <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.675rem' }}>
+                              {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }) : ''}
+                            </Typography>
+                          </Stack>
+
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '0.84rem' }}>
+                            {msg.message}
+                          </Typography>
+                        </Paper>
                       </Box>
                     );
                   })}
@@ -212,7 +296,7 @@ export default function AdminTickets() {
 
               <Divider />
 
-              {/* Reply box */}
+              {/* Reply Box */}
               <Box>
                 <TextField
                   fullWidth
@@ -222,20 +306,24 @@ export default function AdminTickets() {
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                 />
-                <Button
-                  variant="contained"
-                  endIcon={<SendIcon />}
-                  disabled={sending || !replyText.trim()}
-                  onClick={handleSendReply}
-                  sx={{ mt: 1.5 }}
-                >
-                  {sending ? 'در حال ارسال...' : 'ارسال پاسخ'}
-                </Button>
+                <Stack direction="row" justifyContent="flex-end" mt={1.5}>
+                  <Button
+                    variant="contained"
+                    endIcon={sending ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
+                    disabled={sending || !replyText.trim()}
+                    onClick={handleSendReply}
+                  >
+                    {sending ? 'در حال ارسال...' : 'ارسال پاسخ'}
+                  </Button>
+                </Stack>
               </Box>
             </Stack>
           </DialogContent>
+
           <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setActiveTicket(null)}>بستن</Button>
+            <Button onClick={() => setActiveTicket(null)} variant="outlined">
+              بستن
+            </Button>
           </DialogActions>
         </Dialog>
       )}
