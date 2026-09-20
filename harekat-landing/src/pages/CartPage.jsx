@@ -113,11 +113,7 @@ export default function CartPage() {
 
     const handleProceedToCheckout = async () => {
         if (!isLoggedIn) {
-            navigate('/auth', {
-                state: {
-                    from: '/cart',
-                }
-            });
+            window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
             return;
         }
 

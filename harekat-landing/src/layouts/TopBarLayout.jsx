@@ -327,7 +327,9 @@ export default function TopBarLayout() {
                                 </AnimatePresence>
                             </div>
                         ) : (
-                            <SecondaryButton onClick={() => navigate('/auth')}>
+                            <SecondaryButton onClick={() => {
+                                window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
+                            }}>
                                 ورود
                             </SecondaryButton>
                         )}
@@ -423,7 +425,7 @@ export default function TopBarLayout() {
                             ) : (
                                 <SecondaryButton onClick={() => {
                                     setMobileOpen(false);
-                                    navigate('/auth');
+                                    window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
                                 }}>
                                     ورود
                                 </SecondaryButton>

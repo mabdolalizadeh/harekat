@@ -8,6 +8,19 @@ function getCookie(name) {
 
 export function token(kind = 'token') {
     try {
+        if (typeof window !== 'undefined' && window.location.search) {
+            const params = new URLSearchParams(window.location.search);
+            const queryToken = params.get('auth_token') || params.get('token');
+            if (queryToken) {
+                setToken(queryToken, kind);
+                params.delete('auth_token');
+                params.delete('token');
+                const newSearch = params.toString() ? `?${params.toString()}` : '';
+                window.history.replaceState({}, '', `${window.location.pathname}${newSearch}${window.location.hash}`);
+                return queryToken;
+            }
+        }
+
         const local = localStorage.getItem(kind);
         if (local) return local;
         const cookieToken = getCookie('auth_token') || getCookie('token');

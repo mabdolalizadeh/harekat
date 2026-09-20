@@ -20,6 +20,21 @@ import { toPersianDigits } from '../utils/formatters.js';
 
 const LANDING_URL = import.meta.env?.VITE_LANDING_URL || (import.meta.env?.DEV ? 'http://localhost:5173' : '/');
 
+function buildRedirectUrl(target, token) {
+  if (!target || (!target.startsWith('http://') && !target.startsWith('https://'))) {
+    return target || '/overview';
+  }
+  try {
+    const urlObj = new URL(target, window.location.origin);
+    if (token) {
+      urlObj.searchParams.set('auth_token', token);
+    }
+    return urlObj.toString();
+  } catch {
+    return target;
+  }
+}
+
 export default function LoginPage() {
   const { requestOtp, validateOtp, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -36,10 +51,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (redirectTarget.startsWith('http://') || redirectTarget.startsWith('https://')) {
-        window.location.href = redirectTarget;
+      const currentToken = localStorage.getItem('token');
+      const finalRedirect = buildRedirectUrl(redirectTarget, currentToken);
+      if (finalRedirect.startsWith('http://') || finalRedirect.startsWith('https://')) {
+        window.location.href = finalRedirect;
       } else {
-        navigate(redirectTarget, { replace: true });
+        navigate(finalRedirect, { replace: true });
       }
     }
   }, [isAuthenticated, navigate, redirectTarget]);
@@ -79,11 +96,13 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError(null);
-      await validateOtp(phoneNumber.trim(), cleanOtp);
-      if (redirectTarget.startsWith('http://') || redirectTarget.startsWith('https://')) {
-        window.location.href = redirectTarget;
+      const authRes = await validateOtp(phoneNumber.trim(), cleanOtp);
+      const currentToken = authRes?.data?.token || localStorage.getItem('token');
+      const finalRedirect = buildRedirectUrl(redirectTarget, currentToken);
+      if (finalRedirect.startsWith('http://') || finalRedirect.startsWith('https://')) {
+        window.location.href = finalRedirect;
       } else {
-        navigate(redirectTarget, { replace: true });
+        navigate(finalRedirect, { replace: true });
       }
     } catch (err) {
       setError(err.message || 'کد تایید نامعتبر است');

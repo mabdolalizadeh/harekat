@@ -3,11 +3,6 @@ import { Routes, Route } from 'react-router-dom';
 import Landing from "./pages/Landing.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
-import Auth from "./pages/Auth.jsx";
-import Products from "./pages/Products.jsx";
-import TeacherDetail from "./pages/TeacherDetail.jsx";
-import ProductDetail from "./pages/ProductDetail.jsx";
-import CoursesPage from "./pages/CoursesPage.jsx";
 import CapsulesPage from "./pages/CapsulesPage.jsx";
 import PackagesPage from "./pages/PackagesPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
@@ -15,7 +10,14 @@ import { getDashboardUrl } from "./utils/dashboardUrl.js";
 
 function ExternalDashboardRedirect() {
     useEffect(() => {
-        window.location.href = getDashboardUrl();
+        window.location.href = getDashboardUrl('/overview');
+    }, []);
+    return null;
+}
+
+function ExternalLoginRedirect() {
+    useEffect(() => {
+        window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.origin));
     }, []);
     return null;
 }
@@ -27,7 +29,8 @@ export default function App() {
             <Route path='/cart' element={<CartPage/>}/>
             <Route path='/contact-us' element={<ContactUs/>}/>
             <Route path='/about-us' element={<AboutUs/>}/>
-            <Route path='/auth' element={<Auth/>}/>
+            <Route path='/auth' element={<ExternalLoginRedirect/>}/>
+            <Route path='/login' element={<ExternalLoginRedirect/>}/>
             <Route path='/dashboard' element={<ExternalDashboardRedirect/>}/>
 
 
