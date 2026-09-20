@@ -10,6 +10,7 @@ import { customerApi, storeApi } from '../services/api.js';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { BookOpen, Clock, User, Video, ShoppingCart } from 'lucide-react';
+import { useCart } from '../contexts/CartContext.jsx';
 
 function price(value) {
     if (value === null || value === undefined || value === '') return 'رایگان';
@@ -89,6 +90,7 @@ export default function ProductDetail({ type }) {
         ? { label: 'پکیج مهارتی', path: '/packages', listLabel: 'پکیج‌های مهارتی' }
         : { label: 'دوره آموزشی', path: '/courses', listLabel: 'دوره‌ها' };
 
+    const { addToCart } = useCart();
     const discounted = course.salePrice && String(course.salePrice) !== String(course.price);
     const video = videoSource(course.videoUrl);
     const teacherName = course.teacher
@@ -97,7 +99,7 @@ export default function ProductDetail({ type }) {
 
     const add = async () => {
         try {
-            await customerApi.addToCart(course.id, type === 'package' ? 'course' : (type || 'course'), 1, discounted ? course.salePrice : course.price);
+            await addToCart(course.id, type === 'package' ? 'course' : (type || 'course'), 1, discounted ? course.salePrice : course.price);
             setAdded(true);
         } catch (err) {
             console.error('Add to cart failed:', err);

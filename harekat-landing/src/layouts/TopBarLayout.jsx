@@ -19,7 +19,8 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { cn } from "../utils/cn.js";
 import { useTheme } from "../contexts/ThemeContext.jsx";
-import { storeApi, customerApi, authApi, token, assetUrl } from "../services/api.js";
+import { useCart } from "../contexts/CartContext.jsx";
+import { storeApi, authApi, token, assetUrl } from "../services/api.js";
 import { getDashboardUrl } from "../utils/dashboardUrl.js";
 
 function scrollToId(id) {
@@ -31,6 +32,7 @@ export default function TopBarLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const { theme, setTheme } = useTheme();
+    const { itemCount, openCart } = useCart();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(!!token());
@@ -38,7 +40,6 @@ export default function TopBarLayout() {
     const [user, setUser] = useState(() => {
         try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; }
     });
-    const [cartCount, setCartCount] = useState(0);
     const [profileOpen, setProfileOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -103,22 +104,6 @@ export default function TopBarLayout() {
         return () => window.removeEventListener('storage', onStorage);
     }, []);
 
-    // Sync Cart item count (works for both guest session and logged-in user)
-    const updateCartCount = () => {
-        customerApi.getCart()
-            .then((response) => {
-                const count = (response.data?.items ?? []).reduce((sum, item) => sum + (item.quantity || 0), 0);
-                setCartCount(count);
-            })
-            .catch(() => {});
-    };
-
-    useEffect(() => {
-        updateCartCount();
-        const interval = setInterval(updateCartCount, 15000);
-        return () => clearInterval(interval);
-    }, [isLoggedIn]);
-
     const handleLogout = () => {
         authApi.logout();
         setIsLoggedIn(false);
@@ -153,9 +138,8 @@ export default function TopBarLayout() {
         }
     }, [location]);
 
-    const displayName = user?.firstName && user?.lastName
-        ? `${user.firstName} ${user.lastName}`
-        : user?.firstName || user?.phoneNumber || 'کاربر گرامی';
+    const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim();
+    const displayName = fullName || user?.name || user?.full_name || user?.phoneNumber || user?.phone_number || user?.phone || 'پروفایل';
 
     return (
         <div className={cn('fixed top-0 z-50 w-full transition-all duration-300', scrolled ? 'pt-3' : 'pt-5')}>
@@ -224,108 +208,111 @@ export default function TopBarLayout() {
                             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
                         </button>
 
-                        {/* Cart Button (Always visible next to avatar/login) */}
-                        <button
-                            type="button"
-                            onClick={() => navigate('/cart')}
-                            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-surface-muted hover:bg-border text-foreground transition-colors"
-                            title="سبد خرید"
-                        >
-                            <ShoppingCart size={16} />
-                            {cartCount > 0 && (
-                                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-primary-foreground">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </button>
-
-                        {/* User Avatar with Dropdown Menu OR Login Button */}
+                        {/* If Logged In: Show Cart Button + User Avatar Dropdown */}
                         {isLoggedIn ? (
-                            <div className="relative" ref={dropdownRef}>
+                            <>
+                                {/* Cart Button */}
                                 <button
                                     type="button"
-                                    onClick={() => setProfileOpen((prev) => !prev)}
-                                    className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-surface-muted hover:bg-border p-1 pr-2.5 text-xs text-foreground transition-colors"
+                                    onClick={openCart}
+                                    className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-surface-muted hover:bg-border text-foreground transition-colors cursor-pointer"
+                                    title="سبد خرید"
                                 >
-                                    <span className="font-semibold max-w-28 truncate">{displayName}</span>
-                                    {/* Default profile icon avatar */}
-                                    <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-primary/15 text-primary">
-                                        {user?.avatar ? (
-                                            <img src={assetUrl(user.avatar)} alt="" className="h-full w-full object-cover" />
-                                        ) : (
-                                            <UserRound size={15} />
-                                        )}
-                                    </span>
-                                    <ChevronDown size={13} className={cn('text-muted transition-transform', profileOpen && 'rotate-180')} />
+                                    <ShoppingCart size={16} />
+                                    {itemCount > 0 && (
+                                        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-primary-foreground">
+                                            {itemCount}
+                                        </span>
+                                    )}
                                 </button>
 
-                                {/* Dropdown Menu */}
-                                <AnimatePresence>
-                                    {profileOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                                            transition={{ duration: 0.15 }}
-                                            className="absolute left-0 top-full z-50 mt-2 flex min-w-48 flex-col rounded-2xl border border-[var(--border)] bg-background/95 backdrop-blur-xl p-1.5 shadow-xl"
-                                        >
-                                            <div className="px-3 py-2 border-b border-[var(--border)]/60 mb-1">
-                                                <p className="text-xs font-bold text-foreground truncate">{displayName}</p>
-                                                {user?.phoneNumber && (
-                                                    <p className="text-[11px] text-muted dir-ltr text-right mt-0.5">{user.phoneNumber}</p>
-                                                )}
-                                            </div>
+                                {/* User Avatar with Dropdown Menu */}
+                                <div className="relative" ref={dropdownRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfileOpen((prev) => !prev)}
+                                        className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-surface-muted hover:bg-border p-1 pr-2.5 text-xs text-foreground transition-colors cursor-pointer"
+                                    >
+                                        <span className="font-semibold max-w-28 truncate">{displayName}</span>
+                                        {/* Default profile icon avatar */}
+                                        <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-primary/15 text-primary">
+                                            {user?.avatar ? (
+                                                <img src={assetUrl(user.avatar)} alt="" className="h-full w-full object-cover" />
+                                            ) : (
+                                                <UserRound size={15} />
+                                            )}
+                                        </span>
+                                        <ChevronDown size={13} className={cn('text-muted transition-transform', profileOpen && 'rotate-180')} />
+                                    </button>
 
-                                            <button
-                                                type="button"
-                                                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors"
-                                                onClick={() => {
-                                                    setProfileOpen(false);
-                                                    window.location.href = getDashboardUrl('/overview');
-                                                }}
+                                    {/* Dropdown Menu */}
+                                    <AnimatePresence>
+                                        {profileOpen && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                                                transition={{ duration: 0.15 }}
+                                                className="absolute left-0 top-full z-50 mt-2 flex min-w-48 flex-col rounded-2xl border border-[var(--border)] bg-background/95 backdrop-blur-xl p-1.5 shadow-xl"
                                             >
-                                                <LayoutDashboard size={15} className="text-primary" />
-                                                <span>داشبورد کاربری</span>
-                                            </button>
+                                                <div className="px-3 py-2 border-b border-[var(--border)]/60 mb-1">
+                                                    <p className="text-xs font-bold text-foreground truncate">{displayName}</p>
+                                                    {user?.phoneNumber && (
+                                                        <p className="text-[11px] text-muted dir-ltr text-right mt-0.5">{user.phoneNumber}</p>
+                                                    )}
+                                                </div>
 
-                                            <button
-                                                type="button"
-                                                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors"
-                                                onClick={() => {
-                                                    setProfileOpen(false);
-                                                    window.location.href = getDashboardUrl('/courses');
-                                                }}
-                                            >
-                                                <BookOpen size={15} className="text-primary" />
-                                                <span>دوره‌های من</span>
-                                            </button>
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                                                    onClick={() => {
+                                                        setProfileOpen(false);
+                                                        window.location.href = getDashboardUrl('/overview');
+                                                    }}
+                                                >
+                                                    <LayoutDashboard size={15} className="text-primary" />
+                                                    <span>داشبورد کاربری</span>
+                                                </button>
 
-                                            <button
-                                                type="button"
-                                                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors"
-                                                onClick={() => {
-                                                    setProfileOpen(false);
-                                                    window.location.href = getDashboardUrl('/payments');
-                                                }}
-                                            >
-                                                <CreditCard size={15} className="text-primary" />
-                                                <span>سفارشات و پرداخت‌ها</span>
-                                            </button>
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                                                    onClick={() => {
+                                                        setProfileOpen(false);
+                                                        window.location.href = getDashboardUrl('/courses');
+                                                    }}
+                                                >
+                                                    <BookOpen size={15} className="text-primary" />
+                                                    <span>دوره‌های من</span>
+                                                </button>
 
-                                            <div className="border-t border-[var(--border)]/60 my-1" />
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                                                    onClick={() => {
+                                                        setProfileOpen(false);
+                                                        window.location.href = getDashboardUrl('/payments');
+                                                    }}
+                                                >
+                                                    <CreditCard size={15} className="text-primary" />
+                                                    <span>سفارشات و پرداخت‌ها</span>
+                                                </button>
 
-                                            <button
-                                                type="button"
-                                                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-bold text-danger-600 hover:bg-danger-500/10 transition-colors"
-                                                onClick={handleLogout}
-                                            >
-                                                <LogOut size={15} />
-                                                <span>خروج از حساب</span>
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
+                                                <div className="border-t border-[var(--border)]/60 my-1" />
+
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs font-bold text-danger-600 hover:bg-danger-500/10 transition-colors cursor-pointer"
+                                                    onClick={handleLogout}
+                                                >
+                                                    <LogOut size={15} />
+                                                    <span>خروج از حساب</span>
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </>
                         ) : (
                             <SecondaryButton onClick={() => {
                                 window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
@@ -337,22 +324,24 @@ export default function TopBarLayout() {
 
                     {/* Mobile Menu Button */}
                     <div className="flex md:hidden items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={() => navigate('/cart')}
-                            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-surface-muted text-foreground"
-                            title="سبد خرید"
-                        >
-                            <ShoppingCart size={16} />
-                            {cartCount > 0 && (
-                                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-primary-foreground">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </button>
+                        {isLoggedIn && (
+                            <button
+                                type="button"
+                                onClick={openCart}
+                                className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-surface-muted text-foreground cursor-pointer"
+                                title="سبد خرید"
+                            >
+                                <ShoppingCart size={16} />
+                                {itemCount > 0 && (
+                                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-primary-foreground">
+                                        {itemCount}
+                                    </span>
+                                )}
+                            </button>
+                        )}
 
                         <button
-                            className="text-foreground p-2"
+                            className="text-foreground p-2 cursor-pointer"
                             onClick={() => setMobileOpen(!mobileOpen)}
                         >
                             {mobileOpen ? <X size={24} /> : <Menu size={24} />}

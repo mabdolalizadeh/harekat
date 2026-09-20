@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout.jsx';
 import TopBarLayout from '../layouts/TopBarLayout.jsx';
 import Box from '../components/ui/Box.jsx';
 import { H1, H2, P } from '../components/ui/Headings.jsx';
 import { PrimaryButton, SecondaryButton } from '../components/ui/Buttons.jsx';
-import { customerApi, storeApi, token, assetUrl } from '../services/api.js';
+import { useCart } from '../contexts/CartContext.jsx';
+import { storeApi, customerApi, token, assetUrl } from '../services/api.js';
 import { getDashboardUrl } from '../utils/dashboardUrl.js';
 import {
     ShoppingCart,
@@ -29,8 +30,7 @@ function formatPrice(val) {
 
 export default function CartPage() {
     const navigate = useNavigate();
-    const [cart, setCart] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { cart, items, updateQuantity, removeItem, loading } = useCart();
     const [updatingId, setUpdatingId] = useState(null);
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -41,32 +41,11 @@ export default function CartPage() {
 
     const isLoggedIn = !!token();
 
-    const loadCart = async () => {
-        try {
-            setLoading(true);
-            const res = await customerApi.getCart();
-            if (res?.ok && res.data) {
-                setCart(res.data);
-            }
-        } catch (err) {
-            console.error('Error loading cart:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadCart();
-    }, []);
-
     const handleUpdateQuantity = async (itemId, newQty) => {
         if (newQty < 1) return;
         try {
             setUpdatingId(itemId);
-            const res = await customerApi.updateCartItem(itemId, newQty);
-            if (res?.ok && res.data) {
-                setCart(res.data);
-            }
+            await updateQuantity(itemId, newQty);
         } catch (err) {
             console.error('Error updating quantity:', err);
         } finally {
@@ -77,10 +56,7 @@ export default function CartPage() {
     const handleRemoveItem = async (itemId) => {
         try {
             setUpdatingId(itemId);
-            const res = await customerApi.removeFromCart(itemId);
-            if (res?.ok && res.data) {
-                setCart(res.data);
-            }
+            await removeItem(itemId);
         } catch (err) {
             console.error('Error removing item:', err);
         } finally {
@@ -134,7 +110,6 @@ export default function CartPage() {
         }
     };
 
-    const items = cart?.items || [];
     const subtotal = items.reduce(
         (sum, item) => sum + (Number(item.price) || 0) * (item.quantity || 1),
         0

@@ -6,7 +6,7 @@ import {Clock, User, BookOpen, Plus} from "lucide-react";
 import {useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
-import { customerApi } from "../../services/api.js";
+import { useCart } from "../../contexts/CartContext.jsx";
 
 function formatPrice(value) {
     if (value === null || value === undefined || value === '') return 'رایگان';
@@ -66,6 +66,7 @@ export function CourseCard({
     id, title, imgSrc, category, level, duration, courseType, teacher, price, salePrice, registrationStatus, productType = 'course', kind = 'regular', onAddToCart, className, ...props
 }) {
     const [adding, setAdding] = useState(false);
+    const { addToCart } = useCart();
     const navigate = useNavigate();
     const location = useLocation();
     const isSubscription = productType === 'subscription';
@@ -83,7 +84,7 @@ export function CourseCard({
 
         setAdding(true);
         try {
-            await customerApi.addToCart(id, productType, 1, hasSale ? salePrice : price);
+            await addToCart(id, productType, 1, hasSale ? salePrice : price);
             onAddToCart?.();
         } catch (err) {
             console.error('Failed to add to cart:', err);

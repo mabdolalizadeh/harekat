@@ -10,6 +10,7 @@ import CoursesPage from "./pages/CoursesPage.jsx";
 import CapsulesPage from "./pages/CapsulesPage.jsx";
 import PackagesPage from "./pages/PackagesPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
+import CartDrawer from "./components/cart/CartDrawer.jsx";
 import { getDashboardUrl } from "./utils/dashboardUrl.js";
 
 function ExternalDashboardRedirect() {
@@ -28,7 +29,9 @@ function ExternalLoginRedirect() {
 
 export default function App() {
     return (
-        <Routes>
+        <>
+            <CartDrawer />
+            <Routes>
             <Route path='/' element={<Landing/>}/>
             <Route path='/cart' element={<CartPage/>}/>
             <Route path='/contact-us' element={<ContactUs/>}/>
@@ -52,5 +55,6 @@ export default function App() {
 
             <Route path='/teachers/:id' element={<TeacherDetail/>}/>
         </Routes>
+        </>
     );
 }
