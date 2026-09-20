@@ -71,13 +71,28 @@ export default class SessionsController {
                 }
             }
 
+            // Check evaluation gate status
+            const { CourseEvaluations, CourseEvaluationResponses } = await import('../models/index.js');
+            const evalConfig = await CourseEvaluations.findOne({ where: { courseId, isEnabled: true } });
+            const isEvaluationRequired = Boolean(course.evaluationRequired || (evalConfig && evalConfig.isEnabled));
+            const triggerSession = evalConfig?.triggerSessionNumber || course.evaluationTriggerSession || 4;
+
+            let evaluationCompleted = false;
+            if (isEvaluationRequired) {
+                const evalResponse = await CourseEvaluationResponses.findOne({ where: { courseId, userId } });
+                evaluationCompleted = !!evalResponse;
+            }
+
             // Server-side enforcement:
-            // Porsline only available from session 4 onwards
+            // 1. Porsline only available from session 4 onwards
+            // 2. Evaluation Gate: If evaluation is required and NOT completed, lock sessions >= triggerSession and redact videoLink
             const sanitizedSessions = sessions.map((s, index) => {
                 const sessionNum = s.sessionNumber || (index + 1);
                 const isPorslineAvailable = sessionNum >= 4 && !!s.porslineLink;
                 const isFinalSession = s.isFinal || index === sessions.length - 1;
                 const userProg = progressMap.get(s.id);
+
+                const isLockedByEvaluation = isEvaluationRequired && !evaluationCompleted && sessionNum >= triggerSession;
 
                 return {
                     id: s.id,
@@ -85,14 +100,17 @@ export default class SessionsController {
                     sessionNumber: sessionNum,
                     title: s.title,
                     description: s.description,
-                    sessionLink: s.sessionLink || null,
-                    videoLink: s.videoLink || null,
-                    googleDriveLink: s.googleDriveLink || null,
+                    // Redact private stream links if locked by evaluation gate
+                    sessionLink: isLockedByEvaluation ? null : (s.sessionLink || null),
+                    videoLink: isLockedByEvaluation ? null : (s.videoLink || null),
+                    googleDriveLink: isLockedByEvaluation ? null : (s.googleDriveLink || null),
                     groupLink: s.groupLink || null,
-                    // Redact porslineLink if session < 4
                     porslineLink: isPorslineAvailable ? s.porslineLink : null,
                     porslineAvailable: isPorslineAvailable,
                     porslineRule: sessionNum < 4 ? 'پرس‌لاین از جلسه ۴ به بعد فعال می‌شود' : null,
+                    isLocked: isLockedByEvaluation,
+                    lockReason: isLockedByEvaluation ? 'evaluation_required' : null,
+                    lockMessage: isLockedByEvaluation ? `برای دسترسی به این جلسه، ابتدا باید فرم ارزیابی استاد (جلسه ${triggerSession}) را تکمیل فرمایید.` : null,
                     isFinal: isFinalSession,
                     sortOrder: s.sortOrder,
                     isCompleted: userProg ? !!userProg.isCompleted : false,
@@ -117,7 +135,15 @@ export default class SessionsController {
                         typeOfAttendence: course.typeOfAttendence,
                         level: course.level,
                         videoUrl: course.videoUrl,
-                        longDescription: course.longDescription
+                        longDescription: course.longDescription,
+                        evaluationRequired: isEvaluationRequired,
+                        evaluationCompleted,
+                        evaluationTriggerSession: triggerSession
+                    },
+                    evaluationGate: {
+                        required: isEvaluationRequired,
+                        completed: evaluationCompleted,
+                        triggerSession
                     },
                     sessions: sanitizedSessions,
                     stats: {

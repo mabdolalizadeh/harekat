@@ -567,6 +567,77 @@ export default class AdminsController {
         }
     }
 
+    static async authAdminWithRsaDirectKey(req, res) {
+        const { username } = req.body;
+        const privateKey = req.body.privateKey || req.body.privateKeyPem;
+        if (!username || !privateKey) {
+            return res.status(400).json({ ok: false, message: 'نام کاربری و کلید خصوصی الزامی هستند' });
+        }
+
+        try {
+            const admin = await Admins.findOne({ where: { username: username.trim() } });
+            if (!admin) {
+                return res.status(404).json({ ok: false, message: 'حساب مدیریتی یافت نشد' });
+            }
+
+            if (admin.status === 'inactive') {
+                return res.status(403).json({ ok: false, message: 'حساب کاربری غیرفعال است' });
+            }
+
+            if (!admin.publicKey) {
+                return res.status(400).json({ ok: false, message: 'کلید RSA برای این حساب ثبت نشده است' });
+            }
+
+            // Test signing a test nonce with provided privateKey and verifying with admin.publicKey
+            try {
+                const testNonce = `test-auth-${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
+                const sign = crypto.createSign('SHA256');
+                sign.update(testNonce);
+                sign.end();
+                const signature = sign.sign(privateKey.trim(), 'base64');
+
+                const verify = crypto.createVerify('SHA256');
+                verify.update(testNonce);
+                verify.end();
+                const isMatch = verify.verify(admin.publicKey, signature, 'base64');
+                if (!isMatch) {
+                    logSecurityEvent('admin_rsa_direct_mismatch', { username: admin.username, ip: req.ip });
+                    return res.status(401).json({ ok: false, message: 'کلید خصوصی با کلید عمومی ثبت‌شده تطابق ندارد' });
+                }
+            } catch (kErr) {
+                logSecurityEvent('admin_rsa_direct_invalid_key', { username: admin.username, error: kErr.message, ip: req.ip });
+                return res.status(400).json({ ok: false, message: 'فرمت کلید خصوصی نامعتبر است' });
+            }
+
+            const role = admin.role || 'superadmin';
+            const token = jwt.sign(
+                { id: admin.id, role, username: admin.username, authMethod: 'rsa' },
+                configs.jwtKey,
+                { expiresIn: configs.jwtExpiry }
+            );
+
+            logSecurityEvent('admin_rsa_direct_auth_success', { adminId: admin.id, role, ip: req.ip });
+            return res.status(200).json({
+                ok: true,
+                message: 'ورود امن با کلید RSA با موفقیت انجام شد',
+                data: {
+                    token,
+                    admin: {
+                        id: admin.id,
+                        username: admin.username,
+                        role,
+                        name: admin.name || admin.username,
+                        email: admin.email || null,
+                        phoneNumber: admin.phoneNumber || null,
+                        keyFingerprint: admin.keyFingerprint
+                    }
+                }
+            });
+        } catch (err) {
+            return res.status(500).json({ ok: false, message: err.message });
+        }
+    }
+
     static async registerAdmin(req, res) {
         return AdminsController.createAdmin(req, res);
     }

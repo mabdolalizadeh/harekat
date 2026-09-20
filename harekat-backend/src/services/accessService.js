@@ -284,4 +284,63 @@ export class AccessService {
             courses: Object.values(courseMap)
         };
     }
+
+    /**
+     * Centralized authorization and progression gate check (Section 13)
+     * Checks enrollment, subscription status, and instructor evaluation gate.
+     */
+    static async checkCourseProgressAccess(userId, courseId, { targetSessionNumber = null, targetSessionId = null } = {}) {
+        if (!userId || !courseId) {
+            return { canAccess: false, reason: 'missing_parameters', message: 'اطلاعات کاربری یا دوره نامعتبر است' };
+        }
+
+        // 1. Enrollment & Access Check
+        const hasAccess = await this.hasCourseAccess(userId, courseId);
+        if (!hasAccess) {
+            return { canAccess: false, reason: 'no_course_access', message: 'شما دسترسی فعال به این دوره ندارید' };
+        }
+
+        const course = await Courses.findByPk(courseId);
+        if (!course) {
+            return { canAccess: false, reason: 'course_not_found', message: 'دوره یافت نشد' };
+        }
+
+        // 2. Instructor Evaluation Gate Check
+        // Check CourseEvaluations model as well as Course.evaluationRequired flag
+        const { CourseEvaluations, CourseEvaluationResponses } = await import('../models/index.js');
+        const evaluation = await CourseEvaluations.findOne({
+            where: { courseId, isEnabled: true }
+        });
+
+        const isEvaluationRequired = Boolean(course.evaluationRequired || (evaluation && evaluation.isEnabled));
+        const triggerSession = evaluation?.triggerSessionNumber || course.evaluationTriggerSession || 4;
+
+        let evaluationCompleted = false;
+        if (isEvaluationRequired) {
+            const response = await CourseEvaluationResponses.findOne({
+                where: { courseId, userId }
+            });
+            evaluationCompleted = !!response;
+
+            // If evaluation is required, incomplete, and student is attempting to access triggerSession or beyond
+            if (!evaluationCompleted && targetSessionNumber !== null && targetSessionNumber >= triggerSession) {
+                return {
+                    canAccess: false,
+                    reason: 'evaluation_required',
+                    triggerSessionNumber: triggerSession,
+                    evaluationRequired: true,
+                    evaluationCompleted: false,
+                    message: `برای مشاهده جلسه ${targetSessionNumber} و جلسات بعدی، ابتدا باید فرم ارزیابی مدرس را تکمیل فرمایید.`
+                };
+            }
+        }
+
+        return {
+            canAccess: true,
+            isEvaluationRequired,
+            evaluationCompleted,
+            triggerSessionNumber: triggerSession
+        };
+    }
 }
+

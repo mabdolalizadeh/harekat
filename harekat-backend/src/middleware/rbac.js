@@ -1,4 +1,4 @@
-import { TACourses, Admins, Sessions } from '../models/index.js';
+import { TACourses, Admins, Sessions, Assignments, AssignmentSubmissions, Quizzes, QuizAttempts, Exams, ExamResults, CourseEvaluations } from '../models/index.js';
 import { logSecurityEvent } from '../utils/logger.js';
 
 /**
@@ -46,7 +46,7 @@ export function checkTaCourseAccess(courseIdGetter = (req) => req.params.courseI
             }
 
             if (!courseId) {
-                return res.status(400).json({ ok: false, message: 'course context required' });
+                return res.status(400).json({ ok: false, message: 'شناسه دوره الزامی است' });
             }
 
             const assignment = await TACourses.findOne({
@@ -100,10 +100,10 @@ export function checkTaSessionAccess() {
                 return next();
             }
 
-            logSecurityEvent('ta_unauthorized_course_access', { taId: req.user.id, courseId: session.courseId, path: req.path, ip: req.ip });
+            logSecurityEvent('ta_unauthorized_session_access', { taId: req.user.id, courseId: session.courseId, sessionId, path: req.path, ip: req.ip });
             return res.status(403).json({
                 ok: false,
-                message: 'دسترسی به این دوره برای حساب شما مجاز نیست'
+                message: 'دسترسی به این جلسه برای حساب شما مجاز نیست'
             });
         }
 
@@ -111,3 +111,86 @@ export function checkTaSessionAccess() {
     };
 }
 
+/**
+ * Middleware to enforce TA course restriction when accessing an Assignment by ID
+ */
+export function checkTaAssignmentAccess() {
+    return async (req, res, next) => {
+        const role = req.user?.role;
+        if (role === 'admin' || role === 'superadmin') {
+            return next();
+        }
+
+        if (role === 'ta') {
+            const assignmentId = req.params.id || req.params.assignmentId;
+            if (!assignmentId) {
+                return res.status(400).json({ ok: false, message: 'شناسه تکلیف الزامی است' });
+            }
+
+            const item = await Assignments.findByPk(assignmentId);
+            if (!item) {
+                return res.status(404).json({ ok: false, message: 'تکلیف یافت نشد' });
+            }
+
+            const assignment = await TACourses.findOne({
+                where: { adminId: req.user.id, courseId: item.courseId }
+            });
+
+            if (assignment) {
+                req.assignedCourseId = item.courseId;
+                req.targetAssignment = item;
+                return next();
+            }
+
+            logSecurityEvent('ta_unauthorized_assignment_access', { taId: req.user.id, courseId: item.courseId, assignmentId, path: req.path, ip: req.ip });
+            return res.status(403).json({
+                ok: false,
+                message: 'دسترسی به تکالیف این دوره برای حساب شما مجاز نیست'
+            });
+        }
+
+        return res.status(403).json({ ok: false, message: 'forbidden' });
+    };
+}
+
+/**
+ * Middleware to enforce TA course restriction when accessing a Quiz by ID
+ */
+export function checkTaQuizAccess() {
+    return async (req, res, next) => {
+        const role = req.user?.role;
+        if (role === 'admin' || role === 'superadmin') {
+            return next();
+        }
+
+        if (role === 'ta') {
+            const quizId = req.params.id || req.params.quizId;
+            if (!quizId) {
+                return res.status(400).json({ ok: false, message: 'شناسه آزمونک الزامی است' });
+            }
+
+            const quiz = await Quizzes.findByPk(quizId);
+            if (!quiz) {
+                return res.status(404).json({ ok: false, message: 'آزمونک یافت نشد' });
+            }
+
+            const assignment = await TACourses.findOne({
+                where: { adminId: req.user.id, courseId: quiz.courseId }
+            });
+
+            if (assignment) {
+                req.assignedCourseId = quiz.courseId;
+                req.targetQuiz = quiz;
+                return next();
+            }
+
+            logSecurityEvent('ta_unauthorized_quiz_access', { taId: req.user.id, courseId: quiz.courseId, quizId, path: req.path, ip: req.ip });
+            return res.status(403).json({
+                ok: false,
+                message: 'دسترسی به آزمونک‌های این دوره برای حساب شما مجاز نیست'
+            });
+        }
+
+        return res.status(403).json({ ok: false, message: 'forbidden' });
+    };
+}

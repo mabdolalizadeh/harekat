@@ -87,18 +87,31 @@ export default function AdminLogin() {
     setLoading(true);
     setError(null);
     try {
-      // 1. Request challenge from backend
-      const challengeRes = await adminApi.requestRsaChallenge(username.trim());
-      const challenge = challengeRes.data?.challenge;
-      if (!challenge) {
-        throw new Error('چالش امنیتی از سرور دریافت نشد');
+      let loginRes;
+      const canUseSubtle = typeof window !== 'undefined' && window.crypto && window.crypto.subtle;
+      if (canUseSubtle) {
+        try {
+          // 1. Request challenge from backend
+          const challengeRes = await adminApi.requestRsaChallenge(username.trim());
+          const challenge = challengeRes.data?.challenge;
+          if (!challenge) {
+            throw new Error('چالش امنیتی از سرور دریافت نشد');
+          }
+
+          // 2. Sign challenge with user's private key in browser via WebCrypto
+          const signature = await signChallengeWithRsaKey(privateKeyPem.trim(), challenge);
+
+          // 3. Verify signature and login
+          loginRes = await adminApi.rsaLogin(username.trim(), challenge, signature);
+        } catch (subtleErr) {
+          // Fall back to direct RSA verification on backend if WebCrypto subtle fails
+          loginRes = await adminApi.directRsaLogin(username.trim(), privateKeyPem.trim());
+        }
+      } else {
+        // Direct backend RSA verification in non-secure HTTP context
+        loginRes = await adminApi.directRsaLogin(username.trim(), privateKeyPem.trim());
       }
 
-      // 2. Sign challenge with user's private key in browser via WebCrypto
-      const signature = await signChallengeWithRsaKey(privateKeyPem.trim(), challenge);
-
-      // 3. Verify signature and login
-      const loginRes = await adminApi.rsaLogin(username.trim(), challenge, signature);
       localStorage.setItem('adminToken', loginRes.data.token);
       localStorage.setItem('adminUser', JSON.stringify(loginRes.data.admin));
       const from = location.state?.from?.pathname || '/';

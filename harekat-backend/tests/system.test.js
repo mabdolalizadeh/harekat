@@ -332,3 +332,226 @@ test('6. Dashboard & Admin Subdomain Host Routing', async () => {
     });
     assert.ok([200, 404].includes(adminRes.status));
 });
+
+test('7. TA Course Isolation & Server-side RBAC Enforcement', async () => {
+    const courseA = await Courses.create({
+        name: 'دوره الف',
+        price: '0',
+        image: 'https://example.com/a.jpg',
+        level: 'مقدماتی',
+        duration: '۵ ساعت',
+        typeOfAttendence: 'آنلاین',
+        statusOfRegistration: 'open',
+        isActive: true
+    });
+    const courseB = await Courses.create({
+        name: 'دوره ب',
+        price: '0',
+        image: 'https://example.com/b.jpg',
+        level: 'پیشرفته',
+        duration: '۸ ساعت',
+        typeOfAttendence: 'آنلاین',
+        statusOfRegistration: 'open',
+        isActive: true
+    });
+
+    // Create TA A
+    const taAdminA = await Admins.create({
+        username: `ta_user_a_${Date.now()}`,
+        password: 'Password123!',
+        role: 'ta',
+        name: 'دستیار الف',
+        status: 'active'
+    });
+    const taTokenA = jwt.sign({ id: taAdminA.id, role: 'ta', username: taAdminA.username }, configs.jwtKey);
+
+    // Assign TA A to Course A only
+    const { TACourses } = await import('../src/models/index.js');
+    await TACourses.create({ adminId: taAdminA.id, courseId: courseA.id });
+
+    // 1. TA A creates assignment on Course A (allowed)
+    const asgARes = await fetch(`${baseUrl}/assignments/course/${courseA.id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${taTokenA}`
+        },
+        body: JSON.stringify({
+            title: 'تکلیف دوره الف',
+            description: 'توضیحات تکلیف الف',
+            maxScore: 100
+        })
+    });
+    assert.equal(asgARes.status, 201);
+    const asgAData = await asgARes.json();
+    assert.equal(asgAData.ok, true);
+
+    // 2. TA A attempts to create assignment on Course B (must be 403 Forbidden)
+    const asgBRes = await fetch(`${baseUrl}/assignments/course/${courseB.id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${taTokenA}`
+        },
+        body: JSON.stringify({
+            title: 'تکلیف غیرمجاز روی دوره ب',
+            maxScore: 100
+        })
+    });
+    assert.equal(asgBRes.status, 403);
+
+    // 3. TA A creates quiz on Course A (allowed)
+    const quizARes = await fetch(`${baseUrl}/quizzes/course/${courseA.id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${taTokenA}`
+        },
+        body: JSON.stringify({
+            title: 'آزمونک دوره الف',
+            durationMinutes: 10,
+            passingScore: 70,
+            questions: [{ question: 'سوال ۱؟', options: ['الف', 'ب'], correctOptionIndex: 0, score: 1 }]
+        })
+    });
+    assert.equal(quizARes.status, 201);
+
+    // 4. TA A attempts to create quiz on Course B (must be 403 Forbidden)
+    const quizBRes = await fetch(`${baseUrl}/quizzes/course/${courseB.id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${taTokenA}`
+        },
+        body: JSON.stringify({
+            title: 'آزمونک غیرمجاز ب',
+            questions: [{ question: 'سوال؟', options: ['۱', '۲'], correctOptionIndex: 0, score: 1 }]
+        })
+    });
+    assert.equal(quizBRes.status, 403);
+});
+
+test('8. Evaluation Gate & Session Progression Enforcement', async () => {
+    // Create course with evaluation required at session 4
+    const evalCourse = await Courses.create({
+        name: 'دوره با گیت ارزیابی',
+        price: '0',
+        image: 'https://example.com/eval.jpg',
+        level: 'مقدماتی',
+        duration: '۱۰ ساعت',
+        typeOfAttendence: 'آنلاین',
+        statusOfRegistration: 'open',
+        isActive: true,
+        evaluationRequired: true,
+        evaluationTriggerSession: 4
+    });
+
+    const student = await Users.create({
+        phoneNumber: `0912${Math.floor(1000000 + Math.random() * 9000000)}`,
+        name: 'دانشجوی ارزیابی'
+    });
+    const studentToken = jwt.sign({ id: student.id, phoneNumber: student.phoneNumber }, configs.jwtKey);
+
+    await CourseAccess.create({
+        userId: student.id,
+        courseId: evalCourse.id,
+        status: 'active',
+        sourceType: 'direct'
+    });
+
+    // Create 5 sessions
+    for (let i = 1; i <= 5; i++) {
+        await Sessions.create({
+            courseId: evalCourse.id,
+            sessionNumber: i,
+            title: `جلسه ${i}`,
+            videoLink: `https://example.com/video_${i}.mp4`
+        });
+    }
+
+    // 1. Fetch sessions before evaluation
+    const beforeRes = await fetch(`${baseUrl}/sessions/course/${evalCourse.id}/student`, {
+        headers: { 'Authorization': `Bearer ${studentToken}` }
+    });
+    assert.equal(beforeRes.status, 200);
+    const beforeData = await beforeRes.json();
+    assert.equal(beforeData.ok, true);
+
+    const s3 = beforeData.data.sessions.find(s => s.sessionNumber === 3);
+    const s4 = beforeData.data.sessions.find(s => s.sessionNumber === 4);
+    const s5 = beforeData.data.sessions.find(s => s.sessionNumber === 5);
+
+    assert.equal(s3.isLocked, false);
+    assert.ok(s3.videoLink, 'Session 3 video link should be available');
+    assert.equal(s4.isLocked, true, 'Session 4 should be locked by evaluation gate');
+    assert.equal(s4.videoLink, null, 'Session 4 video link must be redacted');
+    assert.equal(s5.isLocked, true, 'Session 5 should be locked by evaluation gate');
+    assert.equal(s5.videoLink, null, 'Session 5 video link must be redacted');
+
+    // 2. Student submits evaluation
+    const evalRes = await fetch(`${baseUrl}/evaluations/course/${evalCourse.id}/submit`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${studentToken}`
+        },
+        body: JSON.stringify({
+            overallRating: 5,
+            teachingRating: 5,
+            contentRating: 4,
+            feedback: 'استاد بسیار عالی و مسلط بودند.'
+        })
+    });
+    assert.equal(evalRes.status, 200);
+    const evalData = await evalRes.json();
+    assert.equal(evalData.ok, true);
+
+    // 3. Fetch sessions after evaluation
+    const afterRes = await fetch(`${baseUrl}/sessions/course/${evalCourse.id}/student`, {
+        headers: { 'Authorization': `Bearer ${studentToken}` }
+    });
+    assert.equal(afterRes.status, 200);
+    const afterData = await afterRes.json();
+    assert.equal(afterData.ok, true);
+
+    const s4After = afterData.data.sessions.find(s => s.sessionNumber === 4);
+    const s5After = afterData.data.sessions.find(s => s.sessionNumber === 5);
+
+    assert.equal(s4After.isLocked, false, 'Session 4 must be unlocked after evaluation');
+    assert.ok(s4After.videoLink, 'Session 4 video link must be available after evaluation');
+    assert.equal(s5After.isLocked, false, 'Session 5 must be unlocked after evaluation');
+    assert.ok(s5After.videoLink, 'Session 5 video link must be available after evaluation');
+});
+
+test('9. Direct RSA Key Authentication Fallback Endpoint', async () => {
+    // Generate RSA pair
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+    });
+
+    const testAdmin = await Admins.create({
+        username: `rsa_direct_user_${Date.now()}`,
+        password: 'Password123!',
+        role: 'superadmin',
+        name: 'Direct RSA User',
+        status: 'active',
+        publicKey: publicKey
+    });
+
+    const loginRes = await fetch(`${baseUrl}/admins/auth/rsa-direct-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: testAdmin.username,
+            privateKeyPem: privateKey
+        })
+    });
+
+    assert.equal(loginRes.status, 200);
+    const loginData = await loginRes.json();
+    assert.equal(loginData.ok, true);
+    assert.ok(loginData.data.token, 'Should return JWT token for valid direct RSA login');
+    assert.equal(loginData.data.admin.username, testAdmin.username);
+});

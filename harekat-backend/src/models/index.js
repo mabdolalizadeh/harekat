@@ -26,6 +26,9 @@ import { Tickets, TicketMessages } from "./tickets.js";
 import TACourses from "./taCourses.js";
 import { Notifications, UserNotificationRead } from "./notifications.js";
 import UserLessonProgress from "./userLessonProgress.js";
+import { Assignments, AssignmentSubmissions } from "./assignments.js";
+import { Quizzes, QuizAttempts } from "./quizzes.js";
+import { CourseEvaluations, CourseEvaluationResponses } from "./evaluations.js";
 import { sequelize } from "./database.config.js";
 
 // Users <-> Courses (many-to-many legacy compatibility)
@@ -389,6 +392,45 @@ UserLessonProgress.belongsTo(Courses, {
     as: "course"
 });
 
+// Assignments associations
+Courses.hasMany(Assignments, { foreignKey: "courseId", as: "assignments", onDelete: "CASCADE" });
+Assignments.belongsTo(Courses, { foreignKey: "courseId", as: "course" });
+Sessions.hasMany(Assignments, { foreignKey: "sessionId", as: "assignments" });
+Assignments.belongsTo(Sessions, { foreignKey: "sessionId", as: "session" });
+
+Assignments.hasMany(AssignmentSubmissions, { foreignKey: "assignmentId", as: "submissions", onDelete: "CASCADE" });
+AssignmentSubmissions.belongsTo(Assignments, { foreignKey: "assignmentId", as: "assignment" });
+Users.hasMany(AssignmentSubmissions, { foreignKey: "userId", as: "assignmentSubmissions", onDelete: "CASCADE" });
+AssignmentSubmissions.belongsTo(Users, { foreignKey: "userId", as: "user" });
+Courses.hasMany(AssignmentSubmissions, { foreignKey: "courseId", as: "assignmentSubmissions", onDelete: "CASCADE" });
+AssignmentSubmissions.belongsTo(Courses, { foreignKey: "courseId", as: "course" });
+Admins.hasMany(AssignmentSubmissions, { foreignKey: "gradedBy", as: "gradedAssignments" });
+AssignmentSubmissions.belongsTo(Admins, { foreignKey: "gradedBy", as: "grader" });
+
+// Quizzes associations
+Courses.hasMany(Quizzes, { foreignKey: "courseId", as: "quizzes", onDelete: "CASCADE" });
+Quizzes.belongsTo(Courses, { foreignKey: "courseId", as: "course" });
+Sessions.hasMany(Quizzes, { foreignKey: "sessionId", as: "quizzes" });
+Quizzes.belongsTo(Sessions, { foreignKey: "sessionId", as: "session" });
+
+Quizzes.hasMany(QuizAttempts, { foreignKey: "quizId", as: "attempts", onDelete: "CASCADE" });
+QuizAttempts.belongsTo(Quizzes, { foreignKey: "quizId", as: "quiz" });
+Users.hasMany(QuizAttempts, { foreignKey: "userId", as: "quizAttempts", onDelete: "CASCADE" });
+QuizAttempts.belongsTo(Users, { foreignKey: "userId", as: "user" });
+Courses.hasMany(QuizAttempts, { foreignKey: "courseId", as: "quizAttempts", onDelete: "CASCADE" });
+QuizAttempts.belongsTo(Courses, { foreignKey: "courseId", as: "course" });
+
+// Course Evaluations associations
+Courses.hasOne(CourseEvaluations, { foreignKey: "courseId", as: "evaluation", onDelete: "CASCADE" });
+CourseEvaluations.belongsTo(Courses, { foreignKey: "courseId", as: "course" });
+
+CourseEvaluations.hasMany(CourseEvaluationResponses, { foreignKey: "evaluationId", as: "responses", onDelete: "CASCADE" });
+CourseEvaluationResponses.belongsTo(CourseEvaluations, { foreignKey: "evaluationId", as: "evaluation" });
+Users.hasMany(CourseEvaluationResponses, { foreignKey: "userId", as: "evaluationResponses", onDelete: "CASCADE" });
+CourseEvaluationResponses.belongsTo(Users, { foreignKey: "userId", as: "user" });
+Courses.hasMany(CourseEvaluationResponses, { foreignKey: "courseId", as: "evaluationResponses", onDelete: "CASCADE" });
+CourseEvaluationResponses.belongsTo(Courses, { foreignKey: "courseId", as: "course" });
+
 export {
     Users,
     Courses,
@@ -422,5 +464,11 @@ export {
     Notifications,
     UserNotificationRead,
     UserLessonProgress,
+    Assignments,
+    AssignmentSubmissions,
+    Quizzes,
+    QuizAttempts,
+    CourseEvaluations,
+    CourseEvaluationResponses,
     sequelize
 };

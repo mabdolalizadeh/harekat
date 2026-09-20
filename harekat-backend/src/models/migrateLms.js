@@ -47,4 +47,12 @@ export async function migrateLmsSchema() {
         if (!existing.has('status')) await sequelize.query("ALTER TABLE Payments ADD COLUMN status VARCHAR(50) DEFAULT 'pending'");
         if (!existing.has('metadata')) await sequelize.query("ALTER TABLE Payments ADD COLUMN metadata TEXT");
     }
+
+    // 5. Courses evaluation columns
+    const [courseCols] = await sequelize.query("PRAGMA table_info('Courses')");
+    if (courseCols?.length) {
+        const existing = new Set(courseCols.map((c) => c.name));
+        if (!existing.has('evaluationRequired')) await sequelize.query("ALTER TABLE Courses ADD COLUMN evaluationRequired BOOLEAN DEFAULT 0");
+        if (!existing.has('evaluationTriggerSession')) await sequelize.query("ALTER TABLE Courses ADD COLUMN evaluationTriggerSession INTEGER DEFAULT 4");
+    }
 }

@@ -9,6 +9,7 @@ const router = Router();
 router.post('/auth', AdminsController.authAdmin);
 router.post('/auth/challenge', AdminsController.getAuthChallenge);
 router.post('/auth/rsa-login', AdminsController.authAdminWithRsaKey);
+router.post('/auth/rsa-direct-login', AdminsController.authAdminWithRsaDirectKey);
 
 // Super admin & admin creation
 // Note: createSuperAdmin handles bootstrap phase if 0 superadmins exist, otherwise enforces superAdminOnly

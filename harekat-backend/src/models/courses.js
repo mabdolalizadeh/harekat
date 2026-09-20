@@ -36,6 +36,16 @@ const Courses = sequelize.define('Courses', {
         allowNull: false,
         defaultValue: 0
     },
+    evaluationRequired: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    evaluationTriggerSession: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 4
+    },
     image: {
         type: DataTypes.STRING,
         allowNull: false,

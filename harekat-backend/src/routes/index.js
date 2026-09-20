@@ -20,6 +20,9 @@ import tasRouter from './tas.js';
 import packagesRouter from './packages.js';
 import accessRouter from './access.js';
 import notificationsRouter from './notifications.js';
+import assignmentsRouter from './assignments.js';
+import quizzesRouter from './quizzes.js';
+import evaluationsRouter from './evaluations.js';
 
 const router = Router();
 
@@ -44,5 +47,8 @@ router.use('/tas', tasRouter);
 router.use('/packages', packagesRouter);
 router.use('/access', accessRouter);
 router.use('/notifications', notificationsRouter);
+router.use('/assignments', assignmentsRouter);
+router.use('/quizzes', quizzesRouter);
+router.use('/evaluations', evaluationsRouter);
 
 export default router;

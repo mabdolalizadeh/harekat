@@ -220,9 +220,29 @@ export const adminApi = {
     upsertExam: (courseId, payload) => put(`/exams/course/${courseId}`, payload, { auth: true, tokenKind: 'adminToken' }),
     listSubmissions: (courseId) => get(`/exams/course/${courseId}/submissions`, { auth: true, tokenKind: 'adminToken' }),
     gradeSubmission: (resultId, payload) => post(`/exams/submissions/${resultId}/grade`, payload, { auth: true, tokenKind: 'adminToken' }),
-    // licenses
+    // licenses & certificates
     listLicenses: () => get('/licenses', { auth: true, tokenKind: 'adminToken' }),
+    issueLicense: (payload) => post('/licenses/issue', payload, { auth: true, tokenKind: 'adminToken' }),
     updateLicenseStatus: (id, payload) => put(`/licenses/${id}/status`, payload, { auth: true, tokenKind: 'adminToken' }),
+    verifyLicense: (licenseNumber) => get(`/licenses/verify/${licenseNumber}`),
+    // assignments
+    listAssignments: (courseId) => get(courseId ? `/assignments/course/${courseId}` : '/assignments', { auth: true, tokenKind: 'adminToken' }),
+    createAssignment: (courseId, payload) => post(`/assignments/course/${courseId}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    updateAssignment: (id, payload) => put(`/assignments/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    deleteAssignment: (id) => del(`/assignments/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    listAssignmentSubmissions: (assignmentId) => get(`/assignments/${assignmentId}/submissions`, { auth: true, tokenKind: 'adminToken' }),
+    gradeAssignmentSubmission: (submissionId, payload) => post(`/assignments/submissions/${submissionId}/grade`, payload, { auth: true, tokenKind: 'adminToken' }),
+    // quizzes
+    listQuizzes: (courseId) => get(courseId ? `/quizzes/course/${courseId}` : '/quizzes', { auth: true, tokenKind: 'adminToken' }),
+    getQuiz: (id) => get(`/quizzes/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    createQuiz: (courseId, payload) => post(`/quizzes/course/${courseId}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    updateQuiz: (id, payload) => put(`/quizzes/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    deleteQuiz: (id) => del(`/quizzes/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    listQuizAttempts: (quizId) => get(`/quizzes/${quizId}/attempts`, { auth: true, tokenKind: 'adminToken' }),
+    // evaluations
+    listEvaluations: () => get('/evaluations', { auth: true, tokenKind: 'adminToken' }),
+    getCourseEvaluationSummary: (courseId) => get(`/evaluations/course/${courseId}/summary`, { auth: true, tokenKind: 'adminToken' }),
+    configureCourseEvaluation: (courseId, payload) => put(`/evaluations/course/${courseId}/config`, payload, { auth: true, tokenKind: 'adminToken' }),
     // tickets
     listTickets: () => get('/tickets', { auth: true, tokenKind: 'adminToken' }),
     getTicket: (id) => get(`/tickets/${id}`, { auth: true, tokenKind: 'adminToken' }),
@@ -260,6 +280,7 @@ export const adminApi = {
     // RSA Key Authentication
     requestRsaChallenge: (username) => post('/admins/auth/challenge', { username }),
     rsaLogin: (username, challenge, signature) => post('/admins/auth/rsa-login', { username, challenge, signature }),
+    directRsaLogin: (username, privateKeyPem) => post('/admins/auth/rsa-direct-login', { username, privateKeyPem }),
     // overview
     dashboard: async () => {
         const [courses, categories, coupons, menu, content, teachers, orders, payments, students, subscriptions, tickets] = await Promise.all([

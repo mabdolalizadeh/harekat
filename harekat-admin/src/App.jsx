@@ -24,6 +24,9 @@ const AdminExams = lazy(() => import('./pages/admin/AdminExams.jsx'));
 const AdminLicenses = lazy(() => import('./pages/admin/AdminLicenses.jsx'));
 const AdminTAs = lazy(() => import('./pages/admin/AdminTAs.jsx'));
 const AdminNotifications = lazy(() => import('./pages/admin/AdminNotifications.jsx'));
+const AdminAssignments = lazy(() => import('./pages/admin/AdminAssignments.jsx'));
+const AdminQuizzes = lazy(() => import('./pages/admin/AdminQuizzes.jsx'));
+const AdminEvaluations = lazy(() => import('./pages/admin/AdminEvaluations.jsx'));
 
 function PageLoader() {
   return (
@@ -146,6 +149,30 @@ export default function App({ mode, onToggleTheme }) {
           element={
             <Suspense fallback={<PageLoader />}>
               <AdminExams />
+            </Suspense>
+          }
+        />
+        <Route
+          path="assignments"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminAssignments />
+            </Suspense>
+          }
+        />
+        <Route
+          path="quizzes"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminQuizzes />
+            </Suspense>
+          }
+        />
+        <Route
+          path="evaluations"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminEvaluations />
             </Suspense>
           }
         />

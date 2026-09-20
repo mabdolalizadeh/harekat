@@ -6,12 +6,16 @@ import { superAdminOnly, adminOrTa } from '../middleware/rbac.js';
 
 const router = Router();
 
+// Public verification
+router.get('/verify/:licenseNumber', LicensesController.verifyLicense);
+
 // Student routes
 router.get('/my', auth, LicensesController.getMyLicenses);
 router.get('/:id', optionalAuth, LicensesController.getLicenseById);
 
-// Admin routes
+// Admin / TA routes
 router.get('/', adminAuth, adminOrTa, LicensesController.listAllLicenses);
-router.put('/:id/status', adminAuth, superAdminOnly, LicensesController.updateLicenseStatus);
+router.post('/issue', adminAuth, adminOrTa, LicensesController.issueCertificate);
+router.put('/:id/status', adminAuth, adminOrTa, LicensesController.updateLicenseStatus);
 
 export default router;
