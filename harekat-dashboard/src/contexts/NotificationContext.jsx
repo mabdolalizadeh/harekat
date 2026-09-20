@@ -2,53 +2,52 @@ import { createContext, useContext, useState } from 'react';
 
 const NotificationContext = createContext(null);
 
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: 'n1',
-    title: '+۸ امتیاز برای تمرین کلاسی',
-    description: 'تمرین شما توسط استاد دوره بررسی و تایید شد.',
-    date: 'امروز، ۲۳ اردیبهشت',
-    type: 'points',
-    isRead: false
-  },
-  {
-    id: 'n2',
-    title: 'جلسه جدید دوره اضافه شد',
-    description: 'فصل سوم دوره React.js هم‌اکنون در دسترس است.',
-    date: 'دیروز',
-    type: 'course',
-    isRead: false
-  },
-  {
-    id: 'n3',
-    title: 'خوش آمدید به مدرسه حرکت',
-    description: 'یادگیری مهارت‌های تخصصی خود را آغاز کنید.',
-    date: '۳ روز پیش',
-    type: 'system',
-    isRead: true
-  }
-];
+const INITIAL_NOTIFICATIONS = [];
 
 export function NotificationProvider({ children }) {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem('notifications');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, isRead: true }));
+      try { localStorage.setItem('notifications', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
   };
 
   const markAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+      try { localStorage.setItem('notifications', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
   };
 
   const addNotification = (notif) => {
-    setNotifications((prev) => [
-      { id: `n_${Date.now()}`, isRead: false, date: 'همین الان', ...notif },
-      ...prev
-    ]);
+    setNotifications((prev) => {
+      const updated = [
+        { id: `n_${Date.now()}`, isRead: false, date: 'همین الان', ...notif },
+        ...prev
+      ];
+      try { localStorage.setItem('notifications', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+    try {
+      localStorage.removeItem('notifications');
+    } catch {}
   };
 
   const value = {
@@ -56,7 +55,8 @@ export function NotificationProvider({ children }) {
     unreadCount,
     markAllAsRead,
     markAsRead,
-    addNotification
+    addNotification,
+    clearAllNotifications
   };
 
   return (

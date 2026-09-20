@@ -2,11 +2,12 @@ import { Box, Typography, Popover, Button, List, ListItem, ListItemAvatar, Avata
 import MilitaryTechOutlinedIcon from '@mui/icons-material/MilitaryTechOutlined';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import { useNotifications } from '../../contexts/NotificationContext.jsx';
 import { NavLink } from 'react-router-dom';
 
 export default function NotificationPopover({ anchorEl, open, onClose }) {
-  const { notifications, markAllAsRead } = useNotifications();
+  const { notifications, markAllAsRead, clearAllNotifications } = useNotifications();
 
   const getIcon = (type) => {
     switch (type) {
@@ -60,50 +61,74 @@ export default function NotificationPopover({ anchorEl, open, onClose }) {
         <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
           پیام‌ها و اعلان‌ها
         </Typography>
-        <Button
-          size="small"
-          onClick={markAllAsRead}
-          sx={{ fontSize: '0.75rem', color: '#64748b', p: 0, minWidth: 'auto' }}
-        >
-          خوانده شد همه
-        </Button>
+        {notifications.length > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Button
+              size="small"
+              onClick={markAllAsRead}
+              sx={{ fontSize: '0.75rem', color: '#64748b', p: 0, minWidth: 'auto' }}
+            >
+              خوانده شد همه
+            </Button>
+            <Typography variant="caption" sx={{ color: '#cbd5e1' }}>•</Typography>
+            <Button
+              size="small"
+              onClick={clearAllNotifications}
+              sx={{ fontSize: '0.75rem', color: '#dc2626', p: 0, minWidth: 'auto' }}
+            >
+              پاک‌سازی
+            </Button>
+          </Box>
+        )}
       </Box>
 
-      <List disablePadding sx={{ maxHeight: 340, overflowY: 'auto' }}>
-        {notifications.slice(0, 4).map((n) => (
-          <ListItem
-            key={n.id}
-            sx={{
-              p: 2,
-              backgroundColor: n.isRead ? '#ffffff' : '#f8fafc',
-              borderBottom: '1px solid #f1f5f9',
-              alignItems: 'flex-start',
-              gap: 1.5
-            }}
-          >
-            <ListItemAvatar sx={{ minWidth: 38 }}>
-              {getIcon(n.type)}
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#1e293b' }}>
-                  {n.title}
-                </Typography>
-              }
-              secondary={
-                <Box component="span">
-                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.3, fontSize: '0.78rem' }}>
-                    {n.description}
+      {notifications.length === 0 ? (
+        <Box sx={{ py: 6, px: 3, textAlign: 'center' }}>
+          <NotificationsNoneOutlinedIcon sx={{ fontSize: 44, color: '#cbd5e1', mb: 1.5 }} />
+          <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: '#64748b' }}>
+            هیچ اعلان جدیدی وجود ندارد
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#94a3b8', mt: 0.5, display: 'block', fontSize: '0.75rem' }}>
+            اعلان‌های مربوط به دوره‌ها و فعالیت‌های شما در اینجا قرار می‌گیرند.
+          </Typography>
+        </Box>
+      ) : (
+        <List disablePadding sx={{ maxHeight: 340, overflowY: 'auto' }}>
+          {notifications.slice(0, 4).map((n) => (
+            <ListItem
+              key={n.id}
+              sx={{
+                p: 2,
+                backgroundColor: n.isRead ? '#ffffff' : '#f8fafc',
+                borderBottom: '1px solid #f1f5f9',
+                alignItems: 'flex-start',
+                gap: 1.5
+              }}
+            >
+              <ListItemAvatar sx={{ minWidth: 38 }}>
+                {getIcon(n.type)}
+              </ListItemAvatar>
+              <ListItemText
+                primary={
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#1e293b' }}>
+                    {n.title}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.7rem', mt: 0.5, display: 'block' }}>
-                    {n.date}
-                  </Typography>
-                </Box>
-              }
-            />
-          </ListItem>
-        ))}
-      </List>
+                }
+                secondary={
+                  <Box component="span">
+                    <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.3, fontSize: '0.78rem' }}>
+                      {n.description}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.7rem', mt: 0.5, display: 'block' }}>
+                      {n.date}
+                    </Typography>
+                  </Box>
+                }
+              />
+            </ListItem>
+          ))}
+        </List>
+      )}
 
       {/* Blue link "All notifications" as in Dribbble reference */}
       <Box sx={{ p: 1.5, textAlign: 'center', backgroundColor: '#ffffff' }}>

@@ -168,7 +168,8 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             }}
           >
             <Badge
-              badgeContent={toPersianDigits(unreadCount)}
+              badgeContent={unreadCount > 0 ? toPersianDigits(unreadCount) : 0}
+              invisible={!unreadCount || unreadCount === 0}
               sx={{
                 '& .MuiBadge-badge': {
                   backgroundColor: '#f47c20',
