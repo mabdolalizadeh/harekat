@@ -76,7 +76,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
         <IconButton
           onClick={onOpenMobileDrawer}
           size="small"
-          sx={{ display: { xs: 'flex', md: 'none' }, color: '#171715' }}
+          sx={{ display: { xs: 'flex', md: 'none' }, color: 'text.primary' }}
           title="منوی اصلی"
         >
           <MenuIcon />
@@ -92,12 +92,13 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             size="small"
             sx={{
               display: { xs: 'none', md: 'flex' },
-              color: '#6b6b63',
-              backgroundColor: '#f7f5f0',
-              border: '1px solid #deddd7',
+              color: 'text.secondary',
+              backgroundColor: mode === 'dark' ? '#1e293b' : '#f7f5f0',
+              border: '1px solid',
+              borderColor: 'divider',
               borderRadius: '10px',
               p: 0.7,
-              '&:hover': { backgroundColor: '#efede7', color: '#171715' }
+              '&:hover': { backgroundColor: mode === 'dark' ? '#334155' : '#efede7', color: 'text.primary' }
             }}
           >
             {isSidebarCollapsed ? <MenuIcon sx={{ fontSize: 18 }} /> : <MenuOpenIcon sx={{ fontSize: 18 }} />}
@@ -107,7 +108,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
         <Divider
           orientation="vertical"
           flexItem
-          sx={{ display: { xs: 'none', sm: 'block' }, mx: 0.5, height: 22, alignSelf: 'center', borderColor: '#deddd7' }}
+          sx={{ display: { xs: 'none', sm: 'block' }, mx: 0.5, height: 22, alignSelf: 'center', borderColor: 'divider' }}
         />
 
         {/* Active Context Breadcrumb */}
@@ -116,7 +117,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             sx={{
               fontWeight: 700,
               fontSize: '0.92rem',
-              color: '#171715',
+              color: 'text.primary',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis'
@@ -130,7 +131,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
               sx={{
                 display: { xs: 'none', lg: 'inline' },
                 fontSize: '0.8rem',
-                color: '#6b6b63',
+                color: 'text.secondary',
                 whiteSpace: 'nowrap'
               }}
             >
@@ -201,7 +202,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
         <Divider
           orientation="vertical"
           flexItem
-          sx={{ mx: 0.5, height: 22, alignSelf: 'center', borderColor: '#deddd7' }}
+          sx={{ mx: 0.5, height: 22, alignSelf: 'center', borderColor: 'divider' }}
         />
 
         {/* User Profile Trigger Button */}
@@ -278,7 +279,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             }}
             sx={{ borderRadius: '10px', py: 1 }}
           >
-            <ListItemIcon sx={{ minWidth: 32, color: '#6b6b63' }}>
+            <ListItemIcon sx={{ minWidth: 32, color: 'text.secondary' }}>
               <PersonOutlineIcon sx={{ fontSize: 19 }} />
             </ListItemIcon>
             <ListItemText primary="پروفایل کاربری" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }} />
@@ -291,7 +292,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             }}
             sx={{ borderRadius: '10px', py: 1 }}
           >
-            <ListItemIcon sx={{ minWidth: 32, color: '#6b6b63' }}>
+            <ListItemIcon sx={{ minWidth: 32, color: 'text.secondary' }}>
               <AutoStoriesOutlinedIcon sx={{ fontSize: 19 }} />
             </ListItemIcon>
             <ListItemText primary="دوره‌های من" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }} />
@@ -304,13 +305,13 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onOpenMobi
             }}
             sx={{ borderRadius: '10px', py: 1 }}
           >
-            <ListItemIcon sx={{ minWidth: 32, color: '#6b6b63' }}>
+            <ListItemIcon sx={{ minWidth: 32, color: 'text.secondary' }}>
               <ReceiptLongOutlinedIcon sx={{ fontSize: 19 }} />
             </ListItemIcon>
             <ListItemText primary="سفارشات من" primaryTypographyProps={{ fontSize: '0.84rem', fontWeight: 600 }} />
           </MenuItem>
 
-          <Divider sx={{ my: 0.5, borderColor: '#deddd7' }} />
+          <Divider sx={{ my: 0.5, borderColor: 'divider' }} />
 
           <MenuItem
             onClick={() => {

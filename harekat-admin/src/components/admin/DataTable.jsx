@@ -204,8 +204,8 @@ export default function DataTable({
       )}
 
       {/* Table Container */}
-      <TableContainer sx={{ maxHeight: 680 }}>
-        <Table stickyHeader size="small">
+      <TableContainer sx={{ maxHeight: 680, overflowX: 'auto' }}>
+        <Table stickyHeader size="small" sx={{ minWidth: { xs: 650, md: '100%' } }}>
           <TableHead>
             <TableRow>
               {columns.map((col) => (

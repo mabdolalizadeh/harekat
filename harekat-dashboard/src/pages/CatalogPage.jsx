@@ -22,10 +22,14 @@ import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { coursesApi } from '../api/coursesApi.js';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { formatPrice, formatDuration, assetUrl, toPersianDigits } from '../utils/formatters.js';
 
 export default function CatalogPage() {
   const { addToCart } = useCart();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,10 +92,10 @@ export default function CatalogPage() {
       {/* Title & Search bar */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 3 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.75rem' }, mb: 0.5 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.75rem' }, mb: 0.5, color: 'text.primary' }}>
             کاوش دوره‌های آموزشی
           </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             دوره‌های تخصصی، بسته‌های مهارتی و آموزش‌های کپسولی مدرسه حرکت ({toPersianDigits(courses.length)} دوره)
           </Typography>
         </Box>
@@ -104,12 +108,12 @@ export default function CatalogPage() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#94a3b8', fontSize: 20 }} />
+                <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
               </InputAdornment>
             ),
             sx: {
               borderRadius: '14px',
-              backgroundColor: '#f8fafc',
+              backgroundColor: isDark ? '#1e293b' : '#f8fafc',
               minWidth: { xs: '100%', sm: 260 }
             }
           }}
@@ -117,7 +121,7 @@ export default function CatalogPage() {
       </Box>
 
       {/* Category Tabs */}
-      <Box sx={{ borderBottom: '1px solid #eef2f7', mb: 3.5, overflowX: 'auto' }}>
+      <Box sx={{ borderBottom: '1px solid', borderColor: 'divider', mb: 3.5, overflowX: 'auto' }}>
         <Tabs
           value={selectedCategory}
           onChange={(_, val) => setSelectedCategory(val)}
@@ -141,11 +145,20 @@ export default function CatalogPage() {
 
       {/* Grid of Courses */}
       {filteredCourses.length === 0 ? (
-        <Box sx={{ textAlign: 'center', py: 8, backgroundColor: '#f8fafc', borderRadius: '24px', border: '1px dashed #cbd5e1' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#475569', mb: 1 }}>
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 8,
+            backgroundColor: 'background.paper',
+            borderRadius: '24px',
+            border: '1px dashed',
+            borderColor: 'divider'
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary', mb: 1 }}>
             دوره‌ای با این مشخصات پیدا نشد
           </Typography>
-          <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             دسته‌بندی دیگری را انتخاب کنید یا عبارت دیگری جستجو نمایید.
           </Typography>
         </Box>
@@ -163,12 +176,14 @@ export default function CatalogPage() {
                   display: 'flex',
                   flexDirection: 'column',
                   height: '100%',
-                  border: '1px solid #eef2f7',
-                  boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.04)',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  backgroundColor: 'background.paper',
+                  boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px -2px rgba(15, 23, 42, 0.04)',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1)'
+                    boxShadow: isDark ? '0 12px 30px rgba(0,0,0,0.5)' : '0 12px 30px -4px rgba(15, 23, 42, 0.1)'
                   }
                 }}
               >
@@ -178,7 +193,7 @@ export default function CatalogPage() {
                     height="180"
                     image={assetUrl(course.image) || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400'}
                     alt={course.name}
-                    sx={{ backgroundColor: '#f1f5f9' }}
+                    sx={{ backgroundColor: isDark ? '#1e293b' : '#f1f5f9' }}
                   />
                   {course.level && (
                     <Chip
@@ -199,14 +214,14 @@ export default function CatalogPage() {
                 </Box>
 
                 <CardContent sx={{ flex: 1, p: 2.5, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '1.05rem', lineHeight: 1.4, mb: 1 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '1.05rem', lineHeight: 1.4, mb: 1, color: 'text.primary' }}>
                     {course.name}
                   </Typography>
 
                   <Typography
                     variant="body2"
                     sx={{
-                      color: '#64748b',
+                      color: 'text.secondary',
                       mb: 2,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
@@ -222,16 +237,16 @@ export default function CatalogPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Avatar
                         src={assetUrl(course.teacher?.avatar)}
-                        sx={{ width: 28, height: 28, fontSize: '0.8rem' }}
+                        sx={{ width: 28, height: 28, fontSize: '0.8rem', backgroundColor: '#f47c20' }}
                       >
                         {course.teacher?.firstName?.[0] || 'م'}
                       </Avatar>
-                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#334155' }}>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary' }}>
                         {course.teacher ? `${course.teacher.firstName} ${course.teacher.lastName}` : 'استاد حرکت'}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: '#94a3b8' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
                       <AccessTimeIcon sx={{ fontSize: 15 }} />
                       <Typography variant="caption" sx={{ fontWeight: 600 }}>
                         {toPersianDigits(formatDuration(course.duration))}
@@ -240,9 +255,9 @@ export default function CatalogPage() {
                   </Box>
 
                   {/* Price & Add to Cart button */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, borderTop: '1px solid #deddd7' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
                     <Box>
-                      <Typography variant="caption" sx={{ color: '#6b6b63', display: 'block', fontSize: '0.72rem' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.72rem' }}>
                         شهریه دوره
                       </Typography>
                       <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#f47c20' }}>

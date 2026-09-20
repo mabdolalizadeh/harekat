@@ -25,11 +25,15 @@ import { subscriptionsApi } from '../api/subscriptionsApi.js';
 import { cartApi } from '../api/cartApi.js';
 import { ordersApi } from '../api/ordersApi.js';
 import { paymentsApi } from '../api/paymentsApi.js';
+import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { sanitizeSvg } from '../utils/sanitizeSvg.js';
 import { formatPrice, formatDate, toPersianDigits } from '../utils/formatters.js';
 
 export default function SubscriptionsPage() {
   const navigate = useNavigate();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+
   const [subscriptions, setSubscriptions] = useState([]);
   const [activeSubData, setActiveSubData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -94,17 +98,17 @@ export default function SubscriptionsPage() {
       {hasActiveSub && (
         <Card
           sx={{
-            p: 3,
+            p: { xs: 2.5, sm: 3.5 },
             mb: 4,
             borderRadius: '24px',
-            backgroundColor: '#fffdfa',
+            backgroundColor: isDark ? 'background.paper' : '#fffdfa',
             border: '2px solid #f47c20',
-            boxShadow: '0 8px 25px -4px rgba(244, 124, 32, 0.15)'
+            boxShadow: isDark ? '0 8px 30px rgba(0,0,0,0.4)' : '0 8px 25px -4px rgba(244, 124, 32, 0.15)'
           }}
         >
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={8}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, mb: 1 }}>
                 <Chip
                   icon={<CheckCircleIcon sx={{ fontSize: 16 }} />}
                   label="اشتراک فعال شما"
@@ -117,22 +121,26 @@ export default function SubscriptionsPage() {
                     icon={<AccessTimeIcon sx={{ fontSize: 14 }} />}
                     label={`معتبر تا: ${formatDate(activeSubData.userSubscription.endDate)}`}
                     size="small"
-                    sx={{ backgroundColor: '#fff8ed', color: '#b94410', fontWeight: 600 }}
+                    sx={{
+                      backgroundColor: isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed',
+                      color: isDark ? '#fed7aa' : '#b94410',
+                      fontWeight: 600
+                    }}
                   />
                 )}
               </Box>
 
-              <Typography variant="h5" sx={{ fontWeight: 800, color: '#171715', mb: 1 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
                 {activeSubData.subscription.title}
               </Typography>
 
-              <Typography variant="body2" sx={{ color: '#55554f', lineHeight: 1.7, mb: 2 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.7, mb: 2 }}>
                 {activeSubData.subscription.description || 'شما در حال حاضر از دسترسی ویژه به دوره‌های تحت پوشش و نشان کاربری اختصاصی برخوردار هستید.'}
               </Typography>
 
               {activeSubData.includedCourses && activeSubData.includedCourses.length > 0 && (
                 <Box>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#171715', display: 'block', mb: 0.5 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', display: 'block', mb: 0.5 }}>
                     دوره‌های باز شده با این اشتراک ({toPersianDigits(activeSubData.includedCourses.length)} دوره):
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -141,7 +149,12 @@ export default function SubscriptionsPage() {
                         key={c.id}
                         label={c.name}
                         size="small"
-                        sx={{ backgroundColor: '#ffffff', border: '1px solid #deddd7' }}
+                        sx={{
+                          backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          color: 'text.primary'
+                        }}
                       />
                     ))}
                   </Box>
@@ -155,8 +168,9 @@ export default function SubscriptionsPage() {
                 sx={{
                   p: 2.5,
                   borderRadius: '20px',
-                  backgroundColor: '#fff8ed',
-                  border: '1px solid #ffdda8',
+                  backgroundColor: isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed',
+                  border: '1px solid',
+                  borderColor: isDark ? 'rgba(244, 124, 32, 0.3)' : '#ffdda8',
                   display: 'inline-flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -177,10 +191,10 @@ export default function SubscriptionsPage() {
                   <VerifiedUserOutlinedIcon sx={{ fontSize: 44, color: '#f47c20', mb: 1 }} />
                 )}
 
-                <Typography variant="caption" sx={{ color: '#b94410', fontWeight: 600 }}>
+                <Typography variant="caption" sx={{ color: isDark ? '#fed7aa' : '#b94410', fontWeight: 600 }}>
                   نشان فعال:
                 </Typography>
-                <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#171715' }}>
+                <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: 'text.primary' }}>
                   {activeSubData.subscription.badgeLabel || activeSubData.subscription.title}
                 </Typography>
               </Box>
@@ -195,12 +209,17 @@ export default function SubscriptionsPage() {
           icon={<CardMembershipOutlinedIcon sx={{ fontSize: 16 }} />}
           label="پلن‌های عضویت ویژه"
           size="small"
-          sx={{ backgroundColor: '#eff6ff', color: '#2563eb', fontWeight: 700, mb: 1.5 }}
+          sx={{
+            backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#eff6ff',
+            color: isDark ? '#60a5fa' : '#2563eb',
+            fontWeight: 700,
+            mb: 1.5
+          }}
         />
-        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', md: '2rem' }, mb: 1.5, color: '#171715' }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '2rem' }, mb: 1.5, color: 'text.primary' }}>
           دسترسی نامحدود با اشتراک حرکت
         </Typography>
-        <Typography variant="body2" sx={{ color: '#64748b', lineHeight: 1.7 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
           با تهیه اشتراک‌های دوره‌ای، به جلسات هفتگی اتاق فکر، وبینارهای تخصصی، نشان ویژه کاربری و شبکه نخبگان حرکت دسترسی خواهید داشت.
         </Typography>
       </Box>
@@ -215,17 +234,18 @@ export default function SubscriptionsPage() {
             <Grid item xs={12} sm={6} md={4} key={sub.id}>
               <Card
                 sx={{
-                  p: 3.5,
+                  p: { xs: 2.5, sm: 3.5 },
                   borderRadius: '28px',
                   display: 'flex',
                   flexDirection: 'column',
                   height: '100%',
-                  border: isFeatured ? '2px solid #f47c20' : '1px solid #deddd7',
+                  border: isFeatured ? '2px solid #f47c20' : '1px solid',
+                  borderColor: isFeatured ? '#f47c20' : 'divider',
                   boxShadow: isFeatured
-                    ? '0 12px 30px -8px rgba(244, 124, 32, 0.2)'
-                    : '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    ? '0 12px 30px -8px rgba(244, 124, 32, 0.25)'
+                    : (isDark ? '0 4px 20px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.04)'),
                   position: 'relative',
-                  backgroundColor: '#ffffff'
+                  backgroundColor: 'background.paper'
                 }}
               >
                 {isFeatured && (
@@ -246,7 +266,18 @@ export default function SubscriptionsPage() {
 
                 {/* Badge preview if configured */}
                 {(sub.badgeLabel || sanitizedBadgeSvg) && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, p: 1, backgroundColor: '#fff8ed', borderRadius: '12px', width: 'fit-content' }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      mb: 2,
+                      p: 1,
+                      backgroundColor: isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed',
+                      borderRadius: '12px',
+                      width: 'fit-content'
+                    }}
+                  >
                     {sanitizedBadgeSvg ? (
                       <Box
                         sx={{ width: 22, height: 22, display: 'flex', alignItems: 'center', '& svg': { width: '100%', height: '100%' } }}
@@ -255,17 +286,17 @@ export default function SubscriptionsPage() {
                     ) : (
                       <VerifiedUserOutlinedIcon sx={{ fontSize: 20, color: '#f47c20' }} />
                     )}
-                    <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, color: '#b94410' }}>
+                    <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, color: isDark ? '#fed7aa' : '#b94410' }}>
                       نشان: {sub.badgeLabel || sub.title}
                     </Typography>
                   </Box>
                 )}
 
-                <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#171715' }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: 'text.primary' }}>
                   {sub.title}
                 </Typography>
 
-                <Typography variant="body2" sx={{ color: '#64748b', mb: 3, minHeight: 40, lineHeight: 1.6 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, minHeight: 40, lineHeight: 1.6 }}>
                   {sub.description || 'دسترسی کامل به محتواهای ویژه و وبینارهای تخصصی مدرسه حرکت.'}
                 </Typography>
 
@@ -275,17 +306,17 @@ export default function SubscriptionsPage() {
                       {formatPrice(sub.salePrice || sub.price)}
                     </Typography>
                     {sub.salePrice && (
-                      <Typography sx={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.95rem' }}>
+                      <Typography sx={{ textDecoration: 'line-through', color: 'text.disabled', fontSize: '0.95rem' }}>
                         {formatPrice(sub.price)}
                       </Typography>
                     )}
                   </Box>
-                  <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                     مدت اعتبار: {toPersianDigits(sub.durationMonths || 1)} ماهه
                   </Typography>
                 </Box>
 
-                <Divider sx={{ mb: 3 }} />
+                <Divider sx={{ mb: 3, borderColor: 'divider' }} />
 
                 <List disablePadding sx={{ mb: 3, flex: 1 }}>
                   <ListItem disableGutters sx={{ py: 0.8 }}>
@@ -294,7 +325,7 @@ export default function SubscriptionsPage() {
                     </ListItemIcon>
                     <ListItemText
                       primary="دسترسی به تمامی دوره‌های تحت پوشش"
-                      primaryTypographyProps={{ fontSize: '0.86rem', fontWeight: 500 }}
+                      primaryTypographyProps={{ fontSize: '0.86rem', fontWeight: 500, color: 'text.primary' }}
                     />
                   </ListItem>
 
@@ -304,7 +335,7 @@ export default function SubscriptionsPage() {
                     </ListItemIcon>
                     <ListItemText
                       primary="نشان اختصاصی کاربری در پروفایل و دیدگاه‌ها"
-                      primaryTypographyProps={{ fontSize: '0.86rem', fontWeight: 500 }}
+                      primaryTypographyProps={{ fontSize: '0.86rem', fontWeight: 500, color: 'text.primary' }}
                     />
                   </ListItem>
 
@@ -314,7 +345,7 @@ export default function SubscriptionsPage() {
                     </ListItemIcon>
                     <ListItemText
                       primary="پشتیبانی اولویت‌دار و تیکت مستقیم با اساتید"
-                      primaryTypographyProps={{ fontSize: '0.86rem', fontWeight: 500 }}
+                      primaryTypographyProps={{ fontSize: '0.86rem', fontWeight: 500, color: 'text.primary' }}
                     />
                   </ListItem>
                 </List>

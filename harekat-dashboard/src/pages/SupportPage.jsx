@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogActions,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   CircularProgress,
@@ -31,9 +30,13 @@ import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 
 import { ticketsApi } from '../api/ticketsApi.js';
 import { accessApi } from '../api/accessApi.js';
+import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { formatDate, toPersianDigits } from '../utils/formatters.js';
 
 export default function SupportPage() {
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+
   const [tickets, setTickets] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -145,11 +148,40 @@ export default function SupportPage() {
   const getStatusChip = (status) => {
     switch (status) {
       case 'open':
-        return <Chip label="در انتظار پاسخ" size="small" sx={{ backgroundColor: '#fef3c7', color: '#b45309', fontWeight: 700 }} />;
+        return (
+          <Chip
+            label="در انتظار پاسخ"
+            size="small"
+            sx={{
+              backgroundColor: isDark ? 'rgba(217, 148, 0, 0.2)' : '#fef3c7',
+              color: isDark ? '#fcd34d' : '#b45309',
+              fontWeight: 700
+            }}
+          />
+        );
       case 'answered':
-        return <Chip label="پاسخ داده شده" size="small" sx={{ backgroundColor: '#dcfce7', color: '#15803d', fontWeight: 700 }} />;
+        return (
+          <Chip
+            label="پاسخ داده شده"
+            size="small"
+            sx={{
+              backgroundColor: isDark ? 'rgba(22, 163, 106, 0.2)' : '#dcfce7',
+              color: isDark ? '#4ade80' : '#15803d',
+              fontWeight: 700
+            }}
+          />
+        );
       case 'closed':
-        return <Chip label="بسته شده" size="small" sx={{ backgroundColor: '#f1f5f9', color: '#64748b' }} />;
+        return (
+          <Chip
+            label="بسته شده"
+            size="small"
+            sx={{
+              backgroundColor: isDark ? '#1e293b' : '#f1f5f9',
+              color: 'text.secondary'
+            }}
+          />
+        );
       default:
         return <Chip label={status || 'نامشخص'} size="small" />;
     }
@@ -158,11 +190,39 @@ export default function SupportPage() {
   const getPriorityChip = (priority) => {
     switch (priority) {
       case 'urgent':
-        return <Chip label="فوری" size="small" sx={{ backgroundColor: '#fee2e2', color: '#b91c1c', fontWeight: 700 }} />;
+        return (
+          <Chip
+            label="فوری"
+            size="small"
+            sx={{
+              backgroundColor: isDark ? 'rgba(229, 72, 77, 0.2)' : '#fee2e2',
+              color: isDark ? '#f87171' : '#b91c1c',
+              fontWeight: 700
+            }}
+          />
+        );
       case 'high':
-        return <Chip label="زیاد" size="small" sx={{ backgroundColor: '#ffedd5', color: '#c2410c' }} />;
+        return (
+          <Chip
+            label="زیاد"
+            size="small"
+            sx={{
+              backgroundColor: isDark ? 'rgba(244, 124, 32, 0.2)' : '#ffedd5',
+              color: isDark ? '#fb923c' : '#c2410c'
+            }}
+          />
+        );
       default:
-        return <Chip label="معمولی" size="small" sx={{ backgroundColor: '#f8fafc', color: '#64748b' }} />;
+        return (
+          <Chip
+            label="معمولی"
+            size="small"
+            sx={{
+              backgroundColor: isDark ? '#1e293b' : '#f8fafc',
+              color: 'text.secondary'
+            }}
+          />
+        );
     }
   };
 
@@ -179,10 +239,10 @@ export default function SupportPage() {
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3.5, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.3rem', md: '1.75rem' }, mb: 0.5, color: '#171715' }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.3rem', md: '1.75rem' }, mb: 0.5, color: 'text.primary' }}>
             تیکت‌های پشتیبانی و ارتباط با اساتید
           </Typography>
-          <Typography variant="body2" sx={{ color: '#6b6b63' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             ارسال و پیگیری سوالات درسی، فنی و مشاوره‌ای پیرامون دوره‌ها
           </Typography>
         </Box>
@@ -206,12 +266,21 @@ export default function SupportPage() {
 
       {/* Tickets List */}
       {tickets.length === 0 ? (
-        <Card sx={{ p: 6, textAlign: 'center', borderRadius: '24px', border: '1px dashed #deddd7', backgroundColor: '#ffffff' }}>
+        <Card
+          sx={{
+            p: 6,
+            textAlign: 'center',
+            borderRadius: '24px',
+            border: '1px dashed',
+            borderColor: 'divider',
+            backgroundColor: 'background.paper'
+          }}
+        >
           <HeadsetMicOutlinedIcon sx={{ fontSize: 60, color: '#f47c20', mb: 2 }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
             هیچ تیکت پشتیبانی ثبت نشده است
           </Typography>
-          <Typography variant="body2" sx={{ color: '#6b6b63', mb: 3, maxWidth: 440, mx: 'auto' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, maxWidth: 440, mx: 'auto' }}>
             در صورت بروز هرگونه مشکل یا سوال در جلسات دوره‌ها، تیکت پشتیبانی ارسال فرمایید.
           </Typography>
           <Button
@@ -231,19 +300,20 @@ export default function SupportPage() {
                 sx={{
                   p: 2.5,
                   borderRadius: '20px',
-                  border: '1px solid #deddd7',
-                  backgroundColor: '#ffffff',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  backgroundColor: 'background.paper',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
-                    borderColor: '#ffdda8'
+                    boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.06)',
+                    borderColor: '#f47c20'
                   }
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, flexWrap: 'wrap', gap: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                     {getStatusChip(ticket.status)}
                     {getPriorityChip(ticket.priority)}
                     {ticket.course ? (
@@ -251,26 +321,34 @@ export default function SupportPage() {
                         icon={<SchoolOutlinedIcon sx={{ fontSize: 14 }} />}
                         label={ticket.course.name}
                         size="small"
-                        sx={{ backgroundColor: '#fff8ed', color: '#b94410', fontWeight: 600 }}
+                        sx={{
+                          backgroundColor: isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed',
+                          color: isDark ? '#fed7aa' : '#b94410',
+                          fontWeight: 600
+                        }}
                       />
                     ) : (
-                      <Chip label="پشتیبانی عمومی" size="small" sx={{ backgroundColor: '#f1f5f9', color: '#475569' }} />
+                      <Chip
+                        label="پشتیبانی عمومی"
+                        size="small"
+                        sx={{ backgroundColor: isDark ? '#1e293b' : '#f1f5f9', color: 'text.secondary' }}
+                      />
                     )}
                   </Box>
 
-                  <Typography variant="caption" sx={{ color: '#9b9b92' }}>
+                  <Typography variant="caption" sx={{ color: 'text.disabled' }}>
                     {formatDate(ticket.createdAt)}
                   </Typography>
                 </Box>
 
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', fontSize: '1.05rem', mb: 0.5 }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '1.05rem', mb: 0.5 }}>
                   {ticket.title}
                 </Typography>
 
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#6b6b63',
+                    color: 'text.secondary',
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
@@ -291,17 +369,17 @@ export default function SupportPage() {
         onClose={() => setCreateOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}
+        PaperProps={{ sx: { borderRadius: '24px', p: 1, backgroundColor: 'background.paper' } }}
       >
-        <DialogTitle sx={{ fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <DialogTitle sx={{ fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'text.primary' }}>
           <span>ثبت تیکت پشتیبانی جدید</span>
-          <IconButton onClick={() => setCreateOpen(false)} size="small">
+          <IconButton onClick={() => setCreateOpen(false)} size="small" sx={{ color: 'text.secondary' }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
         <Box component="form" onSubmit={handleCreateTicket}>
-          <DialogContent dividers>
+          <DialogContent dividers sx={{ borderColor: 'divider' }}>
             {createError && (
               <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>
                 {createError}
@@ -309,7 +387,7 @@ export default function SupportPage() {
             )}
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.8 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.8, color: 'text.primary' }}>
                 مربوط به دوره:
               </Typography>
               <FormControl fullWidth size="small">
@@ -331,7 +409,7 @@ export default function SupportPage() {
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.8 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.8, color: 'text.primary' }}>
                 اولویت:
               </Typography>
               <FormControl fullWidth size="small">
@@ -348,7 +426,7 @@ export default function SupportPage() {
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.8 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.8, color: 'text.primary' }}>
                 عنوان تیکت:
               </Typography>
               <TextField
@@ -362,7 +440,7 @@ export default function SupportPage() {
             </Box>
 
             <Box sx={{ mb: 1 }}>
-              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.8 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.8, color: 'text.primary' }}>
                 متن پیام و توضیحات:
               </Typography>
               <TextField
@@ -378,14 +456,14 @@ export default function SupportPage() {
           </DialogContent>
 
           <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setCreateOpen(false)} sx={{ borderRadius: '12px', color: '#6b6b63' }}>
+            <Button onClick={() => setCreateOpen(false)} sx={{ borderRadius: '12px', color: 'text.secondary' }}>
               انصراف
             </Button>
             <Button
               type="submit"
               variant="contained"
               disabled={submitting}
-              sx={{ borderRadius: '12px', backgroundColor: '#f47c20', fontWeight: 700, px: 3 }}
+              sx={{ borderRadius: '12px', backgroundColor: '#f47c20', fontWeight: 700, px: 3, '&:hover': { backgroundColor: '#df5b13' } }}
             >
               {submitting ? <CircularProgress size={20} color="inherit" /> : 'ثبت تیکت'}
             </Button>
@@ -399,35 +477,61 @@ export default function SupportPage() {
         onClose={() => setSelectedTicket(null)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '24px', p: 1, minHeight: 480 } }}
+        PaperProps={{ sx: { borderRadius: '24px', p: 1, minHeight: 480, backgroundColor: 'background.paper' } }}
       >
         {selectedTicket && (
           <>
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1, color: 'text.primary' }}>
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                   {getStatusChip(selectedTicket.status)}
                   {selectedTicket.course && (
-                    <Chip label={selectedTicket.course.name} size="small" sx={{ backgroundColor: '#fff8ed', color: '#b94410' }} />
+                    <Chip
+                      label={selectedTicket.course.name}
+                      size="small"
+                      sx={{
+                        backgroundColor: isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed',
+                        color: isDark ? '#fed7aa' : '#b94410'
+                      }}
+                    />
                   )}
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715' }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
                   {selectedTicket.title}
                 </Typography>
               </Box>
 
-              <IconButton onClick={() => setSelectedTicket(null)} size="small">
+              <IconButton onClick={() => setSelectedTicket(null)} size="small" sx={{ color: 'text.secondary' }}>
                 <CloseIcon />
               </IconButton>
             </DialogTitle>
 
-            <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2, backgroundColor: '#f8fafc' }}>
+            <DialogContent
+              dividers
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                backgroundColor: isDark ? '#0b0f19' : '#f8fafc',
+                borderColor: 'divider'
+              }}
+            >
               {/* Original student question */}
-              <Paper sx={{ p: 2, borderRadius: '16px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', alignSelf: 'flex-start', maxWidth: '85%' }}>
+              <Paper
+                sx={{
+                  p: 2,
+                  borderRadius: '16px',
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  alignSelf: 'flex-start',
+                  maxWidth: '85%'
+                }}
+              >
                 <Typography variant="caption" sx={{ fontWeight: 700, color: '#f47c20', display: 'block', mb: 0.5 }}>
                   پیام شما ({formatDate(selectedTicket.createdAt)}):
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#334155', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
+                <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
                   {selectedTicket.description}
                 </Typography>
               </Paper>
@@ -441,21 +545,26 @@ export default function SupportPage() {
                     sx={{
                       p: 2,
                       borderRadius: '16px',
-                      backgroundColor: isStudent ? '#ffffff' : '#fff8ed',
-                      border: isStudent ? '1px solid #e2e8f0' : '1px solid #ffdda8',
+                      backgroundColor: isStudent
+                        ? 'background.paper'
+                        : (isDark ? '#1e293b' : '#fff8ed'),
+                      border: '1px solid',
+                      borderColor: isStudent
+                        ? 'divider'
+                        : (isDark ? 'rgba(244, 124, 32, 0.3)' : '#ffdda8'),
                       alignSelf: isStudent ? 'flex-start' : 'flex-end',
                       maxWidth: '85%'
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: isStudent ? '#f47c20' : '#15803d' }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: isStudent ? '#f47c20' : '#16a36a' }}>
                         {isStudent ? 'شما' : 'پشتیبان / استاد دوره'}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: '#94a3b8' }}>
+                      <Typography variant="caption" sx={{ color: 'text.disabled' }}>
                         • {formatDate(msg.createdAt)}
                       </Typography>
                     </Box>
-                    <Typography variant="body2" sx={{ color: '#1e293b', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
+                    <Typography variant="body2" sx={{ color: 'text.primary', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
                       {msg.message}
                     </Typography>
                   </Paper>
@@ -464,7 +573,7 @@ export default function SupportPage() {
             </DialogContent>
 
             {/* Reply Input Bar */}
-            <Box sx={{ p: 2, backgroundColor: '#ffffff', display: 'flex', gap: 1.5, alignItems: 'center' }}>
+            <Box sx={{ p: 2, backgroundColor: 'background.paper', display: 'flex', gap: 1.5, alignItems: 'center' }}>
               <TextField
                 fullWidth
                 size="small"
@@ -478,7 +587,15 @@ export default function SupportPage() {
                 disabled={replying || !replyText.trim()}
                 onClick={handleSendReply}
                 startIcon={replying ? <CircularProgress size={18} color="inherit" /> : <SendIcon sx={{ transform: 'rotate(180deg)' }} />}
-                sx={{ borderRadius: '14px', px: 2.5, py: 1, backgroundColor: '#f47c20', fontWeight: 700, flexShrink: 0 }}
+                sx={{
+                  borderRadius: '14px',
+                  px: 2.5,
+                  py: 1,
+                  backgroundColor: '#f47c20',
+                  fontWeight: 700,
+                  flexShrink: 0,
+                  '&:hover': { backgroundColor: '#df5b13' }
+                }}
               >
                 ارسال
               </Button>

@@ -27,17 +27,17 @@ import {
   RadioGroup,
   FormControlLabel,
   Stack,
+  useMediaQuery,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import VideoLibraryOutlinedIcon from '@mui/icons-material/VideoLibraryOutlined';
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
-import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
 import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
@@ -53,11 +53,13 @@ import { assignmentsApi } from '../api/assignmentsApi.js';
 import { quizzesApi } from '../api/quizzesApi.js';
 import { evaluationsApi } from '../api/evaluationsApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { formatDuration, assetUrl, formatDate, toPersianDigits } from '../utils/formatters.js';
+import { assetUrl, formatDate, toPersianDigits } from '../utils/formatters.js';
 
 export default function CourseDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -287,7 +289,7 @@ export default function CourseDetailPage() {
         feedback: evaluationFeedback.trim(),
       });
       loadEvaluation();
-      loadCourseData(); // Reload sessions in case evaluation gate unlocked sessions
+      loadCourseData(); // Reload sessions to unlock gated sessions
       alert('نظر شما با موفقیت ثبت شد. با تشکر از ارزیابی شما!');
     } catch (err) {
       alert(err.message || 'خطا در ثبت ارزیابی');
@@ -321,16 +323,16 @@ export default function CourseDetailPage() {
 
   if (accessDenied || !courseData) {
     return (
-      <Box sx={{ py: 6, textAlign: 'center', maxWidth: 540, mx: 'auto' }}>
-        <Card sx={{ p: 4, borderRadius: '24px', border: '1px solid #ffdda8', backgroundColor: '#fff8ed' }}>
-          <LockOutlinedIcon sx={{ fontSize: 56, color: '#f47c20', mb: 2 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#171715' }}>
+      <Box sx={{ py: 6, textAlign: 'center', maxWidth: 540, mx: 'auto', px: 2 }}>
+        <Card sx={{ p: { xs: 3, sm: 4 }, borderRadius: '24px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+          <LockOutlinedIcon sx={{ fontSize: 56, color: 'warning.main', mb: 2 }} />
+          <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: 'text.primary' }}>
             عدم دسترسی به محتوای دوره
           </Typography>
-          <Typography variant="body2" sx={{ color: '#6b6b63', mb: 3, lineHeight: 1.8 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, lineHeight: 1.8 }}>
             شما هنوز دسترسی فعالی به این دوره یا جلسات آن ندارید. برای مشاهده جلسات و ویدیوها، دوره را خریداری فرمایید یا از طریق پکیج‌های مهارتی اقدام نمایید.
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
             <Button
               component={NavLink}
               to="/packages"
@@ -339,9 +341,7 @@ export default function CourseDetailPage() {
                 borderRadius: '14px',
                 px: 3,
                 py: 1.2,
-                backgroundColor: '#f47c20',
                 fontWeight: 700,
-                '&:hover': { backgroundColor: '#df5b13' },
               }}
             >
               مشاهده پکیج‌های مهارت
@@ -350,11 +350,11 @@ export default function CourseDetailPage() {
               component={NavLink}
               to="/courses"
               variant="outlined"
-              sx={{ borderRadius: '14px', px: 3, py: 1.2, borderColor: '#deddd7', color: '#55554f' }}
+              sx={{ borderRadius: '14px', px: 3, py: 1.2 }}
             >
               دوره‌های من
             </Button>
-          </Box>
+          </Stack>
         </Card>
       </Box>
     );
@@ -370,7 +370,7 @@ export default function CourseDetailPage() {
           component={NavLink}
           to="/courses"
           startIcon={<ArrowForwardIcon />}
-          sx={{ color: '#6b6b63', fontWeight: 600, fontSize: '0.85rem' }}
+          sx={{ color: 'text.secondary', fontWeight: 600, fontSize: '0.85rem' }}
         >
           بازگشت به دوره‌های من
         </Button>
@@ -389,15 +389,15 @@ export default function CourseDetailPage() {
       </Box>
 
       {/* Main Tabs Navigation */}
-      <Card sx={{ mb: 3, borderRadius: '20px', border: '1px solid #deddd7' }}>
+      <Card sx={{ mb: 3, borderRadius: '20px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
         <Tabs
           value={activeTab}
           onChange={(_, v) => setActiveTab(v)}
           variant="scrollable"
           scrollButtons="auto"
           sx={{
-            px: 2,
-            '& .MuiTab-root': { fontWeight: 700, fontSize: '0.88rem', py: 2 },
+            px: { xs: 1, sm: 2 },
+            '& .MuiTab-root': { fontWeight: 700, fontSize: '0.86rem', py: { xs: 1.5, sm: 2 } },
           }}
         >
           <Tab icon={<VideoLibraryOutlinedIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="جلسات آموزشی" />
@@ -413,7 +413,7 @@ export default function CourseDetailPage() {
 
       {/* Tab 0: Sessions & Video Player */}
       {activeTab === 0 && (
-        <Grid container spacing={3}>
+        <Grid container spacing={{ xs: 2.5, md: 3 }}>
           {/* Left Column: Video Player & Active Session Details */}
           <Grid item xs={12} lg={8}>
             {/* Locked Session Banner if evaluation is required */}
@@ -435,12 +435,12 @@ export default function CourseDetailPage() {
             <Box
               sx={{
                 width: '100%',
-                height: { xs: 220, sm: 400 },
+                height: { xs: 210, sm: 340, md: 400 },
                 borderRadius: '24px',
                 overflow: 'hidden',
                 backgroundColor: '#0f172a',
                 mb: 3,
-                boxShadow: '0 12px 30px -5px rgba(15, 23, 42, 0.2)',
+                boxShadow: '0 12px 30px -5px rgba(15, 23, 42, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -486,36 +486,33 @@ export default function CourseDetailPage() {
             </Box>
 
             {/* Active Session Info */}
-            <Card sx={{ p: 3, borderRadius: '24px', border: '1px solid #deddd7', backgroundColor: '#ffffff', mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, flexWrap: 'wrap', gap: 1 }}>
+            <Card sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: '24px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', mb: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
                 <Chip
                   label={activeSession ? `جلسه شماره ${toPersianDigits(activeSession.sessionNumber)}` : 'جلسه اول'}
                   size="small"
-                  sx={{ backgroundColor: '#fff8ed', color: '#b94410', fontWeight: 700 }}
+                  sx={{ bgcolor: 'action.hover', fontWeight: 700 }}
                 />
                 <Chip
                   icon={activeSession?.isLocked ? <LockOutlinedIcon sx={{ fontSize: 16 }} /> : <CheckCircleIcon sx={{ fontSize: 16, color: '#16a34a !important' }} />}
                   label={activeSession?.isLocked ? 'قفل شده (گیت ارزیابی)' : 'دسترسی مجاز'}
                   size="small"
-                  sx={{
-                    backgroundColor: activeSession?.isLocked ? '#fef3c7' : '#dcfce7',
-                    color: activeSession?.isLocked ? '#b45309' : '#15803d',
-                    fontWeight: 700,
-                  }}
+                  color={activeSession?.isLocked ? 'warning' : 'success'}
+                  sx={{ fontWeight: 700 }}
                 />
               </Box>
 
-              <Typography variant="h5" sx={{ fontWeight: 800, color: '#171715', mb: 1.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1.5, fontSize: { xs: '1.2rem', sm: '1.4rem' } }}>
                 {activeSession ? activeSession.title : courseData.name}
               </Typography>
 
-              <Typography variant="body1" sx={{ color: '#55554f', lineHeight: 1.8, mb: 3 }}>
+              <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.8, mb: 3 }}>
                 {activeSession?.description || courseData.description}
               </Typography>
 
               {/* Quick Action Links & Completion Toggle for Active Session */}
               {activeSession && !activeSession.isLocked && (
-                <Box sx={{ pt: 2, borderTop: '1px solid #deddd7' }}>
+                <Box sx={{ pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
                     <Button
                       variant={activeSession.isCompleted ? 'contained' : 'outlined'}
@@ -528,12 +525,6 @@ export default function CourseDetailPage() {
                         fontWeight: 700,
                         px: 2,
                         py: 0.8,
-                        borderColor: '#deddd7',
-                        backgroundColor: activeSession.isCompleted ? '#16a34a' : 'transparent',
-                        color: activeSession.isCompleted ? '#ffffff' : '#55554f',
-                        '&:hover': {
-                          backgroundColor: activeSession.isCompleted ? '#15803d' : '#f4f4f0',
-                        },
                       }}
                     >
                       {activeSession.isCompleted ? 'جلسه تکمیل شد ✓' : 'علامت‌گذاری به عنوان تکمیل شده'}
@@ -550,7 +541,7 @@ export default function CourseDetailPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         startIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
-                        sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#f47c20' }}
+                        sx={{ borderRadius: '12px', fontWeight: 700 }}
                       >
                         لینک کلاس آنلاین
                       </Button>
@@ -565,7 +556,7 @@ export default function CourseDetailPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         startIcon={<CloudDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                        sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#2563eb' }}
+                        sx={{ borderRadius: '12px', fontWeight: 700 }}
                       >
                         فایل‌های درایو جلسه
                       </Button>
@@ -580,7 +571,7 @@ export default function CourseDetailPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         startIcon={<ForumOutlinedIcon sx={{ fontSize: 16 }} />}
-                        sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#16a34a' }}
+                        sx={{ borderRadius: '12px', fontWeight: 700 }}
                       >
                         گروه تعاملی کلاسی
                       </Button>
@@ -594,9 +585,9 @@ export default function CourseDetailPage() {
           {/* Right Column: Sessions List & Progress */}
           <Grid item xs={12} lg={4}>
             {/* Course Progress Summary Card */}
-            <Card sx={{ p: 2.5, borderRadius: '24px', border: '1px solid #deddd7', backgroundColor: '#ffffff', mb: 3 }}>
+            <Card sx={{ p: 2.5, borderRadius: '24px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#171715' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary' }}>
                   پیشرفت یادگیری دوره
                 </Typography>
                 <Chip
@@ -610,24 +601,24 @@ export default function CourseDetailPage() {
                 variant="determinate"
                 value={stats.completionPercentage}
                 sx={{
-                  height: 10,
+                  height: 9,
                   borderRadius: 5,
-                  backgroundColor: '#f1f0eb',
+                  bgcolor: 'action.hover',
                   '& .MuiLinearProgress-bar': {
                     borderRadius: 5,
-                    backgroundColor: stats.completionPercentage === 100 ? '#16a34a' : '#f47c20',
+                    bgcolor: stats.completionPercentage === 100 ? 'success.main' : 'primary.main',
                   },
                   mb: 1.5,
                 }}
               />
-              <Typography variant="caption" sx={{ color: '#72726a', fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                 {toPersianDigits(stats.completedSessions)} جلسه از مجموع {toPersianDigits(stats.totalSessions)} جلسه تکمیل شده است.
               </Typography>
             </Card>
 
             {/* Sessions List Accordion / Card */}
-            <Card sx={{ p: 2.5, borderRadius: '24px', border: '1px solid #deddd7', backgroundColor: '#ffffff', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', mb: 2 }}>
+            <Card sx={{ p: 2.5, borderRadius: '24px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', mb: 2 }}>
                 جلسات آموزشی ({toPersianDigits(sessions.length)} جلسه)
               </Typography>
 
@@ -644,17 +635,18 @@ export default function CourseDetailPage() {
                         p: 1.6,
                         borderRadius: '16px',
                         cursor: 'pointer',
-                        border: isSelected ? '2px solid #f47c20' : '1px solid #deddd7',
-                        backgroundColor: sess.isLocked ? '#fafaf9' : isSelected ? '#fff8ed' : '#ffffff',
+                        border: '1px solid',
+                        borderColor: isSelected ? 'primary.main' : 'divider',
+                        bgcolor: sess.isLocked ? 'action.hover' : isSelected ? 'action.selected' : 'background.paper',
                         opacity: sess.isLocked ? 0.75 : 1,
                         transition: 'all 0.2s ease',
-                        '&:hover': { backgroundColor: isSelected ? '#fff8ed' : '#f7f5f0' },
+                        '&:hover': { bgcolor: 'action.hover' },
                       }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {sess.isLocked ? (
-                            <LockOutlinedIcon sx={{ fontSize: 18, color: '#f59e0b' }} />
+                            <LockOutlinedIcon sx={{ fontSize: 18, color: 'warning.main' }} />
                           ) : (
                             <IconButton
                               size="small"
@@ -665,13 +657,13 @@ export default function CourseDetailPage() {
                               sx={{ p: 0.2 }}
                             >
                               {sess.isCompleted ? (
-                                <CheckCircleIcon sx={{ fontSize: 20, color: '#16a34a' }} />
+                                <CheckCircleIcon sx={{ fontSize: 20, color: 'success.main' }} />
                               ) : (
-                                <RadioButtonUncheckedIcon sx={{ fontSize: 20, color: '#9b9b92' }} />
+                                <RadioButtonUncheckedIcon sx={{ fontSize: 20, color: 'text.disabled' }} />
                               )}
                             </IconButton>
                           )}
-                          <Typography sx={{ fontWeight: 700, fontSize: '0.86rem', color: isSelected ? '#f47c20' : '#171715' }}>
+                          <Typography sx={{ fontWeight: 700, fontSize: '0.86rem', color: isSelected ? 'primary.main' : 'text.primary' }}>
                             جلسه {toPersianDigits(sess.sessionNumber)}: {sess.title}
                           </Typography>
                         </Box>
@@ -679,12 +671,12 @@ export default function CourseDetailPage() {
                           <Chip
                             label="پایانی"
                             size="small"
-                            sx={{ height: 20, fontSize: '0.65rem', backgroundColor: '#fef3c7', color: '#b45309', fontWeight: 700 }}
+                            sx={{ height: 20, fontSize: '0.65rem', bgcolor: 'warning.light', color: 'warning.dark', fontWeight: 700 }}
                           />
                         )}
                       </Box>
                       {sess.isLocked && (
-                        <Typography variant="caption" color="warning.dark" sx={{ pl: 3.5, display: 'block' }}>
+                        <Typography variant="caption" color="warning.main" sx={{ pl: 3.5, display: 'block' }}>
                           نیازمند ارزیابی استاد
                         </Typography>
                       )}
@@ -700,22 +692,22 @@ export default function CourseDetailPage() {
       {/* Tab 1: Assignments */}
       {activeTab === 1 && (
         <Stack spacing={3}>
-          <Typography variant="h6" fontWeight={800}>
+          <Typography variant="h6" fontWeight={800} color="text.primary">
             تکالیف و تمرین‌های دوره
           </Typography>
           {loadingAssignments ? (
             <CircularProgress size={32} />
           ) : assignments.length === 0 ? (
-            <Card sx={{ p: 4, textAlign: 'center', borderRadius: '20px' }}>
+            <Card sx={{ p: 4, textAlign: 'center', borderRadius: '20px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
               <Typography color="text.secondary">هنوز تکلیفی برای این دوره تعریف نشده است.</Typography>
             </Card>
           ) : (
             <Grid container spacing={2.5}>
               {assignments.map((asg) => (
                 <Grid item xs={12} md={6} key={asg.id}>
-                  <Card sx={{ p: 3, borderRadius: '20px', border: '1px solid #deddd7', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <Card sx={{ p: 3, borderRadius: '20px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
-                      <Typography variant="subtitle1" fontWeight={800}>
+                      <Typography variant="subtitle1" fontWeight={800} color="text.primary">
                         {asg.title}
                       </Typography>
                       <Chip
@@ -744,11 +736,11 @@ export default function CourseDetailPage() {
                     )}
 
                     {asg.mySubmission?.feedback && (
-                      <Box sx={{ p: 1.5, bgcolor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', mb: 2 }}>
-                        <Typography variant="caption" color="success.dark" fontWeight={700} display="block">
+                      <Box sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: '12px', border: '1px solid', borderColor: 'divider', mb: 2 }}>
+                        <Typography variant="caption" color="success.main" fontWeight={700} display="block">
                           بازخورد استاد/دستیار:
                         </Typography>
-                        <Typography variant="body2">{asg.mySubmission.feedback}</Typography>
+                        <Typography variant="body2" color="text.primary">{asg.mySubmission.feedback}</Typography>
                       </Box>
                     )}
 
@@ -770,22 +762,22 @@ export default function CourseDetailPage() {
       {/* Tab 2: Quizzes */}
       {activeTab === 2 && (
         <Stack spacing={3}>
-          <Typography variant="h6" fontWeight={800}>
+          <Typography variant="h6" fontWeight={800} color="text.primary">
             آزمونک‌های تستی دوره
           </Typography>
           {loadingQuizzes ? (
             <CircularProgress size={32} />
           ) : quizzes.length === 0 ? (
-            <Card sx={{ p: 4, textAlign: 'center', borderRadius: '20px' }}>
+            <Card sx={{ p: 4, textAlign: 'center', borderRadius: '20px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
               <Typography color="text.secondary">هنوز آزمونکی برای این دوره تعریف نشده است.</Typography>
             </Card>
           ) : (
             <Grid container spacing={2.5}>
               {quizzes.map((quiz) => (
                 <Grid item xs={12} md={6} key={quiz.id}>
-                  <Card sx={{ p: 3, borderRadius: '20px', border: '1px solid #deddd7', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <Card sx={{ p: 3, borderRadius: '20px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
-                      <Typography variant="subtitle1" fontWeight={800}>
+                      <Typography variant="subtitle1" fontWeight={800} color="text.primary">
                         {quiz.title}
                       </Typography>
                       <Chip
@@ -816,41 +808,41 @@ export default function CourseDetailPage() {
 
       {/* Tab 3: Final Exam */}
       {activeTab === 3 && (
-        <Card sx={{ p: 3, borderRadius: '24px', border: '1px solid #deddd7', maxWidth: 640 }}>
+        <Card sx={{ p: { xs: 2.5, sm: 3.5 }, borderRadius: '24px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', maxWidth: 640 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-            <AssignmentTurnedInOutlinedIcon sx={{ color: '#2563eb', fontSize: 24 }} />
-            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+            <AssignmentTurnedInOutlinedIcon sx={{ color: 'primary.main', fontSize: 24 }} />
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
               آزمون پایان ترم دوره
             </Typography>
           </Box>
 
           {exam ? (
             <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                 {exam.title}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#55554f', mb: 3, lineHeight: 1.8 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, lineHeight: 1.8 }}>
                 {exam.description || 'برای قبولی در این دوره و دریافت گواهینامه معتبر، پاسخ و پروژه نهایی خود را ارسال فرمایید.'}
               </Typography>
 
               {exam.hasTaken ? (
-                <Box sx={{ p: 2, borderRadius: '14px', backgroundColor: '#f0f7ff', border: '1px solid #bfdbfe', mb: 2 }}>
-                  <Typography variant="caption" sx={{ color: '#2563eb', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                <Box sx={{ p: 2, borderRadius: '14px', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', mb: 2 }}>
+                  <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700, display: 'block', mb: 0.5 }}>
                     وضعیت آزمون پایان ترم:
                   </Typography>
                   {exam.resultPublished ? (
                     <Box>
-                      <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: exam.passed ? '#15803d' : '#e11d48' }}>
+                      <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: exam.passed ? 'success.main' : 'error.main' }}>
                         نمره شما: {toPersianDigits(exam.score)} از {toPersianDigits(exam.maxScore)} ({exam.passed ? 'قبول شده ✓' : 'مردود'})
                       </Typography>
                       {exam.passed && (
-                        <Typography variant="caption" sx={{ color: '#15803d', display: 'block', mt: 0.5 }}>
+                        <Typography variant="caption" sx={{ color: 'success.main', display: 'block', mt: 0.5 }}>
                           تبریک! گواهینامه پایان دوره شما با موفقیت صادر شد.
                         </Typography>
                       )}
                     </Box>
                   ) : (
-                    <Typography variant="body2" sx={{ color: '#64748b' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                       پاسخ آزمون شما ثبت شده و در انتظار بررسی و ثبت نمره توسط مدرس دوره است.
                     </Typography>
                   )}
@@ -875,8 +867,8 @@ export default function CourseDetailPage() {
 
       {/* Tab 4: Evaluation */}
       {activeTab === 4 && (
-        <Card sx={{ p: 3.5, borderRadius: '24px', border: '1px solid #deddd7', maxWidth: 640 }}>
-          <Typography variant="h6" fontWeight={800} mb={1}>
+        <Card sx={{ p: { xs: 2.5, sm: 3.5 }, borderRadius: '24px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', maxWidth: 640 }}>
+          <Typography variant="h6" fontWeight={800} color="text.primary" mb={1}>
             فرم نظرسنجی و ارزیابی استاد دوره
           </Typography>
           <Typography variant="body2" color="text.secondary" mb={3}>
@@ -892,7 +884,7 @@ export default function CourseDetailPage() {
           <Box component="form" onSubmit={handleSubmitEvaluation}>
             <Stack spacing={3}>
               <Box>
-                <Typography variant="subtitle2" fontWeight={700} mb={0.5}>
+                <Typography variant="subtitle2" fontWeight={700} color="text.primary" mb={0.5}>
                   ۱. رضایت کلی از دوره آموزشی:
                 </Typography>
                 <Rating
@@ -903,7 +895,7 @@ export default function CourseDetailPage() {
               </Box>
 
               <Box>
-                <Typography variant="subtitle2" fontWeight={700} mb={0.5}>
+                <Typography variant="subtitle2" fontWeight={700} color="text.primary" mb={0.5}>
                   ۲. تسلط، شیوه بیان و کیفیت تدریس استاد:
                 </Typography>
                 <Rating
@@ -914,7 +906,7 @@ export default function CourseDetailPage() {
               </Box>
 
               <Box>
-                <Typography variant="subtitle2" fontWeight={700} mb={0.5}>
+                <Typography variant="subtitle2" fontWeight={700} color="text.primary" mb={0.5}>
                   ۳. کاربردی بودن محتوا و سرفصل‌های ارائه شده:
                 </Typography>
                 <Rating
@@ -949,26 +941,26 @@ export default function CourseDetailPage() {
 
       {/* Tab 5: License / Certificate */}
       {activeTab === 5 && license && (
-        <Card sx={{ p: 4, borderRadius: '24px', border: '1px solid #deddd7', maxWidth: 640, textAlign: 'center' }}>
-          <WorkspacePremiumOutlinedIcon sx={{ fontSize: 72, color: '#f47c20', mb: 1.5 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>
+        <Card sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: '24px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', maxWidth: 640, textAlign: 'center' }}>
+          <WorkspacePremiumOutlinedIcon sx={{ fontSize: 72, color: 'primary.main', mb: 1.5 }} />
+          <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
             گواهینامه پایان دوره {courseData.name}
           </Typography>
-          <Typography variant="body2" sx={{ color: '#55554f', mb: 3 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             این گواهینامه رسمی نشان‌دهنده موفقیت شما در اتمام دوره و قبولی در آزمون پایانی است.
           </Typography>
 
-          <Card sx={{ p: 2.5, backgroundColor: '#f8fafc', borderRadius: '18px', textAlign: 'right', mb: 3 }}>
+          <Card sx={{ p: 2.5, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', borderRadius: '18px', textAlign: 'right', mb: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" sx={{ color: '#64748b' }}>شماره گواهینامه:</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 800 }}>{license.licenseNumber}</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>شماره گواهینامه:</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.primary' }}>{license.licenseNumber}</Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" sx={{ color: '#64748b' }}>تاریخ صدور:</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>{formatDate(license.issueDate)}</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>تاریخ صدور:</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>{formatDate(license.issueDate)}</Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" sx={{ color: '#64748b' }}>وضعیت:</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>وضعیت:</Typography>
               <Chip label="معتبر و تایید شده" color="success" size="small" sx={{ fontWeight: 700 }} />
             </Box>
           </Card>
@@ -981,7 +973,7 @@ export default function CourseDetailPage() {
               target="_blank"
               rel="noopener noreferrer"
               startIcon={<CloudDownloadOutlinedIcon />}
-              sx={{ borderRadius: '14px', px: 3, py: 1.2, backgroundColor: '#f47c20', fontWeight: 700 }}
+              sx={{ borderRadius: '14px', px: 3, py: 1.2, fontWeight: 700 }}
             >
               دانلود نسخه رسمی مدرک (PDF)
             </Button>
@@ -1009,11 +1001,11 @@ export default function CourseDetailPage() {
                 />
                 <TextField
                   label="لینک فایل ضمیمه (Google Drive / Dropbox / لینک مستقیم)"
-                  dir="ltr"
                   value={assignmentFileUrl}
                   onChange={(e) => setAssignmentFileUrl(e.target.value)}
                   placeholder="https://..."
                   fullWidth
+                  slotProps={{ htmlInput: { dir: 'ltr' } }}
                 />
               </Stack>
             </DialogContent>
@@ -1052,8 +1044,8 @@ export default function CourseDetailPage() {
             ) : (
               <Stack spacing={3}>
                 {(activeQuizModal.questions || []).map((q, qIdx) => (
-                  <Card key={qIdx} variant="outlined" sx={{ p: 2.5 }}>
-                    <Typography fontWeight={700} fontSize="0.95rem" mb={1.5}>
+                  <Card key={qIdx} variant="outlined" sx={{ p: 2.5, bgcolor: 'background.paper', borderColor: 'divider' }}>
+                    <Typography fontWeight={700} fontSize="0.95rem" mb={1.5} color="text.primary">
                       {qIdx + 1}. {q.question}
                     </Typography>
                     <RadioGroup
@@ -1119,7 +1111,7 @@ export default function CourseDetailPage() {
             </Alert>
           ) : (
             <Box sx={{ py: 1 }}>
-              <Typography variant="body2" sx={{ color: '#55554f', mb: 2 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
                 برای ثبت آزمون و ارسال پروژه نهایی برای مدرس، دکمه ارسال را تایید فرمایید.
               </Typography>
               <TextField
@@ -1139,14 +1131,14 @@ export default function CourseDetailPage() {
             </Button>
           ) : (
             <>
-              <Button onClick={() => setExamDialogOpen(false)} sx={{ borderRadius: '12px', color: '#6b6b63' }}>
+              <Button onClick={() => setExamDialogOpen(false)} sx={{ borderRadius: '12px' }}>
                 انصراف
               </Button>
               <Button
                 variant="contained"
                 disabled={submittingExam}
                 onClick={handleSubmitExam}
-                sx={{ borderRadius: '12px', backgroundColor: '#2563eb', fontWeight: 700 }}
+                sx={{ borderRadius: '12px', fontWeight: 700 }}
               >
                 {submittingExam ? <CircularProgress size={20} color="inherit" /> : 'ثبت و ارسال نهایی'}
               </Button>
@@ -1172,30 +1164,30 @@ export default function CourseDetailPage() {
         <DialogContent dividers>
           {license ? (
             <Box sx={{ textAlign: 'center', py: 2 }}>
-              <WorkspacePremiumOutlinedIcon sx={{ fontSize: 64, color: '#f47c20', mb: 1 }} />
-              <Typography variant="h5" sx={{ fontWeight: 800, color: '#171715', mb: 1 }}>
+              <WorkspacePremiumOutlinedIcon sx={{ fontSize: 64, color: 'primary.main', mb: 1 }} />
+              <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
                 گواهینامه پایان دوره {courseData.name}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#55554f', mb: 3 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
                 این مدرک نشان‌دهنده قبولی موفقیت‌آمیز شما در آزمون نهایی و اتمام سرفصل‌های دوره است.
               </Typography>
 
-              <Card sx={{ p: 2.5, backgroundColor: '#f8fafc', borderRadius: '18px', textAlign: 'right', mb: 3 }}>
+              <Card sx={{ p: 2.5, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider', borderRadius: '18px', textAlign: 'right', mb: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>شماره گواهینامه:</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 800 }}>{license.licenseNumber}</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>شماره گواهینامه:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.primary' }}>{license.licenseNumber}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>تاریخ صدور:</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{formatDate(license.issueDate)}</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>تاریخ صدور:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>{formatDate(license.issueDate)}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>وضعیت:</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>وضعیت:</Typography>
                   <Chip label="معتبر و تایید شده" color="success" size="small" sx={{ fontWeight: 700 }} />
                 </Box>
               </Card>
 
-              {license.certificateUrl ? (
+              {license.certificateUrl && (
                 <Button
                   variant="contained"
                   component="a"
@@ -1203,14 +1195,10 @@ export default function CourseDetailPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   startIcon={<CloudDownloadOutlinedIcon />}
-                  sx={{ borderRadius: '14px', px: 3, py: 1.2, backgroundColor: '#f47c20', fontWeight: 700 }}
+                  sx={{ borderRadius: '14px', px: 3, py: 1.2, fontWeight: 700 }}
                 >
                   دانلود نسخه رسمی مدرک (PDF)
                 </Button>
-              ) : (
-                <Alert severity="info" sx={{ borderRadius: '12px' }}>
-                  فایل نهایی مدرک توسط آموزشگاه تایید شده و برای شما فعال است.
-                </Alert>
               )}
             </Box>
           ) : null}

@@ -14,7 +14,7 @@ import {
   Tooltip,
   Tabs,
   Tab,
-  Divider,
+  Container,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -151,16 +151,24 @@ export default function AdminLogin() {
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'column',
         bgcolor: 'background.default',
-        p: 2,
-        position: 'relative',
+        p: { xs: 2, sm: 3 },
       }}
       dir="rtl"
     >
-      {/* Theme toggle in top corner */}
-      <Box sx={{ position: 'absolute', top: 20, left: 20 }}>
+      {/* Top Header Bar with Theme Switcher */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          maxWidth: 440,
+          width: '100%',
+          mx: 'auto',
+          mb: { xs: 2, sm: 3 },
+        }}
+      >
         <Tooltip title={theme.palette.mode === 'dark' ? 'حالت روشن' : 'حالت تیره'}>
           <IconButton
             onClick={toggleTheme}
@@ -182,223 +190,251 @@ export default function AdminLogin() {
         </Tooltip>
       </Box>
 
-      {/* Minimal Centered Card */}
-      <Paper
-        elevation={0}
+      {/* Main Login Card */}
+      <Container
+        maxWidth="xs"
         sx={{
-          width: '100%',
-          maxWidth: 400,
-          p: { xs: 3, sm: 4 },
-          borderRadius: 3,
-          border: '1px solid',
-          borderColor: 'divider',
-          bgcolor: 'background.paper',
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 0,
         }}
       >
-        <Stack spacing={1.5} alignItems="center" mb={2.5}>
-          <Box
-            component="img"
-            src="/favicon.svg"
-            alt="Logo"
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: 2,
-              p: 0.5,
-              border: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'action.hover',
-            }}
-          />
-          <Typography variant="h6" fontWeight={800} letterSpacing="-0.02em">
-            ورود به مدیریت حرکت
-          </Typography>
-        </Stack>
-
-        <Tabs
-          value={authMethod}
-          onChange={(_, v) => {
-            setAuthMethod(v);
-            setError(null);
-          }}
-          variant="fullWidth"
+        <Paper
+          elevation={0}
           sx={{
-            minHeight: 40,
-            mb: 2.5,
-            borderBottom: '1px solid',
+            width: '100%',
+            p: { xs: 3, sm: 4 },
+            borderRadius: 3,
+            border: '1px solid',
             borderColor: 'divider',
-            '& .MuiTab-root': {
-              minHeight: 40,
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              py: 0.75,
-            },
+            bgcolor: 'background.paper',
           }}
         >
-          <Tab value="password" label="رمز عبور" icon={<LockIcon sx={{ fontSize: 16 }} />} iconPosition="start" />
-          <Tab value="rsa" label="کلید اختصاصی RSA" icon={<KeyIcon sx={{ fontSize: 16 }} />} iconPosition="start" />
-        </Tabs>
+          <Stack spacing={1.5} alignItems="center" mb={3}>
+            <Box
+              component="img"
+              src="/favicon.svg"
+              alt="Logo"
+              sx={{
+                width: 46,
+                height: 46,
+                borderRadius: 2.5,
+                p: 0.5,
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'action.hover',
+              }}
+            />
+            <Typography variant="h6" fontWeight={800} letterSpacing="-0.02em">
+              ورود به مدیریت حرکت
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              سامانه جامع مدیریت و پنل دستیاران آموزشی
+            </Typography>
+          </Stack>
 
-        {isExpired && (
-          <Alert severity="warning" variant="outlined" sx={{ mb: 2, borderRadius: 2, fontSize: '0.8rem', py: 0.5 }}>
-            نشست شما منقضی شده است
-          </Alert>
-        )}
+          <Tabs
+            value={authMethod}
+            onChange={(_, v) => {
+              setAuthMethod(v);
+              setError(null);
+            }}
+            variant="fullWidth"
+            sx={{
+              minHeight: 42,
+              mb: 3,
+              borderRadius: 2,
+              bgcolor: 'action.hover',
+              p: 0.5,
+              '& .MuiTabs-indicator': {
+                display: 'none',
+              },
+              '& .MuiTab-root': {
+                minHeight: 36,
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                borderRadius: 1.5,
+                transition: 'all 0.2s',
+                '&.Mui-selected': {
+                  bgcolor: 'background.paper',
+                  color: 'primary.main',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                },
+              },
+            }}
+          >
+            <Tab value="password" label="رمز عبور" icon={<LockIcon sx={{ fontSize: 16 }} />} iconPosition="start" />
+            <Tab value="rsa" label="کلید اختصاصی RSA" icon={<KeyIcon sx={{ fontSize: 16 }} />} iconPosition="start" />
+          </Tabs>
 
-        {error && (
-          <Alert severity="error" variant="outlined" sx={{ mb: 2, borderRadius: 2, fontSize: '0.8rem', py: 0.5 }}>
-            {error}
-          </Alert>
-        )}
+          {isExpired && (
+            <Alert severity="warning" variant="outlined" sx={{ mb: 2.5, borderRadius: 2, fontSize: '0.8rem', py: 0.5 }}>
+              نشست شما منقضی شده است
+            </Alert>
+          )}
 
-        {authMethod === 'password' ? (
-          <Box component="form" onSubmit={handlePasswordSubmit}>
-            <Stack spacing={2}>
-              <TextField
-                label="نام کاربری"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-                autoFocus
-                dir="ltr"
-                size="small"
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
+          {error && (
+            <Alert severity="error" variant="outlined" sx={{ mb: 2.5, borderRadius: 2, fontSize: '0.8rem', py: 0.5 }}>
+              {error}
+            </Alert>
+          )}
 
-              <TextField
-                label="رمز عبور"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                dir="ltr"
-                size="small"
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          size="small"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          edge="end"
-                        >
-                          {showPassword ? <HideIcon fontSize="small" /> : <ShowIcon fontSize="small" />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                disabled={loading || !username.trim() || !password}
-                startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <LoginIcon fontSize="small" />}
-                sx={{
-                  mt: 1,
-                  py: 1.1,
-                  borderRadius: 2,
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                }}
-              >
-                {loading ? 'در حال ورود...' : 'ورود'}
-              </Button>
-            </Stack>
-          </Box>
-        ) : (
-          <Box component="form" onSubmit={handleRsaSubmit}>
-            <Stack spacing={2}>
-              <TextField
-                label="نام کاربری مدیر ارشد"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-                autoFocus
-                dir="ltr"
-                size="small"
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-
-              <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.75}>
-                  <Typography variant="caption" fontWeight={600} color="text.secondary">
-                    کلید خصوصی RSA (PEM)
-                  </Typography>
-                  <Button
-                    component="label"
-                    size="small"
-                    variant="outlined"
-                    startIcon={<UploadIcon sx={{ fontSize: 14 }} />}
-                    sx={{ fontSize: '0.7rem', py: 0.25, px: 1, borderRadius: 1.5 }}
-                  >
-                    انتخاب فایل .pem
-                    <input type="file" accept=".pem,.key,.txt" hidden onChange={handleKeyFileUpload} />
-                  </Button>
-                </Stack>
+          {authMethod === 'password' ? (
+            <Box component="form" onSubmit={handlePasswordSubmit}>
+              <Stack spacing={2.5}>
                 <TextField
-                  placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"
-                  multiline
-                  rows={4}
-                  value={privateKeyPem}
-                  onChange={(e) => setPrivateKeyPem(e.target.value)}
-                  dir="ltr"
-                  size="small"
+                  label="نام کاربری"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="username"
+                  autoFocus
                   fullWidth
-                  sx={{
-                    '& textarea': {
-                      fontFamily: 'monospace',
-                      fontSize: '0.75rem',
-                      lineHeight: 1.3,
+                  size="small"
+                  slotProps={{
+                    htmlInput: { dir: 'ltr' },
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
                     },
                   }}
                 />
-              </Box>
 
-              <Button
-                type="submit"
-                variant="contained"
-                color="secondary"
-                fullWidth
-                disabled={loading || !username.trim() || !privateKeyPem.trim()}
-                startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <KeyIcon fontSize="small" />}
-                sx={{
-                  mt: 1,
-                  py: 1.1,
-                  borderRadius: 2,
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                }}
-              >
-                {loading ? 'در حال تایید کلید و ورود...' : 'ورود امن با کلید RSA'}
-              </Button>
-            </Stack>
-          </Box>
-        )}
-      </Paper>
+                <TextField
+                  label="رمز عبور"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  fullWidth
+                  size="small"
+                  slotProps={{
+                    htmlInput: { dir: 'ltr' },
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            size="small"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            edge="end"
+                          >
+                            {showPassword ? <HideIcon fontSize="small" /> : <ShowIcon fontSize="small" />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  disabled={loading || !username.trim() || !password}
+                  startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <LoginIcon fontSize="small" />}
+                  sx={{
+                    mt: 1,
+                    py: 1.2,
+                    borderRadius: 2,
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  {loading ? 'در حال ورود...' : 'ورود به سامانه'}
+                </Button>
+              </Stack>
+            </Box>
+          ) : (
+            <Box component="form" onSubmit={handleRsaSubmit}>
+              <Stack spacing={2.5}>
+                <TextField
+                  label="نام کاربری مدیر ارشد"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="username"
+                  autoFocus
+                  fullWidth
+                  size="small"
+                  slotProps={{
+                    htmlInput: { dir: 'ltr' },
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+
+                <Box>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography variant="caption" fontWeight={600} color="text.secondary">
+                      کلید خصوصی RSA (PEM)
+                    </Typography>
+                    <Button
+                      component="label"
+                      size="small"
+                      variant="outlined"
+                      startIcon={<UploadIcon sx={{ fontSize: 14 }} />}
+                      sx={{ fontSize: '0.7rem', py: 0.25, px: 1, borderRadius: 1.5 }}
+                    >
+                      انتخاب فایل .pem
+                      <input type="file" accept=".pem,.key,.txt" hidden onChange={handleKeyFileUpload} />
+                    </Button>
+                  </Stack>
+                  <TextField
+                    placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"
+                    multiline
+                    rows={4}
+                    value={privateKeyPem}
+                    onChange={(e) => setPrivateKeyPem(e.target.value)}
+                    size="small"
+                    fullWidth
+                    slotProps={{
+                      htmlInput: {
+                        dir: 'ltr',
+                        style: {
+                          fontFamily: 'monospace',
+                          fontSize: '0.75rem',
+                          lineHeight: 1.35,
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="secondary"
+                  fullWidth
+                  disabled={loading || !username.trim() || !privateKeyPem.trim()}
+                  startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <KeyIcon fontSize="small" />}
+                  sx={{
+                    mt: 1,
+                    py: 1.2,
+                    borderRadius: 2,
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  {loading ? 'در حال تایید کلید و ورود...' : 'ورود امن با کلید RSA'}
+                </Button>
+              </Stack>
+            </Box>
+          )}
+        </Paper>
+      </Container>
     </Box>
   );
 }

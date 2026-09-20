@@ -16,27 +16,29 @@ export default function LessonCard({ lesson, onPlay, status }) {
         p: 2,
         mb: 2,
         borderRadius: '18px',
-        backgroundColor: '#ffffff',
-        border: isInProgress ? '1.5px solid #ffa33f' : '1px solid #deddd7',
+        bgcolor: 'background.paper',
+        border: '1px solid',
+        borderColor: isInProgress ? 'primary.main' : 'divider',
         boxShadow: isInProgress
-          ? '0 6px 18px -4px rgba(244, 124, 32, 0.16)'
-          : '0 2px 6px rgba(0, 0, 0, 0.03)',
+          ? '0 6px 18px -4px rgba(244, 124, 32, 0.2)'
+          : '0 2px 6px rgba(0, 0, 0, 0.04)',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.07)'
-        }
+          boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.12)',
+          borderColor: 'primary.main',
+        },
       }}
       onClick={() => onPlay && onPlay(lesson)}
     >
       {/* Top lesson info: Lesson Number + Time / Date */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.2 }}>
-        <Typography variant="caption" sx={{ color: '#9b9b92', fontWeight: 700, fontSize: '0.78rem' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, fontSize: '0.78rem' }}>
           {lesson.lessonNumber ? `جلسه ${toPersianDigits(lesson.lessonNumber)}` : 'جلسه آموزشی'}
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: isInProgress ? '#df5b13' : '#9b9b92' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: isInProgress ? 'primary.main' : 'text.secondary' }}>
           <AccessTimeIcon sx={{ fontSize: 14 }} />
           <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.74rem' }}>
             {toPersianDigits(lesson.timeInfo || lesson.duration || '۳۰ دقیقه')}
@@ -50,13 +52,13 @@ export default function LessonCard({ lesson, onPlay, status }) {
         sx={{
           fontWeight: 700,
           fontSize: '0.9rem',
-          lineHeight: 1.4,
-          color: '#171715',
+          lineHeight: 1.45,
+          color: 'text.primary',
           mb: 1.5,
           display: '-webkit-box',
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         {lesson.title}
@@ -74,7 +76,7 @@ export default function LessonCard({ lesson, onPlay, status }) {
             objectFit: 'cover',
             borderRadius: '14px',
             mb: 1.5,
-            backgroundColor: '#f1f5f9'
+            bgcolor: 'action.hover',
           }}
         />
       )}
@@ -82,7 +84,7 @@ export default function LessonCard({ lesson, onPlay, status }) {
       {/* Bottom Action Bar: Play icon, Exercise icon, Resource icon + Score/Progress */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 0.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }} onClick={(e) => e.stopPropagation()}>
-          {/* Play button (Green square in reference) */}
+          {/* Play button */}
           <Tooltip title="مشاهده ویدیو">
             <IconButton
               size="small"
@@ -91,16 +93,16 @@ export default function LessonCard({ lesson, onPlay, status }) {
                 width: 28,
                 height: 28,
                 borderRadius: '8px',
-                backgroundColor: '#10b981',
+                bgcolor: 'success.main',
                 color: '#ffffff',
-                '&:hover': { backgroundColor: '#059669' }
+                '&:hover': { bgcolor: 'success.dark' },
               }}
             >
               <PlayArrowIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
 
-          {/* Exercise / Reading icon (Yellow/Orange square in reference) */}
+          {/* Exercise / Reading icon */}
           <Tooltip title="متن و سرفصل">
             <IconButton
               size="small"
@@ -109,16 +111,16 @@ export default function LessonCard({ lesson, onPlay, status }) {
                 width: 28,
                 height: 28,
                 borderRadius: '8px',
-                backgroundColor: '#f59e0b',
+                bgcolor: 'warning.main',
                 color: '#ffffff',
-                '&:hover': { backgroundColor: '#d97706' }
+                '&:hover': { bgcolor: 'warning.dark' },
               }}
             >
               <MenuBookIcon sx={{ fontSize: 15 }} />
             </IconButton>
           </Tooltip>
 
-          {/* Resource icon (Blue square in reference) */}
+          {/* Resource icon */}
           <Tooltip title="پیوست‌ها و فایل‌ها">
             <IconButton
               size="small"
@@ -127,9 +129,9 @@ export default function LessonCard({ lesson, onPlay, status }) {
                 width: 28,
                 height: 28,
                 borderRadius: '8px',
-                backgroundColor: '#3b82f6',
+                bgcolor: 'info.main',
                 color: '#ffffff',
-                '&:hover': { backgroundColor: '#2563eb' }
+                '&:hover': { bgcolor: 'info.dark' },
               }}
             >
               <FolderOutlinedIcon sx={{ fontSize: 15 }} />
@@ -137,14 +139,14 @@ export default function LessonCard({ lesson, onPlay, status }) {
           </Tooltip>
         </Box>
 
-        {/* Score indicator (e.g. 0/20 or 20/20 in reference) */}
+        {/* Score indicator */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
-          {isCompleted && <CheckCircleIcon sx={{ fontSize: 15, color: '#10b981' }} />}
+          {isCompleted && <CheckCircleIcon sx={{ fontSize: 15, color: 'success.main' }} />}
           <Typography
             sx={{
               fontWeight: 700,
               fontSize: '0.8rem',
-              color: isCompleted ? '#10b981' : '#94a3b8'
+              color: isCompleted ? 'success.main' : 'text.disabled',
             }}
           >
             {isCompleted ? `${toPersianDigits(20)} / ${toPersianDigits(20)}` : `${toPersianDigits(0)} / ${toPersianDigits(20)}`}

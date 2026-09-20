@@ -27,9 +27,13 @@ import { paymentsApi } from '../api/paymentsApi.js';
 import { formatPrice, formatDate, toPersianDigits } from '../utils/formatters.js';
 import FakePaymentModal from '../components/payment/FakePaymentModal.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 
 export default function OrdersPage() {
   const { refreshUser } = useAuth();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState(null);
@@ -85,7 +89,11 @@ export default function OrdersPage() {
             icon={<CheckCircleOutlineIcon sx={{ fontSize: 16 }} />}
             label="پرداخت شده"
             size="small"
-            sx={{ backgroundColor: '#dcfce7', color: '#15803d', fontWeight: 700 }}
+            sx={{
+              backgroundColor: isDark ? 'rgba(22, 163, 106, 0.2)' : '#dcfce7',
+              color: isDark ? '#4ade80' : '#15803d',
+              fontWeight: 700
+            }}
           />
         );
       case 'pending':
@@ -94,7 +102,11 @@ export default function OrdersPage() {
             icon={<HourglassEmptyIcon sx={{ fontSize: 16 }} />}
             label="در انتظار پرداخت"
             size="small"
-            sx={{ backgroundColor: '#fef3c7', color: '#b45309', fontWeight: 700 }}
+            sx={{
+              backgroundColor: isDark ? 'rgba(217, 148, 0, 0.2)' : '#fef3c7',
+              color: isDark ? '#fcd34d' : '#b45309',
+              fontWeight: 700
+            }}
           />
         );
       case 'failed':
@@ -103,7 +115,11 @@ export default function OrdersPage() {
             icon={<HighlightOffIcon sx={{ fontSize: 16 }} />}
             label="ناموفق"
             size="small"
-            sx={{ backgroundColor: '#fee2e2', color: '#b91c1c', fontWeight: 700 }}
+            sx={{
+              backgroundColor: isDark ? 'rgba(229, 72, 77, 0.2)' : '#fee2e2',
+              color: isDark ? '#f87171' : '#b91c1c',
+              fontWeight: 700
+            }}
           />
         );
       case 'cancelled':
@@ -112,7 +128,11 @@ export default function OrdersPage() {
             icon={<HighlightOffIcon sx={{ fontSize: 16 }} />}
             label="لغو شده"
             size="small"
-            sx={{ backgroundColor: '#f1f5f9', color: '#64748b', fontWeight: 700 }}
+            sx={{
+              backgroundColor: isDark ? '#1e293b' : '#f1f5f9',
+              color: 'text.secondary',
+              fontWeight: 700
+            }}
           />
         );
       default:
@@ -120,7 +140,7 @@ export default function OrdersPage() {
           <Chip
             label={status || 'نامشخص'}
             size="small"
-            sx={{ backgroundColor: '#f1f5f9', color: '#64748b' }}
+            sx={{ backgroundColor: isDark ? '#1e293b' : '#f1f5f9', color: 'text.secondary' }}
           />
         );
     }
@@ -137,10 +157,10 @@ export default function OrdersPage() {
   return (
     <Box>
       <Box sx={{ mb: 3.5 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.3rem', md: '1.75rem' }, mb: 0.5, color: '#171715' }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.3rem', md: '1.75rem' }, mb: 0.5, color: 'text.primary' }}>
           تاریخچه پرداخت‌ها و تراکنش‌ها
         </Typography>
-        <Typography variant="body2" sx={{ color: '#6b6b63' }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           گزارش کامل سفارش‌ها، وضعیت درگاه و کد رهگیری تراکنش‌ها
         </Typography>
       </Box>
@@ -156,27 +176,46 @@ export default function OrdersPage() {
       )}
 
       {payments.length === 0 ? (
-        <Card sx={{ p: 6, textAlign: 'center', borderRadius: '24px', border: '1px dashed #deddd7', backgroundColor: '#ffffff' }}>
+        <Card
+          sx={{
+            p: 6,
+            textAlign: 'center',
+            borderRadius: '24px',
+            border: '1px dashed',
+            borderColor: 'divider',
+            backgroundColor: 'background.paper'
+          }}
+        >
           <ReceiptLongOutlinedIcon sx={{ fontSize: 60, color: '#f47c20', mb: 2 }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
             هیچ تراکنشی یافت نشد
           </Typography>
-          <Typography variant="body2" sx={{ color: '#6b6b63', mb: 3, maxWidth: 440, mx: 'auto' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, maxWidth: 440, mx: 'auto' }}>
             پس از ثبت سفارش در دوره‌ها یا پکیج‌های مهارتی، وضعیت پرداخت و فاکتور شما در این بخش نمایش داده خواهد شد.
           </Typography>
         </Card>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: '20px', border: '1px solid #deddd7', boxShadow: '0 2px 8px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: '20px',
+            border: '1px solid',
+            borderColor: 'divider',
+            backgroundColor: 'background.paper',
+            boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.03)',
+            overflow: 'auto'
+          }}
+        >
           <Table sx={{ minWidth: 650 }}>
-            <TableHead sx={{ backgroundColor: '#f7f5f0' }}>
+            <TableHead sx={{ backgroundColor: isDark ? '#1e293b' : '#f7f5f0' }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 800, color: '#171715' }}>شناسه سفارش / پرداخت</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#171715' }}>محصول / دوره</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#171715' }}>مبلغ</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#171715' }}>تاریخ</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#171715' }}>وضعیت</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#171715' }}>درگاه / کد رهگیری</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#171715', textAlign: 'left' }}>عملیات</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: 'text.primary' }}>شناسه سفارش / پرداخت</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: 'text.primary' }}>محصول / دوره</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: 'text.primary' }}>مبلغ</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: 'text.primary' }}>تاریخ</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: 'text.primary' }}>وضعیت</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: 'text.primary' }}>درگاه / کد رهگیری</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: 'text.primary', textAlign: 'left' }}>عملیات</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -184,11 +223,11 @@ export default function OrdersPage() {
                 const isPending = (p.status || '').toLowerCase() === 'pending';
                 return (
                   <TableRow key={p.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell sx={{ fontWeight: 600, fontSize: '0.82rem', fontFamily: 'monospace' }}>
+                    <TableCell sx={{ fontWeight: 600, fontSize: '0.82rem', fontFamily: 'monospace', color: 'text.primary' }}>
                       {p.orderId ? p.orderId.slice(0, 13) + '...' : p.id.slice(0, 13) + '...'}
                     </TableCell>
 
-                    <TableCell sx={{ fontWeight: 700, fontSize: '0.88rem', color: '#171715' }}>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.88rem', color: 'text.primary' }}>
                       {p.product || 'سفارش دوره'}
                     </TableCell>
 
@@ -196,7 +235,7 @@ export default function OrdersPage() {
                       {formatPrice(p.amount)}
                     </TableCell>
 
-                    <TableCell sx={{ fontSize: '0.84rem', color: '#6b6b63' }}>
+                    <TableCell sx={{ fontSize: '0.84rem', color: 'text.secondary' }}>
                       {formatDate(p.date)}
                     </TableCell>
 
@@ -204,17 +243,17 @@ export default function OrdersPage() {
                       {getStatusChip(p.status)}
                     </TableCell>
 
-                    <TableCell sx={{ fontSize: '0.82rem', color: '#55554f' }}>
+                    <TableCell sx={{ fontSize: '0.82rem', color: 'text.secondary' }}>
                       <Box>
-                        <Typography variant="caption" sx={{ fontWeight: 700, display: 'block' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, display: 'block', color: 'text.primary' }}>
                           {p.gateway || 'درگاه آنلاین'}
                         </Typography>
                         {p.transactionId ? (
-                          <Typography variant="caption" sx={{ color: '#9b9b92', fontFamily: 'monospace' }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
                             {p.transactionId}
                           </Typography>
                         ) : (
-                          <Typography variant="caption" sx={{ color: '#9b9b92' }}>
+                          <Typography variant="caption" sx={{ color: 'text.disabled' }}>
                             فاقد کد رهگیری
                           </Typography>
                         )}
@@ -245,8 +284,10 @@ export default function OrdersPage() {
                           sx={{
                             height: 24,
                             fontSize: '0.72rem',
-                            backgroundColor: p.status === 'paid' ? '#dcfce7' : '#f1f5f9',
-                            color: p.status === 'paid' ? '#15803d' : '#64748b'
+                            backgroundColor: p.status === 'paid'
+                              ? (isDark ? 'rgba(22, 163, 106, 0.2)' : '#dcfce7')
+                              : (isDark ? '#1e293b' : '#f1f5f9'),
+                            color: p.status === 'paid' ? (isDark ? '#4ade80' : '#15803d') : 'text.secondary'
                           }}
                         />
                       )}

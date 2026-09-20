@@ -26,10 +26,14 @@ import { packagesApi } from '../api/packagesApi.js';
 import { cartApi } from '../api/cartApi.js';
 import { ordersApi } from '../api/ordersApi.js';
 import { paymentsApi } from '../api/paymentsApi.js';
+import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { formatPrice, formatDuration, assetUrl, toPersianDigits } from '../utils/formatters.js';
 
 export default function PackagesPage() {
   const navigate = useNavigate();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+
   const [tab, setTab] = useState(0); // 0: My Packages, 1: Available Packages
   const [myPackages, setMyPackages] = useState([]);
   const [allPackages, setAllPackages] = useState([]);
@@ -92,10 +96,10 @@ export default function PackagesPage() {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 3.5 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.75rem' }, mb: 0.5, color: '#171715' }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.75rem' }, mb: 0.5, color: 'text.primary' }}>
           پکیج‌های مهارت حرکت
         </Typography>
-        <Typography variant="body2" sx={{ color: '#6b6b63' }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           پکیج‌های جامع شامل چندین دوره آموزشی مکمل برای یادگیری پیوسته و هدفمند
         </Typography>
       </Box>
@@ -104,9 +108,12 @@ export default function PackagesPage() {
       <Tabs
         value={tab}
         onChange={(e, val) => setTab(val)}
+        variant="scrollable"
+        scrollButtons="auto"
         sx={{
           mb: 3,
-          borderBottom: '1px solid #deddd7',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
           '& .MuiTab-root': { fontWeight: 700, fontSize: '0.9rem' }
         }}
       >
@@ -131,16 +138,17 @@ export default function PackagesPage() {
                 textAlign: 'center',
                 py: 8,
                 px: 2,
-                backgroundColor: '#ffffff',
+                backgroundColor: 'background.paper',
                 borderRadius: '24px',
-                border: '1px dashed #deddd7'
+                border: '1px dashed',
+                borderColor: 'divider'
               }}
             >
               <SchoolOutlinedIcon sx={{ fontSize: 60, color: '#f47c20', mb: 2 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                 شما هنوز پکیج مهارتی فعالی ندارید
               </Typography>
-              <Typography variant="body2" sx={{ color: '#6b6b63', mb: 3, maxWidth: 440, mx: 'auto' }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, maxWidth: 440, mx: 'auto' }}>
                 پکیج‌های مهارت شامل مجموعه‌ای از دوره‌های مکمل به همراه پروژه‌های عملی و پشتیبانی ویژه هستند.
               </Typography>
               <Button
@@ -164,11 +172,12 @@ export default function PackagesPage() {
                 <Grid item xs={12} key={pkg.id}>
                   <Card
                     sx={{
-                      p: 3,
+                      p: { xs: 2, sm: 3 },
                       borderRadius: '24px',
-                      border: '1px solid #ffdda8',
-                      backgroundColor: '#fffdfa',
-                      boxShadow: '0 2px 10px rgba(244, 124, 32, 0.08)'
+                      border: '1px solid',
+                      borderColor: isDark ? 'rgba(244, 124, 32, 0.3)' : '#ffdda8',
+                      backgroundColor: isDark ? 'background.paper' : '#fffdfa',
+                      boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 2px 10px rgba(244, 124, 32, 0.08)'
                     }}
                   >
                     <Grid container spacing={3} alignItems="center">
@@ -179,14 +188,14 @@ export default function PackagesPage() {
                           alt={pkg.name}
                           sx={{
                             width: '100%',
-                            height: 190,
+                            height: { xs: 180, sm: 200, md: 190 },
                             borderRadius: '18px',
                             objectFit: 'cover'
                           }}
                         />
                       </Grid>
                       <Grid item xs={12} md={8}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 1 }}>
                           <Chip
                             label="پکیج خریداری شده"
                             size="small"
@@ -197,13 +206,17 @@ export default function PackagesPage() {
                           <Chip
                             label={`${toPersianDigits(pkg.packageIncludedCourses?.length || 0)} دوره در پکیج`}
                             size="small"
-                            sx={{ backgroundColor: '#fff8ed', color: '#b94410', fontWeight: 600 }}
+                            sx={{
+                              backgroundColor: isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed',
+                              color: isDark ? '#fed7aa' : '#b94410',
+                              fontWeight: 600
+                            }}
                           />
                         </Box>
-                        <Typography variant="h5" sx={{ fontWeight: 800, color: '#171715', mb: 1 }}>
+                        <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1, fontSize: { xs: '1.2rem', md: '1.5rem' } }}>
                           {pkg.name}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#55554f', mb: 2, lineHeight: 1.7 }}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, lineHeight: 1.7 }}>
                           {pkg.description || 'پکیج مهارتی جامع با دسترسی کامل به تمامی جلسات و سرفصل‌های پیوست.'}
                         </Typography>
                       </Grid>
@@ -211,8 +224,8 @@ export default function PackagesPage() {
 
                     {/* Included Courses Section */}
                     {pkg.packageIncludedCourses && pkg.packageIncludedCourses.length > 0 && (
-                      <Box sx={{ mt: 3, pt: 2.5, borderTop: '1px dashed #deddd7' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#171715', mb: 2 }}>
+                      <Box sx={{ mt: 3, pt: 2.5, borderTop: '1px dashed', borderColor: 'divider' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.primary', mb: 2 }}>
                           دوره‌های موجود در این پکیج:
                         </Typography>
                         <Grid container spacing={2}>
@@ -222,8 +235,9 @@ export default function PackagesPage() {
                                 sx={{
                                   p: 2,
                                   borderRadius: '16px',
-                                  border: '1px solid #deddd7',
-                                  backgroundColor: '#ffffff',
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  backgroundColor: isDark ? '#1e293b' : '#ffffff',
                                   display: 'flex',
                                   flexDirection: 'column',
                                   gap: 1.5
@@ -240,7 +254,7 @@ export default function PackagesPage() {
                                       sx={{
                                         fontWeight: 700,
                                         fontSize: '0.86rem',
-                                        color: '#171715',
+                                        color: 'text.primary',
                                         whiteSpace: 'nowrap',
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis'
@@ -248,7 +262,7 @@ export default function PackagesPage() {
                                     >
                                       {incCourse.name}
                                     </Typography>
-                                    <Typography variant="caption" sx={{ color: '#9b9b92' }}>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                                       {incCourse.level || 'عمومی'} • {toPersianDigits(formatDuration(incCourse.duration))}
                                     </Typography>
                                   </Box>
@@ -263,9 +277,9 @@ export default function PackagesPage() {
                                     borderRadius: '10px',
                                     fontWeight: 700,
                                     fontSize: '0.78rem',
-                                    borderColor: '#deddd7',
+                                    borderColor: 'divider',
                                     color: '#f47c20',
-                                    '&:hover': { borderColor: '#f47c20', backgroundColor: '#fff8ed' }
+                                    '&:hover': { borderColor: '#f47c20', backgroundColor: isDark ? 'rgba(244, 124, 32, 0.1)' : '#fff8ed' }
                                   }}
                                 >
                                   ورود به کلاس و جلسات
@@ -294,12 +308,13 @@ export default function PackagesPage() {
                 <Card
                   sx={{
                     borderRadius: '24px',
-                    border: isOwned ? '2px solid #16a34a' : '1px solid #deddd7',
+                    border: isOwned ? '2px solid #16a34a' : '1px solid',
+                    borderColor: isOwned ? '#16a34a' : 'divider',
                     display: 'flex',
                     flexDirection: 'column',
                     height: '100%',
-                    backgroundColor: '#ffffff',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+                    backgroundColor: 'background.paper',
+                    boxShadow: isDark ? '0 4px 20px rgba(0, 0, 0, 0.3)' : '0 4px 16px rgba(0, 0, 0, 0.04)',
                     overflow: 'hidden'
                   }}
                 >
@@ -329,22 +344,31 @@ export default function PackagesPage() {
                   </Box>
 
                   <CardContent sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', mb: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
                       {pkg.name}
                     </Typography>
 
-                    <Typography variant="body2" sx={{ color: '#6b6b63', mb: 2, flex: 1, lineHeight: 1.7 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, flex: 1, lineHeight: 1.7 }}>
                       {pkg.description || 'یادگیری چند مهارت مرتبط در قالب یک برنامه آموزشی یکپارچه.'}
                     </Typography>
 
                     {pkg.packageIncludedCourses && pkg.packageIncludedCourses.length > 0 && (
-                      <Box sx={{ mb: 2, p: 1.5, backgroundColor: '#f7f5f0', borderRadius: '12px' }}>
-                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#171715', display: 'block', mb: 0.5 }}>
+                      <Box
+                        sx={{
+                          mb: 2,
+                          p: 1.5,
+                          backgroundColor: isDark ? '#1e293b' : '#f7f5f0',
+                          borderRadius: '12px',
+                          border: '1px solid',
+                          borderColor: 'divider'
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', display: 'block', mb: 0.5 }}>
                           شامل {toPersianDigits(pkg.packageIncludedCourses.length)} دوره آموزشی:
                         </Typography>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
                           {pkg.packageIncludedCourses.slice(0, 3).map((c) => (
-                            <Typography key={c.id} variant="caption" sx={{ color: '#55554f' }}>
+                            <Typography key={c.id} variant="caption" sx={{ color: 'text.secondary' }}>
                               • {c.name}
                             </Typography>
                           ))}
@@ -357,10 +381,10 @@ export default function PackagesPage() {
                       </Box>
                     )}
 
-                    <Divider sx={{ my: 1.5, borderColor: '#deddd7' }} />
+                    <Divider sx={{ my: 1.5, borderColor: 'divider' }} />
 
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                      <Typography variant="caption" sx={{ color: '#9b9b92', fontWeight: 600 }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                         شهریه پکیج:
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
@@ -368,7 +392,7 @@ export default function PackagesPage() {
                           {formatPrice(pkg.salePrice || pkg.price)}
                         </Typography>
                         {pkg.salePrice && (
-                          <Typography sx={{ textDecoration: 'line-through', color: '#9b9b92', fontSize: '0.85rem' }}>
+                          <Typography sx={{ textDecoration: 'line-through', color: 'text.disabled', fontSize: '0.85rem' }}>
                             {formatPrice(pkg.price)}
                           </Typography>
                         )}

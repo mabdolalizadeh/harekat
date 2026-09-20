@@ -29,6 +29,7 @@ import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { userApi } from '../api/userApi.js';
 import { subscriptionsApi } from '../api/subscriptionsApi.js';
 import { sanitizeSvg } from '../utils/sanitizeSvg.js';
@@ -36,6 +37,8 @@ import { assetUrl, formatDate, toPersianDigits } from '../utils/formatters.js';
 
 export default function ProfilePage() {
   const { user, updateProfile, rubies, studyPoints } = useAuth();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
 
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
@@ -171,10 +174,10 @@ export default function ProfilePage() {
   return (
     <Box>
       <Box sx={{ mb: 3.5 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.3rem', md: '1.75rem' }, color: '#171715', mb: 0.5 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.3rem', md: '1.75rem' }, color: 'text.primary', mb: 0.5 }}>
           حساب کاربری و نشان اشتراک
         </Typography>
-        <Typography variant="body2" sx={{ color: '#6b6b63' }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           مدیریت اطلاعات هویتی، درصد تکمیل پروفایل و نشان پویای اشتراک فعال
         </Typography>
       </Box>
@@ -193,9 +196,10 @@ export default function ProfilePage() {
             sx={{
               p: 3,
               borderRadius: '24px',
-              border: '1px solid #deddd7',
-              backgroundColor: '#ffffff',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+              border: '1px solid',
+              borderColor: 'divider',
+              backgroundColor: 'background.paper',
+              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
               textAlign: 'center',
               mb: 3
             }}
@@ -238,7 +242,7 @@ export default function ProfilePage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: '50%',
-                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
                     backdropFilter: 'blur(2px)'
                   }}
                 >
@@ -256,7 +260,8 @@ export default function ProfilePage() {
                     backgroundColor: '#f47c20',
                     color: '#ffffff',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                    border: '2px solid #ffffff',
+                    border: '2px solid',
+                    borderColor: 'background.paper',
                     width: 32,
                     height: 32,
                     '&:hover': {
@@ -296,7 +301,7 @@ export default function ProfilePage() {
                   px: 1.5,
                   '&:hover': {
                     borderColor: '#df5b13',
-                    backgroundColor: '#fff8ed'
+                    backgroundColor: isDark ? 'rgba(244, 124, 32, 0.1)' : '#fff8ed'
                   }
                 }}
               >
@@ -317,7 +322,7 @@ export default function ProfilePage() {
                     py: 0.4,
                     px: 1,
                     '&:hover': {
-                      backgroundColor: '#fee2e2'
+                      backgroundColor: isDark ? 'rgba(220, 38, 38, 0.15)' : '#fee2e2'
                     }
                   }}
                 >
@@ -326,20 +331,20 @@ export default function ProfilePage() {
               )}
             </Box>
 
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', mb: 0.5 }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.5 }}>
               {firstName && lastName ? `${firstName} ${lastName}` : 'کاربر حرکت'}
             </Typography>
 
-            <Typography variant="body2" sx={{ color: '#6b6b63', mb: 2 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
               {phoneNumber || '۰۹۱۲۳۴۵۶۷۸۹'}
             </Typography>
 
-            <Divider sx={{ my: 2, borderColor: '#deddd7' }} />
+            <Divider sx={{ my: 2, borderColor: 'divider' }} />
 
             {/* Profile Completion Meter */}
             <Box sx={{ textAlign: 'right', mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.8 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700, color: '#171715' }}>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>
                   میزان تکمیل پروفایل:
                 </Typography>
                 <Chip
@@ -347,8 +352,12 @@ export default function ProfilePage() {
                   size="small"
                   sx={{
                     fontWeight: 700,
-                    backgroundColor: completionPercentage >= 80 ? '#dcfce7' : '#fff8ed',
-                    color: completionPercentage >= 80 ? '#15803d' : '#b94410'
+                    backgroundColor: completionPercentage >= 80
+                      ? (isDark ? 'rgba(22, 163, 106, 0.2)' : '#dcfce7')
+                      : (isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed'),
+                    color: completionPercentage >= 80
+                      ? (isDark ? '#4ade80' : '#15803d')
+                      : (isDark ? '#fed7aa' : '#b94410')
                   }}
                 />
               </Box>
@@ -359,7 +368,7 @@ export default function ProfilePage() {
                 sx={{
                   height: 9,
                   borderRadius: 5,
-                  backgroundColor: '#f1f5f9',
+                  backgroundColor: isDark ? '#1e293b' : '#f1f5f9',
                   '& .MuiLinearProgress-bar': {
                     borderRadius: 5,
                     background: completionPercentage >= 80
@@ -370,7 +379,7 @@ export default function ProfilePage() {
               />
 
               {completionPercentage < 100 && (
-                <Typography variant="caption" sx={{ color: '#9b9b92', mt: 0.8, display: 'block' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.8, display: 'block' }}>
                   برای صدور مدارک رسمی پایان دوره‌ها، تکمیل کد ملی و نام کامل الزامی است.
                 </Typography>
               )}
@@ -382,19 +391,20 @@ export default function ProfilePage() {
                 <Box
                   sx={{
                     p: 1.5,
-                    backgroundColor: '#fff8ed',
-                    border: '1px solid #ffdda8',
+                    backgroundColor: isDark ? '#1e293b' : '#fff8ed',
+                    border: '1px solid',
+                    borderColor: isDark ? '#334155' : '#ffdda8',
                     borderRadius: '16px',
                     textAlign: 'center'
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#df5b13', mb: 0.3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#f47c20', mb: 0.3 }}>
                     <EmojiEventsOutlinedIcon sx={{ fontSize: 18 }} />
-                    <Typography sx={{ fontWeight: 800, fontSize: '1.1rem' }}>
+                    <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: 'text.primary' }}>
                       {toPersianDigits(studyPoints)}
                     </Typography>
                   </Box>
-                  <Typography variant="caption" sx={{ color: '#6b6b63', fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                     امتیاز کل
                   </Typography>
                 </Box>
@@ -404,19 +414,20 @@ export default function ProfilePage() {
                 <Box
                   sx={{
                     p: 1.5,
-                    backgroundColor: '#ffefd3',
-                    border: '1px solid #ffdda8',
+                    backgroundColor: isDark ? '#1e293b' : '#ffefd3',
+                    border: '1px solid',
+                    borderColor: isDark ? '#334155' : '#ffdda8',
                     borderRadius: '16px',
                     textAlign: 'center'
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#b94410', mb: 0.3 }}>
-                    <DiamondOutlinedIcon sx={{ fontSize: 18, color: '#f47c20' }} />
-                    <Typography sx={{ fontWeight: 800, fontSize: '1.1rem' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#f47c20', mb: 0.3 }}>
+                    <DiamondOutlinedIcon sx={{ fontSize: 18 }} />
+                    <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: 'text.primary' }}>
                       {toPersianDigits(rubies)}
                     </Typography>
                   </Box>
-                  <Typography variant="caption" sx={{ color: '#6b6b63', fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                     یاقوت‌ها
                   </Typography>
                 </Box>
@@ -429,9 +440,10 @@ export default function ProfilePage() {
             sx={{
               p: 3,
               borderRadius: '24px',
-              border: hasActiveSub ? '2px solid #f47c20' : '1px solid #deddd7',
-              backgroundColor: hasActiveSub ? '#fffdfa' : '#ffffff',
-              boxShadow: hasActiveSub ? '0 8px 24px -4px rgba(244, 124, 32, 0.15)' : 'none',
+              border: hasActiveSub ? '2px solid #f47c20' : '1px solid',
+              borderColor: hasActiveSub ? '#f47c20' : 'divider',
+              backgroundColor: isDark ? 'background.paper' : (hasActiveSub ? '#fffdfa' : '#ffffff'),
+              boxShadow: hasActiveSub ? (isDark ? '0 8px 30px rgba(0,0,0,0.4)' : '0 8px 24px -4px rgba(244, 124, 32, 0.15)') : 'none',
               flex: { xs: 'none', md: 1 },
               display: 'flex',
               flexDirection: 'column'
@@ -439,7 +451,7 @@ export default function ProfilePage() {
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
               <CardMembershipOutlinedIcon sx={{ color: '#f47c20', fontSize: 22 }} />
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', fontSize: '1rem' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '1rem' }}>
                 نشان اشتراک عضویت
               </Typography>
             </Box>
@@ -456,8 +468,9 @@ export default function ProfilePage() {
                     sx={{
                       p: 2,
                       borderRadius: '18px',
-                      backgroundColor: '#fff8ed',
-                      border: '1px solid #ffdda8',
+                      backgroundColor: isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed',
+                      border: '1px solid',
+                      borderColor: isDark ? 'rgba(244, 124, 32, 0.3)' : '#ffdda8',
                       display: 'flex',
                       alignItems: 'center',
                       gap: 1.5,
@@ -483,10 +496,10 @@ export default function ProfilePage() {
                     )}
 
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography variant="caption" sx={{ color: '#b94410', fontWeight: 600 }}>
+                      <Typography variant="caption" sx={{ color: isDark ? '#fed7aa' : '#b94410', fontWeight: 600 }}>
                         نشان ویژه شما:
                       </Typography>
-                      <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#171715' }}>
+                      <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: 'text.primary' }}>
                         {badgeLabel || subData.subscription.title}
                       </Typography>
                     </Box>
@@ -501,22 +514,22 @@ export default function ProfilePage() {
 
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="caption" sx={{ color: '#6b6b63' }}>پلن اشتراک:</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>پلن اشتراک:</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary' }}>
                         {subData.subscription.title}
                       </Typography>
                     </Box>
                     {subData.userSubscription?.endDate && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography variant="caption" sx={{ color: '#6b6b63' }}>اعتبار تا:</Typography>
-                        <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>اعتبار تا:</Typography>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary' }}>
                           {formatDate(subData.userSubscription.endDate)}
                         </Typography>
                       </Box>
                     )}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="caption" sx={{ color: '#6b6b63' }}>دوره‌های تحت پوشش:</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>دوره‌های تحت پوشش:</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary' }}>
                         {toPersianDigits(subData.includedCourses?.length || 0)} دوره
                       </Typography>
                     </Box>
@@ -529,14 +542,14 @@ export default function ProfilePage() {
                   variant="outlined"
                   fullWidth
                   size="small"
-                  sx={{ borderRadius: '12px', fontWeight: 700, borderColor: '#deddd7', color: '#f47c20', mt: 'auto' }}
+                  sx={{ borderRadius: '12px', fontWeight: 700, borderColor: 'divider', color: '#f47c20', mt: 'auto' }}
                 >
                   مشاهده جزئیات اشتراک
                 </Button>
               </Box>
             ) : (
               <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', textAlign: 'center', pt: 1, pb: 0 }}>
-                <Typography variant="body2" sx={{ color: '#6b6b63', mb: 2, lineHeight: 1.8 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, lineHeight: 1.8 }}>
                   شما در حال حاضر فاقد اشتراک ویژه هستید. با فعال‌سازی اشتراک، نشان اختصاصی در کاربری شما درج خواهد شد.
                 </Typography>
                 <Button
@@ -565,15 +578,16 @@ export default function ProfilePage() {
             sx={{
               p: { xs: 2.5, sm: 3.5 },
               borderRadius: '24px',
-              border: '1px solid #deddd7',
-              backgroundColor: '#ffffff',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+              border: '1px solid',
+              borderColor: 'divider',
+              backgroundColor: 'background.paper',
+              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
               height: '100%',
               display: 'flex',
               flexDirection: 'column'
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#171715', mb: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', mb: 3 }}>
               ویرایش اطلاعات هویتی و تحصیلی
             </Typography>
 
@@ -581,7 +595,7 @@ export default function ProfilePage() {
               <Grid container spacing={2.5}>
                 {/* First Name */}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                     نام:
                   </Typography>
                   <TextField
@@ -595,7 +609,7 @@ export default function ProfilePage() {
 
                 {/* Last Name */}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                     نام خانوادگی:
                   </Typography>
                   <TextField
@@ -609,7 +623,7 @@ export default function ProfilePage() {
 
                 {/* National ID (کد ملی) */}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                     کد ملی (جهت صدور گواهینامه):
                   </Typography>
                   <TextField
@@ -618,13 +632,13 @@ export default function ProfilePage() {
                     value={nationalId}
                     onChange={(e) => setNationalId(e.target.value)}
                     placeholder="۰۰۱۲۳۴۵۶۷۸"
-                    dir="ltr"
+                    slotProps={{ htmlInput: { dir: 'ltr' } }}
                   />
                 </Grid>
 
                 {/* Phone Number */}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                     شماره همراه:
                   </Typography>
                   <TextField
@@ -633,13 +647,13 @@ export default function ProfilePage() {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                    dir="ltr"
+                    slotProps={{ htmlInput: { dir: 'ltr' } }}
                   />
                 </Grid>
 
                 {/* Job Title */}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                     موقعیت شغلی / عنوان حرفه‌ای:
                   </Typography>
                   <TextField
@@ -653,7 +667,7 @@ export default function ProfilePage() {
 
                 {/* Education */}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                     آخرین مقطع تحصیلی:
                   </Typography>
                   <TextField
@@ -668,10 +682,10 @@ export default function ProfilePage() {
                 {/* Avatar URL & Direct Upload */}
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: '#171715' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>
                       تصویر نمایه (آواتار):
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#6b6b63' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                       فرمت بهینه WebP خودکار
                     </Typography>
                   </Box>
@@ -682,7 +696,7 @@ export default function ProfilePage() {
                       value={avatar}
                       onChange={(e) => setAvatar(e.target.value)}
                       placeholder="آدرس تصویر یا مسیر فایل آپلود شده..."
-                      dir="ltr"
+                      slotProps={{ htmlInput: { dir: 'ltr' } }}
                     />
                     <Button
                       variant="outlined"
@@ -700,21 +714,21 @@ export default function ProfilePage() {
                         flexShrink: 0,
                         '&:hover': {
                           borderColor: '#df5b13',
-                          backgroundColor: '#fff8ed'
+                          backgroundColor: isDark ? 'rgba(244, 124, 32, 0.1)' : '#fff8ed'
                         }
                       }}
                     >
                       {uploadingAvatar ? 'در حال آپلود...' : 'آپلود فایل'}
                     </Button>
                   </Box>
-                  <Typography variant="caption" sx={{ color: '#9b9b92', mt: 0.8, display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.8, display: 'block' }}>
                     با انتخاب فایل، تصویر شما در سرور فشرده‌سازی شده و به فرمت بهینه WebP تبدیل و ذخیره می‌شود.
                   </Typography>
                 </Grid>
 
                 {/* Bio */}
                 <Grid item xs={12}>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#171715' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                     درباره من / بیوگرافی کوتاه:
                   </Typography>
                   <TextField
