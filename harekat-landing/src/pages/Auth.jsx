@@ -9,8 +9,9 @@ import {useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {ArrowLeft, Phone, KeyRound} from "lucide-react";
 import {cn} from "../utils/cn.js";
-import {authApi} from "../services/api.js";
+import {authApi, customerApi} from "../services/api.js";
 import {getDashboardUrl} from "../utils/dashboardUrl.js";
+
 
 
 const errorTranslations = {
@@ -59,13 +60,32 @@ export default function Auth() {
             const json = await authApi.validateOtp(phoneNumber, otpCode);
             localStorage.setItem('token', json.data.token);
             localStorage.setItem('user', JSON.stringify(json.data.user));
-            const from = location.state?.from;
+
+            const queryParams = new URLSearchParams(location.search);
+            const from = location.state?.from || queryParams.get('from') || queryParams.get('redirect');
+            const autoAddCourseId = location.state?.autoAddCourseId || queryParams.get('autoAddCourseId');
+            const autoAddType = location.state?.autoAddType || queryParams.get('autoAddType') || 'course';
+            const autoAddPrice = location.state?.autoAddPrice || queryParams.get('autoAddPrice');
+
+            if (autoAddCourseId) {
+                try {
+                    await customerApi.addToCart(autoAddCourseId, autoAddType, 1, autoAddPrice);
+                } catch (e) {
+                    console.warn('Auto add to cart after login failed:', e);
+                }
+            }
+
             if (from && typeof from === 'string' && from !== '/dashboard') {
-                navigate(from, {replace: true});
+                if (from.startsWith('http://') || from.startsWith('https://')) {
+                    window.location.href = from;
+                } else {
+                    navigate(from, {replace: true});
+                }
             } else {
                 window.location.href = getDashboardUrl();
             }
         } catch (err) {
+
 
             setError(translateError(err.message) || 'کد تایید نادرست است');
         } finally {

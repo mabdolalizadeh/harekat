@@ -176,7 +176,7 @@ export default function TopBarLayout() {
                             </div>
                         </>) : (
                             <SecondaryButton onClick={() => { window.location.href = getDashboardUrl('/login'); }}>
-                                ثبت نام یا ورود
+                                ورود
                             </SecondaryButton>
                         )}
                     </motion.div>
@@ -226,7 +226,7 @@ export default function TopBarLayout() {
                                 setMobileOpen(false);
                                 window.location.href = isLoggedIn ? getDashboardUrl('/overview') : getDashboardUrl('/login');
                             }}>
-                                {isLoggedIn ? 'داشبورد' : 'ثبت نام یا ورود'}
+                                {isLoggedIn ? 'داشبورد' : 'ورود'}
                             </SecondaryButton>
                         </div>
                     </motion.div>
@@ -235,4 +235,5 @@ export default function TopBarLayout() {
         </div>
     );
 }
+
 

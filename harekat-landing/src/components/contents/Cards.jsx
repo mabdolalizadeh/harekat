@@ -81,9 +81,17 @@ export function CourseCard({
         event.stopPropagation();
         if (!id || adding) return;
         if (!localStorage.getItem('token')) {
-            navigate('/auth', {state: {from: `${location.pathname}${location.search}${location.hash}`}});
+            navigate('/auth', {
+                state: {
+                    from: `${location.pathname}${location.search}${location.hash}`,
+                    autoAddCourseId: id,
+                    autoAddType: productType,
+                    autoAddPrice: hasSale ? salePrice : price
+                }
+            });
             return;
         }
+
         setAdding(true);
         try { await customerApi.addToCart(id, productType, 1, hasSale ? salePrice : price); onAddToCart?.(); }
         finally { setAdding(false); }

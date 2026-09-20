@@ -32,13 +32,18 @@ export default function LoginPage() {
   const [devOtpHint, setDevOtpHint] = useState(null);
   const [showDevForm, setShowDevForm] = useState(false);
 
-  const from = location.state?.from?.pathname || '/overview';
+  const queryParams = new URLSearchParams(location.search);
+  const redirectTarget = queryParams.get('redirect') || queryParams.get('from') || location.state?.from?.pathname || location.state?.from || '/overview';
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/overview', { replace: true });
+      if (redirectTarget.startsWith('http://') || redirectTarget.startsWith('https://')) {
+        window.location.href = redirectTarget;
+      } else {
+        navigate(redirectTarget, { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, redirectTarget]);
 
   const handleRequestOtp = async (e) => {
     e.preventDefault();
@@ -81,13 +86,18 @@ export default function LoginPage() {
       setLoading(true);
       setError(null);
       await validateOtp(phoneNumber.trim(), otp.trim());
-      navigate(from, { replace: true });
+      if (redirectTarget.startsWith('http://') || redirectTarget.startsWith('https://')) {
+        window.location.href = redirectTarget;
+      } else {
+        navigate(redirectTarget, { replace: true });
+      }
     } catch (err) {
       setError(err.message || 'کد تایید نامعتبر است');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <Box

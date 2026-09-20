@@ -97,12 +97,20 @@ export default function ProductDetail({ type }) {
 
     const add = async () => {
         if (!localStorage.getItem('token')) {
-            navigate('/auth', { state: { from: `${location.pathname}${location.search}${location.hash}` } });
+            navigate('/auth', {
+                state: {
+                    from: `${location.pathname}${location.search}${location.hash}`,
+                    autoAddCourseId: course.id,
+                    autoAddType: 'course',
+                    autoAddPrice: discounted ? course.salePrice : course.price
+                }
+            });
             return;
         }
         await customerApi.addToCart(course.id, 'course', 1, discounted ? course.salePrice : course.price);
         setAdded(true);
     };
+
 
     return (
         <MainLayout title={course.name} sectionIds={null} contentMap={null}>
