@@ -48,6 +48,9 @@ async function main() {
             console.log('[*] Regenerating RSA-2048 keypair for existing admin...');
 
             const { publicKey, privateKey, fingerprint } = generateRsaKeyPair();
+            if (args.password) {
+                existing.password = password;
+            }
             existing.publicKey = publicKey;
             existing.keyFingerprint = fingerprint;
             existing.role = 'superadmin';
