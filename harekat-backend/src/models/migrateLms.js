@@ -22,6 +22,8 @@ export async function migrateLmsSchema() {
         if (!existing.has('phoneNumber')) await sequelize.query("ALTER TABLE Admins ADD COLUMN phoneNumber VARCHAR(255)");
         if (!existing.has('status')) await sequelize.query("ALTER TABLE Admins ADD COLUMN status VARCHAR(50) DEFAULT 'active'");
         if (!existing.has('permissions')) await sequelize.query("ALTER TABLE Admins ADD COLUMN permissions TEXT");
+        if (!existing.has('publicKey')) await sequelize.query("ALTER TABLE Admins ADD COLUMN publicKey TEXT");
+        if (!existing.has('keyFingerprint')) await sequelize.query("ALTER TABLE Admins ADD COLUMN keyFingerprint VARCHAR(255)");
     }
 
     // 3. Subscriptions new columns

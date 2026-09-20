@@ -46,6 +46,16 @@ const Admins = sequelize.define('Admins', {
         type: DataTypes.TEXT,
         allowNull: true,
         defaultValue: null
+    },
+    publicKey: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
+    },
+    keyFingerprint: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
     }
 }, {
     createdAt: true,

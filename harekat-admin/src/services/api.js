@@ -251,6 +251,15 @@ export const adminApi = {
     listNotifications: () => get('/notifications/sent', { auth: true, tokenKind: 'adminToken' }),
     sendNotification: (payload) => post('/notifications', payload, { auth: true, tokenKind: 'adminToken' }),
     deleteNotification: (id) => del(`/notifications/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    // admin & superadmin management
+    listAdmins: () => get('/admins', { auth: true, tokenKind: 'adminToken' }),
+    createAdmin: (payload) => post('/admins', payload, { auth: true, tokenKind: 'adminToken' }),
+    createSuperAdmin: (payload) => post('/admins/create-superadmin', payload, { auth: true, tokenKind: 'adminToken' }),
+    generateAdminRsaKey: (id) => post(`/admins/${id}/generate-key`, {}, { auth: true, tokenKind: 'adminToken' }),
+    deleteAdmin: (id) => del(`/admins/${id}`, { auth: true, tokenKind: 'adminToken' }),
+    // RSA Key Authentication
+    requestRsaChallenge: (username) => post('/admins/auth/challenge', { username }),
+    rsaLogin: (username, challenge, signature) => post('/admins/auth/rsa-login', { username, challenge, signature }),
     // overview
     dashboard: async () => {
         const [courses, categories, coupons, menu, content, teachers, orders, payments, students, subscriptions, tickets] = await Promise.all([
@@ -269,6 +278,48 @@ export const adminApi = {
         return { courses, categories, coupons, menu, content, teachers, orders, payments, students, subscriptions, tickets };
     },
 };
+
+export async function signChallengeWithRsaKey(privateKeyPem, challengeText) {
+    if (!privateKeyPem || typeof privateKeyPem !== 'string') {
+        throw new Error('کلید خصوصی معتبر وارد نشده است');
+    }
+    const cleanPem = privateKeyPem
+        .replace(/-----BEGIN [^-]+-----/g, '')
+        .replace(/-----END [^-]+-----/g, '')
+        .replace(/\s+/g, '');
+
+    const binaryDerString = window.atob(cleanPem);
+    const binaryDer = new Uint8Array(binaryDerString.length);
+    for (let i = 0; i < binaryDerString.length; i++) {
+        binaryDer[i] = binaryDerString.charCodeAt(i);
+    }
+
+    const importedKey = await window.crypto.subtle.importKey(
+        'pkcs8',
+        binaryDer.buffer,
+        {
+            name: 'RSASSA-PKCS1-v1_5',
+            hash: 'SHA-256',
+        },
+        false,
+        ['sign']
+    );
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(challengeText);
+    const signatureBuffer = await window.crypto.subtle.sign(
+        'RSASSA-PKCS1-v1_5',
+        importedKey,
+        data
+    );
+
+    const bytes = new Uint8Array(signatureBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
 
 export function parseJwt(token) {
     try {
@@ -307,36 +358,28 @@ export function getTokenExpiry(kind = 'adminToken') {
 }
 
 export function isAdminAuthenticated() {
-    // Auth guard temporarily bypassed for testing
-    return true;
+    const token = getToken('adminToken');
+    return Boolean(token && !isTokenExpired(token));
 }
 
 export function getAdminUser() {
     try {
         const raw = localStorage.getItem('adminUser');
         if (raw) return JSON.parse(raw);
-        const payload = parseJwt(getToken('adminToken'));
+        const token = getToken('adminToken');
+        if (!token || isTokenExpired(token)) return null;
+        const payload = parseJwt(token);
         if (payload) {
             return {
                 id: payload.id,
                 role: payload.role || 'superadmin',
-                username: payload.username || 'superadmin',
-                name: payload.name || 'مدیر ارشد'
+                username: payload.username || 'admin',
+                name: payload.name || payload.username || 'مدیر سامانه'
             };
         }
-        return {
-            id: 'mock-admin-id',
-            role: 'superadmin',
-            username: 'superadmin',
-            name: 'مدیر ارشد (حالت تست)'
-        };
+        return null;
     } catch {
-        return {
-            id: 'mock-admin-id',
-            role: 'superadmin',
-            username: 'superadmin',
-            name: 'مدیر ارشد (حالت تست)'
-        };
+        return null;
     }
 }
 
@@ -346,11 +389,12 @@ export function isTA() {
 }
 
 export function isSuperAdmin() {
-    return true; // Full access for testing all pages
+    const u = getAdminUser();
+    return u?.role === 'superadmin' || u?.role === 'admin';
 }
 
 export function isAdminLoggedIn() {
-    return true;
+    return isAdminAuthenticated();
 }
 
 export function adminLogout() {
