@@ -63,12 +63,6 @@ export default function LandingCTA({ onContactClick }) {
                 ref={ctaCardRef}
                 className="relative w-full max-w-4xl bg-card/50 backdrop-blur-xl border border-border/80 dark:border-white/10 hover:border-primary/40 rounded-3xl p-8 sm:p-14 flex flex-col items-center gap-6 text-center shadow-2xl shadow-black/20 overflow-hidden"
             >
-                {/* Ambient glow in background */}
-                <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -bottom-20 left-1/2 -translate-x-1/2 w-96 h-48 bg-primary/15 rounded-full blur-3xl -z-10"
-                />
-
                 <SectionTag>تماس با ما</SectionTag>
                 <h2 className="text-[clamp(2.2rem,4.5vw,3.6rem)] font-extrabold text-foreground max-w-[700px] leading-tight">
                     درباره دوره‌ها با ما صحبت کن

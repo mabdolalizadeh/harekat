@@ -113,9 +113,6 @@ export default function LandingFounderCard() {
                 ref={cardInnerRef}
                 className="relative bg-card/90 backdrop-blur-xl border border-border/80 hover:border-primary/40 rounded-3xl p-7 sm:p-10 max-w-[640px] w-full shadow-2xl shadow-black/10 transition-colors duration-300 will-change-transform"
             >
-                {/* Decorative corner glow */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
-
                 <div className="relative flex flex-col gap-5">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">

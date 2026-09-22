@@ -122,12 +122,6 @@ export default function LandingTimeline({ steps = defaultSteps }) {
             ref={containerRef}
             className="relative w-full min-h-screen py-10"
         >
-            {/* Subtle section ambient glow */}
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute top-12 left-1/2 -translate-x-1/2 w-[700px] h-[360px] bg-primary/10 rounded-full blur-[110px] -z-10"
-            />
-
             <div
                 ref={pinTargetRef}
                 className="w-full h-screen flex flex-col justify-center items-center gap-10 px-4 max-w-7xl mx-auto"

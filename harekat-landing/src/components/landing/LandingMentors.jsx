@@ -52,12 +52,6 @@ export default function LandingMentors({
             ref={sectionRef}
             className="relative w-full py-16 sm:py-28 flex flex-col items-center gap-6 px-4"
         >
-            {/* Subtle section ambient glow */}
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-[700px] h-[360px] bg-primary/10 rounded-full blur-[110px] -z-10"
-            />
-
             <div ref={headerRef} className="flex flex-col items-center gap-4 text-center">
                 <SectionTag>اساتید</SectionTag>
                 <h2 className="text-[clamp(2.2rem,4.5vw,3.6rem)] font-extrabold text-foreground max-w-[700px] leading-tight">

@@ -65,12 +65,6 @@ export default function LandingFAQ({ faqItems = defaultFaqItems }) {
             ref={sectionRef}
             className="relative w-full py-16 sm:py-28 flex flex-col items-center gap-8 px-4"
         >
-            {/* Subtle section ambient glow */}
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-[700px] h-[360px] bg-primary/10 rounded-full blur-[110px] -z-10"
-            />
-
             <div className="flex flex-col items-center gap-4 text-center">
                 <SectionTag>سوالات متداول</SectionTag>
                 <h2 className="text-[clamp(2.2rem,4.5vw,3.6rem)] font-extrabold text-foreground max-w-[700px] leading-tight">

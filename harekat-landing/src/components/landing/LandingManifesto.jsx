@@ -102,12 +102,6 @@ export default function LandingManifesto() {
             ref={sectionRef}
             className="relative w-full py-20 sm:py-32 flex flex-col items-center text-center px-4"
         >
-            {/* Background subtle radial spotlight */}
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-primary/8 rounded-full blur-[100px] -z-10"
-            />
-
             <div ref={tagRef} className="mb-6">
                 <SectionTag>درباره ما</SectionTag>
             </div>

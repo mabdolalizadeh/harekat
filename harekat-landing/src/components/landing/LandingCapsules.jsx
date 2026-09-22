@@ -51,12 +51,6 @@ export default function LandingCapsules({
             ref={sectionRef}
             className="relative w-full py-14 sm:py-20 flex flex-col items-center gap-6 px-4"
         >
-            {/* Subtle section ambient glow */}
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-[650px] h-[320px] bg-primary/10 rounded-full blur-[100px] -z-10"
-            />
-
             <div className="flex flex-col items-center gap-3 text-center">
                 <SectionTag>دوره‌های کپسولی</SectionTag>
                 <h2 className="text-[clamp(1.9rem,3.8vw,3rem)] font-bold text-foreground">

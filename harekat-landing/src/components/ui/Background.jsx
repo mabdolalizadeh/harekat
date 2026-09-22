@@ -4,113 +4,126 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "../../utils/cn.js";
 import WindingPathBackground from "./WindingPathBackground.jsx";
 
-/* Section-specific color themes (Light mode & Dark mode palettes) */
-const SECTION_PALETTES = {
-    hero: {
-        glowA: [255, 140, 40],   // Warm creative orange
-        glowB: [76, 201, 255],   // Electric blue
-        bgTintLight: "rgba(255, 245, 235, 0.45)",
-        bgTintDark: "rgba(25, 16, 8, 0.35)",
-        accentLight: "#f47c20",
-        accentDark: "#ffa33f",
+/* Section-specific solid color themes (Light mode & Dark mode) */
+const SECTIONS_CONFIG = [
+    {
+        key: 'hero',
+        selector: '#hero',
+        fallbackSelectors: ['[data-section-theme="hero"]'],
+        bgLight: '#fff5ea',   // Warm Creative Peach Cream
+        bgDark: '#180e06',    // Deep Warm Copper
+        accentLight: '#f47c20',
+        accentDark: '#ffa33f',
     },
-    manifesto: {
-        glowA: [168, 85, 247],  // Purple / Violet
-        glowB: [244, 114, 182],  // Soft magenta rose
-        bgTintLight: "rgba(250, 243, 255, 0.4)",
-        bgTintDark: "rgba(22, 10, 32, 0.35)",
-        accentLight: "#7c3aed",
-        accentDark: "#a855f7",
+    {
+        key: 'manifesto',
+        selector: '#manifesto',
+        fallbackSelectors: ['[data-section-theme="manifesto"]'],
+        bgLight: '#f6f0ff',   // Soft Visionary Lavender
+        bgDark: '#140924',    // Deep Night Plum
+        accentLight: '#7c3aed',
+        accentDark: '#a855f7',
     },
-    founder: {
-        glowA: [245, 158, 11],   // Amber
-        glowB: [249, 115, 22],   // Tangerine
-        bgTintLight: "rgba(255, 248, 238, 0.4)",
-        bgTintDark: "rgba(26, 17, 7, 0.35)",
-        accentLight: "#d97706",
-        accentDark: "#fbbf24",
+    {
+        key: 'founder',
+        selector: '#founder',
+        fallbackSelectors: ['[data-section-theme="founder"]'],
+        bgLight: '#fef7ea',   // Warm Honey Amber Cream
+        bgDark: '#191006',    // Deep Toasted Bronze
+        accentLight: '#d97706',
+        accentDark: '#fbbf24',
     },
-    courses: {
-        glowA: [14, 165, 233],   // Sky cyan
-        glowB: [99, 102, 241],   // Indigo
-        bgTintLight: "rgba(240, 249, 255, 0.45)",
-        bgTintDark: "rgba(8, 20, 34, 0.35)",
-        accentLight: "#0284c7",
-        accentDark: "#38bdf8",
+    {
+        key: 'courses',
+        selector: '#courses',
+        fallbackSelectors: ['[data-section-theme="courses"]'],
+        bgLight: '#ecf7fd',   // Crisp Morning Sky Azure
+        bgDark: '#071526',    // Deep Oceanic Midnight Navy
+        accentLight: '#0284c7',
+        accentDark: '#38bdf8',
     },
-    capsules: {
-        glowA: [20, 184, 166],   // Teal / Emerald
-        glowB: [56, 189, 248],   // Cyan
-        bgTintLight: "rgba(240, 253, 250, 0.4)",
-        bgTintDark: "rgba(6, 24, 22, 0.35)",
-        accentLight: "#0d9488",
-        accentDark: "#2dd4bf",
+    {
+        key: 'capsules',
+        selector: '#capsule-courses',
+        fallbackSelectors: ['#capsules', '[data-section-theme="capsules"]'],
+        bgLight: '#edf9f6',   // Fresh Mint Dew / Mineral Aqua
+        bgDark: '#051816',    // Deep Dark Emerald Teal
+        accentLight: '#0d9488',
+        accentDark: '#2dd4bf',
     },
-    packages: {
-        glowA: [139, 92, 246],   // Violet
-        glowB: [236, 72, 153],   // Pink
-        bgTintLight: "rgba(253, 242, 248, 0.4)",
-        bgTintDark: "rgba(28, 8, 24, 0.35)",
-        accentLight: "#c026d3",
-        accentDark: "#f472b6",
+    {
+        key: 'packages',
+        selector: '#skill-packages',
+        fallbackSelectors: ['#packages', '[data-section-theme="packages"]'],
+        bgLight: '#fdf2f9',   // Blossom Orchid Pink
+        bgDark: '#1c081a',    // Deep Velvet Wine
+        accentLight: '#c026d3',
+        accentDark: '#f472b6',
     },
-    subscriptions: {
-        glowA: [234, 179, 8],    // Gold / Sunflower
-        glowB: [249, 115, 22],   // Warm orange
-        bgTintLight: "rgba(254, 252, 232, 0.4)",
-        bgTintDark: "rgba(28, 22, 6, 0.35)",
-        accentLight: "#ca8a04",
-        accentDark: "#facc15",
+    {
+        key: 'subscriptions',
+        selector: '#subscriptions',
+        fallbackSelectors: ['[data-section-theme="subscriptions"]'],
+        bgLight: '#fefce8',   // Warm Sunny Buttercream
+        bgDark: '#191504',    // Deep Dark Amber Olive
+        accentLight: '#ca8a04',
+        accentDark: '#facc15',
     },
-    mentors: {
-        glowA: [99, 102, 241],   // Indigo
-        glowB: [168, 85, 247],   // Purple
-        bgTintLight: "rgba(238, 242, 255, 0.4)",
-        bgTintDark: "rgba(12, 14, 34, 0.35)",
-        accentLight: "#4f46e5",
-        accentDark: "#818cf8",
+    {
+        key: 'mentors',
+        selector: '#mentors',
+        fallbackSelectors: ['[data-section-theme="mentors"]'],
+        bgLight: '#f0f2fe',   // Academic Royal Periwinkle
+        bgDark: '#0c0d28',    // Deep Royal Midnight Indigo
+        accentLight: '#4f46e5',
+        accentDark: '#818cf8',
     },
-    who: {
-        glowA: [244, 63, 94],    // Rose / Coral
-        glowB: [249, 115, 22],   // Orange
-        bgTintLight: "rgba(255, 241, 242, 0.4)",
-        bgTintDark: "rgba(28, 8, 12, 0.35)",
-        accentLight: "#e11d48",
-        accentDark: "#fb7185",
+    {
+        key: 'who',
+        selector: '#who',
+        fallbackSelectors: ['[data-section-theme="who"]'],
+        bgLight: '#fff1f2',   // Coral Rose Petal
+        bgDark: '#1b070f',    // Deep Crimson Merlot
+        accentLight: '#e11d48',
+        accentDark: '#fb7185',
     },
-    "how-it-works": {
-        glowA: [16, 185, 129],   // Emerald green
-        glowB: [6, 182, 212],    // Cyan
-        bgTintLight: "rgba(236, 253, 245, 0.4)",
-        bgTintDark: "rgba(4, 26, 18, 0.35)",
-        accentLight: "#059669",
-        accentDark: "#34d399",
+    {
+        key: 'how-it-works',
+        selector: '#how-it-works',
+        fallbackSelectors: ['[data-section-theme="how-it-works"]'],
+        bgLight: '#ecfdf5',   // Vibrant Spring Mint Green
+        bgDark: '#051810',    // Deep Forest Jade
+        accentLight: '#059669',
+        accentDark: '#34d399',
     },
-    reviews: {
-        glowA: [249, 115, 22],   // Harekat brand orange
-        glowB: [236, 72, 153],   // Fuchsia
-        bgTintLight: "rgba(255, 247, 237, 0.45)",
-        bgTintDark: "rgba(28, 14, 6, 0.35)",
-        accentLight: "#ea580c",
-        accentDark: "#fb923c",
+    {
+        key: 'reviews',
+        selector: '#reviews',
+        fallbackSelectors: ['[data-section-theme="reviews"]'],
+        bgLight: '#fff7ed',   // Sunset Tangerine Tint
+        bgDark: '#1a0c06',    // Deep Terracotta Flame
+        accentLight: '#ea580c',
+        accentDark: '#fb923c',
     },
-    faq: {
-        glowA: [100, 116, 139],  // Slate blue
-        glowB: [148, 163, 184],  // Muted steel
-        bgTintLight: "rgba(248, 250, 252, 0.4)",
-        bgTintDark: "rgba(15, 23, 42, 0.35)",
-        accentLight: "#0284c7",
-        accentDark: "#38bdf8",
+    {
+        key: 'faq',
+        selector: '#faq',
+        fallbackSelectors: ['[data-section-theme="faq"]'],
+        bgLight: '#f0f6fb',   // Intellectual Slate Breeze
+        bgDark: '#071524',    // Deep Celestial Steel
+        accentLight: '#0284c7',
+        accentDark: '#38bdf8',
     },
-    cta: {
-        glowA: [255, 124, 32],   // Primary brand fire
-        glowB: [251, 191, 36],   // Amber spark
-        bgTintLight: "rgba(255, 247, 237, 0.5)",
-        bgTintDark: "rgba(30, 14, 5, 0.4)",
-        accentLight: "#dc2626",
-        accentDark: "#f87171",
+    {
+        key: 'cta',
+        selector: '#cta',
+        fallbackSelectors: ['[data-section-theme="cta"]'],
+        bgLight: '#fef2f2',   // Warm Radiant Sunset Blush
+        bgDark: '#1a0505',    // Deep Flame Glow
+        accentLight: '#dc2626',
+        accentDark: '#f87171',
     },
-};
+];
 
 function isDarkTheme() {
     const el = document.documentElement;
@@ -119,205 +132,125 @@ function isDarkTheme() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-function radialGradient(c, peak) {
-    const [r, g, b] = c;
-    return (
-        `radial-gradient(circle at center, ` +
-        `rgba(${r},${g},${b},${peak}) 0%, ` +
-        `rgba(${r},${g},${b},${(peak * 0.6).toFixed(3)}) 25%, ` +
-        `rgba(${r},${g},${b},${(peak * 0.25).toFixed(3)}) 50%, ` +
-        `rgba(${r},${g},${b},${(peak * 0.07).toFixed(3)}) 70%, ` +
-        `rgba(${r},${g},${b},0) 85%)`
-    );
-}
-
-const SECTION_SELECTORS = {
-    hero: ['#hero', '[data-section-theme="hero"]'],
-    manifesto: ['#manifesto', '[data-section-theme="manifesto"]', 'section:has(.manifesto-word)'],
-    founder: ['#founder', '[data-section-theme="founder"]', 'section:has(.quote)'],
-    courses: ['#courses', '[data-section-theme="courses"]'],
-    capsules: ['#capsule-courses', '#capsules', '[data-section-theme="capsules"]'],
-    packages: ['#skill-packages', '#packages', '[data-section-theme="packages"]'],
-    subscriptions: ['#subscriptions', '[data-section-theme="subscriptions"]'],
-    mentors: ['#mentors', '[data-section-theme="mentors"]'],
-    who: ['#who', '[data-section-theme="who"]'],
-    "how-it-works": ['#how-it-works', '[data-section-theme="how-it-works"]'],
-    reviews: ['#reviews', '[data-section-theme="reviews"]'],
-    faq: ['#faq', '[data-section-theme="faq"]'],
-    cta: ['#cta', '[data-section-theme="cta"]', 'section:has(.arrow-button)'],
-};
-
 export default function Background({ children, className }) {
-    const glowARef = useRef(null);
-    const glowBRef = useRef(null);
-    const tintOverlayRef = useRef(null);
+    const bgRef = useRef(null);
     const containerRef = useRef(null);
-    const activePaletteRef = useRef(SECTION_PALETTES.hero);
+    const activeSectionKeyRef = useRef('hero');
 
     useEffect(() => {
-        const glowA = glowARef.current;
-        const glowB = glowBRef.current;
-        const tintOverlay = tintOverlayRef.current;
-        if (!glowA || !glowB || !tintOverlay) return;
+        const bgEl = bgRef.current;
+        if (!bgEl) return;
 
-        // Current interpolated color state
-        const currentColor = {
-            aR: SECTION_PALETTES.hero.glowA[0],
-            aG: SECTION_PALETTES.hero.glowA[1],
-            aB: SECTION_PALETTES.hero.glowA[2],
-            bR: SECTION_PALETTES.hero.glowB[0],
-            bG: SECTION_PALETTES.hero.glowB[1],
-            bB: SECTION_PALETTES.hero.glowB[2],
-        };
+        let ctx = null;
 
-        const updateGlows = () => {
-            const dark = isDarkTheme();
-            const opA = dark ? 0.32 : 0.24;
-            const opB = dark ? 0.28 : 0.20;
+        const buildScrollTransitions = () => {
+            if (ctx) ctx.revert();
 
-            glowA.style.backgroundImage = radialGradient(
-                [Math.round(currentColor.aR), Math.round(currentColor.aG), Math.round(currentColor.aB)],
-                opA
-            );
-            glowB.style.backgroundImage = radialGradient(
-                [Math.round(currentColor.bR), Math.round(currentColor.bG), Math.round(currentColor.bB)],
-                opB
-            );
-        };
-
-        // Initialize root section color
-        document.documentElement.style.setProperty(
-            '--current-section-color',
-            isDarkTheme() ? SECTION_PALETTES.hero.accentDark : SECTION_PALETTES.hero.accentLight
-        );
-        updateGlows();
-
-        const ctx = gsap.context(() => {
-            const sectionKeys = Object.keys(SECTION_SELECTORS);
-
-            sectionKeys.forEach((key) => {
-                const selectors = SECTION_SELECTORS[key];
-                let target = null;
-                for (const sel of selectors) {
-                    target = document.querySelector(sel);
-                    if (target) break;
-                }
-
-                if (!target) return;
-
-                const palette = SECTION_PALETTES[key];
-                if (!palette) return;
-
-                ScrollTrigger.create({
-                    trigger: target,
-                    start: "top 65%",
-                    end: "bottom 35%",
-                    onEnter: () => transitionToPalette(palette, key),
-                    onEnterBack: () => transitionToPalette(palette, key),
-                });
-            });
-
-            function transitionToPalette(palette, key) {
-                activePaletteRef.current = palette;
+            ctx = gsap.context(() => {
                 const dark = isDarkTheme();
-                const tintColor = dark ? palette.bgTintDark : palette.bgTintLight;
-                const accentColor = dark ? palette.accentDark : palette.accentLight;
 
-                if (accentColor) {
-                    document.documentElement.style.setProperty('--current-section-color', accentColor);
-                }
-                if (key) {
-                    document.documentElement.setAttribute('data-active-section', key);
-                }
-
-                // Smooth morph of radial glow colors
-                gsap.to(currentColor, {
-                    aR: palette.glowA[0],
-                    aG: palette.glowA[1],
-                    aB: palette.glowA[2],
-                    bR: palette.glowB[0],
-                    bG: palette.glowB[1],
-                    bB: palette.glowB[2],
-                    duration: 1.2,
-                    ease: "power2.out",
-                    onUpdate: updateGlows,
-                    overwrite: "auto",
+                // Find valid DOM elements for each defined section
+                const activeSections = [];
+                SECTIONS_CONFIG.forEach((sec) => {
+                    let el = document.querySelector(sec.selector);
+                    if (!el && sec.fallbackSelectors) {
+                        for (const fb of sec.fallbackSelectors) {
+                            el = document.querySelector(fb);
+                            if (el) break;
+                        }
+                    }
+                    if (el) {
+                        activeSections.push({ ...sec, el });
+                    }
                 });
 
-                // Smooth tint overlay transition
-                gsap.to(tintOverlay, {
-                    backgroundColor: tintColor,
-                    duration: 1.2,
-                    ease: "power2.out",
-                    overwrite: "auto",
-                });
-            }
+                if (!activeSections.length) return;
 
-            // Parallax drift of ambient glow spots on scroll
-            gsap.to(glowA, {
-                yPercent: 40,
-                xPercent: 12,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: document.body,
-                    start: "top top",
-                    end: "bottom bottom",
-                    scrub: 1.5,
-                },
-            });
+                // Sync initial background and accent
+                const currentActiveSec = activeSections.find((s) => s.key === activeSectionKeyRef.current) || activeSections[0];
+                const currentBg = dark ? currentActiveSec.bgDark : currentActiveSec.bgLight;
+                const currentAccent = dark ? currentActiveSec.accentDark : currentActiveSec.accentLight;
 
-            gsap.to(glowB, {
-                yPercent: 35,
-                xPercent: -10,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: document.body,
-                    start: "top top",
-                    end: "bottom bottom",
-                    scrub: 1.8,
-                },
-            });
-        }, containerRef);
+                gsap.set(bgEl, { backgroundColor: currentBg });
+                document.documentElement.style.backgroundColor = currentBg;
+                document.body.style.backgroundColor = currentBg;
+                document.documentElement.style.setProperty('--current-section-color', currentAccent);
+                document.documentElement.setAttribute('data-active-section', currentActiveSec.key);
+
+                // Build smooth scrubbed pairwise color transitions between adjacent sections
+                for (let i = 0; i < activeSections.length - 1; i++) {
+                    const curSec = activeSections[i];
+                    const nextSec = activeSections[i + 1];
+
+                    const curBg = dark ? curSec.bgDark : curSec.bgLight;
+                    const nextBg = dark ? nextSec.bgDark : nextSec.bgLight;
+                    const nextAccent = dark ? nextSec.accentDark : nextSec.accentLight;
+                    const curAccent = dark ? curSec.accentDark : curSec.accentLight;
+
+                    gsap.fromTo(
+                        bgEl,
+                        { backgroundColor: curBg },
+                        {
+                            backgroundColor: nextBg,
+                            ease: "none",
+                            immediateRender: false,
+                            scrollTrigger: {
+                                trigger: nextSec.el,
+                                start: "top 85%",
+                                end: "top 25%",
+                                scrub: 0.5,
+                                onUpdate: (self) => {
+                                    // When progress is mostly into next section, update theme variables
+                                    if (self.progress > 0.5) {
+                                        activeSectionKeyRef.current = nextSec.key;
+                                        document.documentElement.style.setProperty('--current-section-color', nextAccent);
+                                        document.documentElement.setAttribute('data-active-section', nextSec.key);
+                                    } else {
+                                        activeSectionKeyRef.current = curSec.key;
+                                        document.documentElement.style.setProperty('--current-section-color', curAccent);
+                                        document.documentElement.setAttribute('data-active-section', curSec.key);
+                                    }
+
+                                    // Keep html & body in sync for seamless mobile overscroll
+                                    if (bgEl.style.backgroundColor) {
+                                        document.documentElement.style.backgroundColor = bgEl.style.backgroundColor;
+                                        document.body.style.backgroundColor = bgEl.style.backgroundColor;
+                                    }
+                                },
+                            }
+                        }
+                    );
+                }
+            }, containerRef);
+        };
+
+        buildScrollTransitions();
 
         const onThemeChange = () => {
-            const dark = isDarkTheme();
-            const palette = activePaletteRef.current;
-            if (palette) {
-                const tintColor = dark ? palette.bgTintDark : palette.bgTintLight;
-                const accentColor = dark ? palette.accentDark : palette.accentLight;
-                document.documentElement.style.setProperty('--current-section-color', accentColor);
-                tintOverlay.style.backgroundColor = tintColor;
-            }
-            updateGlows();
+            buildScrollTransitions();
         };
 
         const mo = new MutationObserver(onThemeChange);
         mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
         return () => {
-            ctx.revert();
+            if (ctx) ctx.revert();
             mo.disconnect();
         };
     }, []);
 
     return (
         <div ref={containerRef} className={cn("relative w-full min-h-screen", className)}>
+            {/* Full-screen solid background layer that smoothly morphs across sections */}
             <div
+                ref={bgRef}
                 aria-hidden="true"
-                className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+                className="pointer-events-none fixed inset-0 z-0 will-change-[background-color]"
+                style={{
+                    backgroundColor: isDarkTheme() ? SECTIONS_CONFIG[0].bgDark : SECTIONS_CONFIG[0].bgLight
+                }}
             >
-                {/* Smooth section tint transition layer */}
-                <div
-                    ref={tintOverlayRef}
-                    className="absolute inset-0 transition-colors duration-1000 will-change-[background-color]"
-                    style={{ backgroundColor: "rgba(255, 245, 235, 0.45)" }}
-                />
-
-                {/* Morphing ambient glows */}
-                <div ref={glowARef} className="ambient-glow ambient-glow-a will-change-[background-image,transform]" />
-                <div ref={glowBRef} className="ambient-glow ambient-glow-b will-change-[background-image,transform]" />
-
-                {/* Hand-drawn route winding path */}
+                {/* Hand-drawn route winding path on top of solid background */}
                 <WindingPathBackground />
             </div>
 
