@@ -3,7 +3,7 @@ import Img from "../ui/Img.jsx";
 import {H2, H3} from "../ui/Headings.jsx";
 import {motion} from "motion/react";
 import {Clock, User, BookOpen, Plus} from "lucide-react";
-import {useState, useRef} from "react";
+import {useState, useRef, useEffect} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "../../contexts/CartContext.jsx";
@@ -107,6 +107,55 @@ export function CourseCard({
 
     const [magneticOffset, setMagneticOffset] = useState({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
     const cardRef = useRef(null);
+    const cardIdRef = useRef(id || Math.random().toString());
+
+    // Listen for neighbor magnetic events to create repulsive wave on other cards
+    useEffect(() => {
+        if (window.matchMedia("(pointer: coarse)").matches) return;
+
+        const handleNeighborMagnetic = (e) => {
+            const { sourceId, mouseX, mouseY } = e.detail;
+            if (sourceId === cardIdRef.current) return;
+            if (!cardRef.current) return;
+
+            const rect = cardRef.current.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const distX = centerX - mouseX;
+            const distY = centerY - mouseY;
+            const distance = Math.hypot(distX, distY);
+
+            // Radius of repulsion: 650px
+            const maxRadius = 650;
+            if (distance < maxRadius && distance > 0) {
+                const intensity = Math.pow(1 - distance / maxRadius, 2);
+                const repelDistance = 22 * intensity;
+                const angle = Math.atan2(distY, distX);
+
+                setMagneticOffset({
+                    x: Math.cos(angle) * repelDistance,
+                    y: Math.sin(angle) * repelDistance,
+                    rotateX: -(Math.sin(angle) * repelDistance * 0.35),
+                    rotateY: Math.cos(angle) * repelDistance * 0.35,
+                });
+            } else {
+                setMagneticOffset((prev) => (prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0, rotateX: 0, rotateY: 0 }));
+            }
+        };
+
+        const handleNeighborClear = () => {
+            setMagneticOffset({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
+        };
+
+        window.addEventListener('course-magnetic-move', handleNeighborMagnetic);
+        window.addEventListener('course-magnetic-leave', handleNeighborClear);
+
+        return () => {
+            window.removeEventListener('course-magnetic-move', handleNeighborMagnetic);
+            window.removeEventListener('course-magnetic-leave', handleNeighborClear);
+        };
+    }, []);
 
     const handleMouseMove = (e) => {
         if (!cardRef.current || window.matchMedia("(pointer: coarse)").matches) return;
@@ -116,7 +165,7 @@ export function CourseCard({
         const deltaX = e.clientX - centerX;
         const deltaY = e.clientY - centerY;
 
-        // Smooth magnetic pull strength
+        // Smooth magnetic pull on the active card
         const pullFactor = 0.14;
         const tiltFactor = 0.035;
 
@@ -126,10 +175,22 @@ export function CourseCard({
             rotateX: -deltaY * tiltFactor,
             rotateY: deltaX * tiltFactor,
         });
+
+        // Broadcast to other course cards to repel away
+        window.dispatchEvent(new CustomEvent('course-magnetic-move', {
+            detail: {
+                sourceId: cardIdRef.current,
+                mouseX: e.clientX,
+                mouseY: e.clientY,
+            }
+        }));
     };
 
     const handleMouseLeave = () => {
         setMagneticOffset({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
+        window.dispatchEvent(new CustomEvent('course-magnetic-leave', {
+            detail: { sourceId: cardIdRef.current }
+        }));
     };
 
     return (
