@@ -388,6 +388,270 @@
         color: #ffffff;
     }
 
+    /* =========================================================
+       Section Color Identity System
+       ========================================================= */
+
+    /* Hero: Creative Warm Flame */
+    [data-section-theme="hero"] {
+        --primary: #f47c20;
+        --primary-foreground: #ffffff;
+        --color-primary: #f47c20;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #f47c20;
+        --section-accent-rgb: 244, 124, 32;
+        --ring: #f47c20;
+    }
+    .dark [data-section-theme="hero"] {
+        --primary: #ffa33f;
+        --primary-foreground: #241007;
+        --color-primary: #ffa33f;
+        --color-primary-foreground: #241007;
+        --section-accent: #ffa33f;
+        --section-accent-rgb: 255, 163, 63;
+        --ring: #ffa33f;
+    }
+
+    /* Manifesto: Deep Visionary Violet */
+    [data-section-theme="manifesto"] {
+        --primary: #7c3aed;
+        --primary-foreground: #ffffff;
+        --color-primary: #7c3aed;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #7c3aed;
+        --section-accent-rgb: 124, 58, 237;
+        --ring: #7c3aed;
+    }
+    .dark [data-section-theme="manifesto"] {
+        --primary: #a855f7;
+        --primary-foreground: #ffffff;
+        --color-primary: #a855f7;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #a855f7;
+        --section-accent-rgb: 168, 85, 247;
+        --ring: #a855f7;
+    }
+
+    /* Founder: Warm Amber Gold */
+    [data-section-theme="founder"] {
+        --primary: #d97706;
+        --primary-foreground: #ffffff;
+        --color-primary: #d97706;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #d97706;
+        --section-accent-rgb: 217, 119, 6;
+        --ring: #d97706;
+    }
+    .dark [data-section-theme="founder"] {
+        --primary: #fbbf24;
+        --primary-foreground: #1c1304;
+        --color-primary: #fbbf24;
+        --color-primary-foreground: #1c1304;
+        --section-accent: #fbbf24;
+        --section-accent-rgb: 251, 191, 36;
+        --ring: #fbbf24;
+    }
+
+    /* Courses: Electric Sky Cyan */
+    [data-section-theme="courses"] {
+        --primary: #0284c7;
+        --primary-foreground: #ffffff;
+        --color-primary: #0284c7;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #0284c7;
+        --section-accent-rgb: 2, 132, 199;
+        --ring: #0284c7;
+    }
+    .dark [data-section-theme="courses"] {
+        --primary: #38bdf8;
+        --primary-foreground: #082f49;
+        --color-primary: #38bdf8;
+        --color-primary-foreground: #082f49;
+        --section-accent: #38bdf8;
+        --section-accent-rgb: 56, 189, 248;
+        --ring: #38bdf8;
+    }
+
+    /* Capsules: Mint Emerald Teal */
+    [data-section-theme="capsules"] {
+        --primary: #0d9488;
+        --primary-foreground: #ffffff;
+        --color-primary: #0d9488;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #0d9488;
+        --section-accent-rgb: 13, 148, 136;
+        --ring: #0d9488;
+    }
+    .dark [data-section-theme="capsules"] {
+        --primary: #2dd4bf;
+        --primary-foreground: #042f2e;
+        --color-primary: #2dd4bf;
+        --color-primary-foreground: #042f2e;
+        --section-accent: #2dd4bf;
+        --section-accent-rgb: 45, 212, 191;
+        --ring: #2dd4bf;
+    }
+
+    /* Packages: High-Energy Magenta / Pink */
+    [data-section-theme="packages"] {
+        --primary: #c026d3;
+        --primary-foreground: #ffffff;
+        --color-primary: #c026d3;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #c026d3;
+        --section-accent-rgb: 192, 38, 211;
+        --ring: #c026d3;
+    }
+    .dark [data-section-theme="packages"] {
+        --primary: #f472b6;
+        --primary-foreground: #38071e;
+        --color-primary: #f472b6;
+        --color-primary-foreground: #38071e;
+        --section-accent: #f472b6;
+        --section-accent-rgb: 244, 114, 182;
+        --ring: #f472b6;
+    }
+
+    /* Subscriptions: Radiant Sunflower Gold */
+    [data-section-theme="subscriptions"] {
+        --primary: #ca8a04;
+        --primary-foreground: #ffffff;
+        --color-primary: #ca8a04;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #ca8a04;
+        --section-accent-rgb: 202, 138, 4;
+        --ring: #ca8a04;
+    }
+    .dark [data-section-theme="subscriptions"] {
+        --primary: #facc15;
+        --primary-foreground: #291e03;
+        --color-primary: #facc15;
+        --color-primary-foreground: #291e03;
+        --section-accent: #facc15;
+        --section-accent-rgb: 250, 204, 21;
+        --ring: #facc15;
+    }
+
+    /* Mentors: Royal Indigo */
+    [data-section-theme="mentors"] {
+        --primary: #4f46e5;
+        --primary-foreground: #ffffff;
+        --color-primary: #4f46e5;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #4f46e5;
+        --section-accent-rgb: 79, 70, 229;
+        --ring: #4f46e5;
+    }
+    .dark [data-section-theme="mentors"] {
+        --primary: #818cf8;
+        --primary-foreground: #1e1b4b;
+        --color-primary: #818cf8;
+        --color-primary-foreground: #1e1b4b;
+        --section-accent: #818cf8;
+        --section-accent-rgb: 129, 140, 248;
+        --ring: #818cf8;
+    }
+
+    /* Audience (Who it's for): Coral Rose */
+    [data-section-theme="who"] {
+        --primary: #e11d48;
+        --primary-foreground: #ffffff;
+        --color-primary: #e11d48;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #e11d48;
+        --section-accent-rgb: 225, 29, 72;
+        --ring: #e11d48;
+    }
+    .dark [data-section-theme="who"] {
+        --primary: #fb7185;
+        --primary-foreground: #4c0519;
+        --color-primary: #fb7185;
+        --color-primary-foreground: #4c0519;
+        --section-accent: #fb7185;
+        --section-accent-rgb: 251, 113, 133;
+        --ring: #fb7185;
+    }
+
+    /* How It Works (Timeline): Vibrant Mint Green */
+    [data-section-theme="how-it-works"] {
+        --primary: #059669;
+        --primary-foreground: #ffffff;
+        --color-primary: #059669;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #059669;
+        --section-accent-rgb: 5, 150, 105;
+        --ring: #059669;
+    }
+    .dark [data-section-theme="how-it-works"] {
+        --primary: #34d399;
+        --primary-foreground: #022c22;
+        --color-primary: #34d399;
+        --color-primary-foreground: #022c22;
+        --section-accent: #34d399;
+        --section-accent-rgb: 52, 211, 153;
+        --ring: #34d399;
+    }
+
+    /* Reviews: Sunset Orange / Terracotta */
+    [data-section-theme="reviews"] {
+        --primary: #ea580c;
+        --primary-foreground: #ffffff;
+        --color-primary: #ea580c;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #ea580c;
+        --section-accent-rgb: 234, 88, 12;
+        --ring: #ea580c;
+    }
+    .dark [data-section-theme="reviews"] {
+        --primary: #fb923c;
+        --primary-foreground: #431407;
+        --color-primary: #fb923c;
+        --color-primary-foreground: #431407;
+        --section-accent: #fb923c;
+        --section-accent-rgb: 251, 146, 60;
+        --ring: #fb923c;
+    }
+
+    /* FAQ: Slate / Cobalt Blue */
+    [data-section-theme="faq"] {
+        --primary: #0284c7;
+        --primary-foreground: #ffffff;
+        --color-primary: #0284c7;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #0284c7;
+        --section-accent-rgb: 2, 132, 199;
+        --ring: #0284c7;
+    }
+    .dark [data-section-theme="faq"] {
+        --primary: #38bdf8;
+        --primary-foreground: #082f49;
+        --color-primary: #38bdf8;
+        --color-primary-foreground: #082f49;
+        --section-accent: #38bdf8;
+        --section-accent-rgb: 56, 189, 248;
+        --ring: #38bdf8;
+    }
+
+    /* CTA: Sunset Fire / Flame */
+    [data-section-theme="cta"] {
+        --primary: #dc2626;
+        --primary-foreground: #ffffff;
+        --color-primary: #dc2626;
+        --color-primary-foreground: #ffffff;
+        --section-accent: #dc2626;
+        --section-accent-rgb: 220, 38, 38;
+        --ring: #dc2626;
+    }
+    .dark [data-section-theme="cta"] {
+        --primary: #f87171;
+        --primary-foreground: #450a0a;
+        --color-primary: #f87171;
+        --color-primary-foreground: #450a0a;
+        --section-accent: #f87171;
+        --section-accent-rgb: 248, 113, 113;
+        --ring: #f87171;
+    }
+
     /* Theme-aware utilities — map to CSS variables so light/dark toggles work */
     .bg-background { background-color: var(--background); }
     .bg-surface { background-color: var(--surface); }

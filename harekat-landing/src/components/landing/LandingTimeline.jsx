@@ -118,9 +118,16 @@ export default function LandingTimeline({ steps = defaultSteps }) {
     return (
         <section
             id="how-it-works"
+            data-section-theme="how-it-works"
             ref={containerRef}
             className="relative w-full min-h-screen py-10"
         >
+            {/* Subtle section ambient glow */}
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute top-12 left-1/2 -translate-x-1/2 w-[700px] h-[360px] bg-primary/10 rounded-full blur-[110px] -z-10"
+            />
+
             <div
                 ref={pinTargetRef}
                 className="w-full h-screen flex flex-col justify-center items-center gap-10 px-4 max-w-7xl mx-auto"
@@ -140,7 +147,7 @@ export default function LandingTimeline({ steps = defaultSteps }) {
                     >
                         <div
                             ref={lineFillRef}
-                            className="h-full w-full bg-gradient-to-r from-primary via-amber-400 to-primary origin-right transform will-change-transform"
+                            className="h-full w-full bg-gradient-to-r from-primary/50 via-primary to-primary/50 origin-right transform will-change-transform"
                         />
                     </div>
 

@@ -98,6 +98,7 @@ export default function LandingManifesto() {
     return (
         <section
             id="manifesto"
+            data-section-theme="manifesto"
             ref={sectionRef}
             className="relative w-full py-20 sm:py-32 flex flex-col items-center text-center px-4"
         >

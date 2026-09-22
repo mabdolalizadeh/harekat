@@ -91,10 +91,17 @@ export default function LandingAudience() {
     return (
         <section
             id="who"
+            data-section-theme="who"
             ref={sectionRef}
             dir="rtl"
-            className="w-full py-20 sm:py-32 px-4 max-w-7xl mx-auto text-right"
+            className="relative w-full py-20 sm:py-32 px-4 max-w-7xl mx-auto text-right"
         >
+            {/* Subtle section ambient glow */}
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-[700px] h-[360px] bg-primary/10 rounded-full blur-[110px] -z-10"
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start relative">
                 {/* Left Sticky Column */}
                 <div className="md:col-span-5 md:sticky md:top-36 flex flex-col items-start text-right gap-6">

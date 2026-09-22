@@ -103,6 +103,7 @@ export default function LandingFounderCard() {
     return (
         <section
             id="founder"
+            data-section-theme="founder"
             ref={cardWrapperRef}
             className="w-full py-12 sm:py-16 flex justify-center px-4 perspective-[1200px]"
             onMouseMove={handleMouseMove}

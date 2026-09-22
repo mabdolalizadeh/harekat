@@ -156,6 +156,7 @@ export default function LandingHero({
     return (
         <section
             id="hero"
+            data-section-theme="hero"
             ref={heroRef}
             className="relative w-full pt-20 sm:pt-24 pb-14 sm:pb-24 flex flex-col items-center"
         >

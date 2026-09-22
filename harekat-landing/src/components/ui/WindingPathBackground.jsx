@@ -153,14 +153,14 @@ export default function WindingPathBackground() {
                 />
 
                 {/* Animated hand-drawn pointing arrow at the leading tip of the path */}
-                <g ref={arrowRef} className="will-change-transform opacity-0 pointer-events-none">
+                <g ref={arrowRef} className="will-change-transform opacity-0 pointer-events-none transition-colors duration-500">
                     {/* Glowing background aura */}
-                    <circle r="12" fill="#f47c20" opacity="0.3" filter="url(#handDrawnGlow)" />
+                    <circle r="14" fill="var(--current-section-color, #f47c20)" opacity="0.35" filter="url(#handDrawnGlow)" />
                     {/* Hand-drawn arrowhead polygon pointing forward in travel direction */}
                     <path
                         d="M -9 -7 L 7 0 L -9 7 L -4 0 Z"
-                        fill="#ffa33f"
-                        stroke="#f47c20"
+                        fill="var(--current-section-color, #ffa33f)"
+                        stroke="var(--current-section-color, #f47c20)"
                         strokeWidth="1.6"
                         strokeLinejoin="round"
                         strokeLinecap="round"
