@@ -130,9 +130,6 @@ export default function LandingTimeline({ steps = defaultSteps }) {
                     <h2 className="text-[clamp(2.2rem,4.5vw,3.6rem)] font-extrabold text-foreground max-w-[700px] leading-tight">
                         یادگیری چطور اتفاق می‌افته
                     </h2>
-                    <p className="text-muted text-sm sm:text-base max-w-md">
-                        با اسکرول، مراحل چهارگانه یادگیری در مدرسه حرکت رو تجربه کنید
-                    </p>
                 </div>
 
                 <div className="relative w-full max-w-6xl mt-4">

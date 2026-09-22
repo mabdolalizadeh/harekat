@@ -330,8 +330,18 @@ export default function TopBarLayout() {
                         )}
                     </motion.div>
 
-                    {/* Mobile Menu Button */}
+                    {/* Mobile Menu & Theme Button */}
                     <div className="flex md:hidden items-center gap-2">
+                        {/* Theme Toggle Button - always visible in mobile topbar */}
+                        <button
+                            type="button"
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 bg-surface-muted hover:bg-border text-muted hover:text-foreground cursor-pointer"
+                            title={theme === 'dark' ? 'حالت روشن' : 'حالت تاریک'}
+                        >
+                            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                        </button>
+
                         {isLoggedIn && (
                             <button
                                 type="button"
@@ -396,13 +406,6 @@ export default function TopBarLayout() {
                         ))}
 
                         <div className="pt-4 border-t border-[var(--border)] flex flex-col gap-3">
-                            <button
-                                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                                className="flex items-center gap-3 text-muted hover:text-foreground transition-colors text-sm py-2"
-                            >
-                                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                                {theme === 'dark' ? 'حالت روشن' : 'حالت تاریک'}
-                            </button>
 
                             {isLoggedIn ? (
                                 <div className="flex flex-col gap-2">

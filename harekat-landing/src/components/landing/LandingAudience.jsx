@@ -2,27 +2,24 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SectionTag from '../ui/SectionTag.jsx';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+
+const persianDigits = ['۰۱', '۰۲', '۰۳', '۰۴'];
 
 const audienceList = [
     {
         title: 'طراحان',
-        badge: 'UI/UX & Graphic',
         desc: 'طراحانی که می‌خوان فراتر از ابزار فکر کنن، روش‌شناسی عمیق یاد بگیرن و خروجی‌هایی خلق کنن که هویت مستقل دارن.',
     },
     {
         title: 'عکاسان و تصویربرداران',
-        badge: 'Photo & Video',
         desc: 'عکاسانی که می‌خوان هنرشون فقط تکنیک لنز و نور نباشه؛ بلکه روایت‌گر داستان‌های مفهومی، هنری و تاثیرگذار باشه.',
     },
     {
         title: 'هنرمندان چندرسانه‌ای',
-        badge: 'New Media & AI',
         desc: 'هنرمندانی که می‌خوان آزادانه بین فرمت‌ها و رسانه‌ها حرکت کنن و پیوند میان هنر کلاسیک و تکنولوژی نو را تجربه کنند.',
     },
     {
         title: 'خلاقان و ایده‌پردازان',
-        badge: 'Creative Thinkers',
         desc: 'هر کسی که ایده‌های بزرگی در ذهن داره و احساس می‌کنه خلاقیتش نیاز به سازماندهی، نقد سازنده و جهت‌گیری حرفه‌ای داره.',
     },
 ];
@@ -95,11 +92,12 @@ export default function LandingAudience() {
         <section
             id="who"
             ref={sectionRef}
-            className="w-full py-20 sm:py-32 px-4 max-w-7xl mx-auto"
+            dir="rtl"
+            className="w-full py-20 sm:py-32 px-4 max-w-7xl mx-auto text-right"
         >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start relative">
                 {/* Left Sticky Column */}
-                <div className="md:col-span-5 md:sticky md:top-36 flex flex-col items-start gap-6">
+                <div className="md:col-span-5 md:sticky md:top-36 flex flex-col items-start text-right gap-6">
                     <SectionTag>برای کیه؟</SectionTag>
                     <h2 className="text-[clamp(2.4rem,4.5vw,3.8rem)] font-extrabold text-foreground leading-tight">
                         این مدرسه برای چه کسی مناسبه؟
@@ -108,19 +106,19 @@ export default function LandingAudience() {
                         مدرسه حرکت چارچوبی است برای کسانی که نمی‌خواهند در مرزهای یک تخصص محدود شوند.
                     </p>
 
-                    {/* Step pills progress indicator */}
-                    <div className="hidden md:flex flex-col gap-2.5 mt-4 w-full max-w-xs">
+                    {/* Step list indicator */}
+                    <div className="hidden md:flex flex-col gap-3 mt-4 w-full max-w-xs">
                         {audienceList.map((item, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-center justify-between px-4 py-2.5 rounded-2xl border transition-all duration-300 ${
+                                className={`flex items-center justify-between px-5 py-3 rounded-2xl border transition-all duration-300 ${
                                     activeIndex === idx
                                         ? 'bg-primary/10 border-primary/40 text-primary font-bold shadow-sm'
                                         : 'bg-card/40 border-border/50 text-muted/70 font-medium'
                                 }`}
                             >
-                                <span className="text-sm">{item.title}</span>
-                                <span className="text-xs font-mono">۰{idx + 1}</span>
+                                <span className="text-sm font-semibold">{item.title}</span>
+                                <span className="text-sm font-bold text-primary">{persianDigits[idx]}</span>
                             </div>
                         ))}
                     </div>
@@ -132,19 +130,11 @@ export default function LandingAudience() {
                         <div
                             key={index}
                             style={{ top: `${130 + index * 24}px` }}
-                            className="audience-vertical-card md:sticky group relative bg-card/90 backdrop-blur-2xl border border-border/90 hover:border-primary/50 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/15 transition-colors duration-300 will-change-transform"
+                            className="audience-vertical-card md:sticky group relative bg-card/90 backdrop-blur-2xl border border-border/90 hover:border-primary/50 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/15 transition-colors duration-300 will-change-transform text-right"
                         >
                             <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/60">
-                                <div className="flex items-center gap-3">
-                                    <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                                        <Sparkles size={18} />
-                                    </span>
-                                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-surface-muted text-muted border border-border/40">
-                                        {item.badge}
-                                    </span>
-                                </div>
-                                <span className="text-2xl font-black font-mono text-primary/75 select-none">
-                                    ۰{index + 1}
+                                <span className="text-3xl font-black text-primary select-none">
+                                    {persianDigits[index]}
                                 </span>
                             </div>
 

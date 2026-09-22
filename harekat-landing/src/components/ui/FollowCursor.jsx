@@ -32,23 +32,23 @@ export default function FollowCursor() {
             gsap.to(ring, {
                 x: mouseX,
                 y: mouseY,
-                duration: 0.35,
+                duration: 0.28,
                 ease: "power2.out",
             });
         };
 
-        // Interactive hover states
+        // Interactive hover states - refined, sharp, and compact
         const onMouseEnterInteractive = () => {
             gsap.to(ring, {
-                scale: 2.4,
-                backgroundColor: "rgba(244, 124, 32, 0.18)",
-                borderColor: "rgba(244, 124, 32, 0.6)",
-                duration: 0.3,
+                scale: 1.45,
+                backgroundColor: "rgba(244, 124, 32, 0.12)",
+                borderColor: "rgba(244, 124, 32, 0.75)",
+                duration: 0.25,
                 ease: "power2.out",
             });
             gsap.to(dot, {
-                scale: 0.5,
-                opacity: 0.5,
+                scale: 0.7,
+                opacity: 0.6,
                 duration: 0.2,
             });
         };
@@ -57,8 +57,8 @@ export default function FollowCursor() {
             gsap.to(ring, {
                 scale: 1,
                 backgroundColor: "transparent",
-                borderColor: "rgba(244, 124, 32, 0.4)",
-                duration: 0.3,
+                borderColor: "rgba(244, 124, 32, 0.45)",
+                duration: 0.25,
                 ease: "power2.out",
             });
             gsap.to(dot, {
@@ -95,15 +95,15 @@ export default function FollowCursor() {
 
     return (
         <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden hidden md:block">
-            {/* Trailing Outer Ring */}
+            {/* Trailing Outer Ring - crisp 24px base, scales to only ~34px, with subpixel rendering */}
             <div
                 ref={cursorRingRef}
-                className="fixed top-0 left-0 -ml-4 -mt-4 w-8 h-8 rounded-full border border-primary/40 pointer-events-none will-change-transform transition-colors"
+                className="fixed top-0 left-0 -ml-3 -mt-3 w-6 h-6 rounded-full border border-primary/45 pointer-events-none will-change-transform transform-gpu"
             />
             {/* Inner Precision Dot */}
             <div
                 ref={cursorDotRef}
-                className="fixed top-0 left-0 -ml-1 -mt-1 w-2 h-2 rounded-full bg-primary pointer-events-none will-change-transform shadow-[0_0_8px_rgba(244,124,32,0.8)]"
+                className="fixed top-0 left-0 -ml-1 -mt-1 w-2 h-2 rounded-full bg-primary pointer-events-none will-change-transform transform-gpu shadow-[0_0_6px_rgba(244,124,32,0.7)]"
             />
         </div>
     );

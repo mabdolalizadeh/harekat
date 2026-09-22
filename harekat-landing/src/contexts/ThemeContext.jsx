@@ -52,8 +52,8 @@ export function ThemeProvider({children}) {
                         ],
                     },
                     {
-                        duration: 650,
-                        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+                        duration: 1100,
+                        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
                         pseudoElement: '::view-transition-new(root)',
                     }
                 );
