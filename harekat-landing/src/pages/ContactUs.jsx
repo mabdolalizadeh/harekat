@@ -4,7 +4,7 @@ import MainLayout from "../layouts/MainLayout.jsx";
 import TopBarLayout from "../layouts/TopBarLayout.jsx";
 import SmoothScrollProvider from "../components/landing/SmoothScrollProvider.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
-import { PrimaryButton } from "../components/ui/Buttons.jsx";
+
 import { Mail, MapPin, Phone, Clock, Send, Sparkles, CheckCircle2, MessageSquare } from "lucide-react";
 import { TextField } from "@mui/material";
 
@@ -274,14 +274,16 @@ export default function ContactUs() {
                                         sx={muiInputSx}
                                     />
 
-                                    <div className="pt-2">
-                                        <PrimaryButton
+                                    <div className="pt-3">
+                                        <button
                                             type="submit"
-                                            className="w-full sm:w-auto px-8 py-3.5 text-base font-bold shadow-lg shadow-primary/25 flex flex-row items-center justify-center gap-3 cursor-pointer"
+                                            className="group relative w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-gradient-to-l from-primary via-primary to-amber-500 text-primary-foreground font-extrabold text-base tracking-wide shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden"
                                         >
-                                            <span className="leading-none">ارسال پیام به حرکت</span>
-                                            <Send size={18} className="shrink-0" />
-                                        </PrimaryButton>
+                                            {/* Shine sweep on hover */}
+                                            <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                            <span className="relative leading-none font-title text-[1.05rem]">ارسال پیام به حرکت</span>
+                                            <Send size={18} className="relative shrink-0 transition-transform duration-300 group-hover:-translate-x-1 group-hover:-translate-y-0.5" />
+                                        </button>
                                     </div>
                                 </form>
                             )}
