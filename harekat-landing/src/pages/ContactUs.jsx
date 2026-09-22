@@ -277,7 +277,7 @@ export default function ContactUs() {
                                     <div className="pt-3">
                                         <button
                                             type="submit"
-                                            className="group relative w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-gradient-to-l from-primary via-primary to-amber-500 text-primary-foreground font-extrabold text-base tracking-wide shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden"
+                                            className="group relative w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-gradient-to-l from-primary via-primary to-amber-500 text-primary-foreground font-extrabold text-base tracking-wide shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden"
                                         >
                                             {/* Shine sweep on hover */}
                                             <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
