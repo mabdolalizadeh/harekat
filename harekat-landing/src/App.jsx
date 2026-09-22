@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { CursorifyProvider } from 'react-cursorify';
 import Landing from "./pages/Landing.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
@@ -29,7 +30,7 @@ function ExternalLoginRedirect() {
 
 export default function App() {
     return (
-        <>
+        <CursorifyProvider>
             <CartDrawer />
             <Routes>
             <Route path='/' element={<Landing/>}/>
@@ -55,6 +56,6 @@ export default function App() {
 
             <Route path='/teachers/:id' element={<TeacherDetail/>}/>
         </Routes>
-        </>
+        </CursorifyProvider>
     );
 }

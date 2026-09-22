@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@tailwindcss/vite": "^4.3.3",
     "clsx": "^2.1.1",
     "embla-carousel-autoplay": "^8.6.0",
@@ -19,6 +21,7 @@
     "lucide-react": "^1.30.0",
     "motion": "^13.0.0",
     "react": "^19.2.8",
+    "react-cursorify": "^1.1.1287",
     "react-dom": "^19.2.8",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.2",

@@ -22,7 +22,6 @@ import LandingTimeline from "../components/landing/LandingTimeline.jsx";
 import LandingTestimonials from "../components/landing/LandingTestimonials.jsx";
 import LandingFAQ from "../components/landing/LandingFAQ.jsx";
 import LandingCTA from "../components/landing/LandingCTA.jsx";
-import FollowCursor from "../components/ui/FollowCursor.jsx";
 import DragToCartDropZone from "../components/ui/DragToCartDropZone.jsx";
 
 const fallbackHeroSlides = [
@@ -220,9 +219,8 @@ export default function Landing() {
 
     return (
         <SmoothScrollProvider>
-            {/* Top luxury scroll indicator, custom cursor & drag drop zone */}
+            {/* Top luxury scroll indicator & drag drop zone */}
             <ScrollProgressBar />
-            <FollowCursor />
             <DragToCartDropZone />
 
             <Background>
