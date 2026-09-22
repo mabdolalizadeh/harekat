@@ -72,7 +72,7 @@ export default function Footer({
                             مهارت بساز و برای حرکت بزرگ بعدی آماده شو.
                         </p>
 
-                        {/* Socials */}
+                        {/* Socials - commented out as requested
                         <div className="mt-7 flex items-center gap-2">
                             {socialItems.map((social) => {
                                 const Icon = social.icon;
@@ -115,6 +115,7 @@ export default function Footer({
                                 );
                             })}
                         </div>
+                        */}
                     </div>
 
                     {/* Navigation */}
