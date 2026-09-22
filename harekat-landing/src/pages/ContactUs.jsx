@@ -63,6 +63,9 @@ const muiInputSx = {
     '& .MuiOutlinedInput-notchedOutline legend': {
         textAlign: 'right',
     },
+    '& .MuiFormLabel-asterisk': {
+        display: 'none',
+    },
 };
 
 export default function ContactUs() {
