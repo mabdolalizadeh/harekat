@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Draggable } from "gsap/Draggable";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout.jsx";
 import TopBarLayout from "../layouts/TopBarLayout.jsx";
@@ -9,6 +10,8 @@ import SectionTag from "../components/ui/SectionTag.jsx";
 import { ArrowButton } from "../components/ui/Buttons.jsx";
 import { Sparkles, Compass, Lightbulb, Users, Award, Layers, ArrowLeft } from "lucide-react";
 import { storeApi } from "../services/api.js";
+
+gsap.registerPlugin(ScrollTrigger, Draggable);
 
 const values = [
     {
@@ -177,15 +180,34 @@ export default function AboutUs() {
                         return Math.max(0, valuesTrack.scrollWidth - valuesSection.clientWidth + 96);
                     };
 
+                    // Stagger card entrance within the horizontal scroll
+                    const cards = valuesTrack.querySelectorAll('.about-value-card');
+                    cards.forEach((card, i) => {
+                        gsap.fromTo(card,
+                            { opacity: 0, y: 60, scale: 0.92 },
+                            {
+                                opacity: 1, y: 0, scale: 1,
+                                duration: 0.6,
+                                ease: 'power3.out',
+                                scrollTrigger: {
+                                    trigger: valuesSection,
+                                    start: `top ${80 - i * 5}%`,
+                                    toggleActions: 'play none none none',
+                                },
+                            }
+                        );
+                    });
+
                     gsap.to(valuesTrack, {
                         x: () => getDistance(),
                         ease: 'none',
                         scrollTrigger: {
                             trigger: valuesSection,
                             pin: true,
-                            start: 'top 12%',
-                            end: () => `+=${getDistance() * 1.2}`,
-                            scrub: 0.8,
+                            pinSpacing: true,
+                            start: 'top top',
+                            end: () => `+=${getDistance() * 1.5}`,
+                            scrub: 1,
                             anticipatePin: 1,
                             invalidateOnRefresh: true,
                             onUpdate: (self) => {
@@ -215,10 +237,27 @@ export default function AboutUs() {
                 });
             }
 
-            // Stats counter animation with Persian numbers
+            // Stats counter animation with Persian numbers + GSAP entrance
             const toPersianDigits = (num) => String(Math.round(num)).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
             const statBoxes = el.querySelectorAll('.about-stat-box');
+
+            // Staggered scale-up entrance for stat boxes
+            gsap.fromTo(statBoxes,
+                { opacity: 0, y: 40, scale: 0.85 },
+                {
+                    opacity: 1, y: 0, scale: 1,
+                    duration: 0.7,
+                    stagger: 0.1,
+                    ease: 'back.out(1.4)',
+                    scrollTrigger: {
+                        trigger: el.querySelector('.about-stats-grid'),
+                        start: 'top 85%',
+                        toggleActions: 'play none none none',
+                    },
+                }
+            );
+
             statBoxes.forEach((box, i) => {
                 const data = statsData[i];
                 if (!data) return;
@@ -228,7 +267,7 @@ export default function AboutUs() {
                 const counter = { val: 0 };
                 gsap.to(counter, {
                     val: data.target,
-                    duration: 1.8,
+                    duration: 2.2,
                     ease: 'power2.out',
                     scrollTrigger: {
                         trigger: box,
@@ -297,10 +336,9 @@ export default function AboutUs() {
                             <h2 className="text-[clamp(2.2rem,4.5vw,3.5rem)] font-extrabold text-foreground leading-tight">
                                 چه چیزی ما رو متفاوت می‌کنه
                             </h2>
-                            {/* Subtle Horizontal progress indicator */}
-                            <div className="hidden md:flex items-center gap-2 mt-2">
-                                <span className="text-[11px] font-mono text-muted select-none">پیمایش افقی</span>
-                                <div className="w-28 h-1 rounded-full bg-border/60 overflow-hidden">
+                            {/* Minimal progress bar */}
+                            <div className="hidden md:flex justify-center mt-3">
+                                <div className="w-32 h-1 rounded-full bg-border/60 overflow-hidden">
                                     <div
                                         ref={horizontalProgressRef}
                                         className="h-full bg-primary rounded-full transition-[width] duration-100 will-change-[width]"
@@ -319,16 +357,16 @@ export default function AboutUs() {
                                 {values.map((item, index) => (
                                     <div
                                         key={index}
-                                        className={`about-value-card group relative bg-card/85 dark:bg-card/90 backdrop-blur-2xl border border-border/80 ${item.theme.cardBorder} rounded-3xl sm:rounded-[2rem] p-7 sm:p-9 shadow-xl shadow-black/5 hover:shadow-2xl hover:shadow-black/15 transition-all duration-500 hover:-translate-y-2 w-[340px] sm:w-[440px] lg:w-[470px] min-h-[480px] sm:min-h-[500px] shrink-0 flex flex-col justify-between overflow-hidden select-none`}
+                                        className={`about-value-card group relative bg-card/85 dark:bg-card/90 backdrop-blur-2xl border border-border/80 ${item.theme.cardBorder} rounded-3xl sm:rounded-[2rem] p-7 sm:p-9 shadow-xl shadow-black/5 hover:shadow-2xl hover:shadow-black/15 transition-all duration-500 hover:-translate-y-2 w-[340px] sm:w-[440px] lg:w-[470px] min-h-[480px] sm:min-h-[500px] shrink-0 flex flex-col justify-between overflow-clip select-none`}
                                     >
                                         {/* Ambient gradient corner glow */}
                                         <div
-                                            className={`pointer-events-none absolute -top-24 -left-24 w-56 h-56 rounded-full bg-gradient-to-br ${item.theme.glow} blur-3xl opacity-40 group-hover:opacity-80 transition-opacity duration-700`}
+                                            className={`pointer-events-none absolute top-0 left-0 w-56 h-56 rounded-full bg-gradient-to-br ${item.theme.glow} blur-3xl opacity-40 group-hover:opacity-80 transition-opacity duration-700`}
                                         />
 
                                         {/* Giant watermark number in corner */}
                                         <span
-                                            className={`pointer-events-none absolute top-4 left-6 text-7xl sm:text-8xl font-black font-mono select-none tracking-tighter ${item.theme.watermark} transition-all duration-500 group-hover:scale-105`}
+                                            className={`pointer-events-none absolute top-4 left-6 text-7xl sm:text-8xl font-black font-title select-none tracking-tighter ${item.theme.watermark} transition-all duration-500 group-hover:scale-105`}
                                         >
                                             {item.number}
                                         </span>
@@ -378,18 +416,26 @@ export default function AboutUs() {
                         </div>
                     </div>
 
-                    {/* Stats Grid - Enhanced & Efficient with GSAP Count-up */}
-                    <div className="about-stats-grid grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 w-full max-w-4xl py-6">
+                    {/* Stats Grid - Premium Animated Counter Boxes */}
+                    <div className="about-stats-grid grid grid-cols-2 sm:grid-cols-4 gap-5 sm:gap-7 w-full max-w-5xl py-8">
                         {statsData.map((stat, i) => (
                             <div
                                 key={i}
-                                className="about-stat-box group bg-card/75 backdrop-blur-xl border border-border/80 hover:border-primary/50 rounded-3xl p-6 text-center flex flex-col items-center gap-2.5 shadow-md shadow-black/5 hover:-translate-y-1 transition-all duration-300"
+                                className="about-stat-box group relative bg-card/80 backdrop-blur-2xl border border-border/70 hover:border-primary/50 rounded-[1.75rem] p-7 sm:p-8 text-center flex flex-col items-center gap-3 shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1.5 transition-all duration-500"
                             >
-                                <div className="w-6 h-1 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
-                                <span className="stat-count-value text-3xl sm:text-4xl font-black font-mono text-foreground tracking-tight select-none min-h-[1.2em]">
+                                {/* Decorative top accent line */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-b-full bg-gradient-to-r from-primary/60 via-primary to-primary/60 group-hover:w-20 transition-all duration-500" />
+
+                                {/* Number with title font */}
+                                <span className="stat-count-value text-4xl sm:text-5xl font-black font-title text-foreground tracking-tight select-none min-h-[1.3em] leading-none mt-2">
                                     ۰
                                 </span>
-                                <span className="text-xs sm:text-sm text-muted font-medium">
+
+                                {/* Subtle divider */}
+                                <div className="w-8 h-px bg-border/80 group-hover:bg-primary/50 group-hover:w-12 transition-all duration-300" />
+
+                                {/* Label */}
+                                <span className="text-xs sm:text-sm text-muted font-medium leading-snug">
                                     {stat.label}
                                 </span>
                             </div>
