@@ -7,33 +7,81 @@ import TopBarLayout from "../layouts/TopBarLayout.jsx";
 import SmoothScrollProvider from "../components/landing/SmoothScrollProvider.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
 import { ArrowButton } from "../components/ui/Buttons.jsx";
-import { Sparkles, Compass, Lightbulb, Users, Award, Layers } from "lucide-react";
+import { Sparkles, Compass, Lightbulb, Users, Award, Layers, ArrowLeft } from "lucide-react";
 import { storeApi } from "../services/api.js";
 
 const values = [
     {
         icon: Compass,
         number: '۰۱',
+        tag: 'روش‌شناسی عملی',
         title: 'عملگرایی و تجربه واقعی',
-        desc: 'یادگیری از طریق انجام دادن و ساختن پروژه‌های واقعی؛ نه صرفاً حفظ کردن مفاهیم تئوری و دستورالعمل‌های خشک ابزارها.',
+        quote: '«یادگیری در میدان عمل و با دست‌های درگیر در کار شکل می‌گیرد، نه روی کاغذ.»',
+        desc: 'ما در حرکت فرآیند یادگیری را از دل پروژه‌های حقیقی آغاز می‌کنیم؛ مواجهه با چالش‌های بازار، آزمون و خطا، و دستیابی به استانداردهای ملموس حرفه‌ای.',
+        theme: {
+            cardBorder: 'hover:border-brand-500/40 dark:hover:border-brand-500/40',
+            badgeBg: 'bg-brand-500/10 text-brand-600 dark:text-brand-400 border-brand-500/20',
+            dot: 'bg-brand-500',
+            iconBox: 'bg-brand-500/10 text-brand-500 group-hover:bg-brand-500 group-hover:text-brand-950',
+            glow: 'from-brand-500/15 via-brand-600/5 to-transparent',
+            quoteBorder: 'border-r-brand-500/60',
+            watermark: 'text-brand-500/10 group-hover:text-brand-500/20',
+            btnHover: 'group-hover:text-brand-500',
+        },
     },
     {
         icon: Lightbulb,
         number: '۰۲',
+        tag: 'فرهنگ گفت‌وگو',
         title: 'تفکر انتقادی و نقدپذیری',
-        desc: 'ما باور داریم رشد واقعی از بازخورد صریح و صادقانه شروع می‌شود. جلسات نقد گروهی، بخش جدایی‌ناپذیر یادگیری در حرکت است.',
+        quote: '«نقد شفاف و سازنده، میانبر طلایی ارتقای استانداردهای هنری است.»',
+        desc: 'رشد واقعی در فضایی امن برای آزمودن ایده‌ها رخ می‌دهد. در کارگاه‌های نقد، یاد می‌گیریم فراتر از سلیقه شخصی، چرایی تصمیمات بصری‌مان را تحلیل و دفاع کنیم.',
+        theme: {
+            cardBorder: 'hover:border-electric-500/40 dark:hover:border-electric-500/40',
+            badgeBg: 'bg-electric-500/10 text-electric-600 dark:text-electric-400 border-electric-500/20',
+            dot: 'bg-electric-500',
+            iconBox: 'bg-electric-500/10 text-electric-500 group-hover:bg-electric-500 group-hover:text-white',
+            glow: 'from-electric-500/15 via-electric-600/5 to-transparent',
+            quoteBorder: 'border-r-electric-500/60',
+            watermark: 'text-electric-500/10 group-hover:text-electric-500/20',
+            btnHover: 'group-hover:text-electric-500',
+        },
     },
     {
         icon: Layers,
         number: '۰۳',
-        title: 'نگاه چندرسانه‌ای',
-        desc: 'هنرمند امروز نباید در چارچوب یک نرم‌افزار خاص محدود بماند. ما پل ارتباطی میان رسانه‌ها، فرمت‌ها و هنر دیجیتال هستیم.',
+        tag: 'تلفیق رسانه‌ای',
+        title: 'نگاه میان‌رشته‌ای و چندبعدی',
+        quote: '«مرزهای سنتی نرم‌افزارها را بشکنید؛ یک ایده خلاق در هر قالبی نفس می‌کشد.»',
+        desc: 'هنرمند معاصر نباید محدود به یک ابزار خاص بماند. ما پیوند میان موشن گرافیک، گرافیک دیزاین، تایپوگرافی و تکنولوژی را برای خلق روایت‌های غنی آموزش می‌دهیم.',
+        theme: {
+            cardBorder: 'hover:border-violet-500/40 dark:hover:border-violet-500/40',
+            badgeBg: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20',
+            dot: 'bg-violet-500',
+            iconBox: 'bg-violet-500/10 text-violet-500 group-hover:bg-violet-500 group-hover:text-white',
+            glow: 'from-violet-500/15 via-violet-600/5 to-transparent',
+            quoteBorder: 'border-r-violet-500/60',
+            watermark: 'text-violet-500/10 group-hover:text-violet-500/20',
+            btnHover: 'group-hover:text-violet-500',
+        },
     },
     {
         icon: Users,
         number: '۰۴',
+        tag: 'هویت و امضا',
         title: 'رشد فردی و هویت مستقل',
-        desc: 'هر دانش‌آموخته مسیر خلاقانه منحصربه‌فرد خود را دارد. هدف ما هموار کردن مسیر و کشف صدا و زبان بصری اختصاصی شماست.',
+        quote: '«آموزش کارآمد کپی‌کار تولید نمی‌کند، بلکه هویت و صدای اختصاصی شما را نمایان می‌سازد.»',
+        desc: 'هر دانش‌آموخته مسیر خلاقانه خودش را دارد. در حرکت تلاش می‌کنیم با راهنمایی اساتید و منتورها، امضای بصری ویژه شما کشف و برای بازار کار تثبیت شود.',
+        theme: {
+            cardBorder: 'hover:border-emerald-500/40 dark:hover:border-emerald-500/40',
+            badgeBg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+            dot: 'bg-emerald-500',
+            iconBox: 'bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-black dark:group-hover:text-black',
+            glow: 'from-emerald-500/15 via-emerald-600/5 to-transparent',
+            quoteBorder: 'border-r-emerald-500/60',
+            watermark: 'text-emerald-500/10 group-hover:text-emerald-500/20',
+            btnHover: 'group-hover:text-emerald-500',
+        },
     },
 ];
 
@@ -266,34 +314,63 @@ export default function AboutUs() {
                         <div className="w-full overflow-hidden relative">
                             <div
                                 ref={valuesTrackRef}
-                                className="flex flex-row gap-6 sm:gap-8 items-stretch will-change-transform py-4 px-4 sm:px-8 w-max"
+                                className="flex flex-row gap-6 sm:gap-8 items-stretch will-change-transform py-6 px-4 sm:px-8 w-max"
                             >
                                 {values.map((item, index) => (
                                     <div
                                         key={index}
-                                        className="about-value-card group bg-card/85 backdrop-blur-xl border border-border/80 hover:border-primary/50 rounded-3xl p-8 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 w-[320px] sm:w-[400px] shrink-0 flex flex-col justify-between gap-6"
+                                        className={`about-value-card group relative bg-card/85 dark:bg-card/90 backdrop-blur-2xl border border-border/80 ${item.theme.cardBorder} rounded-3xl sm:rounded-[2rem] p-7 sm:p-9 shadow-xl shadow-black/5 hover:shadow-2xl hover:shadow-black/15 transition-all duration-500 hover:-translate-y-2 w-[340px] sm:w-[440px] lg:w-[470px] min-h-[480px] sm:min-h-[500px] shrink-0 flex flex-col justify-between overflow-hidden select-none`}
                                     >
-                                        <div className="flex items-center justify-between pb-4 border-b border-border/50">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
-                                                <item.icon size={22} />
-                                            </div>
-                                            <span className="text-3xl font-black font-mono text-primary select-none">
-                                                {item.number}
+                                        {/* Ambient gradient corner glow */}
+                                        <div
+                                            className={`pointer-events-none absolute -top-24 -left-24 w-56 h-56 rounded-full bg-gradient-to-br ${item.theme.glow} blur-3xl opacity-40 group-hover:opacity-80 transition-opacity duration-700`}
+                                        />
+
+                                        {/* Giant watermark number in corner */}
+                                        <span
+                                            className={`pointer-events-none absolute top-4 left-6 text-7xl sm:text-8xl font-black font-mono select-none tracking-tighter ${item.theme.watermark} transition-all duration-500 group-hover:scale-105`}
+                                        >
+                                            {item.number}
+                                        </span>
+
+                                        {/* Card Header: Tag badge + Icon */}
+                                        <div className="relative z-10 flex items-center justify-between pb-4">
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-md ${item.theme.badgeBg}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${item.theme.dot} animate-pulse`} />
+                                                {item.tag}
                                             </span>
+
+                                            <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 shadow-inner transition-all duration-300 ${item.theme.iconBox}`}>
+                                                <item.icon size={22} className="transition-transform duration-300 group-hover:scale-110" />
+                                            </div>
                                         </div>
 
-                                        <div className="flex flex-col gap-3">
-                                            <h3 className="text-foreground text-xl font-bold group-hover:text-primary transition-colors">
+                                        {/* Body Content */}
+                                        <div className="relative z-10 flex flex-col gap-4 my-auto py-2">
+                                            <h3 className="text-foreground text-xl sm:text-2xl font-black leading-snug group-hover:text-primary transition-colors duration-300">
                                                 {item.title}
                                             </h3>
-                                            <p className="text-muted text-sm sm:text-base leading-relaxed font-normal">
+
+                                            {/* Editorial Takeaway Quote Box */}
+                                            <div className={`relative rounded-2xl bg-secondary/40 dark:bg-secondary/20 border border-border/50 border-r-4 ${item.theme.quoteBorder} p-3.5 sm:p-4 text-xs sm:text-sm text-foreground/90 font-medium leading-relaxed backdrop-blur-sm`}>
+                                                <p className="italic">{item.quote}</p>
+                                            </div>
+
+                                            <p className="text-muted text-sm sm:text-[0.95rem] leading-relaxed font-normal">
                                                 {item.desc}
                                             </p>
                                         </div>
 
-                                        <div className="pt-3 border-t border-border/40 flex items-center justify-between text-xs text-muted/70 font-mono">
-                                            <span>اصل ۰{index + 1} از ۰۴</span>
-                                            <span className="text-primary font-bold">حرکت</span>
+                                        {/* Footer */}
+                                        <div className="relative z-10 pt-5 mt-4 border-t border-border/50 flex items-center justify-between text-xs font-mono">
+                                            <div className="flex items-center gap-2 text-muted">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-primary/70" />
+                                                <span>اصل {item.number} از ۰۴</span>
+                                            </div>
+                                            <div className={`flex items-center gap-1.5 font-bold text-foreground/80 ${item.theme.btnHover} transition-colors`}>
+                                                <span className="text-[11px] font-sans">رویکرد حرکت</span>
+                                                <ArrowLeft size={14} className="transition-transform duration-300 group-hover:-translate-x-1" />
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
