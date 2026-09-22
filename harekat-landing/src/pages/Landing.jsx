@@ -23,7 +23,6 @@ import LandingTestimonials from "../components/landing/LandingTestimonials.jsx";
 import LandingFAQ from "../components/landing/LandingFAQ.jsx";
 import LandingCTA from "../components/landing/LandingCTA.jsx";
 import DragToCartDropZone from "../components/ui/DragToCartDropZone.jsx";
-import HandDrawnSectionPath from "../components/ui/HandDrawnSectionPath.jsx";
 
 const fallbackHeroSlides = [
     { image: '', alt: '' },
@@ -238,20 +237,11 @@ export default function Landing() {
                         onCtaClick={handleCtaClick}
                     />
 
-                    {/* Path 1: Hero -> Manifesto (starts right under Hero, stops above Manifesto title) */}
-                    <HandDrawnSectionPath variant="right-to-center" />
-
                     {/* ============ MANIFESTO ============ */}
                     <LandingManifesto />
 
-                    {/* Path 2: Manifesto -> Founder (starts left under Manifesto, stops above Founder card) */}
-                    <HandDrawnSectionPath variant="left-to-center" />
-
                     {/* ============ FOUNDER CARD ============ */}
                     <LandingFounderCard />
-
-                    {/* Path 3: Founder -> Courses (starts right under Founder, stops above Courses title) */}
-                    <HandDrawnSectionPath variant="right-to-center" />
 
                     {/* ============ COURSES / PROGRAMS ============ */}
                     <LandingCourses
@@ -261,18 +251,12 @@ export default function Landing() {
                         isLoading={isLoading}
                     />
 
-                    {/* Path 4: Courses -> Capsules (starts left under Courses, stops above Capsules title) */}
-                    <HandDrawnSectionPath variant="left-to-center" />
-
                     {/* ============ CAPSULE COURSES ============ */}
                     <LandingCapsules
                         id={sectionIds.capsule}
                         capsuleCourses={capsuleCourses}
                         isLoading={isLoading}
                     />
-
-                    {/* Path 5: Capsules -> Packages (starts right under Capsules, stops above Packages title) */}
-                    <HandDrawnSectionPath variant="right-to-center" />
 
                     {/* ============ SKILL PACKAGES ============ */}
                     <LandingPackages
@@ -281,18 +265,12 @@ export default function Landing() {
                         isLoading={isLoading}
                     />
 
-                    {/* Path 6: Packages -> Subscriptions (starts left under Packages, stops above Subscriptions title) */}
-                    <HandDrawnSectionPath variant="left-to-center" />
-
                     {/* ============ SUBSCRIPTIONS ============ */}
                     <LandingSubscriptions
                         id={sectionIds.subscriptions}
                         apiSubscriptions={apiSubscriptions}
                         isLoading={isLoading}
                     />
-
-                    {/* Path 7: Subscriptions -> Mentors (starts right under Subscriptions, stops above Mentors title) */}
-                    <HandDrawnSectionPath variant="right-to-center" />
 
                     {/* ============ MENTORS ============ */}
                     <LandingMentors
@@ -301,32 +279,17 @@ export default function Landing() {
                         onJoinClick={() => navigate('/contact-us')}
                     />
 
-                    {/* Path 8: Mentors -> Audience (starts left under Mentors, stops above Audience title on the right) */}
-                    <HandDrawnSectionPath variant="left-to-right" />
-
                     {/* ============ WHO IT'S FOR ============ */}
                     <LandingAudience />
-
-                    {/* Path 9: Audience -> Timeline (starts right under Audience, stops above Timeline title) */}
-                    <HandDrawnSectionPath variant="right-to-center" />
 
                     {/* ============ HOW IT WORKS ============ */}
                     <LandingTimeline steps={steps} />
 
-                    {/* Path 10: Timeline -> Testimonials (starts left under Timeline, stops above Testimonials title) */}
-                    <HandDrawnSectionPath variant="left-to-center" />
-
                     {/* ============ TESTIMONIALS ============ */}
                     <LandingTestimonials testimonials={testimonials} />
 
-                    {/* Path 11: Testimonials -> FAQ (starts right under Testimonials, stops above FAQ title) */}
-                    <HandDrawnSectionPath variant="right-to-center" />
-
                     {/* ============ FAQ ============ */}
                     <LandingFAQ faqItems={faqItems} />
-
-                    {/* Path 12: FAQ -> CTA (starts left under FAQ, stops above CTA title) */}
-                    <HandDrawnSectionPath variant="left-to-center" />
 
                     {/* ============ CTA & CONTACT ============ */}
                     <LandingCTA onContactClick={() => navigate('/contact-us')} />
