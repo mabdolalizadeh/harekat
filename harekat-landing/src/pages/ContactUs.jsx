@@ -21,6 +21,7 @@ const muiInputSx = {
         '& fieldset': {
             borderColor: 'var(--border)',
             borderWidth: '1.5px',
+            textAlign: 'right',
         },
         '&:hover fieldset': {
             borderColor: 'var(--primary)',
@@ -34,10 +35,6 @@ const muiInputSx = {
             fontFamily: 'inherit',
             padding: '14px 16px',
             textAlign: 'right',
-            '&::placeholder': {
-                color: 'var(--muted)',
-                opacity: 0.9,
-            },
         },
         '& textarea': {
             color: 'var(--foreground)',
@@ -45,22 +42,26 @@ const muiInputSx = {
             padding: '6px 4px',
             lineHeight: 1.7,
             textAlign: 'right',
-            '&::placeholder': {
-                color: 'var(--muted)',
-                opacity: 0.9,
-            },
         },
     },
     '& .MuiInputLabel-root': {
-        color: 'var(--muted)',
+        color: 'var(--text-muted)',
         fontFamily: 'inherit',
-        fontSize: '0.875rem',
+        fontSize: '0.9rem',
         right: '1.75rem',
         left: 'auto',
         transformOrigin: 'top right',
         '&.Mui-focused': {
             color: 'var(--primary)',
         },
+        '&.MuiInputLabel-shrink': {
+            right: '1.75rem',
+            left: 'auto',
+            transformOrigin: 'top right',
+        },
+    },
+    '& .MuiOutlinedInput-notchedOutline legend': {
+        textAlign: 'right',
     },
 };
 
@@ -222,65 +223,53 @@ export default function ContactUs() {
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-xs font-semibold text-foreground/90">نام و نام‌خانوادگی</label>
-                                            <TextField
-                                                required
-                                                fullWidth
-                                                name="name"
-                                                value={formState.name}
-                                                onChange={handleChange}
-                                                placeholder="نام و نام‌خانوادگی خود را وارد کنید"
-                                                variant="outlined"
-                                                sx={muiInputSx}
-                                            />
-                                        </div>
-
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-xs font-semibold text-foreground/90">آدرس ایمیل</label>
-                                            <TextField
-                                                required
-                                                fullWidth
-                                                type="email"
-                                                name="email"
-                                                value={formState.email}
-                                                onChange={handleChange}
-                                                placeholder="youremail@example.com"
-                                                variant="outlined"
-                                                sx={muiInputSx}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1.5">
-                                        <label className="text-xs font-semibold text-foreground/90">موضوع پیام</label>
                                         <TextField
                                             required
                                             fullWidth
-                                            name="subject"
-                                            value={formState.subject}
+                                            label="نام و نام‌خانوادگی"
+                                            name="name"
+                                            value={formState.name}
                                             onChange={handleChange}
-                                            placeholder="موضوع مشاوره یا پرسش شما..."
+                                            variant="outlined"
+                                            sx={muiInputSx}
+                                        />
+
+                                        <TextField
+                                            required
+                                            fullWidth
+                                            label="آدرس ایمیل"
+                                            type="email"
+                                            name="email"
+                                            value={formState.email}
+                                            onChange={handleChange}
                                             variant="outlined"
                                             sx={muiInputSx}
                                         />
                                     </div>
 
-                                    <div className="flex flex-col gap-1.5">
-                                        <label className="text-xs font-semibold text-foreground/90">متن پیام</label>
-                                        <TextField
-                                            required
-                                            fullWidth
-                                            multiline
-                                            rows={5}
-                                            name="message"
-                                            value={formState.message}
-                                            onChange={handleChange}
-                                            placeholder="پیام یا سوال خود درباره دوره‌ها را با جزییات بنویسید..."
-                                            variant="outlined"
-                                            sx={muiInputSx}
-                                        />
-                                    </div>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        label="موضوع پیام"
+                                        name="subject"
+                                        value={formState.subject}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                        sx={muiInputSx}
+                                    />
+
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        label="متن پیام"
+                                        multiline
+                                        rows={5}
+                                        name="message"
+                                        value={formState.message}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                        sx={muiInputSx}
+                                    />
 
                                     <div className="pt-2">
                                         <PrimaryButton

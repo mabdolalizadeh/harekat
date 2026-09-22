@@ -163,7 +163,15 @@ export default function Background({ children, className }) {
                     }
                 });
 
-                if (!activeSections.length) return;
+                if (!activeSections.length) {
+                    // No sections found (non-landing pages): use CSS variable
+                    const fallbackBg = getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
+                    const bg = fallbackBg ? fallbackBg : (dark ? '#10100f' : '#f7f5f0');
+                    gsap.set(bgEl, { backgroundColor: bg });
+                    document.documentElement.style.backgroundColor = bg;
+                    document.body.style.backgroundColor = bg;
+                    return;
+                }
 
                 // Sync initial background and accent
                 const currentActiveSec = activeSections.find((s) => s.key === activeSectionKeyRef.current) || activeSections[0];
