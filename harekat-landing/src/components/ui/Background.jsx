@@ -1,67 +1,90 @@
 import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "../../utils/cn.js";
+import WindingPathBackground from "./WindingPathBackground.jsx";
 
-/* ---- Palette (project tokens: brand-400, electric-400, violet-400) ---- */
-const ORANGE   = [255, 163,  63];
-const ELECTRIC = [ 76, 201, 255];
-const VIOLET   = [164, 124, 255];
-
-/* Keyframes narrative:
- *   0%   Orange   + Electric
- *   25%  Orange   + Electric
- *   50%  Electric + Violet
- *   75%  Violet   + Electric
- *   100% Violet   + Orange
- */
-const STOPS_A = [
-    [0.00, ORANGE],
-    [0.25, ORANGE],
-    [0.50, ELECTRIC],
-    [0.75, VIOLET],
-    [1.00, VIOLET],
-];
-
-const STOPS_B = [
-    [0.00, ELECTRIC],
-    [0.25, ELECTRIC],
-    [0.50, VIOLET],
-    [0.75, ELECTRIC],
-    [1.00, ORANGE],
-];
-
-const lerp = (a, b, t) => a + (b - a) * t;
-
-function sampleColor(stops, t) {
-    if (t <= stops[0][0]) return stops[0][1];
-    const last = stops[stops.length - 1];
-    if (t >= last[0]) return last[1];
-    for (let i = 0; i < stops.length - 1; i++) {
-        const [t0, c0] = stops[i];
-        const [t1, c1] = stops[i + 1];
-        if (t >= t0 && t <= t1) {
-            const k = (t - t0) / (t1 - t0);
-            return [
-                Math.round(lerp(c0[0], c1[0], k)),
-                Math.round(lerp(c0[1], c1[1], k)),
-                Math.round(lerp(c0[2], c1[2], k)),
-            ];
-        }
-    }
-    return last[1];
-}
-
-/* Multi-stop radial falloff instead of filter:blur — much cheaper on GPU. */
-function gradient(c, peak) {
-    const [r, g, b] = c;
-    return (
-        `radial-gradient(circle at center,` +
-        `rgba(${r},${g},${b},${peak}) 0%,` +
-        `rgba(${r},${g},${b},${(peak * 0.6).toFixed(3)}) 25%,` +
-        `rgba(${r},${g},${b},${(peak * 0.25).toFixed(3)}) 50%,` +
-        `rgba(${r},${g},${b},${(peak * 0.07).toFixed(3)}) 70%,` +
-        `rgba(${r},${g},${b},0) 85%)`
-    );
-}
+/* Section-specific color themes (Light mode & Dark mode palettes) */
+const SECTION_PALETTES = {
+    hero: {
+        glowA: [255, 140, 40],   // Warm creative orange
+        glowB: [76, 201, 255],   // Electric blue
+        bgTintLight: "rgba(255, 245, 235, 0.45)",
+        bgTintDark: "rgba(25, 16, 8, 0.35)",
+    },
+    manifesto: {
+        glowA: [168, 85, 247],  // Purple / Violet
+        glowB: [244, 114, 182],  // Soft magenta rose
+        bgTintLight: "rgba(250, 243, 255, 0.4)",
+        bgTintDark: "rgba(22, 10, 32, 0.35)",
+    },
+    founder: {
+        glowA: [245, 158, 11],   // Amber
+        glowB: [249, 115, 22],   // Tangerine
+        bgTintLight: "rgba(255, 248, 238, 0.4)",
+        bgTintDark: "rgba(26, 17, 7, 0.35)",
+    },
+    courses: {
+        glowA: [14, 165, 233],   // Sky cyan
+        glowB: [99, 102, 241],   // Indigo
+        bgTintLight: "rgba(240, 249, 255, 0.45)",
+        bgTintDark: "rgba(8, 20, 34, 0.35)",
+    },
+    capsules: {
+        glowA: [20, 184, 166],   // Teal / Emerald
+        glowB: [56, 189, 248],   // Cyan
+        bgTintLight: "rgba(240, 253, 250, 0.4)",
+        bgTintDark: "rgba(6, 24, 22, 0.35)",
+    },
+    packages: {
+        glowA: [139, 92, 246],   // Violet
+        glowB: [236, 72, 153],   // Pink
+        bgTintLight: "rgba(253, 242, 248, 0.4)",
+        bgTintDark: "rgba(28, 8, 24, 0.35)",
+    },
+    subscriptions: {
+        glowA: [234, 179, 8],    // Gold / Sunflower
+        glowB: [249, 115, 22],   // Warm orange
+        bgTintLight: "rgba(254, 252, 232, 0.4)",
+        bgTintDark: "rgba(28, 22, 6, 0.35)",
+    },
+    mentors: {
+        glowA: [99, 102, 241],   // Indigo
+        glowB: [168, 85, 247],   // Purple
+        bgTintLight: "rgba(238, 242, 255, 0.4)",
+        bgTintDark: "rgba(12, 14, 34, 0.35)",
+    },
+    who: {
+        glowA: [244, 63, 94],    // Rose / Coral
+        glowB: [249, 115, 22],   // Orange
+        bgTintLight: "rgba(255, 241, 242, 0.4)",
+        bgTintDark: "rgba(28, 8, 12, 0.35)",
+    },
+    "how-it-works": {
+        glowA: [16, 185, 129],   // Emerald green
+        glowB: [6, 182, 212],    // Cyan
+        bgTintLight: "rgba(236, 253, 245, 0.4)",
+        bgTintDark: "rgba(4, 26, 18, 0.35)",
+    },
+    reviews: {
+        glowA: [249, 115, 22],   // Harekat brand orange
+        glowB: [236, 72, 153],   // Fuchsia
+        bgTintLight: "rgba(255, 247, 237, 0.45)",
+        bgTintDark: "rgba(28, 14, 6, 0.35)",
+    },
+    faq: {
+        glowA: [100, 116, 139],  // Slate blue
+        glowB: [148, 163, 184],  // Muted steel
+        bgTintLight: "rgba(248, 250, 252, 0.4)",
+        bgTintDark: "rgba(15, 23, 42, 0.35)",
+    },
+    cta: {
+        glowA: [255, 124, 32],   // Primary brand fire
+        glowB: [251, 191, 36],   // Amber spark
+        bgTintLight: "rgba(255, 247, 237, 0.5)",
+        bgTintDark: "rgba(30, 14, 5, 0.4)",
+    },
+};
 
 function isDarkTheme() {
     const el = document.documentElement;
@@ -70,93 +93,165 @@ function isDarkTheme() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-import WindingPathBackground from "./WindingPathBackground.jsx";
+function radialGradient(c, peak) {
+    const [r, g, b] = c;
+    return (
+        `radial-gradient(circle at center, ` +
+        `rgba(${r},${g},${b},${peak}) 0%, ` +
+        `rgba(${r},${g},${b},${(peak * 0.6).toFixed(3)}) 25%, ` +
+        `rgba(${r},${g},${b},${(peak * 0.25).toFixed(3)}) 50%, ` +
+        `rgba(${r},${g},${b},${(peak * 0.07).toFixed(3)}) 70%, ` +
+        `rgba(${r},${g},${b},0) 85%)`
+    );
+}
 
 export default function Background({ children, className }) {
     const glowARef = useRef(null);
     const glowBRef = useRef(null);
+    const tintOverlayRef = useRef(null);
+    const containerRef = useRef(null);
 
     useEffect(() => {
-        const a = glowARef.current;
-        const b = glowBRef.current;
-        if (!a || !b) return;
+        const glowA = glowARef.current;
+        const glowB = glowBRef.current;
+        const tintOverlay = tintOverlayRef.current;
+        if (!glowA || !glowB || !tintOverlay) return;
 
-        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        let ticking = false;
-        let rafId = 0;
-        let lastProgress = -1;
+        // Current interpolated color state
+        const currentColor = {
+            aR: SECTION_PALETTES.hero.glowA[0],
+            aG: SECTION_PALETTES.hero.glowA[1],
+            aB: SECTION_PALETTES.hero.glowA[2],
+            bR: SECTION_PALETTES.hero.glowB[0],
+            bG: SECTION_PALETTES.hero.glowB[1],
+            bB: SECTION_PALETTES.hero.glowB[2],
+        };
 
-        const paint = (p) => {
+        const updateGlows = () => {
             const dark = isDarkTheme();
-            const cA = sampleColor(STOPS_A, p);
-            const cB = sampleColor(STOPS_B, p);
+            const opA = dark ? 0.32 : 0.24;
+            const opB = dark ? 0.28 : 0.20;
 
-            const opA = dark ? 0.26 : 0.22;
-            const opB = dark ? 0.22 : 0.18;
-
-            a.style.backgroundImage = gradient(cA, opA);
-            b.style.backgroundImage = gradient(cB, opB);
-
-            // Base: centered on the element (translate -50%). Drift on scroll.
-            a.style.transform =
-                `translate3d(calc(-50% + ${(p * 10).toFixed(2)}vw), calc(-50% + ${(p * 22).toFixed(2)}vh), 0)`;
-            b.style.transform =
-                `translate3d(calc(-50% - ${(p * 8).toFixed(2)}vw), calc(-50% + ${(p * 18).toFixed(2)}vh), 0)`;
+            glowA.style.backgroundImage = radialGradient(
+                [Math.round(currentColor.aR), Math.round(currentColor.aG), Math.round(currentColor.aB)],
+                opA
+            );
+            glowB.style.backgroundImage = radialGradient(
+                [Math.round(currentColor.bR), Math.round(currentColor.bG), Math.round(currentColor.bB)],
+                opB
+            );
         };
 
-        const read = () => {
-            ticking = false;
-            const max = document.documentElement.scrollHeight - window.innerHeight;
-            const raw = max > 0 ? window.scrollY / max : 0;
-            const p = Math.min(1, Math.max(0, raw));
-            if (Math.abs(p - lastProgress) < 0.0015) return;
-            lastProgress = p;
-            paint(p);
-        };
+        updateGlows();
 
-        const onScroll = () => {
-            if (ticking) return;
-            ticking = true;
-            rafId = requestAnimationFrame(read);
-        };
+        const ctx = gsap.context(() => {
+            const sectionKeys = Object.keys(SECTION_PALETTES);
+
+            sectionKeys.forEach((key) => {
+                const target = document.querySelector(`#${key}`) ||
+                    (key === 'capsules' ? document.querySelector('#capsule-courses') : null) ||
+                    (key === 'packages' ? document.querySelector('#skill-packages') : null) ||
+                    (key === 'manifesto' ? document.querySelector('section:has(.manifesto-word)') : null) ||
+                    (key === 'founder' ? document.querySelector('section:has(.quote)') : null) ||
+                    (key === 'cta' ? document.querySelector('section:has(.arrow-button)') : null);
+
+                if (!target) return;
+
+                const palette = SECTION_PALETTES[key];
+
+                ScrollTrigger.create({
+                    trigger: target,
+                    start: "top 60%",
+                    end: "bottom 40%",
+                    onEnter: () => transitionToPalette(palette),
+                    onEnterBack: () => transitionToPalette(palette),
+                });
+            });
+
+            function transitionToPalette(palette) {
+                const dark = isDarkTheme();
+                const tintColor = dark ? palette.bgTintDark : palette.bgTintLight;
+
+                // Smooth morph of radial glow colors
+                gsap.to(currentColor, {
+                    aR: palette.glowA[0],
+                    aG: palette.glowA[1],
+                    aB: palette.glowA[2],
+                    bR: palette.glowB[0],
+                    bG: palette.glowB[1],
+                    bB: palette.glowB[2],
+                    duration: 1.4,
+                    ease: "power2.out",
+                    onUpdate: updateGlows,
+                    overwrite: "auto",
+                });
+
+                // Smooth tint overlay transition
+                gsap.to(tintOverlay, {
+                    backgroundColor: tintColor,
+                    duration: 1.4,
+                    ease: "power2.out",
+                    overwrite: "auto",
+                });
+            }
+
+            // Parallax drift of ambient glow spots on scroll
+            gsap.to(glowA, {
+                yPercent: 40,
+                xPercent: 12,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: document.body,
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 1.5,
+                },
+            });
+
+            gsap.to(glowB, {
+                yPercent: 35,
+                xPercent: -10,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: document.body,
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 1.8,
+                },
+            });
+        }, containerRef);
 
         const onThemeChange = () => {
-            lastProgress = -1;
-            if (reducedMotion) paint(0.2);
-            else read();
+            updateGlows();
         };
-
-        if (reducedMotion) {
-            paint(0.2);
-        } else {
-            read();
-            window.addEventListener("scroll", onScroll, { passive: true });
-            window.addEventListener("resize", onScroll, { passive: true });
-        }
-
-        const mq = window.matchMedia("(prefers-color-scheme: dark)");
-        mq.addEventListener?.("change", onThemeChange);
 
         const mo = new MutationObserver(onThemeChange);
         mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
         return () => {
-            window.removeEventListener("scroll", onScroll);
-            window.removeEventListener("resize", onScroll);
-            mq.removeEventListener?.("change", onThemeChange);
+            ctx.revert();
             mo.disconnect();
-            if (rafId) cancelAnimationFrame(rafId);
         };
     }, []);
 
     return (
-        <div className={cn("relative w-full min-h-screen", className)}>
+        <div ref={containerRef} className={cn("relative w-full min-h-screen", className)}>
             <div
                 aria-hidden="true"
                 className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
             >
-                <div ref={glowARef} className="ambient-glow ambient-glow-a" />
-                <div ref={glowBRef} className="ambient-glow ambient-glow-b" />
+                {/* Smooth section tint transition layer */}
+                <div
+                    ref={tintOverlayRef}
+                    className="absolute inset-0 transition-colors duration-1000 will-change-[background-color]"
+                    style={{ backgroundColor: "rgba(255, 245, 235, 0.45)" }}
+                />
+
+                {/* Morphing ambient glows */}
+                <div ref={glowARef} className="ambient-glow ambient-glow-a will-change-[background-image,transform]" />
+                <div ref={glowBRef} className="ambient-glow ambient-glow-b will-change-[background-image,transform]" />
+
+                {/* Hand-drawn route winding path */}
                 <WindingPathBackground />
             </div>
 

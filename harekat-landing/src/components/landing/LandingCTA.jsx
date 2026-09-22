@@ -53,6 +53,7 @@ export default function LandingCTA({ onContactClick }) {
 
     return (
         <section
+            id="cta"
             ref={sectionRef}
             className="w-full py-16 sm:py-28 flex flex-col items-center gap-20 px-4"
         >
