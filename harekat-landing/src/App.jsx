@@ -7,19 +7,28 @@ function ScrollToTop() {
     const { pathname, search } = useLocation();
 
     useEffect(() => {
-        window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
+        const scrollUp = () => {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            if (window.__lenis) {
+                window.__lenis.scrollTo(0, { immediate: true });
+            }
+        };
 
-        if (window.__lenis) {
-            window.__lenis.scrollTo(0, { immediate: true });
-        }
-
-        const t = setTimeout(() => {
+        // Scroll immediately
+        scrollUp();
+        // Retry after Lenis may have (re)initialized
+        const t1 = setTimeout(scrollUp, 50);
+        const t2 = setTimeout(() => {
+            scrollUp();
             ScrollTrigger.refresh();
-        }, 60);
+        }, 150);
 
-        return () => clearTimeout(t);
+        return () => {
+            clearTimeout(t1);
+            clearTimeout(t2);
+        };
     }, [pathname, search]);
 
     return null;
