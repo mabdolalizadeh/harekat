@@ -16,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger, Draggable);
 const values = [
     {
         icon: Compass,
-        number: '۰۱',
+        number: '۱',
         tag: 'روش‌شناسی عملی',
         title: 'عملگرایی و تجربه واقعی',
         quote: '«یادگیری در میدان عمل و با دست‌های درگیر در کار شکل می‌گیرد، نه روی کاغذ.»',
@@ -34,7 +34,7 @@ const values = [
     },
     {
         icon: Lightbulb,
-        number: '۰۲',
+        number: '۲',
         tag: 'فرهنگ گفت‌وگو',
         title: 'تفکر انتقادی و نقدپذیری',
         quote: '«نقد شفاف و سازنده، میانبر طلایی ارتقای استانداردهای هنری است.»',
@@ -52,7 +52,7 @@ const values = [
     },
     {
         icon: Layers,
-        number: '۰۳',
+        number: '۳',
         tag: 'تلفیق رسانه‌ای',
         title: 'نگاه میان‌رشته‌ای و چندبعدی',
         quote: '«مرزهای سنتی نرم‌افزارها را بشکنید؛ یک ایده خلاق در هر قالبی نفس می‌کشد.»',
@@ -70,7 +70,7 @@ const values = [
     },
     {
         icon: Users,
-        number: '۰۴',
+        number: '۴',
         tag: 'هویت و امضا',
         title: 'رشد فردی و هویت مستقل',
         quote: '«آموزش کارآمد کپی‌کار تولید نمی‌کند، بلکه هویت و صدای اختصاصی شما را نمایان می‌سازد.»',
@@ -366,7 +366,7 @@ export default function AboutUs() {
 
                                         {/* Giant watermark number in corner */}
                                         <span
-                                            className={`pointer-events-none absolute top-4 left-6 text-7xl sm:text-8xl font-black font-title select-none tracking-tighter ${item.theme.watermark} transition-all duration-500 group-hover:scale-105`}
+                                            className={`pointer-events-none absolute top-3 left-25 text-7xl sm:text-8xl font-black font-title select-none tracking-tighter ${item.theme.watermark} transition-all duration-500 group-hover:scale-105`}
                                         >
                                             {item.number}
                                         </span>
@@ -399,17 +399,6 @@ export default function AboutUs() {
                                             </p>
                                         </div>
 
-                                        {/* Footer */}
-                                        <div className="relative z-10 pt-5 mt-4 border-t border-border/50 flex items-center justify-between text-xs font-mono">
-                                            <div className="flex items-center gap-2 text-muted">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-primary/70" />
-                                                <span>اصل {item.number} از ۰۴</span>
-                                            </div>
-                                            <div className={`flex items-center gap-1.5 font-bold text-foreground/80 ${item.theme.btnHover} transition-colors`}>
-                                                <span className="text-[11px] font-sans">رویکرد حرکت</span>
-                                                <ArrowLeft size={14} className="transition-transform duration-300 group-hover:-translate-x-1" />
-                                            </div>
-                                        </div>
                                     </div>
                                 ))}
                             </div>
