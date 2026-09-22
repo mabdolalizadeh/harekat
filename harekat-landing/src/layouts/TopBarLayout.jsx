@@ -1,5 +1,4 @@
 import Logo from "../components/ui/Logo.jsx";
-import { H3 } from "../components/ui/Headings.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { SecondaryButton } from "../components/ui/Buttons.jsx";
@@ -152,9 +151,9 @@ export default function TopBarLayout() {
                 className={cn(
                     'mx-auto max-w-[var(--container-8xl)] px-6 sm:px-8 py-1.5',
                     'transition-all duration-300 rounded-full',
-                    'bg-background/30 backdrop-blur-xl border border-border/30',
+                    'backdrop-blur-xl',
                     scrolled
-                        ? 'shadow-lg shadow-black/10 border-border/50'
+                        ? 'shadow-lg shadow-black/10 border-border/50 bg-background/15'
                         : 'shadow-sm shadow-black/5'
                 )}
             >
@@ -187,12 +186,12 @@ export default function TopBarLayout() {
                                     delay: 0.02 * index,
                                 }}
                             >
-                                <H3
+                                <span
                                     onClick={() => handleNav(item)}
-                                    className="cursor-pointer text-muted hover:text-foreground transition-all duration-200 ease-in-out text-sm font-medium"
+                                    className="cursor-pointer text-muted hover:text-foreground transition-all duration-200 ease-in-out text-xs font-medium select-none"
                                 >
                                     {item.text}
-                                </H3>
+                                </span>
                             </motion.div>
                         ))}
                     </div>
@@ -320,9 +319,12 @@ export default function TopBarLayout() {
                                 </div>
                             </>
                         ) : (
-                            <SecondaryButton onClick={() => {
-                                window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
-                            }}>
+                            <SecondaryButton
+                                className="text-xs px-3.5 py-1 font-medium"
+                                onClick={() => {
+                                    window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
+                                }}
+                            >
                                 ورود
                             </SecondaryButton>
                         )}
@@ -383,13 +385,13 @@ export default function TopBarLayout() {
                         )}
 
                         {topBarLinks.map((item, index) => (
-                            <H3
+                            <span
                                 key={index}
                                 onClick={() => handleNav(item)}
-                                className="cursor-pointer text-muted hover:text-foreground transition-all duration-200 text-base py-2"
+                                className="cursor-pointer text-muted hover:text-foreground transition-all duration-200 text-xs font-medium py-2 select-none"
                             >
                                 {item.text}
-                            </H3>
+                            </span>
                         ))}
 
                         <div className="pt-4 border-t border-[var(--border)] flex flex-col gap-3">
