@@ -37,10 +37,20 @@ const values = [
     },
 ];
 
+const statsData = [
+    { target: 200, prefix: '+', label: 'دانش‌آموخته خلاق' },
+    { target: 30, prefix: '+', label: 'دوره و کارگاه فعال' },
+    { target: 15, prefix: '+', label: 'استاد و منتور تخصصی' },
+    { target: 98, prefix: '٪', label: 'رضایت هنرجویان' },
+];
+
 export default function AboutUs() {
     const navigate = useNavigate();
     const pageRef = useRef(null);
     const storyRef = useRef(null);
+    const valuesSectionRef = useRef(null);
+    const valuesTrackRef = useRef(null);
+    const horizontalProgressRef = useRef(null);
     const [sectionIds, setSectionIds] = useState({ capsule: 'capsule-courses', skill: 'skill-packages', subscriptions: 'subscriptions' });
     const [contentMap, setContentMap] = useState({});
 
@@ -106,42 +116,82 @@ export default function AboutUs() {
                 );
             }
 
-            // Values cards reveal
-            gsap.fromTo(
-                el.querySelectorAll('.about-value-card'),
-                { opacity: 0, y: 45, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.7,
-                    stagger: 0.1,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: el.querySelector('.about-values-grid'),
-                        start: 'top 85%',
-                    },
-                }
-            );
+            // Horizontal scroll for values section on desktop & tablet
+            const valuesSection = valuesSectionRef.current;
+            const valuesTrack = valuesTrackRef.current;
+            const progressLine = horizontalProgressRef.current;
 
-            // Stats counter animation
-            const statNumbers = el.querySelectorAll('.about-stat-num');
-            gsap.fromTo(
-                statNumbers,
-                { opacity: 0, scale: 0.8, y: 20 },
-                {
-                    opacity: 1,
-                    scale: 1,
-                    y: 0,
-                    duration: 0.7,
-                    stagger: 0.08,
-                    ease: 'back.out(1.5)',
+            if (valuesSection && valuesTrack) {
+                const mm = gsap.matchMedia();
+
+                mm.add('(min-width: 768px)', () => {
+                    const getDistance = () => {
+                        return Math.max(0, valuesTrack.scrollWidth - valuesSection.clientWidth + 96);
+                    };
+
+                    gsap.to(valuesTrack, {
+                        x: () => getDistance(),
+                        ease: 'none',
+                        scrollTrigger: {
+                            trigger: valuesSection,
+                            pin: true,
+                            start: 'top 12%',
+                            end: () => `+=${getDistance() * 1.2}`,
+                            scrub: 0.8,
+                            anticipatePin: 1,
+                            invalidateOnRefresh: true,
+                            onUpdate: (self) => {
+                                if (progressLine) {
+                                    progressLine.style.width = `${Math.round(self.progress * 100)}%`;
+                                }
+                            },
+                        },
+                    });
+                });
+
+                mm.add('(max-width: 767px)', () => {
+                    gsap.fromTo(
+                        valuesTrack.querySelectorAll('.about-value-card'),
+                        { opacity: 0.3, y: 30 },
+                        {
+                            opacity: 1,
+                            y: 0,
+                            duration: 0.6,
+                            stagger: 0.15,
+                            scrollTrigger: {
+                                trigger: valuesSection,
+                                start: 'top 80%',
+                            },
+                        }
+                    );
+                });
+            }
+
+            // Stats counter animation with Persian numbers
+            const toPersianDigits = (num) => String(Math.round(num)).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+            const statBoxes = el.querySelectorAll('.about-stat-box');
+            statBoxes.forEach((box, i) => {
+                const data = statsData[i];
+                if (!data) return;
+                const valueEl = box.querySelector('.stat-count-value');
+                if (!valueEl) return;
+
+                const counter = { val: 0 };
+                gsap.to(counter, {
+                    val: data.target,
+                    duration: 1.8,
+                    ease: 'power2.out',
                     scrollTrigger: {
-                        trigger: el.querySelector('.about-stats-grid'),
-                        start: 'top 85%',
+                        trigger: box,
+                        start: 'top 88%',
+                        once: true,
                     },
-                }
-            );
+                    onUpdate: () => {
+                        valueEl.textContent = data.prefix + toPersianDigits(counter.val);
+                    },
+                });
+            });
         }, pageRef);
 
         return () => ctx.revert();
@@ -189,54 +239,78 @@ export default function AboutUs() {
                         </p>
                     </div>
 
-                    {/* Values Grid */}
-                    <div className="w-full flex flex-col items-center gap-8">
-                        <div className="flex flex-col items-center gap-3 text-center">
+                    {/* Horizontal Scroll Section: What makes us different */}
+                    <div
+                        ref={valuesSectionRef}
+                        className="w-full relative py-6 flex flex-col items-center gap-8 overflow-hidden"
+                    >
+                        <div className="flex flex-col items-center gap-3 text-center px-4">
                             <SectionTag>ستون‌های اصلی</SectionTag>
                             <h2 className="text-[clamp(2.2rem,4.5vw,3.5rem)] font-extrabold text-foreground leading-tight">
                                 چه چیزی ما رو متفاوت می‌کنه
                             </h2>
+                            {/* Subtle Horizontal progress indicator */}
+                            <div className="hidden md:flex items-center gap-2 mt-2">
+                                <span className="text-[11px] font-mono text-muted select-none">پیمایش افقی</span>
+                                <div className="w-28 h-1 rounded-full bg-border/60 overflow-hidden">
+                                    <div
+                                        ref={horizontalProgressRef}
+                                        className="h-full bg-primary rounded-full transition-[width] duration-100 will-change-[width]"
+                                        style={{ width: '0%' }}
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="about-values-grid grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-                            {values.map((item, index) => (
-                                <div
-                                    key={index}
-                                    className="about-value-card group bg-card/80 backdrop-blur-xl border border-border/80 hover:border-primary/50 rounded-3xl p-8 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 will-change-transform flex flex-col gap-4"
-                                >
-                                    <div className="flex items-center justify-between pb-3 border-b border-border/50">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
-                                            <item.icon size={20} />
+                        {/* The Horizontal Track Wrapper */}
+                        <div className="w-full overflow-hidden relative">
+                            <div
+                                ref={valuesTrackRef}
+                                className="flex flex-row gap-6 sm:gap-8 items-stretch will-change-transform py-4 px-4 sm:px-8 w-max"
+                            >
+                                {values.map((item, index) => (
+                                    <div
+                                        key={index}
+                                        className="about-value-card group bg-card/85 backdrop-blur-xl border border-border/80 hover:border-primary/50 rounded-3xl p-8 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 w-[320px] sm:w-[400px] shrink-0 flex flex-col justify-between gap-6"
+                                    >
+                                        <div className="flex items-center justify-between pb-4 border-b border-border/50">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                                                <item.icon size={22} />
+                                            </div>
+                                            <span className="text-3xl font-black font-mono text-primary select-none">
+                                                {item.number}
+                                            </span>
                                         </div>
-                                        <span className="text-3xl font-black font-mono text-primary/75 select-none">
-                                            {item.number}
-                                        </span>
+
+                                        <div className="flex flex-col gap-3">
+                                            <h3 className="text-foreground text-xl font-bold group-hover:text-primary transition-colors">
+                                                {item.title}
+                                            </h3>
+                                            <p className="text-muted text-sm sm:text-base leading-relaxed font-normal">
+                                                {item.desc}
+                                            </p>
+                                        </div>
+
+                                        <div className="pt-3 border-t border-border/40 flex items-center justify-between text-xs text-muted/70 font-mono">
+                                            <span>اصل ۰{index + 1} از ۰۴</span>
+                                            <span className="text-primary font-bold">حرکت</span>
+                                        </div>
                                     </div>
-                                    <h3 className="text-foreground text-xl font-bold group-hover:text-primary transition-colors">
-                                        {item.title}
-                                    </h3>
-                                    <p className="text-muted text-sm sm:text-base leading-relaxed font-normal">
-                                        {item.desc}
-                                    </p>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Stats Grid */}
-                    <div className="about-stats-grid grid grid-cols-2 sm:grid-cols-4 gap-6 w-full max-w-4xl py-6">
-                        {[
-                            { number: '+۲۰۰', label: 'دانش‌آموخته خلاق' },
-                            { number: '+۳۰', label: 'دوره و کارگاه فعال' },
-                            { number: '+۱۵', label: 'استاد و منتور تخصصی' },
-                            { number: '%۹۸', label: 'رضایت هنرجویان' },
-                        ].map((stat, i) => (
+                    {/* Stats Grid - Enhanced & Efficient with GSAP Count-up */}
+                    <div className="about-stats-grid grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 w-full max-w-4xl py-6">
+                        {statsData.map((stat, i) => (
                             <div
                                 key={i}
-                                className="about-stat-num bg-card/60 backdrop-blur-xl border border-border/70 rounded-3xl p-6 text-center flex flex-col gap-2 shadow-sm"
+                                className="about-stat-box group bg-card/75 backdrop-blur-xl border border-border/80 hover:border-primary/50 rounded-3xl p-6 text-center flex flex-col items-center gap-2.5 shadow-md shadow-black/5 hover:-translate-y-1 transition-all duration-300"
                             >
-                                <span className="text-3xl sm:text-4xl font-black text-foreground">
-                                    {stat.number}
+                                <div className="w-6 h-1 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
+                                <span className="stat-count-value text-3xl sm:text-4xl font-black font-mono text-foreground tracking-tight select-none min-h-[1.2em]">
+                                    ۰
                                 </span>
                                 <span className="text-xs sm:text-sm text-muted font-medium">
                                     {stat.label}

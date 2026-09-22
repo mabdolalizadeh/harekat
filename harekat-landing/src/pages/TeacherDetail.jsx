@@ -78,7 +78,7 @@ export default function TeacherDetail() {
                 {/* Two-column layout: Right sticky profile, Left scrolling resume and courses */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 w-full items-start">
                     {/* Right Column: Sticky Teacher Profile Card */}
-                    <div className="md:col-span-4 md:sticky md:top-28 self-start flex flex-col gap-4">
+                    <div className="md:col-span-4 md:sticky md:top-32 self-start flex flex-col gap-4 z-10">
                         <div className="w-full rounded-3xl border border-border/80 bg-card/80 backdrop-blur-xl p-6 sm:p-7 flex flex-col items-center text-center gap-5 shadow-xl shadow-black/15">
                             <div className="w-36 h-36 rounded-3xl overflow-hidden bg-surface-muted border border-border/70 shrink-0 flex items-center justify-center shadow-inner">
                                 {teacher.avatar ? (

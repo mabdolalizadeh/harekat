@@ -6,6 +6,63 @@ import SmoothScrollProvider from "../components/landing/SmoothScrollProvider.jsx
 import SectionTag from "../components/ui/SectionTag.jsx";
 import { PrimaryButton } from "../components/ui/Buttons.jsx";
 import { Mail, MapPin, Phone, Clock, Send, Sparkles, CheckCircle2, MessageSquare } from "lucide-react";
+import { TextField } from "@mui/material";
+
+const muiInputSx = {
+    width: '100%',
+    direction: 'rtl',
+    '& .MuiOutlinedInput-root': {
+        borderRadius: '1.25rem',
+        backgroundColor: 'var(--color-surface-muted, rgba(255, 255, 255, 0.04))',
+        color: 'var(--foreground)',
+        fontFamily: 'inherit',
+        fontSize: '0.9rem',
+        transition: 'all 0.2s ease',
+        '& fieldset': {
+            borderColor: 'var(--border)',
+            borderWidth: '1.5px',
+        },
+        '&:hover fieldset': {
+            borderColor: 'var(--primary)',
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: 'var(--primary)',
+            borderWidth: '2px',
+        },
+        '& input': {
+            color: 'var(--foreground)',
+            fontFamily: 'inherit',
+            padding: '14px 16px',
+            textAlign: 'right',
+            '&::placeholder': {
+                color: 'var(--muted)',
+                opacity: 0.9,
+            },
+        },
+        '& textarea': {
+            color: 'var(--foreground)',
+            fontFamily: 'inherit',
+            padding: '6px 4px',
+            lineHeight: 1.7,
+            textAlign: 'right',
+            '&::placeholder': {
+                color: 'var(--muted)',
+                opacity: 0.9,
+            },
+        },
+    },
+    '& .MuiInputLabel-root': {
+        color: 'var(--muted)',
+        fontFamily: 'inherit',
+        fontSize: '0.875rem',
+        right: '1.75rem',
+        left: 'auto',
+        transformOrigin: 'top right',
+        '&.Mui-focused': {
+            color: 'var(--primary)',
+        },
+    },
+};
 
 export default function ContactUs() {
     const pageRef = useRef(null);
@@ -165,61 +222,73 @@ export default function ContactUs() {
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-xs font-semibold text-foreground">نام و نام‌خانوادگی</label>
-                                            <input
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-xs font-semibold text-foreground/90">نام و نام‌خانوادگی</label>
+                                            <TextField
                                                 required
+                                                fullWidth
                                                 name="name"
                                                 value={formState.name}
                                                 onChange={handleChange}
-                                                placeholder="نام خود را وارد کنید"
-                                                className="bg-surface-muted/60 border border-border/80 rounded-2xl px-4 py-3 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:border-primary/60 transition-colors"
+                                                placeholder="نام و نام‌خانوادگی خود را وارد کنید"
+                                                variant="outlined"
+                                                sx={muiInputSx}
                                             />
                                         </div>
 
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-xs font-semibold text-foreground">آدرس ایمیل</label>
-                                            <input
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-xs font-semibold text-foreground/90">آدرس ایمیل</label>
+                                            <TextField
                                                 required
+                                                fullWidth
                                                 type="email"
                                                 name="email"
                                                 value={formState.email}
                                                 onChange={handleChange}
                                                 placeholder="youremail@example.com"
-                                                className="bg-surface-muted/60 border border-border/80 rounded-2xl px-4 py-3 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:border-primary/60 transition-colors"
+                                                variant="outlined"
+                                                sx={muiInputSx}
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-semibold text-foreground">موضوع پیام</label>
-                                        <input
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-xs font-semibold text-foreground/90">موضوع پیام</label>
+                                        <TextField
                                             required
+                                            fullWidth
                                             name="subject"
                                             value={formState.subject}
                                             onChange={handleChange}
                                             placeholder="موضوع مشاوره یا پرسش شما..."
-                                            className="bg-surface-muted/60 border border-border/80 rounded-2xl px-4 py-3 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:border-primary/60 transition-colors"
+                                            variant="outlined"
+                                            sx={muiInputSx}
                                         />
                                     </div>
 
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-semibold text-foreground">متن پیام</label>
-                                        <textarea
+                                    <div className="flex flex-col gap-1.5">
+                                        <label className="text-xs font-semibold text-foreground/90">متن پیام</label>
+                                        <TextField
                                             required
-                                            name="message"
+                                            fullWidth
+                                            multiline
                                             rows={5}
+                                            name="message"
                                             value={formState.message}
                                             onChange={handleChange}
                                             placeholder="پیام یا سوال خود درباره دوره‌ها را با جزییات بنویسید..."
-                                            className="bg-surface-muted/60 border border-border/80 rounded-2xl px-4 py-3 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:border-primary/60 transition-colors resize-none"
+                                            variant="outlined"
+                                            sx={muiInputSx}
                                         />
                                     </div>
 
                                     <div className="pt-2">
-                                        <PrimaryButton type="submit" className="w-full sm:w-auto px-8 py-3.5 text-base font-bold shadow-lg shadow-primary/25">
-                                            <Send size={18} />
-                                            ارسال پیام به حرکت
+                                        <PrimaryButton
+                                            type="submit"
+                                            className="w-full sm:w-auto px-8 py-3.5 text-base font-bold shadow-lg shadow-primary/25 flex flex-row items-center justify-center gap-3 cursor-pointer"
+                                        >
+                                            <span className="leading-none">ارسال پیام به حرکت</span>
+                                            <Send size={18} className="shrink-0" />
                                         </PrimaryButton>
                                     </div>
                                 </form>

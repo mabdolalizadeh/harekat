@@ -122,7 +122,7 @@ export default function ProductDetail({ type }) {
                 {/* Main Side-by-Side: Right picture constant (sticky), Left details scrolling */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 w-full items-start relative">
                     {/* Right Column: Sticky Picture */}
-                    <div className="md:col-span-5 md:sticky md:top-28 self-start flex flex-col gap-4">
+                    <div className="md:col-span-5 md:sticky md:top-32 self-start flex flex-col gap-4 z-10">
                         <div className="overflow-hidden rounded-3xl border border-border/80 bg-card/80 backdrop-blur-xl relative shadow-xl shadow-black/15 group">
                             <img
                                 src={course.image}

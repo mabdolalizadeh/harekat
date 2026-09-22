@@ -1,6 +1,29 @@
 import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CursorifyProvider } from 'react-cursorify';
+
+function ScrollToTop() {
+    const { pathname, search } = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        if (window.__lenis) {
+            window.__lenis.scrollTo(0, { immediate: true });
+        }
+
+        const t = setTimeout(() => {
+            ScrollTrigger.refresh();
+        }, 60);
+
+        return () => clearTimeout(t);
+    }, [pathname, search]);
+
+    return null;
+}
 import Landing from "./pages/Landing.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
@@ -31,6 +54,7 @@ function ExternalLoginRedirect() {
 export default function App() {
     return (
         <CursorifyProvider>
+            <ScrollToTop />
             <CartDrawer />
             <Routes>
             <Route path='/' element={<Landing/>}/>
