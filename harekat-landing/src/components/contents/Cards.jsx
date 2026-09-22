@@ -3,7 +3,7 @@ import Img from "../ui/Img.jsx";
 import {H2, H3} from "../ui/Headings.jsx";
 import {motion} from "motion/react";
 import {Clock, User, BookOpen, Plus} from "lucide-react";
-import {useState} from "react";
+import {useState, useRef} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "../../contexts/CartContext.jsx";
@@ -105,15 +105,60 @@ export function CourseCard({
         e.dataTransfer.effectAllowed = 'copy';
     };
 
+    const [magneticOffset, setMagneticOffset] = useState({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
+    const cardRef = useRef(null);
+
+    const handleMouseMove = (e) => {
+        if (!cardRef.current || window.matchMedia("(pointer: coarse)").matches) return;
+        const rect = cardRef.current.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const deltaX = e.clientX - centerX;
+        const deltaY = e.clientY - centerY;
+
+        // Smooth magnetic pull strength
+        const pullFactor = 0.14;
+        const tiltFactor = 0.035;
+
+        setMagneticOffset({
+            x: deltaX * pullFactor,
+            y: deltaY * pullFactor,
+            rotateX: -deltaY * tiltFactor,
+            rotateY: deltaX * tiltFactor,
+        });
+    };
+
+    const handleMouseLeave = () => {
+        setMagneticOffset({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
+    };
+
     return (
         <motion.div
+            ref={cardRef}
             draggable={!isSubscription}
             onDragStart={handleDragStart}
-            whileHover={{y: -4}}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            animate={{
+                x: magneticOffset.x,
+                y: magneticOffset.y,
+                rotateX: magneticOffset.rotateX,
+                rotateY: magneticOffset.rotateY,
+            }}
+            transition={{
+                type: "spring",
+                stiffness: 220,
+                damping: 18,
+                mass: 0.6,
+            }}
+            style={{
+                transformStyle: "preserve-3d",
+                perspective: 800,
+            }}
             onClick={() => id && !isSubscription && navigate(getDetailPath())}
             className={cn(
-                'bg-card border border-border/10 flex flex-col rounded-xl overflow-hidden',
-                'group transition-all duration-300 hover:border-border/20 hover:shadow-lg hover:shadow-black/20',
+                'bg-card border border-border/10 flex flex-col rounded-xl overflow-hidden will-change-transform',
+                'group transition-[border-color,box-shadow] duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10',
                 !isSubscription && 'cursor-pointer active:cursor-grabbing',
                 className
             )}
