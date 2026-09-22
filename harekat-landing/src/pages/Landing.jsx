@@ -18,6 +18,7 @@ import LandingPackages from "../components/landing/LandingPackages.jsx";
 import LandingSubscriptions from "../components/landing/LandingSubscriptions.jsx";
 import LandingMentors from "../components/landing/LandingMentors.jsx";
 import LandingAudience from "../components/landing/LandingAudience.jsx";
+import LandingJourney from "../components/landing/LandingJourney.jsx";
 import LandingTimeline from "../components/landing/LandingTimeline.jsx";
 import LandingTestimonials from "../components/landing/LandingTestimonials.jsx";
 import LandingFAQ from "../components/landing/LandingFAQ.jsx";
@@ -281,6 +282,9 @@ export default function Landing() {
 
                     {/* ============ WHO IT'S FOR ============ */}
                     <LandingAudience />
+
+                    {/* ============ THE CREATIVE JOURNEY ============ */}
+                    <LandingJourney />
 
                     {/* ============ HOW IT WORKS ============ */}
                     <LandingTimeline steps={steps} />

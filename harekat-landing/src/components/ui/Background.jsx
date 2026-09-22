@@ -87,6 +87,15 @@ const SECTIONS_CONFIG = [
         accentDark: '#fb7185',
     },
     {
+        key: 'journey',
+        selector: '#journey',
+        fallbackSelectors: ['[data-section-theme="journey"]'],
+        bgLight: '#f3f4f6',   // Crisp Modern Paper
+        bgDark: '#0b1329',    // Deep Midnight Indigo Slate
+        accentLight: '#f47c20',
+        accentDark: '#ffa33f',
+    },
+    {
         key: 'how-it-works',
         selector: '#how-it-works',
         fallbackSelectors: ['[data-section-theme="how-it-works"]'],
