@@ -189,7 +189,7 @@ export default function LandingHero({
                 {/* Floating Category Badge */}
                 <div
                     ref={badgeRef}
-                    className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs sm:text-sm font-semibold text-primary backdrop-blur-md shadow-sm mb-6"
+                    className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs sm:text-sm font-light text-primary backdrop-blur-md shadow-sm mb-6"
                 >
                     <Sparkles size={14} className="text-primary animate-pulse" />
                     <span>مدرسه هنر و مهارت</span>
