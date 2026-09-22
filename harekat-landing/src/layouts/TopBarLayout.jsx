@@ -151,10 +151,11 @@ export default function TopBarLayout() {
             <div
                 className={cn(
                     'mx-auto max-w-[var(--container-8xl)] px-6 sm:px-8 py-1.5',
-                    'transition-all duration-300',
+                    'transition-all duration-300 rounded-full',
+                    'bg-background/30 backdrop-blur-xl border border-border/30',
                     scrolled
-                        ? 'bg-background/85 backdrop-blur-xl shadow-sm shadow-black/10 border-b border-[var(--border)]/50 rounded-full'
-                        : 'bg-transparent'
+                        ? 'shadow-lg shadow-black/10 border-border/50'
+                        : 'shadow-sm shadow-black/5'
                 )}
             >
                 <div className="flex items-center justify-between">
