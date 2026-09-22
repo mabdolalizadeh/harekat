@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "../../utils/cn.js";
-import WindingPathBackground from "./WindingPathBackground.jsx";
 
 /* Section-specific solid color themes (Light mode & Dark mode) */
 const SECTIONS_CONFIG = [
@@ -249,10 +248,7 @@ export default function Background({ children, className }) {
                 style={{
                     backgroundColor: isDarkTheme() ? SECTIONS_CONFIG[0].bgDark : SECTIONS_CONFIG[0].bgLight
                 }}
-            >
-                {/* Hand-drawn route winding path on top of solid background */}
-                <WindingPathBackground />
-            </div>
+            />
 
             <div className="relative z-10 flex flex-col items-center justify-center w-full min-h-screen">
                 {children}
