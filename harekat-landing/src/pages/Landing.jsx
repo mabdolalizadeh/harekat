@@ -19,7 +19,6 @@ import LandingSubscriptions from "../components/landing/LandingSubscriptions.jsx
 import LandingMentors from "../components/landing/LandingMentors.jsx";
 import LandingAudience from "../components/landing/LandingAudience.jsx";
 import LandingTimeline from "../components/landing/LandingTimeline.jsx";
-import SectionMotionPath from "../components/ui/SectionMotionPath.jsx";
 import LandingTestimonials from "../components/landing/LandingTestimonials.jsx";
 import LandingFAQ from "../components/landing/LandingFAQ.jsx";
 import LandingCTA from "../components/landing/LandingCTA.jsx";
@@ -238,17 +237,11 @@ export default function Landing() {
                         onCtaClick={handleCtaClick}
                     />
 
-                    <SectionMotionPath variant="right-to-center" />
-
                     {/* ============ MANIFESTO ============ */}
                     <LandingManifesto />
 
-                    <SectionMotionPath variant="left-to-center" />
-
                     {/* ============ FOUNDER CARD ============ */}
                     <LandingFounderCard />
-
-                    <SectionMotionPath variant="right-to-center" />
 
                     {/* ============ COURSES / PROGRAMS ============ */}
                     <LandingCourses
@@ -258,16 +251,12 @@ export default function Landing() {
                         isLoading={isLoading}
                     />
 
-                    <SectionMotionPath variant="left-to-center" />
-
                     {/* ============ CAPSULE COURSES ============ */}
                     <LandingCapsules
                         id={sectionIds.capsule}
                         capsuleCourses={capsuleCourses}
                         isLoading={isLoading}
                     />
-
-                    <SectionMotionPath variant="right-to-center" />
 
                     {/* ============ SKILL PACKAGES ============ */}
                     <LandingPackages
@@ -276,16 +265,12 @@ export default function Landing() {
                         isLoading={isLoading}
                     />
 
-                    <SectionMotionPath variant="left-to-center" />
-
                     {/* ============ SUBSCRIPTIONS ============ */}
                     <LandingSubscriptions
                         id={sectionIds.subscriptions}
                         apiSubscriptions={apiSubscriptions}
                         isLoading={isLoading}
                     />
-
-                    <SectionMotionPath variant="right-to-center" />
 
                     {/* ============ MENTORS ============ */}
                     <LandingMentors
@@ -294,27 +279,17 @@ export default function Landing() {
                         onJoinClick={() => navigate('/contact-us')}
                     />
 
-                    <SectionMotionPath variant="left-to-center" />
-
                     {/* ============ WHO IT'S FOR ============ */}
                     <LandingAudience />
-
-                    <SectionMotionPath variant="right-to-center" />
 
                     {/* ============ HOW IT WORKS ============ */}
                     <LandingTimeline steps={steps} />
 
-                    <SectionMotionPath variant="left-to-center" />
-
                     {/* ============ TESTIMONIALS ============ */}
                     <LandingTestimonials testimonials={testimonials} />
 
-                    <SectionMotionPath variant="right-to-center" />
-
                     {/* ============ FAQ ============ */}
                     <LandingFAQ faqItems={faqItems} />
-
-                    <SectionMotionPath variant="left-to-center" />
 
                     {/* ============ CTA & CONTACT ============ */}
                     <LandingCTA onContactClick={() => navigate('/contact-us')} />
