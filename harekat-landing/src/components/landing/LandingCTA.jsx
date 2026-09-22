@@ -59,7 +59,7 @@ export default function LandingCTA({ onContactClick }) {
             {/* Primary Action CTA Card */}
             <div
                 ref={ctaCardRef}
-                className="relative w-full max-w-4xl bg-card border border-border/80 dark:border-white/10 hover:border-primary/40 rounded-3xl p-8 sm:p-14 flex flex-col items-center gap-6 text-center shadow-2xl shadow-black/20 overflow-hidden"
+                className="relative w-full max-w-4xl bg-card/50 backdrop-blur-xl border border-border/80 dark:border-white/10 hover:border-primary/40 rounded-3xl p-8 sm:p-14 flex flex-col items-center gap-6 text-center shadow-2xl shadow-black/20 overflow-hidden"
             >
                 {/* Ambient glow in background */}
                 <div
@@ -94,12 +94,12 @@ export default function LandingCTA({ onContactClick }) {
                 <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 mt-2 items-center justify-center">
                     <a
                         href="mailto:info@schoolharekat.ir"
-                        className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card border border-border/80 text-foreground/80 hover:text-foreground transition-all duration-200 shadow-sm"
+                        className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card/50 backdrop-blur-md border border-border/80 text-foreground/80 hover:text-foreground transition-all duration-200 shadow-sm"
                     >
                         <Mail size={18} className="text-primary" />
                         <span className="text-sm font-medium">info@schoolharekat.ir</span>
                     </a>
-                    <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card border border-border/80 text-text-muted shadow-sm">
+                    <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-card/50 backdrop-blur-md border border-border/80 text-text-muted shadow-sm">
                         <MapPin size={18} className="text-primary" />
                         <span className="text-sm font-medium">تهران، ایران</span>
                     </div>

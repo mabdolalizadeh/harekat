@@ -188,7 +188,7 @@ export default function TopBarLayout() {
                             >
                                 <span
                                     onClick={() => handleNav(item)}
-                                    className="cursor-pointer text-muted hover:text-foreground transition-all duration-200 ease-in-out text-xs font-medium select-none"
+                                    className="cursor-pointer text-muted hover:text-foreground transition-all duration-200 ease-in-out text-[18px] font-medium select-none"
                                 >
                                     {item.text}
                                 </span>
@@ -320,7 +320,7 @@ export default function TopBarLayout() {
                             </>
                         ) : (
                             <SecondaryButton
-                                className="text-xs px-3.5 py-1 font-medium"
+                                className="text-[16px] px-4 py-1.5 font-medium"
                                 onClick={() => {
                                     window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
                                 }}
@@ -358,7 +358,7 @@ export default function TopBarLayout() {
                 </div>
             </div>
 
-            {/* Mobile Menu Overlay */}
+            {/* Mobile Navigation Drawer */}
             <AnimatePresence>
                 {mobileOpen && (
                     <motion.div
@@ -366,8 +366,9 @@ export default function TopBarLayout() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="md:hidden absolute top-full left-0 w-full bg-background/95 backdrop-blur-xl border-b border-[var(--border)] px-6 py-6 flex flex-col gap-4 z-40 shadow-xl"
+                        className="md:hidden absolute top-full left-0 w-full bg-background/95 backdrop-blur-xl border-b border-[var(--border)] px-6 py-6 flex flex-col gap-4 z-40"
                     >
+                        {/* If logged in on mobile, show user summary */}
                         {isLoggedIn && (
                             <div className="flex items-center gap-3 p-3 rounded-2xl bg-surface-muted border border-[var(--border)]">
                                 <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary/15 text-primary shrink-0">
@@ -388,7 +389,7 @@ export default function TopBarLayout() {
                             <span
                                 key={index}
                                 onClick={() => handleNav(item)}
-                                className="cursor-pointer text-muted hover:text-foreground transition-all duration-200 text-xs font-medium py-2 select-none"
+                                className="cursor-pointer text-muted hover:text-foreground transition-all duration-200 text-[18px] font-medium py-2 select-none"
                             >
                                 {item.text}
                             </span>
