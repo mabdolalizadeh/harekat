@@ -1,168 +1,233 @@
+import { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
 import MainLayout from "../layouts/MainLayout.jsx";
 import TopBarLayout from "../layouts/TopBarLayout.jsx";
-import {motion} from "motion/react";
-import Box from "../components/ui/Box.jsx";
-import {H1, H2, P} from "../components/ui/Headings.jsx";
+import SmoothScrollProvider from "../components/landing/SmoothScrollProvider.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
-import {PrimaryButton} from "../components/ui/Buttons.jsx";
-import {Mail, MapPin, Phone, Clock, Send} from "lucide-react";
-import {useState} from "react";
+import { PrimaryButton } from "../components/ui/Buttons.jsx";
+import { Mail, MapPin, Phone, Clock, Send, Sparkles, CheckCircle2, MessageSquare } from "lucide-react";
 
 export default function ContactUs() {
-    const [formState, setFormState] = useState({name: '', email: '', subject: '', message: ''});
+    const pageRef = useRef(null);
+    const [formState, setFormState] = useState({ name: '', email: '', subject: '', message: '' });
+    const [sent, setSent] = useState(false);
+
+    useEffect(() => {
+        const el = pageRef.current;
+        if (!el) return;
+
+        const ctx = gsap.context(() => {
+            gsap.fromTo(
+                el.querySelectorAll('.contact-fade-up'),
+                { opacity: 0, y: 35 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    stagger: 0.12,
+                    ease: 'power3.out',
+                }
+            );
+        }, pageRef);
+
+        return () => ctx.revert();
+    }, []);
 
     const handleChange = (e) => {
-        setFormState(prev => ({...prev, [e.target.name]: e.target.value}));
+        setFormState(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!formState.name || !formState.email || !formState.message) return;
+        setSent(true);
+        setTimeout(() => {
+            setSent(false);
+            setFormState({ name: '', email: '', subject: '', message: '' });
+        }, 4000);
     };
 
     return (
-        <MainLayout title={'تماس با ما'} sectionIds={null} contentMap={null}>
-            <TopBarLayout/>
+        <SmoothScrollProvider>
+            <MainLayout title={'تماس با ما'} sectionIds={null} contentMap={null}>
+                <TopBarLayout />
 
-            <Box className={'pt-40 pb-24 gap-6'}>
-                <SectionTag>تماس با ما</SectionTag>
-                <H1 className={'text-[clamp(2.5rem,5vw,4rem)] text-center text-foreground max-w-[700px]'}>
-                    با ما در ارتباط باش
-                </H1>
-                <P className={'text-center text-muted max-w-[540px] text-[clamp(0.95rem,1.8vw,1.15rem)]'}>
-                    خوشحالیم به سوالاتت جواب بدیم و درباره دوره‌ها، ثبت‌نام و شرایط همکاری صحبت کنیم.
-                </P>
-            </Box>
+                <div ref={pageRef} className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-32 sm:pt-40 pb-28 flex flex-col items-center gap-14">
+                    {/* Header */}
+                    <div className="contact-fade-up flex flex-col items-center gap-4 text-center max-w-2xl">
+                        <SectionTag>ارتباط مستقیم</SectionTag>
+                        <h1 className="text-[clamp(2.5rem,5.5vw,4.5rem)] font-extrabold text-foreground leading-[1.1]">
+                            با ما در ارتباط باش
+                        </h1>
+                        <p className="text-muted text-base sm:text-lg leading-relaxed font-normal">
+                            خوشحالیم درباره دوره‌ها، شرایط ثبت‌نام، همکاری یا هر سوالی که داری گپ بزنیم.
+                        </p>
+                    </div>
 
-            <Box className={'pb-24 gap-16 w-full max-w-[1000px] mx-auto'}>
-                {/*info cards*/ }
-                <div className={'grid grid-cols-1 sm:grid-cols-3 gap-5 w-full'}>
-                    {[
-                        {icon: Mail, title: 'ایمیل', value: 'info@schoolharekat.ir', href: 'mailto:info@schoolharekat.ir'},
-                        {icon: Phone, title: 'تلفن', value: '۰۲۱-۱۲۳۴۵۶۷۸', href: 'tel:+982112345678'},
-                        {icon: MapPin, title: 'آدرس', value: 'تهران، خیابان ولیعصر', href: null},
-                    ].map((item, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{opacity: 0, y: 24}}
-                            whileInView={{opacity: 1, y: 0}}
-                            viewport={{once: true}}
-                            transition={{duration: 0.5, delay: index * 0.08}}
-                            className={
-                                'bg-card border border-[var(--border)] rounded-[var(--radius-xl)] p-6 flex flex-col gap-3'
-                            }
-                        >
-                            <div className={'flex items-center gap-3'}>
-                                <div className={'w-10 h-10 rounded-full bg-surface-muted flex items-center justify-center'}>
-                                    <item.icon size={18} className={'text-muted'}/>
+                    {/* Main Grid: Info Cards on one side, Interactive Form on the other */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
+                        {/* Right: Contact channels & Working hours */}
+                        <div className="lg:col-span-5 flex flex-col gap-6 w-full">
+                            <div className="contact-fade-up bg-card/75 backdrop-blur-xl border border-border/80 rounded-3xl p-7 flex flex-col gap-6 shadow-xl shadow-black/10">
+                                <div className="flex items-center gap-3 pb-4 border-b border-border/60">
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                        <MessageSquare size={20} />
+                                    </span>
+                                    <div>
+                                        <h2 className="text-base font-bold text-foreground">راه‌های ارتباطی</h2>
+                                        <p className="text-xs text-muted">همیشه پاسخگوی پیام‌های شما هستیم</p>
+                                    </div>
                                 </div>
-                                <H2 className={'text-foreground text-sm font-semibold'}>{item.title}</H2>
+
+                                <div className="flex flex-col gap-4">
+                                    <a
+                                        href="mailto:info@schoolharekat.ir"
+                                        className="group flex items-center gap-4 p-4 rounded-2xl bg-surface-muted/60 hover:bg-surface-muted border border-border/50 transition-all duration-200"
+                                    >
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                                            <Mail size={18} />
+                                        </div>
+                                        <div className="flex flex-col text-right">
+                                            <span className="text-xs text-muted">ایمیل رسمی</span>
+                                            <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                                                info@schoolharekat.ir
+                                            </span>
+                                        </div>
+                                    </a>
+
+                                    <a
+                                        href="tel:+982112345678"
+                                        className="group flex items-center gap-4 p-4 rounded-2xl bg-surface-muted/60 hover:bg-surface-muted border border-border/50 transition-all duration-200"
+                                    >
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                                            <Phone size={18} />
+                                        </div>
+                                        <div className="flex flex-col text-right">
+                                            <span className="text-xs text-muted">شماره تماس</span>
+                                            <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors dir-ltr">
+                                                ۰۲۱ - ۱۲۳۴ ۵۶۷۸
+                                            </span>
+                                        </div>
+                                    </a>
+
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface-muted/60 border border-border/50">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                            <MapPin size={18} />
+                                        </div>
+                                        <div className="flex flex-col text-right">
+                                            <span className="text-xs text-muted">آدرس حضوری</span>
+                                            <span className="text-sm font-semibold text-foreground">
+                                                تهران، خیابان ولیعصر
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            {item.href ? (
-                                <a href={item.href} className={'text-foreground/70 text-sm hover:text-foreground transition-colors'}>
-                                    {item.value}
-                                </a>
+
+                            {/* Working Hours Card */}
+                            <div className="contact-fade-up bg-card/75 backdrop-blur-xl border border-border/80 rounded-3xl p-7 flex flex-col gap-5 shadow-xl shadow-black/10">
+                                <div className="flex items-center gap-3 pb-3 border-b border-border/60">
+                                    <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                        <Clock size={18} />
+                                    </span>
+                                    <h3 className="text-sm font-bold text-foreground">ساعات کاری و پشتیبانی</h3>
+                                </div>
+                                <div className="flex flex-col gap-2.5">
+                                    {[
+                                        { day: 'شنبه تا چهارشنبه', time: '۹ صبح تا ۶ عصر' },
+                                        { day: 'پنجشنبه‌ها', time: '۹ صبح تا ۱ ظهر' },
+                                        { day: 'جمعه و تعطیلات رسمی', time: 'تعطیل (پاسخگویی از طریق ایمیل)' },
+                                    ].map((item, i) => (
+                                        <div key={i} className="flex justify-between items-center text-xs sm:text-sm py-1 border-b border-border/30 last:border-0">
+                                            <span className="text-muted font-medium">{item.day}</span>
+                                            <span className="text-foreground font-semibold">{item.time}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Left: Interactive Form */}
+                        <div className="contact-fade-up lg:col-span-7 bg-card/85 backdrop-blur-2xl border-2 border-border/80 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/15 w-full">
+                            {sent ? (
+                                <div className="flex flex-col items-center justify-center text-center gap-4 py-16">
+                                    <CheckCircle2 size={56} className="text-success-500 animate-bounce" />
+                                    <h3 className="text-2xl font-extrabold text-foreground">پیامت با موفقیت ارسال شد!</h3>
+                                    <p className="text-muted text-sm max-w-sm">
+                                        تیم پشتیبانی مدرسه حرکت به زودی از طریق ایمیل با شما تماس خواهد گرفت.
+                                    </p>
+                                </div>
                             ) : (
-                                <span className={'text-foreground/70 text-sm'}>{item.value}</span>
+                                <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full">
+                                    <div className="flex flex-col gap-1">
+                                        <h2 className="text-2xl font-bold text-foreground">ارسال پیام مستقیم</h2>
+                                        <p className="text-xs sm:text-sm text-muted">فرم زیر را تکمیل کنید تا کارشناسان ما پاسخ دهند</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-xs font-semibold text-foreground">نام و نام‌خانوادگی</label>
+                                            <input
+                                                required
+                                                name="name"
+                                                value={formState.name}
+                                                onChange={handleChange}
+                                                placeholder="نام خود را وارد کنید"
+                                                className="bg-surface-muted/60 border border-border/80 rounded-2xl px-4 py-3 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:border-primary/60 transition-colors"
+                                            />
+                                        </div>
+
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-xs font-semibold text-foreground">آدرس ایمیل</label>
+                                            <input
+                                                required
+                                                type="email"
+                                                name="email"
+                                                value={formState.email}
+                                                onChange={handleChange}
+                                                placeholder="youremail@example.com"
+                                                className="bg-surface-muted/60 border border-border/80 rounded-2xl px-4 py-3 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:border-primary/60 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-semibold text-foreground">موضوع پیام</label>
+                                        <input
+                                            required
+                                            name="subject"
+                                            value={formState.subject}
+                                            onChange={handleChange}
+                                            placeholder="موضوع مشاوره یا پرسش شما..."
+                                            className="bg-surface-muted/60 border border-border/80 rounded-2xl px-4 py-3 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:border-primary/60 transition-colors"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-semibold text-foreground">متن پیام</label>
+                                        <textarea
+                                            required
+                                            name="message"
+                                            rows={5}
+                                            value={formState.message}
+                                            onChange={handleChange}
+                                            placeholder="پیام یا سوال خود درباره دوره‌ها را با جزییات بنویسید..."
+                                            className="bg-surface-muted/60 border border-border/80 rounded-2xl px-4 py-3 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:border-primary/60 transition-colors resize-none"
+                                        />
+                                    </div>
+
+                                    <div className="pt-2">
+                                        <PrimaryButton type="submit" className="w-full sm:w-auto px-8 py-3.5 text-base font-bold shadow-lg shadow-primary/25">
+                                            <Send size={18} />
+                                            ارسال پیام به حرکت
+                                        </PrimaryButton>
+                                    </div>
+                                </form>
                             )}
-                        </motion.div>
-                    ))}
+                        </div>
+                    </div>
                 </div>
-
-                {/*form*/ }
-                <motion.div
-                    initial={{opacity: 0, y: 24}}
-                    whileInView={{opacity: 1, y: 0}}
-                    viewport={{once: true}}
-                    transition={{duration: 0.6}}
-                    className={'w-full'}
-                >
-                    <form
-                        className={'flex flex-col gap-5 w-full'}
-                        onSubmit={(e) => e.preventDefault()}
-                    >
-                        <div className={'grid grid-cols-1 sm:grid-cols-2 gap-5'}>
-                            <div className={'flex flex-col gap-2'}>
-                                <label className={'text-muted text-sm'}>نام</label>
-                                <input
-                                    name={'name'}
-                                    value={formState.name}
-                                    onChange={handleChange}
-                                    placeholder={'نام خودت رو وارد کن'}
-                                    className={
-                                        'bg-card border border-[var(--border)] rounded-[var(--radius-md)] px-4 py-3 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors'
-                                    }
-                                />
-                            </div>
-                            <div className={'flex flex-col gap-2'}>
-                                <label className={'text-muted text-sm'}>ایمیل</label>
-                                <input
-                                    name={'email'}
-                                    type={'email'}
-                                    value={formState.email}
-                                    onChange={handleChange}
-                                    placeholder={'example@email.com'}
-                                    className={
-                                        'bg-card border border-[var(--border)] rounded-[var(--radius-md)] px-4 py-3 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors'
-                                    }
-                                />
-                            </div>
-                        </div>
-                        <div className={'flex flex-col gap-2'}>
-                            <label className={'text-muted text-sm'}>موضوع</label>
-                            <input
-                                name={'subject'}
-                                value={formState.subject}
-                                onChange={handleChange}
-                                placeholder={'چطور می‌تونیم کمکت کنیم؟'}
-                                className={
-                                    'bg-card border border-[var(--border)] rounded-[var(--radius-md)] px-4 py-3 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors'
-                                }
-                            />
-                        </div>
-                        <div className={'flex flex-col gap-2'}>
-                            <label className={'text-muted text-sm'}>پیام</label>
-                            <textarea
-                                name={'message'}
-                                rows={5}
-                                value={formState.message}
-                                onChange={handleChange}
-                                placeholder={'پیامت رو بنویس...'}
-                                className={
-                                    'bg-card border border-[var(--border)] rounded-[var(--radius-md)] px-4 py-3 text-foreground text-sm placeholder:text-muted focus:outline-none focus:border-[var(--border)]/30 transition-colors resize-none'
-                                }
-                            />
-                        </div>
-                        <div>
-                            <PrimaryButton className={'flex items-center gap-2 px-6 py-2.5'}>
-                                <Send size={16}/>
-                                ارسال پیام
-                            </PrimaryButton>
-                        </div>
-                    </form>
-                </motion.div>
-
-                {/*working hours*/ }
-                <motion.div
-                    initial={{opacity: 0, y: 24}}
-                    whileInView={{opacity: 1, y: 0}}
-                    viewport={{once: true}}
-                    transition={{duration: 0.6}}
-                    className={'bg-card border border-[var(--border)] rounded-[var(--radius-xl)] p-6 w-full'}
-                >
-                    <div className={'flex items-center gap-3 mb-4'}>
-                        <Clock size={18} className={'text-muted'}/>
-                        <H2 className={'text-foreground text-sm font-semibold'}>ساعات کاری</H2>
-                    </div>
-                    <div className={'flex flex-col gap-2'}>
-                        {[
-                            {day: 'شنبه تا چهارشنبه', time: '۹ صبح - ۶ عصر'},
-                            {day: 'پنجشنبه', time: '۹ صبح - ۱ ظهر'},
-                            {day: 'جمعه', time: 'تعطیل'},
-                        ].map((item, i) => (
-                            <div key={i} className={'flex justify-between items-center text-sm'}>
-                                <span className={'text-muted'}>{item.day}</span>
-                                <span className={'text-foreground/70'}>{item.time}</span>
-                            </div>
-                        ))}
-                    </div>
-                </motion.div>
-            </Box>
-        </MainLayout>
-    )
+            </MainLayout>
+        </SmoothScrollProvider>
+    );
 }

@@ -45,14 +45,35 @@ export default function LandingHero({
                 );
             }
 
-            if (titleLine1Ref.current && titleLine2Ref.current) {
-                tl.fromTo(
-                    [titleLine1Ref.current, titleLine2Ref.current],
-                    { opacity: 0, y: 40, skewY: 2 },
-                    { opacity: 1, y: 0, skewY: 0, duration: 0.8, stagger: 0.12 },
-                    '-=0.4'
-                );
-            }
+            // GSAP Split-Text animation for headline
+            tl.fromTo(
+                heroEl.querySelectorAll('.hero-split-word'),
+                { opacity: 0, y: 35, rotateX: -25, filter: 'blur(6px)' },
+                {
+                    opacity: 1,
+                    y: 0,
+                    rotateX: 0,
+                    filter: 'blur(0px)',
+                    duration: 0.7,
+                    stagger: 0.08,
+                    ease: 'power3.out',
+                },
+                '-=0.3'
+            );
+
+            tl.fromTo(
+                heroEl.querySelectorAll('.hero-split-highlight'),
+                { opacity: 0, y: 40, scale: 0.9, filter: 'blur(8px)' },
+                {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    filter: 'blur(0px)',
+                    duration: 0.85,
+                    ease: 'back.out(1.4)',
+                },
+                '-=0.35'
+            );
 
             if (subtitleRef.current) {
                 tl.fromTo(
@@ -175,14 +196,21 @@ export default function LandingHero({
 
                 {/* Primary Artistic Persian Headline */}
                 <h1 className="text-[clamp(2.5rem,7.5vw,6rem)] font-extrabold leading-[1.08] tracking-tight text-foreground select-none">
-                    <span ref={titleLine1Ref} className="inline-block">
-                        {heroTitle}
+                    <span className="inline-block">
+                        {(heroTitle ? heroTitle.replace(/نمی‌گیری[؛;]?/g, '').trim() : 'اینجا فقط یاد')
+                            .split(/\s+/)
+                            .filter(Boolean)
+                            .map((word, idx) => (
+                                <span
+                                    key={idx}
+                                    className="hero-split-word inline-block ml-3"
+                                >
+                                    {word}
+                                </span>
+                            ))}
                     </span>
                     <br />
-                    <span
-                        ref={titleLine2Ref}
-                        className="inline-block bg-gradient-to-l from-primary via-brand-400 to-amber-300 bg-clip-text text-transparent"
-                    >
+                    <span className="hero-split-highlight inline-block bg-gradient-to-l from-primary via-brand-400 to-amber-300 bg-clip-text text-transparent mt-1">
                         نمی‌گیری؛
                     </span>
                 </h1>

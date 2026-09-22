@@ -92,14 +92,29 @@ export function CourseCard({
             setAdding(false);
         }
     };
+
+    const handleDragStart = (e) => {
+        if (!id || isSubscription) return;
+        const dragData = JSON.stringify({
+            id,
+            title,
+            type: productType,
+            price: hasSale ? salePrice : price,
+        });
+        e.dataTransfer.setData('application/harekat-item', dragData);
+        e.dataTransfer.effectAllowed = 'copy';
+    };
+
     return (
         <motion.div
+            draggable={!isSubscription}
+            onDragStart={handleDragStart}
             whileHover={{y: -4}}
             onClick={() => id && !isSubscription && navigate(getDetailPath())}
             className={cn(
                 'bg-card border border-border/10 flex flex-col rounded-xl overflow-hidden',
                 'group transition-all duration-300 hover:border-border/20 hover:shadow-lg hover:shadow-black/20',
-                !isSubscription && 'cursor-pointer',
+                !isSubscription && 'cursor-pointer active:cursor-grabbing',
                 className
             )}
             {...props}

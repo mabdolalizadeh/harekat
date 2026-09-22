@@ -70,6 +70,8 @@ function isDarkTheme() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+import WindingPathBackground from "./WindingPathBackground.jsx";
+
 export default function Background({ children, className }) {
     const glowARef = useRef(null);
     const glowBRef = useRef(null);
@@ -155,6 +157,7 @@ export default function Background({ children, className }) {
             >
                 <div ref={glowARef} className="ambient-glow ambient-glow-a" />
                 <div ref={glowBRef} className="ambient-glow ambient-glow-b" />
+                <WindingPathBackground />
             </div>
 
             <div className="relative z-10 flex flex-col items-center justify-center w-full min-h-screen">

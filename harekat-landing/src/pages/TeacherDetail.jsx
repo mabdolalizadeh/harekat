@@ -67,60 +67,119 @@ export default function TeacherDetail() {
     return (
         <MainLayout title={fullName} sectionIds={null} contentMap={null}>
             <TopBarLayout />
-            <Box className="w-full gap-8 pb-20 pt-28 sm:pt-36 max-w-225 mx-auto">
-                <button onClick={() => navigate(-1)} className="self-start flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"><ArrowRight size={16} /> بازگشت</button>
+            <Box className="w-full gap-8 pb-24 pt-28 sm:pt-36 max-w-6xl mx-auto px-4 sm:px-6">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="self-start flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors cursor-pointer"
+                >
+                    <ArrowRight size={16} /> بازگشت
+                </button>
 
-                {/* header */}
-                <div className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8 flex flex-col items-center sm:items-start sm:flex-row gap-6">
-                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-surface-muted border border-border shrink-0 flex items-center justify-center">
-                        {teacher.avatar ? <img src={teacher.avatar} alt={fullName} className="h-full w-full object-cover" /> : <User size={56} className="opacity-30 text-muted" />}
-                    </div>
-                    <div className="flex flex-col gap-3 text-center sm:text-right flex-1 min-w-0">
-                        <H1 className="text-2xl sm:text-3xl">{fullName}</H1>
-                        {(teacher.categories ?? []).length > 0 && (
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
-                                {(teacher.categories ?? []).map((cat) => (
-                                    <span key={cat.id} className="inline-flex rounded-full bg-primary/10 text-primary border border-primary/15 px-2.5 py-1 text-xs font-medium">{cat.name}</span>
-                                ))}
+                {/* Two-column layout: Right sticky profile, Left scrolling resume and courses */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 w-full items-start">
+                    {/* Right Column: Sticky Teacher Profile Card */}
+                    <div className="md:col-span-4 md:sticky md:top-28 self-start flex flex-col gap-4">
+                        <div className="w-full rounded-3xl border border-border/80 bg-card/80 backdrop-blur-xl p-6 sm:p-7 flex flex-col items-center text-center gap-5 shadow-xl shadow-black/15">
+                            <div className="w-36 h-36 rounded-3xl overflow-hidden bg-surface-muted border border-border/70 shrink-0 flex items-center justify-center shadow-inner">
+                                {teacher.avatar ? (
+                                    <img src={teacher.avatar} alt={fullName} className="h-full w-full object-cover" />
+                                ) : (
+                                    <User size={64} className="opacity-30 text-muted" />
+                                )}
                             </div>
-                        )}
-                        {teacher.email && <a href={`mailto:${teacher.email}`} className="inline-flex items-center justify-center sm:justify-start gap-1.5 text-sm text-muted hover:text-link"><Mail size={14} />{teacher.email}</a>}
-                        {teacher.resumeFile && <a href={teacher.resumeFile} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center sm:justify-start gap-1.5 text-sm text-primary hover:underline"><FileText size={14} /> دانلود رزومه (PDF)</a>}
-                        <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-muted"><BookOpen size={14} />{courses.length} دوره</div>
-                    </div>
-                </div>
 
-                {/* resume markdown */}
-                <div className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8">
-                    <div className="mb-4 flex items-center gap-2 border-b border-border pb-3"><div className="h-6 w-1 rounded-full bg-primary" /><H2 className="text-base">رزومه و سوابق</H2></div>
-                    {teacher.resume ? <MarkdownContent content={teacher.resume} /> : <P className="text-muted text-sm">رزومه‌ای ثبت نشده است.</P>}
-                </div>
+                            <div className="flex flex-col gap-2 items-center">
+                                <H1 className="text-2xl font-extrabold">{fullName}</H1>
+                                {(teacher.categories ?? []).length > 0 && (
+                                    <div className="flex flex-wrap items-center justify-center gap-1.5 mt-1">
+                                        {(teacher.categories ?? []).map((cat) => (
+                                            <span
+                                                key={cat.id}
+                                                className="inline-flex rounded-full bg-primary/10 text-primary border border-primary/20 px-3 py-1 text-xs font-semibold"
+                                            >
+                                                {cat.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
 
-                {/* courses */}
-                {courses.length > 0 && (
-                    <div className="w-full flex flex-col gap-4">
-                        <H2 className="text-xl">دوره‌های مدرس</H2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-                            {courses.filter(c => c.isActive !== false).map((c) => (
-                                <CourseCard
-                                    key={c.id}
-                                    title={c.name}
-                                    imgSrc={c.image}
-                                    category={(c.categories ?? [])[0]?.name ?? ''}
-                                    level={c.level ?? ''}
-                                    duration={c.duration ?? ''}
-                                    courseType={c.typeOfAttendence ?? ''}
-                                    teacher={fullName}
-                                    price={c.price}
-                                    salePrice={c.salePrice ?? null}
-                                    registrationStatus={c.statusOfRegistration ?? ''}
-                                    id={c.id}
-                                    productType="course"
-                                />
-                            ))}
+                            <div className="w-full border-t border-border/60 pt-4 flex flex-col gap-2.5 text-sm">
+                                {teacher.email && (
+                                    <a
+                                        href={`mailto:${teacher.email}`}
+                                        className="inline-flex items-center justify-center gap-2 text-muted hover:text-foreground transition-colors"
+                                    >
+                                        <Mail size={15} className="text-primary" />
+                                        <span>{teacher.email}</span>
+                                    </a>
+                                )}
+                                {teacher.resumeFile && (
+                                    <a
+                                        href={teacher.resumeFile}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center justify-center gap-2 text-primary hover:underline font-medium mt-1"
+                                    >
+                                        <FileText size={15} />
+                                        <span>دانلود رزومه (PDF)</span>
+                                    </a>
+                                )}
+                                <div className="inline-flex items-center justify-center gap-2 text-xs text-muted/80 mt-1">
+                                    <BookOpen size={14} className="text-primary" />
+                                    <span>{courses.length} دوره فعال</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                )}
+
+                    {/* Left Column: Scrolling Resume & Courses */}
+                    <div className="md:col-span-8 flex flex-col gap-8 w-full">
+                        {/* Resume markdown */}
+                        <div className="w-full rounded-3xl border border-border/80 bg-card/60 backdrop-blur-xl p-6 sm:p-8 shadow-sm">
+                            <div className="mb-5 flex items-center gap-2.5 border-b border-border/60 pb-4">
+                                <div className="h-6 w-1.5 rounded-full bg-primary" />
+                                <H2 className="text-xl font-bold">رزومه و سوابق حرفه‌ای</H2>
+                            </div>
+                            {teacher.resume ? (
+                                <div className="prose prose-invert max-w-none text-foreground/90 leading-relaxed text-sm sm:text-base">
+                                    <MarkdownContent content={teacher.resume} />
+                                </div>
+                            ) : (
+                                <P className="text-muted text-sm">رزومه‌ای ثبت نشده است.</P>
+                            )}
+                        </div>
+
+                        {/* Courses List */}
+                        {courses.length > 0 && (
+                            <div className="w-full flex flex-col gap-5">
+                                <div className="flex items-center justify-between">
+                                    <H2 className="text-2xl font-bold">دوره‌های این مدرس</H2>
+                                    <span className="text-xs text-muted">می‌توانید با درگ کردن به سبد خرید اضافه کنید</span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
+                                    {courses.filter(c => c.isActive !== false).map((c) => (
+                                        <CourseCard
+                                            key={c.id}
+                                            title={c.name}
+                                            imgSrc={c.image}
+                                            category={(c.categories ?? [])[0]?.name ?? ''}
+                                            level={c.level ?? ''}
+                                            duration={c.duration ?? ''}
+                                            courseType={c.typeOfAttendence ?? ''}
+                                            teacher={fullName}
+                                            price={c.price}
+                                            salePrice={c.salePrice ?? null}
+                                            registrationStatus={c.statusOfRegistration ?? ''}
+                                            id={c.id}
+                                            productType="course"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </Box>
         </MainLayout>
     );

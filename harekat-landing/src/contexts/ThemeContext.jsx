@@ -25,9 +25,42 @@ export function ThemeProvider({children}) {
     });
 
     const setTheme = (t) => {
-        localStorage.setItem('theme', t);
-        setThemeState(t);
-        applyTheme(t);
+        const update = () => {
+            localStorage.setItem('theme', t);
+            setThemeState(t);
+            applyTheme(t);
+        };
+
+        // If browser supports View Transition API and not reduced-motion
+        if (
+            document.startViewTransition &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+            const transition = document.startViewTransition(() => {
+                update();
+            });
+
+            transition.ready.then(() => {
+                // Circle starts from top-left corner (0 0) and grows across the viewport
+                const maxRadius = Math.hypot(window.innerWidth, window.innerHeight);
+
+                document.documentElement.animate(
+                    {
+                        clipPath: [
+                            `circle(0px at 0 0)`,
+                            `circle(${maxRadius}px at 0 0)`,
+                        ],
+                    },
+                    {
+                        duration: 650,
+                        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+                        pseudoElement: '::view-transition-new(root)',
+                    }
+                );
+            }).catch(() => {});
+        } else {
+            update();
+        }
     };
 
     const toggleTheme = () => {

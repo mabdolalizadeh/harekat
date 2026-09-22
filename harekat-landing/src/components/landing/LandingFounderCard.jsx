@@ -16,21 +16,19 @@ export default function LandingFounderCard() {
             const mm = gsap.matchMedia();
 
             mm.add('(min-width: 768px)', () => {
-                // Scroll-triggered entry with gentle rotational alignment
+                // Scroll-triggered entry without sudden slant or rotation
                 gsap.fromTo(
                     inner,
                     {
                         opacity: 0,
-                        y: 60,
-                        rotateZ: -3,
-                        scale: 0.94,
+                        y: 50,
+                        scale: 0.96,
                     },
                     {
                         opacity: 1,
                         y: 0,
-                        rotateZ: 1.5,
                         scale: 1,
-                        duration: 1,
+                        duration: 0.9,
                         ease: 'power3.out',
                         scrollTrigger: {
                             trigger: wrapper,
@@ -41,10 +39,9 @@ export default function LandingFounderCard() {
                     }
                 );
 
-                // Subtle scroll scrub for parallax floating effect
+                // Gentle scroll scrub for smooth parallax
                 gsap.to(inner, {
-                    y: -25,
-                    rotateZ: 0,
+                    y: -20,
                     ease: 'none',
                     scrollTrigger: {
                         trigger: wrapper,

@@ -109,7 +109,7 @@ export default function ProductDetail({ type }) {
     return (
         <MainLayout title={course.name} sectionIds={null} contentMap={null}>
             <TopBarLayout />
-            <Box className="w-full max-w-5xl gap-8 pb-20 pt-28 sm:pt-36 mx-auto px-4 sm:px-6">
+            <Box className="w-full max-w-6xl gap-8 pb-24 pt-28 sm:pt-36 mx-auto px-4 sm:px-6">
                 {/* Breadcrumbs */}
                 <div className="flex items-center gap-2 text-xs sm:text-sm text-muted self-start">
                     <Link to="/" className="hover:text-foreground transition-colors">خانه</Link>
@@ -119,116 +119,139 @@ export default function ProductDetail({ type }) {
                     <span className="text-foreground truncate max-w-[200px] sm:max-w-none">{course.name}</span>
                 </div>
 
-                {/* Main Product Card */}
-                <div className="grid w-full gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
-                    <div className="overflow-hidden rounded-2xl border border-border bg-card relative">
-                        <img src={course.image} alt={course.name} className="aspect-square w-full object-cover" />
-                        <span className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-foreground text-xs px-3 py-1 rounded-full border border-border/20 font-medium">
-                            {kindInfo.label}
-                        </span>
-                    </div>
+                {/* Main Side-by-Side: Right picture constant (sticky), Left details scrolling */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 w-full items-start relative">
+                    {/* Right Column: Sticky Picture */}
+                    <div className="md:col-span-5 md:sticky md:top-28 self-start flex flex-col gap-4">
+                        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card/80 backdrop-blur-xl relative shadow-xl shadow-black/15 group">
+                            <img
+                                src={course.image}
+                                alt={course.name}
+                                className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <span className="absolute top-4 right-4 bg-background/90 backdrop-blur-md text-foreground text-xs px-3.5 py-1.5 rounded-full border border-border/40 font-semibold shadow-sm">
+                                {kindInfo.label}
+                            </span>
+                        </div>
 
-                    <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 sm:p-7">
-                        <H1 className="text-2xl sm:text-3xl text-foreground font-bold">{course.name}</H1>
-                        <P className="text-muted leading-relaxed">{course.description}</P>
-
-                        {/* Badges */}
-                        <div className="flex flex-wrap gap-2 pt-2">
+                        {/* Quick meta badges */}
+                        <div className="flex flex-wrap gap-2">
                             {course.level && (
-                                <span className="flex items-center gap-1.5 text-xs text-foreground bg-surface-muted px-3 py-1 rounded-lg">
+                                <span className="flex items-center gap-1.5 text-xs text-foreground bg-surface-muted/80 border border-border/50 px-3 py-1.5 rounded-xl">
                                     <BookOpen size={13} className="text-primary" />
                                     {course.level}
                                 </span>
                             )}
                             {course.duration && (
-                                <span className="flex items-center gap-1.5 text-xs text-foreground bg-surface-muted px-3 py-1 rounded-lg">
+                                <span className="flex items-center gap-1.5 text-xs text-foreground bg-surface-muted/80 border border-border/50 px-3 py-1.5 rounded-xl">
                                     <Clock size={13} className="text-primary" />
                                     {course.duration}
                                 </span>
                             )}
                             {course.typeOfAttendence && (
-                                <span className="flex items-center gap-1.5 text-xs text-foreground bg-surface-muted px-3 py-1 rounded-lg">
+                                <span className="flex items-center gap-1.5 text-xs text-foreground bg-surface-muted/80 border border-border/50 px-3 py-1.5 rounded-xl">
                                     {course.typeOfAttendence}
                                 </span>
                             )}
                             {teacherName && (
-                                <span className="flex items-center gap-1.5 text-xs text-foreground bg-surface-muted px-3 py-1 rounded-lg">
+                                <span className="flex items-center gap-1.5 text-xs text-foreground bg-surface-muted/80 border border-border/50 px-3 py-1.5 rounded-xl">
                                     <User size={13} className="text-primary" />
                                     {teacherName}
                                 </span>
                             )}
                         </div>
+                    </div>
 
-                        {/* Pricing & CTA */}
-                        <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-border/10">
-                            <div className="flex items-baseline gap-2">
-                                {discounted && (
-                                    <span className="text-sm text-muted line-through">
-                                        {price(course.price)}
-                                    </span>
-                                )}
-                                <span className="text-xl sm:text-2xl font-black text-foreground">
-                                    {price(discounted ? course.salePrice : course.price)}
+                    {/* Left Column: Details Scrolling */}
+                    <div className="md:col-span-7 flex flex-col gap-8 w-full">
+                        <div className="flex flex-col gap-4 bg-card/60 backdrop-blur-xl border border-border/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <H1 className="text-2xl sm:text-4xl text-foreground font-extrabold leading-tight">
+                                {course.name}
+                            </H1>
+                            <P className="text-muted leading-relaxed text-base sm:text-lg font-normal">
+                                {course.description}
+                            </P>
+                        </div>
+
+                        {/* Long Description Markdown & Syllabus */}
+                        {course.longDescription && (
+                            <div className="w-full rounded-3xl border border-border/80 bg-card/60 backdrop-blur-xl p-6 sm:p-8 flex flex-col gap-5 shadow-sm">
+                                <H2 className="text-xl font-bold text-foreground">توضیحات و سرفصل‌های دوره</H2>
+                                <div className="prose prose-invert max-w-none text-foreground/90 leading-relaxed text-sm sm:text-base">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{course.longDescription}</ReactMarkdown>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Video Intro / Preview - After details */}
+                        {video && (
+                            <div className="w-full flex flex-col gap-4 rounded-3xl border border-border/80 bg-card/60 backdrop-blur-xl p-6 sm:p-8 shadow-sm">
+                                <div className="flex items-center gap-2 text-foreground font-bold text-lg">
+                                    <Video size={20} className="text-primary" />
+                                    <span>پیش‌نمایش ویدیو دوره</span>
+                                </div>
+                                <div className="w-full overflow-hidden rounded-2xl border border-border bg-black shadow-md">
+                                    {video.type === 'embed' ? (
+                                        <div className="aspect-video">
+                                            <iframe
+                                                src={video.src}
+                                                title={`ویدیوی ${course.name}`}
+                                                className="h-full w-full"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            />
+                                        </div>
+                                    ) : (
+                                        <video src={video.src} controls preload="metadata" className="aspect-video w-full" />
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Purchase & Pricing Card - After details & video */}
+                        <div className="w-full rounded-3xl border-2 border-primary/40 bg-card/90 backdrop-blur-2xl p-6 sm:p-8 flex flex-col gap-5 shadow-2xl shadow-primary/10">
+                            <div className="flex items-center justify-between flex-wrap gap-4 border-b border-border/60 pb-5">
+                                <div>
+                                    <span className="text-xs text-muted block mb-1">هزینه سرمایه‌گذاری دوره</span>
+                                    <div className="flex items-baseline gap-3">
+                                        {discounted && (
+                                            <span className="text-base text-muted line-through">
+                                                {price(course.price)}
+                                            </span>
+                                        )}
+                                        <span className="text-2xl sm:text-3xl font-black text-foreground">
+                                            {price(discounted ? course.salePrice : course.price)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <span className="text-xs text-primary font-bold px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+                                    دسترسی همیشگی
                                 </span>
                             </div>
+
                             {added ? (
-                                <div className="flex flex-col gap-2">
-                                    <PrimaryButton onClick={() => navigate('/cart')} className="w-full flex items-center justify-center gap-2 py-3 bg-success-600 hover:bg-success-700">
-                                        <ShoppingCart size={18} />
-                                        مشاهده سبد خرید و پرداخت
+                                <div className="flex flex-col gap-3">
+                                    <PrimaryButton onClick={() => navigate('/cart')} className="w-full flex items-center justify-center gap-2 py-4 bg-success-600 hover:bg-success-700 text-base font-bold">
+                                        <ShoppingCart size={20} />
+                                        مشاهده سبد خرید و تکمیل ثبت‌نام
                                     </PrimaryButton>
                                     <button
                                         type="button"
                                         onClick={add}
-                                        className="text-xs text-muted hover:text-foreground text-center py-1"
+                                        className="text-xs text-muted hover:text-foreground text-center py-1 cursor-pointer"
                                     >
                                         افزودن مجدد به سبد
                                     </button>
                                 </div>
                             ) : (
-                                <PrimaryButton onClick={add} className="w-full flex items-center justify-center gap-2 py-3">
-                                    <ShoppingCart size={18} />
-                                    افزودن به سبد خرید
+                                <PrimaryButton onClick={add} className="w-full flex items-center justify-center gap-2 py-4 text-base font-bold shadow-lg shadow-primary/25">
+                                    <ShoppingCart size={20} />
+                                    افزودن به سبد خرید و ثبت‌نام
                                 </PrimaryButton>
                             )}
                         </div>
                     </div>
                 </div>
-
-                {/* Video Intro / Preview */}
-                {video && (
-                    <div className="w-full flex flex-col gap-3">
-                        <div className="flex items-center gap-2 text-foreground font-bold text-lg">
-                            <Video size={20} className="text-primary" />
-                            <span>پیش‌نمایش ویدیو</span>
-                        </div>
-                        <div className="w-full overflow-hidden rounded-2xl border border-border bg-black shadow-md">
-                            {video.type === 'embed' ? (
-                                <div className="aspect-video">
-                                    <iframe
-                                        src={video.src}
-                                        title={`ویدیوی ${course.name}`}
-                                        className="h-full w-full"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    />
-                                </div>
-                            ) : (
-                                <video src={video.src} controls preload="metadata" className="aspect-video w-full" />
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Long Description Markdown */}
-                {course.longDescription && (
-                    <div className="w-full rounded-2xl border border-border bg-card p-6 sm:p-8 flex flex-col gap-4">
-                        <H2 className="text-xl font-bold text-foreground">توضیحات و سرفصل‌ها</H2>
-                        <div className="prose prose-invert max-w-none text-foreground/90 leading-relaxed text-sm sm:text-base">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{course.longDescription}</ReactMarkdown>
-                        </div>
-                    </div>
-                )}
             </Box>
         </MainLayout>
     );

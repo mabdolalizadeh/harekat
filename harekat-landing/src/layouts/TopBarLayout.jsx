@@ -154,7 +154,7 @@ export default function TopBarLayout() {
                     'backdrop-blur-xl',
                     scrolled
                         ? 'shadow-lg shadow-black/10 border-border/50 bg-background/15'
-                        : 'shadow-sm shadow-black/5'
+                        : ''
                 )}
             >
                 <div className="flex items-center justify-between">
