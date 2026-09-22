@@ -1,6 +1,6 @@
 import Logo from "../components/ui/Logo.jsx";
 import { H3 } from "../components/ui/Headings.jsx";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { SecondaryButton } from "../components/ui/Buttons.jsx";
 import {
@@ -24,6 +24,10 @@ import { storeApi, authApi, token, assetUrl } from "../services/api.js";
 import { getDashboardUrl } from "../utils/dashboardUrl.js";
 
 function scrollToId(id) {
+    if (window.__lenis) {
+        window.__lenis.scrollTo('#' + id, { offset: -70, duration: 1.2 });
+        return;
+    }
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
