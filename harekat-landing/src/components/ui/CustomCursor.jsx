@@ -61,8 +61,6 @@ export default function CustomCursor() {
 
         let currentType = 'default';
         let lastTarget = null;
-        let sliderContainer = null;
-        let sliderRect = null;
 
         const handleMouseMove = (e) => {
             const { clientX, clientY } = e;
@@ -76,64 +74,27 @@ export default function CustomCursor() {
             const target = e.target;
             if (!target) return;
 
-            // 1. Check if hovering slider container
-            let isInsideSlider = false;
-            if (sliderContainer && sliderContainer.contains(target)) {
-                isInsideSlider = true;
-            } else {
-                const foundSlider = target.closest('[data-cursor="slider"], .slideshow-drag-area, #hero .slideshow-container');
-                if (foundSlider) {
-                    sliderContainer = foundSlider;
-                    sliderRect = foundSlider.getBoundingClientRect();
-                    isInsideSlider = true;
-                } else {
-                    sliderContainer = null;
-                    sliderRect = null;
-                }
-            }
-
-            if (isInsideSlider && sliderRect) {
-                // If hovering clickable controls inside the slider (like pagination dots or buttons), let interactive take precedence
-                if (target.closest('button, a, input, select, textarea, [role="button"]')) {
-                    if (currentType !== 'interactive') {
-                        currentType = 'interactive';
-                        setCursorType('interactive');
-                    }
-                    return;
-                }
-
-                // Determine whether pointer is in the left half or right half of the slider
-                const isLeft = (clientX - sliderRect.left) < (sliderRect.width / 2);
-                const nextType = isLeft ? 'slider-left' : 'slider-right';
-                if (nextType !== currentType) {
-                    currentType = nextType;
-                    setCursorType(nextType);
-                }
-                return;
-            }
-
-            // Outside slider: use target caching to avoid unnecessary DOM queries
+            // Target caching to avoid unnecessary DOM queries on identical target
             if (target === lastTarget) return;
             lastTarget = target;
 
             let nextType = 'default';
 
-            // 2. Check if hovering course / capsule / package / subscription card
-            if (target.closest('[data-cursor="course"], .landing-course-card, .capsule-card-item, .package-card-item, .subscription-card-item')) {
+            // 1. Check if hovering standard clickable / interactive elements first
+            if (target.closest('button, a, input, select, textarea, [role="button"], .cursor-pointer, [data-cursor="pointer"]')) {
+                nextType = 'interactive';
+            }
+            // 2. Check if hovering slideshow / carousel
+            else if (target.closest('[data-cursor="slider"], .slideshow-drag-area, #hero .slideshow-container')) {
+                nextType = 'slider';
+            }
+            // 3. Check if hovering course / capsule / package / subscription card
+            else if (target.closest('[data-cursor="course"], .landing-course-card, .capsule-card-item, .package-card-item, .subscription-card-item')) {
                 nextType = 'course';
             }
-            // 3. Check if hovering "Who it is for" or "How it works" sections
+            // 4. Check if hovering "Who it is for" or "How it works" sections
             else if (target.closest('[data-cursor="scroll"], #who, #how-it-works')) {
-                // If hovering a clickable element inside these sections, let interactive take precedence
-                if (target.closest('button, a, input, select, textarea, [role="button"], .cursor-pointer')) {
-                    nextType = 'interactive';
-                } else {
-                    nextType = 'scroll';
-                }
-            }
-            // 4. Check if hovering standard clickable / interactive elements
-            else if (target.closest('a, button, input, select, textarea, [role="button"], .cursor-pointer, [data-cursor="pointer"]')) {
-                nextType = 'interactive';
+                nextType = 'scroll';
             }
 
             if (nextType !== currentType) {
@@ -193,9 +154,7 @@ export default function CustomCursor() {
     const isInteractive = cursorType === 'interactive';
     const isScroll = cursorType === 'scroll';
     const isCourse = cursorType === 'course';
-    const isSliderLeft = cursorType === 'slider-left';
-    const isSliderRight = cursorType === 'slider-right' || cursorType === 'slider';
-    const isSlider = isSliderLeft || isSliderRight;
+    const isSlider = cursorType === 'slider';
 
     return (
         <div
@@ -209,23 +168,7 @@ export default function CustomCursor() {
                 ref={cursorRef}
                 className="fixed top-0 left-0 pointer-events-none will-change-transform transform-gpu"
             >
-                {/* 1. Center Precision Dot: Unified inside container, never lags or desyncs */}
-                {/* <div
-                    ref={dotRef}
-                    style={{
-                        backgroundColor: 'var(--current-section-color, var(--primary))',
-                        boxShadow: '0 0 10px var(--current-section-color, var(--primary))',
-                    }}
-                    className={`absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none will-change-transform transition-all duration-300 ${
-                        isDefault
-                            ? 'w-1.5 h-1.5 opacity-100 scale-100'
-                            : isInteractive
-                            ? 'w-2 h-2 opacity-50 scale-75'
-                            : 'w-1 h-1 opacity-0 scale-0'
-                    }`}
-                /> */}
-
-                {/* 2. Morphing Adaptive Outer Ring / Badge */}
+                {/* Morphing Adaptive Outer Ring / Badge */}
                 <div
                     ref={ringRef}
                     style={{
@@ -254,7 +197,7 @@ export default function CustomCursor() {
                             : isCourse
                             ? 'w-13 h-13 scale-105'
                             : isSlider
-                            ? `w-14 h-14 ${isDragging ? 'scale-90 shadow-2xl' : 'scale-100'}`
+                            ? `w-11 h-11 ${isDragging ? 'scale-85' : 'scale-100'}`
                             : 'w-7 h-7'
                     }`}
                 >
@@ -325,64 +268,6 @@ export default function CustomCursor() {
                                     stroke="currentColor"
                                     strokeWidth="1.6"
                                     strokeLinecap="round"
-                                />
-                            </svg>
-                        </div>
-                    )}
-
-                    {/* Slider Left Mode SVG: Razor-sharp left arrow with directional drag hint animation */}
-                    {isSliderLeft && (
-                        <div className="flex items-center justify-center animate-fade-in">
-                            <svg
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                className={`animate-drag-hint-left transition-transform duration-200 ${isDragging ? 'scale-90' : ''}`}
-                            >
-                                <path
-                                    d="M19 12H5"
-                                    stroke="currentColor"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                                <path
-                                    d="M11 6L5 12L11 18"
-                                    stroke="currentColor"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                        </div>
-                    )}
-
-                    {/* Slider Right Mode SVG: Razor-sharp right arrow with directional drag hint animation */}
-                    {isSliderRight && !isSliderLeft && (
-                        <div className="flex items-center justify-center animate-fade-in">
-                            <svg
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                className={`animate-drag-hint-right transition-transform duration-200 ${isDragging ? 'scale-90' : ''}`}
-                            >
-                                <path
-                                    d="M5 12H19"
-                                    stroke="currentColor"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                                <path
-                                    d="M13 6L19 12L13 18"
-                                    stroke="currentColor"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
                                 />
                             </svg>
                         </div>

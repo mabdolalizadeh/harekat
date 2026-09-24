@@ -98,8 +98,9 @@ export class SmsIrProvider extends BaseSmsProvider {
                 throw err;
             }
 
-            // Success logging format required by spec:
-            console.log('[OTP][SMSIR] OTP request sent');
+            // Success logging format: print notification and OTP to console as requested
+            console.log(`[OTP][SMSIR] OTP request sent for ${mobile}`);
+            console.log(`[OTP] ${mobile} → ${otp}`);
 
             return {
                 success: true,

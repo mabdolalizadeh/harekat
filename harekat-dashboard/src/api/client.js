@@ -1,8 +1,10 @@
+import { getCookie } from '../utils/cookie.js';
+
 const API_BASE = import.meta.env?.VITE_API_BASE || (import.meta.env?.DEV ? 'http://localhost:3000/api/v1' : '/api/v1');
 
 function getToken() {
   try {
-    return localStorage.getItem('token');
+    return localStorage.getItem('token') || getCookie('auth_token') || getCookie('token');
   } catch {
     return null;
   }

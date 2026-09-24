@@ -6,7 +6,7 @@ export default function StudentReviewCard({ review, quote, name, className, ...p
     return (
         <div
             className={cn(
-                'group relative flex flex-col justify-between h-full bg-card border border-border/80 rounded-3xl p-6 sm:p-7 shadow-xl shadow-black/[0.04] dark:shadow-black/30 transition-all duration-300 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1.5',
+                'group relative flex flex-col justify-between h-full bg-card border border-border/80 rounded-3xl p-6 sm:p-7 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.35)] transition-all duration-300 hover:border-primary/50 hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.45)] hover:-translate-y-1',
                 className
             )}
             {...props}

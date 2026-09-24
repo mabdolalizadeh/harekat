@@ -109,10 +109,10 @@ export default function LandingTestimonials({ testimonials = defaultTestimonials
             {/* Embla Carousel Viewport with shadow bleed headroom */}
             <div className="w-full max-w-[1300px] relative px-2 sm:px-6">
                 <div
-                    className="overflow-hidden py-8 -my-8 px-3 -mx-3 cursor-grab active:cursor-grabbing select-none"
+                    className="overflow-hidden py-10 -my-10 px-4 -mx-4 cursor-grab active:cursor-grabbing select-none"
                     ref={emblaRef}
                 >
-                    <div className="flex -mr-6 touch-pan-y py-3">
+                    <div className="flex -mr-6 touch-pan-y py-6">
                         {testimonials.map((item, index) => (
                             <div
                                 key={index}

@@ -36,7 +36,7 @@ function buildRedirectUrl(target, token) {
 }
 
 export default function LoginPage() {
-  const { requestOtp, validateOtp, isAuthenticated } = useAuth();
+  const { requestOtp, validateOtp, isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -51,7 +51,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const currentToken = localStorage.getItem('token');
+      const currentToken = token || localStorage.getItem('token');
       const finalRedirect = buildRedirectUrl(redirectTarget, currentToken);
       if (finalRedirect.startsWith('http://') || finalRedirect.startsWith('https://')) {
         window.location.href = finalRedirect;
@@ -59,7 +59,7 @@ export default function LoginPage() {
         navigate(finalRedirect, { replace: true });
       }
     }
-  }, [isAuthenticated, navigate, redirectTarget]);
+  }, [isAuthenticated, token, navigate, redirectTarget]);
 
   const handleRequestOtp = async (e) => {
     e.preventDefault();

@@ -14,6 +14,9 @@ let server;
 let baseUrl;
 
 test.before(async () => {
+    // Force mock OTP mode for automated integration test run
+    configs.otpMode = 'mock';
+
     // Ensure DB connection and schema sync + migration
     await sequelize.sync();
     await migrateLmsSchema();

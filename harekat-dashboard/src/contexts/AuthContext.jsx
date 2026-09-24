@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/authApi.js';
 import { userApi } from '../api/userApi.js';
+import { getCookie, setSharedCookie, removeSharedCookie } from '../utils/cookie.js';
 
 const AuthContext = createContext(null);
 
@@ -35,7 +36,7 @@ export function redirectToLandingLogin(returnUrl) {
 }
 
 export function AuthProvider({ children }) {
-  // 1. Check for token passed via URL query param or stored in localStorage
+  // 1. Check for token passed via URL query param or stored in localStorage or shared cookie
   const getInitialToken = () => {
     try {
       if (typeof window !== 'undefined') {
@@ -45,6 +46,7 @@ export function AuthProvider({ children }) {
 
         if (queryToken) {
           localStorage.setItem('token', queryToken);
+          setSharedCookie('auth_token', queryToken);
           const cleanUrl = new URL(window.location.href);
           cleanUrl.searchParams.delete('token');
           cleanUrl.searchParams.delete('auth_token');
@@ -53,7 +55,7 @@ export function AuthProvider({ children }) {
           return queryToken;
         }
       }
-      return localStorage.getItem('token');
+      return localStorage.getItem('token') || getCookie('auth_token') || getCookie('token');
     } catch {
       return null;
     }
@@ -129,6 +131,61 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Listen for cross-tab and cross-app logout/login events
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (!e || !e.key || e.key === 'token' || e.key === 'auth_token' || e.key === 'user' || e.key === 'auth_sync_event') {
+        const currentToken = localStorage.getItem('token') || getCookie('auth_token') || getCookie('token');
+        if (!currentToken) {
+          setToken(null);
+          setUser(null);
+        } else if (currentToken !== token) {
+          setToken(currentToken);
+          const payload = parseJwt(currentToken);
+          if (payload?.id) {
+            refreshUser(payload.id, currentToken);
+          }
+        }
+      }
+    };
+
+    let authChannel = null;
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        authChannel = new BroadcastChannel('harekat_auth_channel');
+        authChannel.onmessage = (event) => {
+          if (event?.data?.type === 'LOGOUT') {
+            setToken(null);
+            setUser(null);
+            removeSharedCookie('auth_token');
+            removeSharedCookie('token');
+            try {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+            } catch {}
+          } else if (event?.data?.type === 'LOGIN') {
+            const currentToken = localStorage.getItem('token') || getCookie('auth_token') || getCookie('token');
+            if (currentToken) {
+              setToken(currentToken);
+              const payload = parseJwt(currentToken);
+              if (payload?.id) {
+                refreshUser(payload.id, currentToken);
+              }
+            }
+          }
+        };
+      } catch {}
+    }
+
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      if (authChannel) {
+        authChannel.close();
+      }
+    };
+  }, [token, refreshUser]);
+
   const requestOtp = async (phoneNumber) => {
     return await authApi.requestOtp(phoneNumber);
   };
@@ -139,6 +196,7 @@ export function AuthProvider({ children }) {
       const { token: receivedToken, user: receivedUser } = res.data;
       setToken(receivedToken);
       localStorage.setItem('token', receivedToken);
+      setSharedCookie('auth_token', receivedToken);
 
       try {
         const fullUserRes = await userApi.getUserById(receivedUser.id);
@@ -149,6 +207,19 @@ export function AuthProvider({ children }) {
         setUser(receivedUser);
         localStorage.setItem('user', JSON.stringify(receivedUser));
       }
+
+      // Broadcast login event to sync other open tabs/windows
+      if (typeof window !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('harekat_auth_channel');
+          bc.postMessage({ type: 'LOGIN', timestamp: Date.now() });
+          bc.close();
+        } catch {}
+        try {
+          localStorage.setItem('auth_sync_event', JSON.stringify({ type: 'LOGIN', time: Date.now() }));
+        } catch {}
+      }
+
       return res.data;
     }
     throw new Error(res?.message || 'کد ورود نامعتبر است');
@@ -174,6 +245,21 @@ export function AuthProvider({ children }) {
     } catch {
       // ignore
     }
+    removeSharedCookie('auth_token');
+    removeSharedCookie('token');
+
+    // Broadcast logout event so landing and any other tabs sync immediately
+    if (typeof window !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel('harekat_auth_channel');
+        bc.postMessage({ type: 'LOGOUT', timestamp: Date.now() });
+        bc.close();
+      } catch {}
+      try {
+        localStorage.setItem('auth_sync_event', JSON.stringify({ type: 'LOGOUT', time: Date.now() }));
+      } catch {}
+    }
+
     if (redirect) {
       window.location.href = '/login';
     }

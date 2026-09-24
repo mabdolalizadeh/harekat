@@ -59,7 +59,7 @@ export default function Slideshow({
         setDragOffset(diff * 0.75);
     };
 
-    const handlePointerUp = (e) => {
+    const handlePointerUp = () => {
         if (!isDragging) return;
         setIsDragging(false);
 
@@ -73,16 +73,6 @@ export default function Slideshow({
             paginate(1);
         } else if (diff > threshold) {
             paginate(-1);
-        } else if (!hasDraggedRef.current && Math.abs(diff) < 6 && !slide?.link) {
-            const rect = containerRef.current?.getBoundingClientRect();
-            if (rect && e) {
-                const isLeft = (e.clientX - rect.left) < rect.width / 2;
-                if (isLeft) {
-                    paginate(1);
-                } else {
-                    paginate(-1);
-                }
-            }
         }
 
         setDragOffset(0);

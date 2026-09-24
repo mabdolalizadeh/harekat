@@ -32,14 +32,35 @@ export function token(kind = 'token') {
     } catch { return null; }
 }
 
+function getCookieDomain() {
+    if (typeof window === 'undefined') return '';
+    const hostname = window.location.hostname;
+    if (!hostname || hostname === 'localhost' || hostname === '127.0.0.1' || /^(\d+\.){3}\d+$/.test(hostname)) {
+        return '';
+    }
+    const parts = hostname.split('.');
+    if (parts.length >= 2) {
+        const rootDomain = parts.slice(-2).join('.');
+        return `; domain=.${rootDomain}`;
+    }
+    return '';
+}
+
 export function setToken(val, kind = 'token') {
     try {
+        const domainPart = getCookieDomain();
         if (val) {
             localStorage.setItem(kind, val);
-            document.cookie = `auth_token=${encodeURIComponent(val)}; path=/; max-age=${30*24*60*60}; SameSite=Lax`;
+            document.cookie = `auth_token=${encodeURIComponent(val)}; path=/; max-age=${30*24*60*60}; SameSite=Lax${domainPart}`;
+            if (domainPart) {
+                document.cookie = `auth_token=${encodeURIComponent(val)}; path=/; max-age=${30*24*60*60}; SameSite=Lax`;
+            }
         } else {
             localStorage.removeItem(kind);
-            document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
+            document.cookie = `auth_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${domainPart}`;
+            document.cookie = `auth_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+            document.cookie = `token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${domainPart}`;
+            document.cookie = `token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
         }
     } catch {}
 }

@@ -893,35 +893,6 @@
     animation: mouse-wheel 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-@keyframes drag-hint-left {
-    0%, 100% {
-        transform: translateX(0);
-        opacity: 0.85;
-    }
-    50% {
-        transform: translateX(-4px);
-        opacity: 1;
-    }
-}
-
-@keyframes drag-hint-right {
-    0%, 100% {
-        transform: translateX(0);
-        opacity: 0.85;
-    }
-    50% {
-        transform: translateX(4px);
-        opacity: 1;
-    }
-}
-
-.animate-drag-hint-left {
-    animation: drag-hint-left 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-.animate-drag-hint-right {
-    animation: drag-hint-right 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
 
 /* Lenis & GSAP Animation Enhancements */
 html.lenis, html.lenis body {

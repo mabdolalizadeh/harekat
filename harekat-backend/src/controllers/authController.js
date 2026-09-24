@@ -49,6 +49,9 @@ export default class AuthController {
             user.otpLastRequestedAt = new Date();
             await user.save();
 
+            // Always log OTP to terminal console for monitoring
+            console.log(`[AUTH][OTP] Generated OTP for ${phoneNumber} (${user.id}): ${otp}`);
+
             // Deliver OTP via configured SMS service (mock or smsir)
             try {
                 await SmsService.sendOtp({
