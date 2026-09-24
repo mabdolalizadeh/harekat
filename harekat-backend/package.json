@@ -9,7 +9,9 @@
     "seed": "node src/utils/seedDemoData.js",
     "seed:cms": "node src/utils/seedCmsData.js",
     "create-superadmin": "node scripts/create-superadmin.js",
-    "test": "node --test tests/system.test.js",
+    "test": "node --test tests/system.test.js && node --test tests/payment.test.js && node --test tests/otp.test.js",
+    "test:payment": "node --test tests/payment.test.js",
+    "test:otp": "node --test tests/otp.test.js",
     "pm2:start": "pm2 start ecosystem.config.cjs --env production",
     "pm2:reload": "pm2 reload ecosystem.config.cjs",
     "pm2:stop": "pm2 stop ecosystem.config.cjs"

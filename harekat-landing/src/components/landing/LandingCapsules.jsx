@@ -68,7 +68,7 @@ export default function LandingCapsules({
                     ))
                 ) : (
                     capsuleCourses.map((course, idx) => (
-                        <div key={course.id || course.title || idx} className="capsule-card-item will-change-transform">
+                        <div key={course.id || course.title || idx} className="capsule-card-item">
                             <CourseCard {...course} kind="capsule" />
                         </div>
                     ))

@@ -31,6 +31,9 @@ import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import { ticketsApi } from '../api/ticketsApi.js';
 import { accessApi } from '../api/accessApi.js';
 import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
+import AnimatedPage from '../components/ui/AnimatedPage.jsx';
+import SpotlightCard from '../components/ui/SpotlightCard.jsx';
+import AnimatedNumber from '../components/ui/AnimatedNumber.jsx';
 import { formatDate, toPersianDigits } from '../utils/formatters.js';
 
 export default function SupportPage() {
@@ -235,7 +238,7 @@ export default function SupportPage() {
   }
 
   return (
-    <Box>
+    <AnimatedPage>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3.5, flexWrap: 'wrap', gap: 2 }}>
         <Box>
@@ -603,6 +606,6 @@ export default function SupportPage() {
           </>
         )}
       </Dialog>
-    </Box>
+    </AnimatedPage>
   );
 }

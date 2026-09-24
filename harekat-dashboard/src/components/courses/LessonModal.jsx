@@ -4,6 +4,8 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { toPersianDigits, formatDuration } from '../../utils/formatters.js';
 
 export default function LessonModal({ lesson, open, onClose, onToggleComplete, isCompleted }) {
@@ -132,20 +134,31 @@ export default function LessonModal({ lesson, open, onClose, onToggleComplete, i
         <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#1e293b' }}>
           توضیحات و سرفصل جلسه:
         </Typography>
-        <Typography
-          variant="body2"
+        <Box
           sx={{
-            color: '#475569',
+            color: 'text.primary',
             lineHeight: 1.8,
-            whiteSpace: 'pre-line',
-            backgroundColor: '#f8fafc',
+            backgroundColor: 'action.hover',
             p: 2.5,
             borderRadius: '16px',
-            border: '1px solid #eef2f6'
+            border: '1px solid',
+            borderColor: 'divider',
+            '& p': { mb: 1, '&:last-child': { mb: 0 } },
+            '& img': { maxWidth: '100%', height: 'auto', borderRadius: '12px', my: 1.5, display: 'block' },
+            '& a': { color: 'primary.main', textDecoration: 'underline' },
+            '& ul, & ol': { pr: 2.5, mb: 1 },
           }}
         >
-          {lesson.longDescription || lesson.description || 'توضیحات تکمیلی برای این جلسه ثبت نشده است.'}
-        </Typography>
+          {lesson.longDescription || lesson.description ? (
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {lesson.longDescription || lesson.description}
+            </ReactMarkdown>
+          ) : (
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              توضیحات تکمیلی برای این جلسه ثبت نشده است.
+            </Typography>
+          )}
+        </Box>
       </DialogContent>
 
       <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>

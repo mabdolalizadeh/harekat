@@ -19,6 +19,7 @@ import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined';
 import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined';
+import AnimatedNumber from '../components/ui/AnimatedNumber.jsx';
 
 export default function Sidebar({ onItemClick }) {
   const { user, rubies, studyPoints, logout } = useAuth();
@@ -119,7 +120,7 @@ export default function Sidebar({ onItemClick }) {
           >
             <DiamondOutlinedIcon sx={{ fontSize: 13, color: '#f47c20' }} />
             <Typography sx={{ fontSize: '0.72rem', fontWeight: 700 }}>
-              {toPersianDigits(rubies)} یاقوت
+              <AnimatedNumber value={rubies} /> یاقوت
             </Typography>
           </Box>
         </Box>
@@ -130,7 +131,7 @@ export default function Sidebar({ onItemClick }) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
               <EmojiEventsOutlinedIcon sx={{ fontSize: 15, color: '#d99400' }} />
               <Typography sx={{ fontWeight: 700, fontSize: '0.78rem', color: 'text.primary' }}>
-                {toPersianDigits(studyPoints)} امتیاز
+                <AnimatedNumber value={studyPoints} /> امتیاز
               </Typography>
             </Box>
             <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
@@ -201,54 +202,76 @@ export default function Sidebar({ onItemClick }) {
               (item.path === '/payments' && location.pathname === '/orders');
 
             return (
-              <ListItemButton
-                key={item.path}
-                component={NavLink}
-                to={item.path}
-                onClick={onItemClick}
-                sx={{
-                  borderRadius: '12px',
-                  mb: 0.4,
-                  py: 0.9,
-                  px: 1.4,
-                  backgroundColor: isActive ? (isDark ? 'rgba(244, 124, 32, 0.15)' : '#fff8ed') : 'transparent',
-                  color: isActive ? '#f47c20' : 'text.primary',
-                  borderRight: isActive ? '3px solid #f47c20' : '3px solid transparent',
-                  '&:hover': {
-                    backgroundColor: isActive ? (isDark ? 'rgba(244, 124, 32, 0.2)' : '#fff8ed') : (isDark ? '#1e293b' : '#f7f5f0'),
-                    color: isActive ? '#df5b13' : 'text.primary'
-                  }
-                }}
-              >
-                <ListItemIcon
+              <Box key={item.path} sx={{ position: 'relative', mb: 0.5 }}>
+                <ListItemButton
+                  component={NavLink}
+                  to={item.path}
+                  onClick={onItemClick}
                   sx={{
-                    minWidth: 34,
-                    color: isActive ? '#f47c20' : 'text.secondary'
+                    position: 'relative',
+                    borderRadius: '12px',
+                    py: 1,
+                    px: 1.5,
+                    backgroundColor: isActive ? (isDark ? 'rgba(244, 124, 32, 0.12)' : '#fff8ed') : 'transparent',
+                    color: isActive ? '#f47c20' : 'text.primary',
+                    transition: 'background-color 0.2s ease, color 0.2s ease',
+                    zIndex: 2,
+                    '&:hover': {
+                      backgroundColor: isActive
+                        ? (isDark ? 'rgba(244, 124, 32, 0.18)' : '#fff3e0')
+                        : (isDark ? 'rgba(255, 255, 255, 0.04)' : '#f7f5f0'),
+                      color: isActive ? '#df5b13' : 'text.primary',
+                      transform: 'translateX(-2px)',
+                    },
                   }}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    fontSize: '0.86rem',
-                    fontWeight: isActive ? 700 : 500
-                  }}
-                />
-                {item.badge && (
-                  <Chip
-                    label={item.badge}
-                    size="small"
+                  {/* Subtle active pill indicator on the right edge */}
+                  {isActive && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '18%',
+                        bottom: '18%',
+                        width: 3.5,
+                        borderRadius: '0 4px 4px 0',
+                        bgcolor: 'primary.main',
+                      }}
+                    />
+                  )}
+
+                  <ListItemIcon
                     sx={{
-                      height: 20,
-                      fontSize: '0.7rem',
-                      backgroundColor: isActive ? '#f47c20' : (isDark ? '#334155' : '#deddd7'),
-                      color: isActive ? '#ffffff' : (isDark ? '#cbd5e1' : '#55554f'),
-                      fontWeight: 700
+                      minWidth: 34,
+                      color: isActive ? '#f47c20' : 'text.secondary',
+                      transition: 'color 0.2s ease',
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontSize: '0.86rem',
+                      fontWeight: isActive ? 700 : 500,
+                      letterSpacing: '-0.01em',
                     }}
                   />
-                )}
-              </ListItemButton>
+                  {item.badge && (
+                    <Chip
+                      label={item.badge}
+                      size="small"
+                      sx={{
+                        height: 20,
+                        fontSize: '0.7rem',
+                        backgroundColor: isActive ? '#f47c20' : (isDark ? '#334155' : '#deddd7'),
+                        color: isActive ? '#ffffff' : (isDark ? '#cbd5e1' : '#55554f'),
+                        fontWeight: 700,
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </Box>
             );
           })}
         </List>

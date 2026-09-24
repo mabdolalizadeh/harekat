@@ -175,6 +175,7 @@
 
     --hero-grid: rgb(23 23 21 / 0.07);
     --hero-glow: rgb(244 124 32 / 0.16);
+    --current-section-color: var(--primary);
 }
 
 /* Automatic system dark mode */
@@ -218,6 +219,7 @@
 
         --hero-grid: rgb(255 255 255 / 0.055);
         --hero-glow: rgb(255 163 63 / 0.13);
+        --current-section-color: var(--primary);
     }
 }
 
@@ -308,12 +310,16 @@
 
     html {
         min-width: 320px;
+        overflow-x: clip;
         scroll-behavior: smooth;
         background: var(--background);
     }
 
     body {
         min-height: 100vh;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: clip;
         margin: 0;
         background: var(--background);
         color: var(--foreground);
@@ -321,6 +327,13 @@
         font-feature-settings: "kern" 1, "liga" 1;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        html.custom-cursor-active,
+        html.custom-cursor-active * {
+            cursor: none !important;
+        }
     }
 
     ::selection {
@@ -863,6 +876,51 @@
     100% {
         transform: translateX(100%);
     }
+}
+
+@keyframes mouse-wheel {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(5px);
+        opacity: 0.4;
+    }
+}
+
+.animate-mouse-wheel {
+    animation: mouse-wheel 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes drag-hint-left {
+    0%, 100% {
+        transform: translateX(0);
+        opacity: 0.85;
+    }
+    50% {
+        transform: translateX(-4px);
+        opacity: 1;
+    }
+}
+
+@keyframes drag-hint-right {
+    0%, 100% {
+        transform: translateX(0);
+        opacity: 0.85;
+    }
+    50% {
+        transform: translateX(4px);
+        opacity: 1;
+    }
+}
+
+.animate-drag-hint-left {
+    animation: drag-hint-left 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-drag-hint-right {
+    animation: drag-hint-right 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* Lenis & GSAP Animation Enhancements */

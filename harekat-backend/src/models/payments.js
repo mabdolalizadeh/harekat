@@ -39,6 +39,36 @@ const Payments = sequelize.define("Payments", {
         allowNull: true,
         defaultValue: null
     },
+    trackId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+    },
+    cardNumber: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
+    },
+    failureReason: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
+    },
+    callbackData: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
+    },
+    paidAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null
+    },
     metadata: {
         type: DataTypes.TEXT,
         allowNull: true,

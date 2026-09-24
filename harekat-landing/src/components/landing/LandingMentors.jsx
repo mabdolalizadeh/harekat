@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SectionTag from '../ui/SectionTag.jsx';
@@ -10,6 +11,7 @@ export default function LandingMentors({
     isLoading = false,
     onJoinClick,
 }) {
+    const navigate = useNavigate();
     const sectionRef = useRef(null);
     const headerRef = useRef(null);
     const gridRef = useRef(null);
@@ -69,7 +71,7 @@ export default function LandingMentors({
 
             <div
                 ref={gridRef}
-                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 w-full mt-6"
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 w-full mt-6"
             >
                 {isLoading ? (
                     Array.from({ length: 4 }).map((_, i) => (
@@ -83,13 +85,13 @@ export default function LandingMentors({
                     displayTeachers.map((teacher, index) => (
                         <div
                             key={teacher.id || index}
-                            className="mentor-card-item will-change-transform"
+                            className="mentor-card-item"
                         >
                             <TeacherCard
                                 name={teacher.name}
                                 role={teacher.role}
                                 avatar={teacher.avatar}
-                                onClick={() => teacher.id && (window.location.href = `/teachers/${teacher.id}`)}
+                                onClick={() => teacher.id && navigate(`/teachers/${teacher.id}`)}
                                 className={teacher.id ? 'cursor-pointer hover:-translate-y-1 transition-transform duration-300' : ''}
                             />
                         </div>

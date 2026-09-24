@@ -173,61 +173,37 @@ export default function Background({ children, className }) {
                     return;
                 }
 
+                // Apply active theme to background and CSS variables
+                const applySectionTheme = (key, bg, accent) => {
+                    if (activeSectionKeyRef.current === key) return;
+                    activeSectionKeyRef.current = key;
+                    bgEl.style.backgroundColor = bg;
+                    document.documentElement.style.setProperty('--current-section-color', accent);
+                    document.documentElement.setAttribute('data-active-section', key);
+                };
+
                 // Sync initial background and accent
                 const currentActiveSec = activeSections.find((s) => s.key === activeSectionKeyRef.current) || activeSections[0];
-                const currentBg = dark ? currentActiveSec.bgDark : currentActiveSec.bgLight;
-                const currentAccent = dark ? currentActiveSec.accentDark : currentActiveSec.accentLight;
+                const initialBg = dark ? currentActiveSec.bgDark : currentActiveSec.bgLight;
+                const initialAccent = dark ? currentActiveSec.accentDark : currentActiveSec.accentLight;
 
-                gsap.set(bgEl, { backgroundColor: currentBg });
-                document.documentElement.style.backgroundColor = currentBg;
-                document.body.style.backgroundColor = currentBg;
-                document.documentElement.style.setProperty('--current-section-color', currentAccent);
+                bgEl.style.backgroundColor = initialBg;
+                document.documentElement.style.setProperty('--current-section-color', initialAccent);
                 document.documentElement.setAttribute('data-active-section', currentActiveSec.key);
 
-                // Build smooth scrubbed pairwise color transitions between adjacent sections
-                for (let i = 0; i < activeSections.length - 1; i++) {
-                    const curSec = activeSections[i];
-                    const nextSec = activeSections[i + 1];
+                // High-performance event-driven section triggers (zero per-frame scrub thrashing)
+                activeSections.forEach((sec) => {
+                    const secBg = dark ? sec.bgDark : sec.bgLight;
+                    const secAccent = dark ? sec.accentDark : sec.accentLight;
 
-                    const curBg = dark ? curSec.bgDark : curSec.bgLight;
-                    const nextBg = dark ? nextSec.bgDark : nextSec.bgLight;
-                    const nextAccent = dark ? nextSec.accentDark : nextSec.accentLight;
-                    const curAccent = dark ? curSec.accentDark : curSec.accentLight;
-
-                    gsap.fromTo(
-                        bgEl,
-                        { backgroundColor: curBg },
-                        {
-                            backgroundColor: nextBg,
-                            ease: "none",
-                            immediateRender: false,
-                            scrollTrigger: {
-                                trigger: nextSec.el,
-                                start: "top 85%",
-                                end: "top 25%",
-                                scrub: 0.5,
-                                onUpdate: (self) => {
-                                    // When progress is mostly into next section, update theme variables
-                                    if (self.progress > 0.5) {
-                                        activeSectionKeyRef.current = nextSec.key;
-                                        document.documentElement.style.setProperty('--current-section-color', nextAccent);
-                                        document.documentElement.setAttribute('data-active-section', nextSec.key);
-                                    } else {
-                                        activeSectionKeyRef.current = curSec.key;
-                                        document.documentElement.style.setProperty('--current-section-color', curAccent);
-                                        document.documentElement.setAttribute('data-active-section', curSec.key);
-                                    }
-
-                                    // Keep html & body in sync for seamless mobile overscroll
-                                    if (bgEl.style.backgroundColor) {
-                                        document.documentElement.style.backgroundColor = bgEl.style.backgroundColor;
-                                        document.body.style.backgroundColor = bgEl.style.backgroundColor;
-                                    }
-                                },
-                            }
-                        }
-                    );
-                }
+                    ScrollTrigger.create({
+                        trigger: sec.el,
+                        start: "top 65%",
+                        end: "bottom 35%",
+                        onEnter: () => applySectionTheme(sec.key, secBg, secAccent),
+                        onEnterBack: () => applySectionTheme(sec.key, secBg, secAccent),
+                    });
+                });
             }, containerRef);
         };
 
@@ -252,7 +228,7 @@ export default function Background({ children, className }) {
             <div
                 ref={bgRef}
                 aria-hidden="true"
-                className="pointer-events-none fixed inset-0 z-0 will-change-[background-color]"
+                className="pointer-events-none fixed inset-0 z-0 transition-colors duration-500 ease-out will-change-[background-color]"
                 style={{
                     backgroundColor: isDarkTheme() ? SECTIONS_CONFIG[0].bgDark : SECTIONS_CONFIG[0].bgLight
                 }}

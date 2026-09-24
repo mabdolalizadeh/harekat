@@ -67,7 +67,7 @@ export default function LandingFAQ({ faqItems = defaultFaqItems }) {
         >
             <div className="flex flex-col items-center gap-4 text-center">
                 <SectionTag>سوالات متداول</SectionTag>
-                <h2 className="text-[clamp(2.2rem,4.5vw,3.6rem)] font-extrabold text-foreground max-w-[700px] leading-tight">
+                <h2 className="text-[clamp(1.85rem,4vw,3.4rem)] font-extrabold text-foreground max-w-[700px] leading-tight">
                     سوالات درباره ثبت‌نام
                 </h2>
                 <p className="text-muted max-w-[600px] text-[clamp(0.95rem,1.8vw,1.15rem)] leading-relaxed">

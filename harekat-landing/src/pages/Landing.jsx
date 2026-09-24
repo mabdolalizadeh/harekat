@@ -23,6 +23,7 @@ import LandingTestimonials from "../components/landing/LandingTestimonials.jsx";
 import LandingFAQ from "../components/landing/LandingFAQ.jsx";
 import LandingCTA from "../components/landing/LandingCTA.jsx";
 import DragToCartDropZone from "../components/ui/DragToCartDropZone.jsx";
+import LandingLoader from "../components/ui/LandingLoader.jsx";
 
 const fallbackHeroSlides = [
     { image: '', alt: '' },
@@ -219,6 +220,14 @@ export default function Landing() {
 
     return (
         <SmoothScrollProvider>
+            {/* Custom Initial Loading Screen */}
+            <LandingLoader
+                isReady={!isLoading}
+                onComplete={() => {
+                    setTimeout(() => ScrollTrigger.refresh(), 100);
+                }}
+            />
+
             {/* Top luxury scroll indicator & drag drop zone */}
             <ScrollProgressBar />
             <DragToCartDropZone />

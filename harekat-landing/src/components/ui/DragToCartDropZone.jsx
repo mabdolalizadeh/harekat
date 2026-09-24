@@ -72,7 +72,7 @@ export default function DragToCartDropZone() {
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[9990] flex items-center gap-4 px-8 py-5 rounded-full border-2 transition-all duration-300 shadow-2xl backdrop-blur-2xl ${
+                    className={`fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-[9990] max-w-[calc(100%-2rem)] flex items-center gap-3 sm:gap-4 px-5 py-3.5 sm:px-8 sm:py-5 rounded-full border-2 transition-all duration-300 shadow-2xl backdrop-blur-2xl ${
                         justAdded
                             ? 'bg-success-500/20 border-success-500 text-success-500 scale-105'
                             : isDraggingOver

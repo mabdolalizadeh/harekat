@@ -33,6 +33,9 @@ import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 import { userApi } from '../api/userApi.js';
 import { subscriptionsApi } from '../api/subscriptionsApi.js';
 import { sanitizeSvg } from '../utils/sanitizeSvg.js';
+import AnimatedPage from '../components/ui/AnimatedPage.jsx';
+import SpotlightCard from '../components/ui/SpotlightCard.jsx';
+import AnimatedNumber from '../components/ui/AnimatedNumber.jsx';
 import { assetUrl, formatDate, toPersianDigits } from '../utils/formatters.js';
 
 export default function ProfilePage() {
@@ -172,7 +175,7 @@ export default function ProfilePage() {
   const sanitizedBadgeSvg = sanitizeSvg(subData?.subscription?.badgeIconSvg);
 
   return (
-    <Box>
+    <AnimatedPage>
       <Box sx={{ mb: 3.5 }}>
         <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.3rem', md: '1.75rem' }, color: 'text.primary', mb: 0.5 }}>
           حساب کاربری و نشان اشتراک
@@ -346,7 +349,7 @@ export default function ProfilePage() {
                   میزان تکمیل پروفایل:
                 </Typography>
                 <Chip
-                  label={`${toPersianDigits(completionPercentage)}٪`}
+                  label={<><AnimatedNumber value={completionPercentage} />٪</>}
                   size="small"
                   sx={{
                     fontWeight: 700,
@@ -399,7 +402,7 @@ export default function ProfilePage() {
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#f47c20', mb: 0.3 }}>
                     <EmojiEventsOutlinedIcon sx={{ fontSize: 18 }} />
                     <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: 'text.primary' }}>
-                      {toPersianDigits(studyPoints)}
+                      <AnimatedNumber value={studyPoints} />
                     </Typography>
                   </Box>
                   <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
@@ -422,7 +425,7 @@ export default function ProfilePage() {
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#f47c20', mb: 0.3 }}>
                     <DiamondOutlinedIcon sx={{ fontSize: 18 }} />
                     <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: 'text.primary' }}>
-                      {toPersianDigits(rubies)}
+                      <AnimatedNumber value={rubies} />
                     </Typography>
                   </Box>
                   <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
@@ -765,6 +768,6 @@ export default function ProfilePage() {
           </Card>
         </Grid>
       </Grid>
-    </Box>
+    </AnimatedPage>
   );
 }

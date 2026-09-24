@@ -55,6 +55,7 @@ import {
 } from '@mui/icons-material';
 import { adminLogout, isTA, getAdminUser } from '../../services/api.js';
 import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
+import AnimatedPage from '../../components/ui/AnimatedPage.jsx';
 
 const SUPER_ADMIN_GROUPS = [
   {
@@ -661,7 +662,9 @@ export default function AdminLayout({ mode, onToggleTheme }) {
             mx: 'auto',
           }}
         >
-          <Outlet />
+          <AnimatedPage key={location.pathname}>
+            <Outlet />
+          </AnimatedPage>
         </Box>
       </Box>
 

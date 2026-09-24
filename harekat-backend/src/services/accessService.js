@@ -5,7 +5,8 @@ export class AccessService {
     /**
      * Synchronize and clean expired accesses for a given user (or all users)
      */
-    static async syncUserAccess(userId) {
+    static async syncUserAccess(userId, options = {}) {
+        const { transaction } = options;
         const now = new Date();
         // 1. Expire past user subscriptions
         await UserSubscriptions.update(
@@ -15,7 +16,8 @@ export class AccessService {
                     userId,
                     status: 'active',
                     expiresAt: { [Op.lte]: now }
-                }
+                },
+                transaction
             }
         );
 
@@ -27,7 +29,8 @@ export class AccessService {
                     userId,
                     status: 'active',
                     expiresAt: { [Op.lte]: now }
-                }
+                },
+                transaction
             }
         );
 
@@ -41,17 +44,18 @@ export class AccessService {
                     { expiresAt: { [Op.gt]: now } }
                 ]
             },
-            attributes: ['courseId']
+            attributes: ['courseId'],
+            transaction
         });
 
         const activeCourseIds = [...new Set(activeAccesses.map((a) => a.courseId))];
 
-        const user = await Users.findByPk(userId);
+        const user = await Users.findByPk(userId, { transaction });
         if (user && activeCourseIds.length > 0) {
-            const courses = await Courses.findAll({ where: { id: activeCourseIds } });
-            await user.setCourses(courses);
+            const courses = await Courses.findAll({ where: { id: activeCourseIds }, transaction });
+            await user.setCourses(courses, { transaction });
         } else if (user) {
-            await user.setCourses([]);
+            await user.setCourses([], { transaction });
         }
 
         return activeCourseIds;
@@ -60,9 +64,9 @@ export class AccessService {
     /**
      * Check if a student currently has valid access to a course
      */
-    static async hasCourseAccess(userId, courseId) {
+    static async hasCourseAccess(userId, courseId, options = {}) {
         if (!userId || !courseId) return false;
-        await this.syncUserAccess(userId);
+        await this.syncUserAccess(userId, options);
 
         const now = new Date();
         const activeRecord = await CourseAccess.findOne({
@@ -74,7 +78,8 @@ export class AccessService {
                     { expiresAt: null },
                     { expiresAt: { [Op.gt]: now } }
                 ]
-            }
+            },
+            transaction: options.transaction
         });
 
         return !!activeRecord;
@@ -83,26 +88,28 @@ export class AccessService {
     /**
      * Get list of all course IDs that a user has active access to
      */
-    static async getUserActiveCourseIds(userId) {
+    static async getUserActiveCourseIds(userId, options = {}) {
         if (!userId) return [];
-        return await this.syncUserAccess(userId);
+        return await this.syncUserAccess(userId, options);
     }
 
     /**
      * Grant access to an individual course from any source
      */
-    static async grantCourseAccess({ userId, courseId, sourceType = 'direct', sourceId = null, expiresAt = null }) {
+    static async grantCourseAccess({ userId, courseId, sourceType = 'direct', sourceId = null, expiresAt = null }, options = {}) {
         if (!userId || !courseId) throw new Error('userId and courseId are required');
+        const { transaction } = options;
 
         // Look for existing access from this specific source
         let access = await CourseAccess.findOne({
-            where: { userId, courseId, sourceType, sourceId: sourceId || null }
+            where: { userId, courseId, sourceType, sourceId: sourceId || null },
+            transaction
         });
 
         if (access) {
             access.status = 'active';
             access.expiresAt = expiresAt;
-            await access.save();
+            await access.save({ transaction });
         } else {
             access = await CourseAccess.create({
                 userId,
@@ -111,32 +118,35 @@ export class AccessService {
                 sourceId: sourceId || null,
                 status: 'active',
                 expiresAt
-            });
+            }, { transaction });
         }
 
-        await this.syncUserAccess(userId);
+        await this.syncUserAccess(userId, { transaction });
         return access;
     }
 
     /**
      * Revoke access from a specific source (or all sources if unspecified)
      */
-    static async revokeCourseAccess({ userId, courseId, sourceType = null, sourceId = null }) {
+    static async revokeCourseAccess({ userId, courseId, sourceType = null, sourceId = null }, options = {}) {
+        const { transaction } = options;
         const whereClause = { userId, courseId };
         if (sourceType) whereClause.sourceType = sourceType;
         if (sourceId) whereClause.sourceId = sourceId;
 
-        await CourseAccess.update({ status: 'revoked' }, { where: whereClause });
-        await this.syncUserAccess(userId);
+        await CourseAccess.update({ status: 'revoked' }, { where: whereClause, transaction });
+        await this.syncUserAccess(userId, { transaction });
         return true;
     }
 
     /**
      * Grant access via a Package (grants package itself + all included courses)
      */
-    static async grantPackageAccess({ userId, packageId, orderId = null }) {
+    static async grantPackageAccess({ userId, packageId, orderId = null }, options = {}) {
+        const { transaction } = options;
         const packageCourse = await Courses.findByPk(packageId, {
-            include: [{ model: Courses, as: 'packageIncludedCourses' }]
+            include: [{ model: Courses, as: 'packageIncludedCourses' }],
+            transaction
         });
 
         if (!packageCourse) throw new Error('Package course not found');
@@ -148,7 +158,7 @@ export class AccessService {
             sourceType: 'direct',
             sourceId: orderId,
             expiresAt: null
-        });
+        }, { transaction });
 
         // Grant access to all included courses
         const included = packageCourse.packageIncludedCourses || [];
@@ -159,7 +169,7 @@ export class AccessService {
                 sourceType: 'package',
                 sourceId: packageId,
                 expiresAt: null
-            });
+            }, { transaction });
         }
 
         return true;
@@ -168,9 +178,11 @@ export class AccessService {
     /**
      * Grant access via a Subscription (grants subscription + all included courses with duration)
      */
-    static async grantSubscriptionAccess({ userId, subscriptionId, durationDays = null, orderId = null }) {
+    static async grantSubscriptionAccess({ userId, subscriptionId, durationDays = null, orderId = null }, options = {}) {
+        const { transaction } = options;
         const sub = await Subscriptions.findByPk(subscriptionId, {
-            include: [{ model: Courses, as: 'includedCourses' }]
+            include: [{ model: Courses, as: 'includedCourses' }],
+            transaction
         });
 
         if (!sub) throw new Error('Subscription not found');
@@ -187,7 +199,7 @@ export class AccessService {
             expiresAt,
             status: 'active',
             orderId
-        });
+        }, { transaction });
 
         // Grant access to all courses included in subscription
         const courses = sub.includedCourses || [];
@@ -198,7 +210,7 @@ export class AccessService {
                 sourceType: 'subscription',
                 sourceId: subscriptionId,
                 expiresAt
-            });
+            }, { transaction });
         }
 
         return userSub;

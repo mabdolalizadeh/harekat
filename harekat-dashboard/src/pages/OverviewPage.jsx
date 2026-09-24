@@ -28,6 +28,9 @@ import { accessApi } from '../api/accessApi.js';
 import { sessionsApi } from '../api/sessionsApi.js';
 import LessonCard from '../components/courses/LessonCard.jsx';
 import LessonModal from '../components/courses/LessonModal.jsx';
+import AnimatedPage from '../components/ui/AnimatedPage.jsx';
+import SpotlightCard from '../components/ui/SpotlightCard.jsx';
+import AnimatedNumber from '../components/ui/AnimatedNumber.jsx';
 import { formatPrice, formatDuration, assetUrl, toPersianDigits } from '../utils/formatters.js';
 
 export default function OverviewPage() {
@@ -153,7 +156,7 @@ export default function OverviewPage() {
   }
 
   return (
-    <Box>
+    <AnimatedPage>
       {/* Top Header: "All lessons" + Superfocus toggle */}
       <Box
         sx={{
@@ -170,7 +173,7 @@ export default function OverviewPage() {
             میز کار و جلسات آموزشی من
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            دسترسی به دوره‌های فعال ({toPersianDigits(accessibleCourses.length)} دوره) و پیگیری جلسات کلاسی
+            دسترسی به دوره‌های فعال (<AnimatedNumber value={accessibleCourses.length} /> دوره) و پیگیری جلسات کلاسی
           </Typography>
         </Box>
 
@@ -209,7 +212,7 @@ export default function OverviewPage() {
 
       {/* RECOMMENDED COURSE */}
       {recommendedCourse && (
-        <Card
+        <SpotlightCard
           sx={{
             p: { xs: 2.5, sm: 3 },
             mb: 4,
@@ -219,7 +222,6 @@ export default function OverviewPage() {
             borderColor: 'primary.light',
             boxShadow: '0 4px 20px -2px rgba(244, 124, 32, 0.12)',
             position: 'relative',
-            overflow: 'hidden',
           }}
         >
           <Grid container spacing={3} alignItems="center">
@@ -309,7 +311,7 @@ export default function OverviewPage() {
               </Box>
             </Grid>
           </Grid>
-        </Card>
+        </SpotlightCard>
       )}
 
       {/* Accessible Courses Overview Bar */}
@@ -613,6 +615,6 @@ export default function OverviewPage() {
         isCompleted={selectedLesson ? completedLessonIds.includes(selectedLesson.id) : false}
         onToggleComplete={(id) => toggleLessonComplete(id)}
       />
-    </Box>
+    </AnimatedPage>
   );
 }

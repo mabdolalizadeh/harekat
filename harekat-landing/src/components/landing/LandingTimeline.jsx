@@ -120,20 +120,20 @@ export default function LandingTimeline({ steps = defaultSteps }) {
             id="how-it-works"
             data-section-theme="how-it-works"
             ref={containerRef}
-            className="relative w-full min-h-screen py-10"
+            className="relative w-full min-h-screen py-10 md:py-0"
         >
             <div
                 ref={pinTargetRef}
-                className="w-full h-screen flex flex-col justify-center items-center gap-10 px-4 max-w-7xl mx-auto"
+                className="w-full h-auto min-h-screen md:h-screen flex flex-col justify-center items-center gap-8 sm:gap-10 px-4 max-w-7xl mx-auto py-12 md:py-0"
             >
                 <div className="flex flex-col items-center gap-4 text-center">
                     <SectionTag>نحوه عملکرد</SectionTag>
-                    <h2 className="text-[clamp(2.2rem,4.5vw,3.6rem)] font-extrabold text-foreground max-w-[700px] leading-tight">
+                    <h2 className="text-[clamp(1.9rem,4vw,3.4rem)] font-extrabold text-foreground max-w-[700px] leading-tight">
                         یادگیری چطور اتفاق می‌افته
                     </h2>
                 </div>
 
-                <div className="relative w-full max-w-6xl mt-4">
+                <div className="relative w-full max-w-6xl mt-4" data-cursor="scroll">
                     {/* Connecting glowing progress line for desktop */}
                     <div
                         aria-hidden="true"
@@ -147,14 +147,14 @@ export default function LandingTimeline({ steps = defaultSteps }) {
 
                     <div
                         ref={cardsContainerRef}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 w-full relative z-10"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-8 w-full relative z-10"
                     >
                         {steps.map((step, index) => (
                             <div
                                 key={index}
-                                className="timeline-step-card flex flex-col gap-4 bg-card/75 backdrop-blur-xl border border-border/80 hover:border-primary/50 rounded-3xl p-6 sm:p-7 shadow-xl shadow-black/10 transition-colors duration-300 will-change-transform"
+                                className="timeline-step-card flex flex-col gap-3 sm:gap-4 bg-card border border-border/80 hover:border-primary/50 rounded-3xl p-5 sm:p-7 shadow-xl shadow-black/10 transition-colors duration-300 will-change-transform"
                             >
-                                <span className="text-[clamp(3rem,5vw,4.5rem)] font-black leading-none tracking-tight text-primary select-none">
+                                <span className="text-[clamp(2.5rem,4.5vw,4.2rem)] font-black leading-none tracking-tight text-primary select-none">
                                     {step.number}
                                 </span>
                                 <h3 className="text-foreground text-lg sm:text-xl font-bold">

@@ -68,7 +68,7 @@ export default function LandingPackages({
                     ))
                 ) : (
                     skillPackages.map((course, idx) => (
-                        <div key={course.id || course.title || idx} className="package-card-item will-change-transform">
+                        <div key={course.id || course.title || idx} className="package-card-item">
                             <CourseCard {...course} kind="skill" productType="course" />
                         </div>
                     ))

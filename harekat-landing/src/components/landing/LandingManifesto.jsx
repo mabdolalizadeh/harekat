@@ -100,15 +100,15 @@ export default function LandingManifesto() {
             id="manifesto"
             data-section-theme="manifesto"
             ref={sectionRef}
-            className="relative w-full py-20 sm:py-32 flex flex-col items-center text-center px-4"
+            className="relative w-full py-16 sm:py-28 flex flex-col items-center text-center px-4"
         >
-            <div ref={tagRef} className="mb-6">
+            <div ref={tagRef} className="mb-5 sm:mb-6">
                 <SectionTag>درباره ما</SectionTag>
             </div>
 
             <h2
                 ref={titleRef}
-                className="text-[clamp(2.2rem,4.8vw,4rem)] font-black text-foreground max-w-[760px] leading-[1.2] tracking-tight"
+                className="text-[clamp(1.85rem,4.5vw,3.8rem)] font-black text-foreground max-w-[760px] leading-[1.25] tracking-tight"
             >
                 رسانه عوض می‌شه؛ هنرمند می‌مونه.
             </h2>

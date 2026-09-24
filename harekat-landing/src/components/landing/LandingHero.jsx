@@ -107,23 +107,8 @@ export default function LandingHero({
                 // Banner parallax on scroll
                 if (bannerWrapperRef.current) {
                     gsap.to(bannerWrapperRef.current, {
-                        y: 80,
-                        scale: 0.96,
-                        opacity: 0.85,
-                        ease: 'none',
-                        scrollTrigger: {
-                            trigger: heroEl,
-                            start: 'top top',
-                            end: 'bottom top',
-                            scrub: true,
-                        }
-                    });
-                }
-
-                // Content parallax drift
-                if (contentRef.current) {
-                    gsap.to(contentRef.current, {
-                        y: 40,
+                        y: 50,
+                        opacity: 0.9,
                         ease: 'none',
                         scrollTrigger: {
                             trigger: heroEl,
@@ -196,7 +181,7 @@ export default function LandingHero({
                 </div>
 
                 {/* Primary Artistic Persian Headline */}
-                <h1 className="text-[clamp(2.5rem,7.5vw,6rem)] font-extrabold leading-[1.08] tracking-tight text-foreground select-none">
+                <h1 className="text-[clamp(1.9rem,6.5vw,5.5rem)] font-extrabold leading-[1.18] tracking-tight text-foreground select-none">
                     <span className="inline-block">
                         {(heroTitle ? heroTitle.replace(/نمی‌گیری[؛;]?/g, '').trim() : 'اینجا فقط یاد')
                             .split(/\s+/)
@@ -204,7 +189,7 @@ export default function LandingHero({
                             .map((word, idx) => (
                                 <span
                                     key={idx}
-                                    className="hero-split-word inline-block ml-3"
+                                    className="hero-split-word inline-block ml-1.5 sm:ml-3"
                                 >
                                     {word}
                                 </span>
@@ -219,7 +204,7 @@ export default function LandingHero({
                 {/* Subtitle with refined editorial typography */}
                 <p
                     ref={subtitleRef}
-                    className="mt-6 max-w-2xl text-muted text-[clamp(1rem,2vw,1.25rem)] leading-relaxed font-normal"
+                    className="mt-5 sm:mt-6 max-w-2xl text-muted text-[clamp(0.95rem,2vw,1.25rem)] leading-relaxed font-normal px-2"
                 >
                     {heroSubtitle}
                 </p>
@@ -237,12 +222,12 @@ export default function LandingHero({
                 {/* Scroll Down Prompt Indicator */}
                 <div
                     ref={scrollIndicatorRef}
-                    className="mt-14 sm:mt-16 flex flex-col items-center gap-2 text-muted/80 cursor-pointer hover:text-foreground transition-colors"
+                    className="mt-14 sm:mt-16 flex flex-col items-center gap-2.5 text-muted/80 cursor-pointer hover:text-foreground transition-colors group"
                     onClick={onCtaClick}
                 >
                     <span className="text-xs font-semibold tracking-wider">برای مشاهده اسکرول کنید</span>
-                    <div className="w-5 h-9 rounded-full border border-border/80 flex items-start justify-center p-1">
-                        <div className="w-1.5 h-2 rounded-full bg-primary animate-bounce mt-0.5" />
+                    <div className="w-[22px] h-[36px] rounded-full border border-border/80 group-hover:border-primary/60 flex items-start justify-center pt-2.5 relative transition-colors">
+                        <div className="w-1.5 h-2.5 rounded-full bg-primary animate-mouse-wheel" />
                     </div>
                 </div>
 

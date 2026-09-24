@@ -105,127 +105,22 @@ export function CourseCard({
         e.dataTransfer.effectAllowed = 'copy';
     };
 
-    const [magneticOffset, setMagneticOffset] = useState({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
-    const cardRef = useRef(null);
-    const cardIdRef = useRef(id || Math.random().toString());
-
-    // Listen for neighbor magnetic events to create repulsive wave on other cards
-    useEffect(() => {
-        if (window.matchMedia("(pointer: coarse)").matches) return;
-
-        const handleNeighborMagnetic = (e) => {
-            const { sourceId, mouseX, mouseY } = e.detail;
-            if (sourceId === cardIdRef.current) return;
-            if (!cardRef.current) return;
-
-            const rect = cardRef.current.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-
-            const distX = centerX - mouseX;
-            const distY = centerY - mouseY;
-            const distance = Math.hypot(distX, distY);
-
-            // Radius of repulsion: 650px
-            const maxRadius = 650;
-            if (distance < maxRadius && distance > 0) {
-                const intensity = Math.pow(1 - distance / maxRadius, 2);
-                const repelDistance = 22 * intensity;
-                const angle = Math.atan2(distY, distX);
-
-                setMagneticOffset({
-                    x: Math.cos(angle) * repelDistance,
-                    y: Math.sin(angle) * repelDistance,
-                    rotateX: -(Math.sin(angle) * repelDistance * 0.35),
-                    rotateY: Math.cos(angle) * repelDistance * 0.35,
-                });
-            } else {
-                setMagneticOffset((prev) => (prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0, rotateX: 0, rotateY: 0 }));
-            }
-        };
-
-        const handleNeighborClear = () => {
-            setMagneticOffset({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
-        };
-
-        window.addEventListener('course-magnetic-move', handleNeighborMagnetic);
-        window.addEventListener('course-magnetic-leave', handleNeighborClear);
-
-        return () => {
-            window.removeEventListener('course-magnetic-move', handleNeighborMagnetic);
-            window.removeEventListener('course-magnetic-leave', handleNeighborClear);
-        };
-    }, []);
-
-    const handleMouseMove = (e) => {
-        if (!cardRef.current || window.matchMedia("(pointer: coarse)").matches) return;
-        const rect = cardRef.current.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const deltaX = e.clientX - centerX;
-        const deltaY = e.clientY - centerY;
-
-        // Smooth magnetic pull on the active card
-        const pullFactor = 0.14;
-        const tiltFactor = 0.035;
-
-        setMagneticOffset({
-            x: deltaX * pullFactor,
-            y: deltaY * pullFactor,
-            rotateX: -deltaY * tiltFactor,
-            rotateY: deltaX * tiltFactor,
-        });
-
-        // Broadcast to other course cards to repel away
-        window.dispatchEvent(new CustomEvent('course-magnetic-move', {
-            detail: {
-                sourceId: cardIdRef.current,
-                mouseX: e.clientX,
-                mouseY: e.clientY,
-            }
-        }));
-    };
-
-    const handleMouseLeave = () => {
-        setMagneticOffset({ x: 0, y: 0, rotateX: 0, rotateY: 0 });
-        window.dispatchEvent(new CustomEvent('course-magnetic-leave', {
-            detail: { sourceId: cardIdRef.current }
-        }));
-    };
-
     return (
-        <motion.div
-            ref={cardRef}
+        <div
+            data-cursor="course"
+            data-course-card="true"
             draggable={!isSubscription}
             onDragStart={handleDragStart}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            animate={{
-                x: magneticOffset.x,
-                y: magneticOffset.y,
-                rotateX: magneticOffset.rotateX,
-                rotateY: magneticOffset.rotateY,
-            }}
-            transition={{
-                type: "spring",
-                stiffness: 220,
-                damping: 18,
-                mass: 0.6,
-            }}
-            style={{
-                transformStyle: "preserve-3d",
-                perspective: 800,
-            }}
             onClick={() => id && !isSubscription && navigate(getDetailPath())}
             className={cn(
-                'bg-card border border-border/10 flex flex-col rounded-xl overflow-hidden will-change-transform',
-                'group transition-[border-color,box-shadow] duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10',
+                'bg-card border border-border/70 flex flex-col rounded-2xl overflow-hidden',
+                'transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-2xl hover:border-primary/50 hover:shadow-primary/10',
                 !isSubscription && 'cursor-pointer active:cursor-grabbing',
                 className
             )}
             {...props}
         >
-            {/*image*/ }
+            {/*image*/}
             <div className={'relative overflow-hidden aspect-square'}>
                 <Img
                     src={imgSrc}
@@ -284,7 +179,7 @@ export function CourseCard({
                     </button>
                 </div>
             </div>
-        </motion.div>
+        </div>
     )
 }
 

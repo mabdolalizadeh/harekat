@@ -34,6 +34,7 @@ test.after(async () => {
 
 test('1. Student Auth & Test OTP (No OTP in HTTP response)', async () => {
     const testPhone = '09129990001';
+    await Users.destroy({ where: { phoneNumber: testPhone } });
 
     // Request OTP
     const res = await fetch(`${baseUrl}/auth`, {

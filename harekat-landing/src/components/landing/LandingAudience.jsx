@@ -94,13 +94,13 @@ export default function LandingAudience() {
             data-section-theme="who"
             ref={sectionRef}
             dir="rtl"
-            className="relative w-full py-20 sm:py-32 px-4 max-w-7xl mx-auto text-right"
+            className="relative w-full py-16 sm:py-28 px-4 max-w-7xl mx-auto text-right"
         >
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start relative">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start relative">
                 {/* Left Sticky Column */}
-                <div className="md:col-span-5 md:sticky md:top-36 flex flex-col items-start text-right gap-6">
+                <div className="md:col-span-5 md:sticky md:top-36 flex flex-col items-start text-right gap-5 sm:gap-6">
                     <SectionTag>برای کیه؟</SectionTag>
-                    <h2 className="text-[clamp(2.4rem,4.5vw,3.8rem)] font-extrabold text-foreground leading-tight">
+                    <h2 className="text-[clamp(1.85rem,4vw,3.4rem)] font-extrabold text-foreground leading-tight">
                         این مدرسه برای چه کسی مناسبه؟
                     </h2>
                     <p className="text-muted text-base sm:text-lg leading-relaxed font-normal max-w-md">
@@ -126,24 +126,24 @@ export default function LandingAudience() {
                 </div>
 
                 {/* Right Scrolling Stacking Cards Column */}
-                <div className="md:col-span-7 flex flex-col gap-8 sm:gap-12 relative pb-20">
+                <div className="md:col-span-7 flex flex-col gap-6 sm:gap-10 relative pb-12 sm:pb-20" data-cursor="scroll">
                     {audienceList.map((item, index) => (
                         <div
                             key={index}
-                            style={{ top: `${130 + index * 24}px` }}
-                            className="audience-vertical-card md:sticky group relative bg-card/90 backdrop-blur-2xl border border-border/90 hover:border-primary/50 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/15 transition-colors duration-300 will-change-transform text-right"
+                            style={{ '--card-top': `${130 + index * 24}px` }}
+                            className="audience-vertical-card md:sticky md:[top:var(--card-top)] group relative bg-card border border-border/90 hover:border-primary/50 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-black/10 transition-colors duration-300 will-change-transform text-right"
                         >
-                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/60">
-                                <span className="text-3xl font-black text-primary select-none">
+                            <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-border/60">
+                                <span className="text-2xl sm:text-3xl font-black text-primary select-none">
                                     {persianDigits[index]}
                                 </span>
                             </div>
 
-                            <h3 className="text-foreground text-2xl sm:text-3xl font-extrabold mb-4 group-hover:text-primary transition-colors">
+                            <h3 className="text-foreground text-xl sm:text-2xl md:text-3xl font-extrabold mb-3 sm:mb-4 group-hover:text-primary transition-colors">
                                 {item.title}
                             </h3>
 
-                            <p className="text-muted text-base sm:text-lg leading-relaxed font-normal">
+                            <p className="text-muted text-sm sm:text-base md:text-lg leading-relaxed font-normal">
                                 {item.desc}
                             </p>
                         </div>

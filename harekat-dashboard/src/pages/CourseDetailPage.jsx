@@ -53,6 +53,9 @@ import { assignmentsApi } from '../api/assignmentsApi.js';
 import { quizzesApi } from '../api/quizzesApi.js';
 import { evaluationsApi } from '../api/evaluationsApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import AnimatedPage from '../components/ui/AnimatedPage.jsx';
+import SpotlightCard from '../components/ui/SpotlightCard.jsx';
+import AnimatedNumber from '../components/ui/AnimatedNumber.jsx';
 import { assetUrl, formatDate, toPersianDigits } from '../utils/formatters.js';
 
 export default function CourseDetailPage() {
@@ -363,7 +366,7 @@ export default function CourseDetailPage() {
   const currentVideoUrl = activeSession?.isLocked ? null : (activeSession?.videoLink || courseData.videoUrl);
 
   return (
-    <Box>
+    <AnimatedPage>
       {/* Top Bar: Back & Status */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Button
@@ -1209,6 +1212,6 @@ export default function CourseDetailPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </AnimatedPage>
   );
 }

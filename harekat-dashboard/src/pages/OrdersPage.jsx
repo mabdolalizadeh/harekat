@@ -26,6 +26,9 @@ import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
 import { paymentsApi } from '../api/paymentsApi.js';
 import { formatPrice, formatDate, toPersianDigits } from '../utils/formatters.js';
 import FakePaymentModal from '../components/payment/FakePaymentModal.jsx';
+import AnimatedPage from '../components/ui/AnimatedPage.jsx';
+import SpotlightCard from '../components/ui/SpotlightCard.jsx';
+import AnimatedNumber from '../components/ui/AnimatedNumber.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useThemeMode } from '../contexts/ThemeModeContext.jsx';
 
@@ -58,9 +61,20 @@ export default function OrdersPage() {
     loadPayments();
   }, []);
 
-  const handleOpenPaymentModal = (payment) => {
-    setSelectedPayment(payment);
-    setModalOpen(true);
+  const handleOpenPaymentModal = async (payment) => {
+    try {
+      const orderId = payment.orderId || payment.id;
+      const initRes = await paymentsApi.initiatePayment(orderId, payment.gateway);
+      if (initRes?.ok && initRes.data?.requiresGatewayRedirect && initRes.data?.redirectUrl) {
+        window.location.href = initRes.data.redirectUrl;
+        return;
+      }
+      setSelectedPayment({ ...payment, ...(initRes?.data || {}) });
+      setModalOpen(true);
+    } catch (err) {
+      setSelectedPayment(payment);
+      setModalOpen(true);
+    }
   };
 
   const handlePaymentSuccess = async (data) => {
@@ -155,7 +169,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <Box>
+    <AnimatedPage>
       <Box sx={{ mb: 3.5 }}>
         <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.3rem', md: '1.75rem' }, mb: 0.5, color: 'text.primary' }}>
           تاریخچه پرداخت‌ها و تراکنش‌ها
@@ -246,15 +260,25 @@ export default function OrdersPage() {
                     <TableCell sx={{ fontSize: '0.82rem', color: 'text.secondary' }}>
                       <Box>
                         <Typography variant="caption" sx={{ fontWeight: 700, display: 'block', color: 'text.primary' }}>
-                          {p.gateway || 'درگاه آنلاین'}
+                          {p.gateway === 'zibal' ? 'درگاه زیبال' : (p.gateway === 'mock' ? 'درگاه آزمایشی' : (p.gateway || 'درگاه آنلاین'))}
                         </Typography>
-                        {p.transactionId ? (
-                          <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
-                            {p.transactionId}
+                        {p.trackId && (
+                          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                            شناسه: {p.trackId}
                           </Typography>
-                        ) : (
+                        )}
+                        {p.transactionId ? (
+                          <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 600, display: 'block', fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                            کد مرجع: {p.transactionId}
+                          </Typography>
+                        ) : !p.trackId && (
                           <Typography variant="caption" sx={{ color: 'text.disabled' }}>
                             فاقد کد رهگیری
+                          </Typography>
+                        )}
+                        {p.cardNumber && (
+                          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontFamily: 'monospace', fontSize: '0.72rem' }}>
+                            {p.cardNumber}
                           </Typography>
                         )}
                       </Box>
@@ -308,6 +332,6 @@ export default function OrdersPage() {
         onSuccess={handlePaymentSuccess}
         onCancelled={handlePaymentCancelled}
       />
-    </Box>
+    </AnimatedPage>
   );
 }

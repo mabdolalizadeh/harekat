@@ -6,6 +6,13 @@ import { superAdminOnly } from '../middleware/rbac.js';
 
 const router = Router();
 
+// Public Gateway Callback endpoints (Zibal redirects here after payment)
+router.get('/zibal/callback', PaymentsController.handleZibalCallback);
+router.post('/zibal/callback', PaymentsController.handleZibalCallback);
+
+// Public / Student Payment Status Check (for result page)
+router.get('/:id/status', PaymentsController.getPaymentStatus);
+
 // Student routes
 router.post('/initiate', auth, PaymentsController.initiatePayment);
 router.post('/fake/process', auth, PaymentsController.processFakePayment);

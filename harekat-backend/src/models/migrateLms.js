@@ -10,6 +10,8 @@ export async function migrateLmsSchema() {
         if (!existing.has('jobTitle')) await sequelize.query("ALTER TABLE Users ADD COLUMN jobTitle VARCHAR(255)");
         if (!existing.has('education')) await sequelize.query("ALTER TABLE Users ADD COLUMN education VARCHAR(255)");
         if (!existing.has('rubies')) await sequelize.query("ALTER TABLE Users ADD COLUMN rubies INTEGER DEFAULT 0");
+        if (!existing.has('otpAttempts')) await sequelize.query("ALTER TABLE Users ADD COLUMN otpAttempts INTEGER DEFAULT 0");
+        if (!existing.has('otpLastRequestedAt')) await sequelize.query("ALTER TABLE Users ADD COLUMN otpLastRequestedAt DATETIME");
     }
 
     // 2. Admins new columns
@@ -44,8 +46,19 @@ export async function migrateLmsSchema() {
         if (!existing.has('amount')) await sequelize.query("ALTER TABLE Payments ADD COLUMN amount VARCHAR(255)");
         if (!existing.has('gateway')) await sequelize.query("ALTER TABLE Payments ADD COLUMN gateway VARCHAR(50) DEFAULT 'mock'");
         if (!existing.has('transactionId')) await sequelize.query("ALTER TABLE Payments ADD COLUMN transactionId VARCHAR(255)");
+        if (!existing.has('trackId')) await sequelize.query("ALTER TABLE Payments ADD COLUMN trackId VARCHAR(255)");
+        if (!existing.has('cardNumber')) await sequelize.query("ALTER TABLE Payments ADD COLUMN cardNumber VARCHAR(255)");
+        if (!existing.has('description')) await sequelize.query("ALTER TABLE Payments ADD COLUMN description TEXT");
+        if (!existing.has('failureReason')) await sequelize.query("ALTER TABLE Payments ADD COLUMN failureReason TEXT");
+        if (!existing.has('callbackData')) await sequelize.query("ALTER TABLE Payments ADD COLUMN callbackData TEXT");
+        if (!existing.has('paidAt')) await sequelize.query("ALTER TABLE Payments ADD COLUMN paidAt DATETIME");
         if (!existing.has('status')) await sequelize.query("ALTER TABLE Payments ADD COLUMN status VARCHAR(50) DEFAULT 'pending'");
         if (!existing.has('metadata')) await sequelize.query("ALTER TABLE Payments ADD COLUMN metadata TEXT");
+
+        await sequelize.query("CREATE INDEX IF NOT EXISTS idx_payments_track_id ON Payments (trackId)");
+        await sequelize.query("CREATE INDEX IF NOT EXISTS idx_payments_order_id ON Payments (orderId)");
+        await sequelize.query("CREATE INDEX IF NOT EXISTS idx_payments_user_id ON Payments (userId)");
+        await sequelize.query("CREATE INDEX IF NOT EXISTS idx_payments_status ON Payments (status)");
     }
 
     // 5. Courses evaluation columns

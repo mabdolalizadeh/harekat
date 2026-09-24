@@ -47,6 +47,7 @@ import PageHeader from '../../components/admin/PageHeader.jsx';
 import StatCard from '../../components/admin/StatCard.jsx';
 import StatusChip from '../../components/admin/StatusChip.jsx';
 import EmptyState from '../../components/admin/EmptyState.jsx';
+import AnimatedNumber from '../../components/ui/AnimatedNumber.jsx';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -290,7 +291,7 @@ export default function AdminDashboard() {
           <Grid item xs={12} sm={6} md={4}>
             <StatCard
               title="دوره‌های اختصاص‌یافته به شما"
-              value={courses.length.toLocaleString('fa-IR')}
+              value={<AnimatedNumber value={courses.length} />}
               icon={CourseIcon}
               color="primary"
               caption="دوره‌هایی که مدیریت آموزشی آن با شماست"
@@ -301,7 +302,7 @@ export default function AdminDashboard() {
           <Grid item xs={12} sm={6} md={4}>
             <StatCard
               title="تیکت‌های در انتظار پاسخ"
-              value={pendingTicketsCount.toLocaleString('fa-IR')}
+              value={<AnimatedNumber value={pendingTicketsCount} />}
               icon={TicketIcon}
               color={pendingTicketsCount > 0 ? 'error' : 'success'}
               badge={pendingTicketsCount > 0 ? 'پاسخ دهید' : 'پاسخ داده شده'}
@@ -314,7 +315,7 @@ export default function AdminDashboard() {
           <Grid item xs={12} sm={6} md={4}>
             <StatCard
               title="کل تیکت‌های دوره‌های من"
-              value={tickets.length.toLocaleString('fa-IR')}
+              value={<AnimatedNumber value={tickets.length} />}
               icon={TicketIcon}
               color="info"
               caption="مجموع پرسش‌های پشتیبانی ثبت‌شده دانشجویان"
@@ -507,7 +508,7 @@ export default function AdminDashboard() {
         <Grid item xs={12} sm={6} md={4}>
           <StatCard
             title="کل دانشجویان و کاربران"
-            value={students.length.toLocaleString('fa-IR')}
+            value={<AnimatedNumber value={students.length} />}
             icon={StudentIcon}
             color="primary"
             caption={`${students.filter((s) => s.phoneNumber).length} کاربر با شماره موبایل ثبت‌شده`}
@@ -518,7 +519,7 @@ export default function AdminDashboard() {
         <Grid item xs={12} sm={6} md={4}>
           <StatCard
             title="دوره‌های آموزشی فعال"
-            value={courses.length.toLocaleString('fa-IR')}
+            value={<AnimatedNumber value={courses.length} />}
             icon={CourseIcon}
             color="info"
             caption={`${categories.length} دسته‌بندی موضوعی و ${teachers.length} مدرس`}
@@ -542,7 +543,7 @@ export default function AdminDashboard() {
         <Grid item xs={12} sm={6} md={4}>
           <StatCard
             title="سفارش‌های ثبت‌شده"
-            value={orders.length.toLocaleString('fa-IR')}
+            value={<AnimatedNumber value={orders.length} />}
             icon={OrderIcon}
             color="warning"
             badge={`${orders.filter((o) => o.status === 'pending').length} در انتظار پرداخت`}
@@ -555,7 +556,7 @@ export default function AdminDashboard() {
         <Grid item xs={12} sm={6} md={4}>
           <StatCard
             title="پلن‌های اشتراک فعال"
-            value={activeSubCount.toLocaleString('fa-IR')}
+            value={<AnimatedNumber value={activeSubCount} />}
             icon={SubscriptionIcon}
             color="secondary"
             caption={`از مجموع ${subscriptions.length} نوع پلن اشتراک ماهانه`}
@@ -566,7 +567,7 @@ export default function AdminDashboard() {
         <Grid item xs={12} sm={6} md={4}>
           <StatCard
             title="تیکت‌های در انتظار پاسخ"
-            value={pendingTicketsCount.toLocaleString('fa-IR')}
+            value={<AnimatedNumber value={pendingTicketsCount} />}
             icon={TicketIcon}
             color={pendingTicketsCount > 0 ? 'error' : 'success'}
             badge={pendingTicketsCount > 0 ? 'نیاز به بررسی' : 'پاسخ داده شده'}

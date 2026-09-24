@@ -71,7 +71,11 @@ export default function SubscriptionsPage() {
       await cartApi.addToCart(sub.id, 'subscription', 1, effectivePrice);
       const orderRes = await ordersApi.createOrder();
       if (orderRes?.ok && orderRes.data?.id) {
-        await paymentsApi.initiatePayment(orderRes.data.id, 'mock');
+        const initRes = await paymentsApi.initiatePayment(orderRes.data.id);
+        if (initRes?.ok && initRes.data?.requiresGatewayRedirect && initRes.data?.redirectUrl) {
+          window.location.href = initRes.data.redirectUrl;
+          return;
+        }
       }
       navigate('/payments');
     } catch (err) {

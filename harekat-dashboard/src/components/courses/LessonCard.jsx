@@ -1,4 +1,5 @@
 import { Box, Typography, Card, IconButton, Tooltip } from '@mui/material';
+import { motion } from 'motion/react';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
@@ -11,27 +12,33 @@ export default function LessonCard({ lesson, onPlay, status }) {
   const isInProgress = status === 'in_progress';
 
   return (
-    <Card
-      sx={{
-        p: 2,
-        mb: 2,
-        borderRadius: '18px',
-        bgcolor: 'background.paper',
-        border: '1px solid',
-        borderColor: isInProgress ? 'primary.main' : 'divider',
-        boxShadow: isInProgress
-          ? '0 6px 18px -4px rgba(244, 124, 32, 0.2)'
-          : '0 2px 6px rgba(0, 0, 0, 0.04)',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.12)',
-          borderColor: 'primary.main',
-        },
-      }}
-      onClick={() => onPlay && onPlay(lesson)}
+    <motion.div
+      whileHover={{ y: -3, transition: { duration: 0.18, ease: 'easeOut' } }}
+      whileTap={{ scale: 0.985 }}
     >
+      <Card
+        sx={{
+          p: 2,
+          mb: 2,
+          borderRadius: '18px',
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: isInProgress ? 'primary.main' : 'divider',
+          boxShadow: isInProgress
+            ? '0 6px 18px -4px rgba(244, 124, 32, 0.22)'
+            : '0 2px 6px rgba(0, 0, 0, 0.03)',
+          cursor: 'pointer',
+          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+          '&:hover': {
+            boxShadow: isInProgress
+              ? '0 10px 24px -4px rgba(244, 124, 32, 0.3)'
+              : '0 8px 20px -4px rgba(0, 0, 0, 0.08)',
+            borderColor: 'primary.main',
+          },
+        }}
+        onClick={() => onPlay && onPlay(lesson)}
+      >
+
       {/* Top lesson info: Lesson Number + Time / Date */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.2 }}>
         <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, fontSize: '0.78rem' }}>
@@ -154,5 +161,6 @@ export default function LessonCard({ lesson, onPlay, status }) {
         </Box>
       </Box>
     </Card>
+    </motion.div>
   );
 }

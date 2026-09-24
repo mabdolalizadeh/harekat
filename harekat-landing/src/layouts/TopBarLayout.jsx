@@ -46,9 +46,16 @@ export default function TopBarLayout() {
     const [profileOpen, setProfileOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    // Scroll listener for sticky navbar styling
+    // Throttled / state-guarded scroll listener for sticky navbar styling
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 40);
+        let lastScrolled = false;
+        const onScroll = () => {
+            const isScrolled = window.scrollY > 40;
+            if (isScrolled !== lastScrolled) {
+                lastScrolled = isScrolled;
+                setScrolled(isScrolled);
+            }
+        };
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
@@ -149,7 +156,7 @@ export default function TopBarLayout() {
         <div className={cn('fixed top-0 z-50 w-full transition-all duration-300', scrolled ? 'pt-3' : 'pt-5')}>
             <div
                 className={cn(
-                    'mx-auto max-w-[var(--container-8xl)] px-6 sm:px-8 py-1.5',
+                    'mx-auto max-w-[var(--container-8xl)] px-3.5 sm:px-8 py-1.5',
                     'transition-all duration-300 rounded-full',
                     'backdrop-blur-xl',
                     scrolled
@@ -376,7 +383,7 @@ export default function TopBarLayout() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="md:hidden absolute top-full left-0 w-full bg-background/95 backdrop-blur-xl border-b border-[var(--border)] px-6 py-6 flex flex-col gap-4 z-40"
+                        className="md:hidden absolute top-full left-0 w-full max-h-[85vh] overflow-y-auto bg-background/95 backdrop-blur-xl border-b border-[var(--border)] px-5 sm:px-6 py-5 sm:py-6 flex flex-col gap-4 z-40 shadow-2xl"
                     >
                         {/* If logged in on mobile, show user summary */}
                         {isLoggedIn && (

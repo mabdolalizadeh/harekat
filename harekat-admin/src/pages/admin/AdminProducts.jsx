@@ -53,6 +53,7 @@ import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
 import StatusChip from '../../components/admin/StatusChip.jsx';
 import EmptyState from '../../components/admin/EmptyState.jsx';
 import ImagePicker from '../../components/ImagePicker.jsx';
+import MarkdownEditor from '../../components/MarkdownEditor.jsx';
 
 const EMPTY_PRODUCT = {
   name: '',
@@ -687,13 +688,12 @@ function ProductFormModal({ open, initial, categories, teachers, allCourses, kin
               </Grid>
 
               <Grid size={12}>
-                <TextField
-                  label="توضیحات جامع دوره (پشتیبانی از Markdown)"
-                  multiline
-                  rows={6}
+                <MarkdownEditor
+                  label="توضیحات جامع دوره (پشتیبانی از فرمت‌بندی Markdown و درج تصویر)"
                   value={form.longDescription || ''}
-                  onChange={(e) => set('longDescription', e.target.value)}
-                  placeholder="سرفصل‌ها، پیش‌نیازها و اهداف آموزشی با قالب Markdown..."
+                  onChange={(val) => set('longDescription', val)}
+                  placeholder="سرفصل‌ها، پیش‌نیازها و اهداف آموزشی را به زبان Markdown یا متن ساده بنویسید. برای افزودن تصویر دوره از دکمه «آپلود و درج تصویر» استفاده نمایید..."
+                  minHeight={340}
                 />
               </Grid>
             </Grid>

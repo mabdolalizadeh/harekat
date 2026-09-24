@@ -70,7 +70,7 @@ function LevelBlock({ id, eyebrow, title, courses = [], loading }) {
                     courses.map((course, index) => (
                         <div
                             key={course.id || course.title || index}
-                            className="landing-course-card will-change-transform"
+                            className="landing-course-card"
                         >
                             <CourseCard {...course} />
                         </div>

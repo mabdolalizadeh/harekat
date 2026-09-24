@@ -68,7 +68,7 @@ export default function LandingSubscriptions({
                     ))
                 ) : (
                     apiSubscriptions.map((item, idx) => (
-                        <div key={item.id || idx} className="subscription-card-item will-change-transform">
+                        <div key={item.id || idx} className="subscription-card-item">
                             <SubscriptionCard {...item} />
                         </div>
                     ))

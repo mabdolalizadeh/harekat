@@ -45,7 +45,7 @@ app.use(cors({
     origin: corsOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id', 'X-Session-Id', 'Accept'],
 }));
 
 app.use(express.json({
@@ -212,13 +212,14 @@ app.use('/api/v1/admins/auth', strictAuthLimiter);
 app.use('/api/v1/admins/register', strictAuthLimiter);
 
 app.use('/api/v1', routes);
+app.use('/api', routes);
 
 // Serve the admin SPA from the admin hostname at its root. The hostname is
 // configured with ADMIN_HOSTNAME (for example admin.domain.tld); the
 // admin.* fallback also makes local subdomain testing straightforward.
 if (fs.existsSync(path.join(adminDist, 'index.html'))) {
     app.use((req, res, next) => {
-        if (!isAdminHost(req) || req.path.startsWith('/api/v1') || isLegacyAdminPath(req)) return next();
+        if (!isAdminHost(req) || req.path.startsWith('/api') || isLegacyAdminPath(req)) return next();
         express.static(adminDist)(req, res, (err) => {
             if (err) return next(err);
             if (req.method === 'GET') return res.sendFile(path.join(adminDist, 'index.html'));
@@ -232,7 +233,7 @@ if (fs.existsSync(path.join(adminDist, 'index.html'))) {
 // dashboard.* fallback also makes local subdomain testing straightforward.
 if (fs.existsSync(path.join(dashboardDist, 'index.html'))) {
     app.use((req, res, next) => {
-        if (!isDashboardHost(req) || req.path.startsWith('/api/v1')) return next();
+        if (!isDashboardHost(req) || req.path.startsWith('/api')) return next();
         express.static(dashboardDist)(req, res, (err) => {
             if (err) return next(err);
             if (req.method === 'GET') return res.sendFile(path.join(dashboardDist, 'index.html'));
@@ -249,7 +250,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.startsWith('/api/v1') && !isLegacyAdminPath(req)) {
+    if (req.method === 'GET' && !req.path.startsWith('/api') && !isLegacyAdminPath(req)) {
         if (isAdminHost(req) && fs.existsSync(path.join(adminDist, 'index.html'))) {
             return res.sendFile(path.join(adminDist, 'index.html'));
         }

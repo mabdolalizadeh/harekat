@@ -25,6 +25,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
 import { useCart } from '../../contexts/CartContext.jsx';
 import { cartApi } from '../../api/cartApi.js';
+import { paymentsApi } from '../../api/paymentsApi.js';
 import { formatPrice, assetUrl, toPersianDigits } from '../../utils/formatters.js';
 import FakePaymentModal from '../payment/FakePaymentModal.jsx';
 
@@ -82,10 +83,19 @@ export default function CartDrawer() {
       setCouponCode('');
       setCouponMessage(null);
 
-      if (order?.paymentId || order?.payment?.id) {
+      // Initiate payment session with backend
+      const initiateRes = await paymentsApi.initiatePayment(order.id);
+      if (initiateRes?.ok && initiateRes.data?.requiresGatewayRedirect && initiateRes.data?.redirectUrl) {
+        // Real Gateway (Zibal): Redirect user's browser directly to Zibal IPG
+        window.location.href = initiateRes.data.redirectUrl;
+        return;
+      }
+
+      if (order?.paymentId || order?.payment?.id || initiateRes?.data?.paymentId) {
         setPendingPayment({
-          id: order.paymentId || order.payment?.id,
-          amount: order.finalAmount
+          id: initiateRes?.data?.paymentId || order.paymentId || order.payment?.id,
+          amount: initiateRes?.data?.amount || order.finalAmount,
+          orderId: order.id
         });
         setPaymentModalOpen(true);
       } else {

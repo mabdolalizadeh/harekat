@@ -73,31 +73,36 @@ export default function LandingFounderCard() {
         return () => ctx.revert();
     }, []);
 
-    // 3D Hover tilt interaction
-    const handleMouseMove = (e) => {
+    // 3D Hover tilt interaction using gsap.quickTo and cached rect (zero layout thrashing)
+    const xTo = useRef(null);
+    const yTo = useRef(null);
+    const rectRef = useRef(null);
+
+    const handleMouseEnter = () => {
         const card = cardInnerRef.current;
         if (!card || window.innerWidth < 768) return;
-        const rect = card.getBoundingClientRect();
+        rectRef.current = card.getBoundingClientRect();
+        if (!xTo.current) {
+            xTo.current = gsap.quickTo(card, 'rotationY', { duration: 0.3, ease: 'power2.out' });
+            yTo.current = gsap.quickTo(card, 'rotationX', { duration: 0.3, ease: 'power2.out' });
+        }
+    };
+
+    const handleMouseMove = (e) => {
+        if (!rectRef.current || !xTo.current || !yTo.current) return;
+        const rect = rectRef.current;
         const x = e.clientX - rect.left - rect.width / 2;
         const y = e.clientY - rect.top - rect.height / 2;
-        gsap.to(card, {
-            rotationY: x * 0.04,
-            rotationX: -y * 0.04,
-            duration: 0.4,
-            ease: 'power2.out',
-            transformPerspective: 1000,
-        });
+        xTo.current(x * 0.03);
+        yTo.current(-y * 0.03);
     };
 
     const handleMouseLeave = () => {
-        const card = cardInnerRef.current;
-        if (!card) return;
-        gsap.to(card, {
-            rotationY: 0,
-            rotationX: 0,
-            duration: 0.6,
-            ease: 'power3.out',
-        });
+        rectRef.current = null;
+        if (xTo.current && yTo.current) {
+            xTo.current(0);
+            yTo.current(0);
+        }
     };
 
     return (
@@ -106,12 +111,13 @@ export default function LandingFounderCard() {
             data-section-theme="founder"
             ref={cardWrapperRef}
             className="w-full py-12 sm:py-16 flex justify-center px-4 perspective-[1200px]"
+            onMouseEnter={handleMouseEnter}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
         >
             <div
                 ref={cardInnerRef}
-                className="relative bg-card/90 backdrop-blur-xl border border-border/80 hover:border-primary/40 rounded-3xl p-7 sm:p-10 max-w-[640px] w-full shadow-2xl shadow-black/10 transition-colors duration-300 will-change-transform"
+                className="relative bg-card/90 backdrop-blur-xl border border-border/80 hover:border-primary/40 rounded-3xl p-5 sm:p-10 max-w-[640px] w-full shadow-2xl shadow-black/10 transition-colors duration-300 will-change-transform"
             >
                 <div className="relative flex flex-col gap-5">
                     <div className="flex items-center justify-between">

@@ -97,23 +97,26 @@ export default function LandingTestimonials({ testimonials = defaultTestimonials
             data-section-theme="reviews"
             ref={sectionRef}
             dir="rtl"
-            className="relative w-full py-20 sm:py-32 flex flex-col items-center gap-8 px-4 overflow-hidden"
+            className="relative w-full py-16 sm:py-28 flex flex-col items-center gap-8 px-4 overflow-x-clip"
         >
             <div className="flex flex-col items-center gap-4 text-center">
                 <SectionTag>نظرات دانش‌آموزان</SectionTag>
-                <h2 className="text-[clamp(2.2rem,4.5vw,3.6rem)] font-extrabold text-foreground max-w-[700px] leading-tight">
+                <h2 className="text-[clamp(1.9rem,4vw,3.4rem)] font-extrabold text-foreground max-w-[700px] leading-tight">
                     دانش‌آموزان ما چه می‌گن
                 </h2>
             </div>
 
-            {/* Embla Carousel Viewport */}
+            {/* Embla Carousel Viewport with shadow bleed headroom */}
             <div className="w-full max-w-[1300px] relative px-2 sm:px-6">
-                <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
-                    <div className="flex -mr-6 touch-pan-y py-4">
+                <div
+                    className="overflow-hidden py-8 -my-8 px-3 -mx-3 cursor-grab active:cursor-grabbing select-none"
+                    ref={emblaRef}
+                >
+                    <div className="flex -mr-6 touch-pan-y py-3">
                         {testimonials.map((item, index) => (
                             <div
                                 key={index}
-                                className="embla-slide-item flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] pr-6 min-w-0 transition-transform duration-300 hover:-translate-y-1"
+                                className="embla-slide-item flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] pr-6 min-w-0 transition-transform duration-300"
                             >
                                 <StudentReviewCard review={item.quote} name={item.name} />
                             </div>

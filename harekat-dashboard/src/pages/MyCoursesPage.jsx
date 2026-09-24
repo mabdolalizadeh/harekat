@@ -19,6 +19,9 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { accessApi } from '../api/accessApi.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import AnimatedPage from '../components/ui/AnimatedPage.jsx';
+import SpotlightCard from '../components/ui/SpotlightCard.jsx';
+import AnimatedNumber from '../components/ui/AnimatedNumber.jsx';
 import { assetUrl, toPersianDigits } from '../utils/formatters.js';
 
 export default function MyCoursesPage() {
@@ -55,14 +58,14 @@ export default function MyCoursesPage() {
   }
 
   return (
-    <Box>
+    <AnimatedPage>
       {/* Header */}
       <Box sx={{ mb: 3.5 }}>
         <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.35rem', sm: '1.5rem', md: '1.75rem' }, mb: 0.5, color: 'text.primary' }}>
           دوره‌های من
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          دوره‌های با دسترسی فعال شما در مدرسه حرکت ({toPersianDigits(courses.length)} دوره)
+          دوره‌های با دسترسی فعال شما در مدرسه حرکت (<AnimatedNumber value={courses.length} /> دوره)
         </Typography>
       </Box>
 
@@ -96,7 +99,7 @@ export default function MyCoursesPage() {
             const progress = course.progress !== undefined ? course.progress : 0;
             return (
               <Grid item xs={12} sm={6} lg={4} key={course.id}>
-                <Card
+                <SpotlightCard
                   sx={{
                     borderRadius: '24px',
                     display: 'flex',
@@ -105,8 +108,7 @@ export default function MyCoursesPage() {
                     border: '1px solid',
                     borderColor: 'divider',
                     bgcolor: 'background.paper',
-                    transition: 'all 0.25s ease',
-                    overflow: 'hidden',
+                    transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.15)',
@@ -228,12 +230,12 @@ export default function MyCoursesPage() {
                       </Button>
                     </Box>
                   </CardContent>
-                </Card>
+                </SpotlightCard>
               </Grid>
             );
           })}
         </Grid>
       )}
-    </Box>
+    </AnimatedPage>
   );
 }

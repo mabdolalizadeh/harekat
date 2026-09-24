@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { CursorifyProvider } from 'react-cursorify';
+import CustomCursor from './components/ui/CustomCursor.jsx';
 
 function ScrollToTop() {
     const { pathname, search } = useLocation();
@@ -62,33 +62,29 @@ function ExternalLoginRedirect() {
 
 export default function App() {
     return (
-        <CursorifyProvider>
+        <>
+            <CustomCursor />
             <ScrollToTop />
             <CartDrawer />
             <Routes>
-            <Route path='/' element={<Landing/>}/>
-            <Route path='/cart' element={<CartPage/>}/>
-            <Route path='/contact-us' element={<ContactUs/>}/>
-            <Route path='/about-us' element={<AboutUs/>}/>
-            <Route path='/auth' element={<ExternalLoginRedirect/>}/>
-            <Route path='/login' element={<ExternalLoginRedirect/>}/>
-            <Route path='/dashboard' element={<ExternalDashboardRedirect/>}/>
+                <Route path='/' element={<Landing/>}/>
+                <Route path='/cart' element={<CartPage/>}/>
+                <Route path='/contact-us' element={<ContactUs/>}/>
+                <Route path='/about-us' element={<AboutUs/>}/>
+                <Route path='/auth' element={<ExternalLoginRedirect/>}/>
+                <Route path='/login' element={<ExternalLoginRedirect/>}/>
+                <Route path='/dashboard' element={<ExternalDashboardRedirect/>}/>
 
+                {/* Dedicated separated routes for courses, capsules, and packages */}
+                <Route path='/courses/:id' element={<ProductDetail type="course"/>}/>
+                <Route path='/capsules/:id' element={<ProductDetail type="capsule"/>}/>
+                <Route path='/packages/:id' element={<ProductDetail type="package"/>}/>
 
-            {/* Dedicated separated routes for courses, capsules, and packages */}
-            <Route path='/courses' element={<CoursesPage/>}/>
-            <Route path='/courses/:id' element={<ProductDetail type="course"/>}/>
-            <Route path='/capsules' element={<CapsulesPage/>}/>
-            <Route path='/capsules/:id' element={<ProductDetail type="capsule"/>}/>
-            <Route path='/packages' element={<PackagesPage/>}/>
-            <Route path='/packages/:id' element={<ProductDetail type="package"/>}/>
+                {/* Products and legacy/fallback routes */}
+                <Route path='/products/:id' element={<ProductDetail/>}/>
 
-            {/* Products and legacy/fallback routes */}
-            <Route path='/products' element={<Products/>}/>
-            <Route path='/products/:id' element={<ProductDetail/>}/>
-
-            <Route path='/teachers/:id' element={<TeacherDetail/>}/>
-        </Routes>
-        </CursorifyProvider>
+                <Route path='/teachers/:id' element={<TeacherDetail/>}/>
+            </Routes>
+        </>
     );
 }
