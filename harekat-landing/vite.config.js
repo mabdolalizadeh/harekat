@@ -11,4 +11,30 @@ export default defineConfig({
   server: {
     allowedHosts: ['.ngrok-free.app'],
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-router-dom') || id.includes('react-router') || id.includes('react-dom') || id.includes('/react/')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@mui') || id.includes('@emotion')) {
+              return 'vendor-mui';
+            }
+            if (id.includes('gsap') || id.includes('lenis') || id.includes('motion')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('react-markdown') || id.includes('remark-gfm') || id.includes('micromark') || id.includes('unified') || id.includes('vfile')) {
+              return 'vendor-markdown';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+          }
+        },
+      },
+    },
+  },
 })
