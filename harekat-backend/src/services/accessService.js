@@ -161,7 +161,22 @@ export class AccessService {
         }, { transaction });
 
         // Grant access to all included courses
-        const included = packageCourse.packageIncludedCourses || [];
+        let included = packageCourse.packageIncludedCourses || [];
+        if (!included || included.length === 0) {
+            const junctionItems = await PackageCourses.findAll({
+                where: { packageId },
+                attributes: ['courseId'],
+                transaction
+            });
+            const courseIds = junctionItems.map((j) => j.courseId);
+            if (courseIds.length > 0) {
+                included = await Courses.findAll({
+                    where: { id: courseIds },
+                    transaction
+                });
+            }
+        }
+
         for (const incCourse of included) {
             await this.grantCourseAccess({
                 userId,
@@ -191,18 +206,47 @@ export class AccessService {
         const startDate = new Date();
         const expiresAt = new Date(startDate.getTime() + days * 86400000);
 
-        // Record UserSubscription
-        const userSub = await UserSubscriptions.create({
-            userId,
-            subscriptionId,
-            startDate,
-            expiresAt,
-            status: 'active',
-            orderId
-        }, { transaction });
+        // Record UserSubscription idempotently
+        let userSub = null;
+        if (orderId) {
+            userSub = await UserSubscriptions.findOne({
+                where: { userId, subscriptionId, orderId },
+                transaction
+            });
+        }
+        if (userSub) {
+            userSub.status = 'active';
+            userSub.startDate = startDate;
+            userSub.expiresAt = expiresAt;
+            await userSub.save({ transaction });
+        } else {
+            userSub = await UserSubscriptions.create({
+                userId,
+                subscriptionId,
+                startDate,
+                expiresAt,
+                status: 'active',
+                orderId
+            }, { transaction });
+        }
 
         // Grant access to all courses included in subscription
-        const courses = sub.includedCourses || [];
+        let courses = sub.includedCourses || [];
+        if (!courses || courses.length === 0) {
+            const junctionItems = await SubscriptionCourses.findAll({
+                where: { subscriptionId },
+                attributes: ['courseId'],
+                transaction
+            });
+            const courseIds = junctionItems.map((j) => j.courseId);
+            if (courseIds.length > 0) {
+                courses = await Courses.findAll({
+                    where: { id: courseIds },
+                    transaction
+                });
+            }
+        }
+
         for (const course of courses) {
             await this.grantCourseAccess({
                 userId,

@@ -69,8 +69,8 @@ export default class CartController {
             return res.status(400).json({ ok: false, message: 'productId and productType are required' });
         }
 
-        if (!['course', 'subscription'].includes(productType)) {
-            return res.status(400).json({ ok: false, message: 'productType must be course or subscription' });
+        if (!['course', 'subscription', 'package'].includes(productType)) {
+            return res.status(400).json({ ok: false, message: 'productType must be course, subscription, or package' });
         }
 
         try {
@@ -79,10 +79,10 @@ export default class CartController {
             let productName = '';
             let productImage = '';
 
-            if (productType === 'course') {
+            if (productType === 'course' || productType === 'package') {
                 const course = await Courses.findByPk(productId);
                 if (!course) {
-                    return res.status(404).json({ ok: false, message: 'course not found' });
+                    return res.status(404).json({ ok: false, message: 'course or package not found' });
                 }
                 canonicalPrice = course.salePrice || course.price;
                 productName = course.name;

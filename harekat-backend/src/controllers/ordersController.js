@@ -32,7 +32,7 @@ export default class OrdersController {
                 let productName = '';
                 let productImage = '';
 
-                if (item.productType === 'course') {
+                if (item.productType === 'course' || item.productType === 'package') {
                     const course = await Courses.findByPk(item.productId);
                     if (course) {
                         canonicalPrice = course.salePrice || course.price;
