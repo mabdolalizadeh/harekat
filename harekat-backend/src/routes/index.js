@@ -24,6 +24,7 @@ import assignmentsRouter from './assignments.js';
 import quizzesRouter from './quizzes.js';
 import evaluationsRouter from './evaluations.js';
 import contactMessagesRouter from './contactMessages.js';
+import articlesRouter from './articles.js';
 
 const router = Router();
 
@@ -52,5 +53,6 @@ router.use('/assignments', assignmentsRouter);
 router.use('/quizzes', quizzesRouter);
 router.use('/evaluations', evaluationsRouter);
 router.use('/contact-messages', contactMessagesRouter);
+router.use('/articles', articlesRouter);
 
 export default router;

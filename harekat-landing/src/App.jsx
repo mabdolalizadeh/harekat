@@ -41,6 +41,8 @@ import ProductDetail from "./pages/ProductDetail.jsx";
 import CoursesPage from "./pages/CoursesPage.jsx";
 import CapsulesPage from "./pages/CapsulesPage.jsx";
 import PackagesPage from "./pages/PackagesPage.jsx";
+import BlogPage from "./pages/BlogPage.jsx";
+import BlogDetailPage from "./pages/BlogDetailPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import CartDrawer from "./components/cart/CartDrawer.jsx";
 import { getDashboardUrl } from "./utils/dashboardUrl.js";
@@ -72,6 +74,15 @@ export default function App() {
                 <Route path='/auth' element={<ExternalLoginRedirect/>}/>
                 <Route path='/login' element={<ExternalLoginRedirect/>}/>
                 <Route path='/dashboard' element={<ExternalDashboardRedirect/>}/>
+
+                {/* Blog / Articles System */}
+                <Route path='/blog' element={<BlogPage/>}/>
+                <Route path='/blog/:slug' element={<BlogDetailPage/>}/>
+
+                {/* Catalog listings */}
+                <Route path='/courses' element={<CoursesPage/>}/>
+                <Route path='/packages' element={<PackagesPage/>}/>
+                <Route path='/capsules' element={<CapsulesPage/>}/>
 
                 {/* Dedicated separated routes for courses, capsules, and packages */}
                 <Route path='/courses/:id' element={<ProductDetail type="course"/>}/>

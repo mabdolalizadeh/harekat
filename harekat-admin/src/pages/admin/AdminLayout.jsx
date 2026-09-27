@@ -102,6 +102,7 @@ const SUPER_ADMIN_GROUPS = [
   {
     title: 'مدیریت وب‌سایت',
     items: [
+      { to: '/articles', label: 'وبلاگ و مقالات', icon: ArticleIcon },
       { to: '/banners', label: 'بنرهای صفحه اصلی', icon: ImageIcon },
       { to: '/marquee', label: 'نوار متحرک (مارکی)', icon: CampaignIcon },
       { to: '/header', label: 'منوی سربرگ', icon: MenuIcon },

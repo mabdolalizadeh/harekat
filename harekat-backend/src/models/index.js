@@ -30,6 +30,7 @@ import { Assignments, AssignmentSubmissions } from "./assignments.js";
 import { Quizzes, QuizAttempts } from "./quizzes.js";
 import { CourseEvaluations, CourseEvaluationResponses } from "./evaluations.js";
 import ContactMessages from "./contactMessages.js";
+import Articles from "./articles.js";
 import { sequelize } from "./database.config.js";
 
 // Users <-> Courses (many-to-many legacy compatibility)
@@ -476,5 +477,6 @@ export {
     CourseEvaluations,
     CourseEvaluationResponses,
     ContactMessages,
+    Articles,
     sequelize
 };

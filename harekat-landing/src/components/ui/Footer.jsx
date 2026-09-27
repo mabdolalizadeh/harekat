@@ -9,6 +9,7 @@ const footerLinks = [
     { text: "پکیج‌های مهارتی", key: "skill", link: "/#skill-packages" },
     { text: "دوره‌های کپسولی", key: "capsule", link: "/#capsule-courses" },
     { text: "اشتراک‌ها", key: "subscriptions", link: "/#subscriptions" },
+    { text: "وبلاگ و مقالات", link: "/blog" },
     { text: "درباره ما", link: "/about-us" },
     { text: "تماس با ما", link: "/contact-us" },
 ];

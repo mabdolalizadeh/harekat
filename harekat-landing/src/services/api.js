@@ -158,6 +158,36 @@ export const storeApi = {
     },
     validateCoupon: (code, orderAmount) => post('/coupons/validate', { code, orderAmount }),
     sendContactMessage: (data) => post('/contact-messages', data),
+    getArticles: async (params = {}) => {
+        const query = new URLSearchParams(params).toString();
+        const response = await get(`/articles${query ? `?${query}` : ''}`);
+        return {
+            ...response,
+            data: {
+                ...response.data,
+                articles: (response.data?.articles || []).map((art) => ({
+                    ...art,
+                    featuredImage: assetUrl(art.featuredImage)
+                }))
+            }
+        };
+    },
+    getArticle: async (slugOrId) => {
+        const response = await get(`/articles/${encodeURIComponent(slugOrId)}`);
+        return {
+            ...response,
+            data: {
+                article: response.data?.article ? {
+                    ...response.data.article,
+                    featuredImage: assetUrl(response.data.article.featuredImage)
+                } : null,
+                related: (response.data?.related || []).map((art) => ({
+                    ...art,
+                    featuredImage: assetUrl(art.featuredImage)
+                }))
+            }
+        };
+    },
 };
 
 export const customerApi = {

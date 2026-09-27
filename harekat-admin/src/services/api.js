@@ -310,6 +310,21 @@ export const adminApi = {
         put(`/contact-messages/${id}/read`, { isRead }, { auth: true, tokenKind: 'adminToken' }),
     deleteContactMessage: (id) =>
         del(`/contact-messages/${id}`, { auth: true, tokenKind: 'adminToken' }),
+
+    // Blog / Articles
+    listArticles: (params = {}) => {
+        const q = new URLSearchParams();
+        if (params.page) q.append('page', params.page);
+        if (params.limit) q.append('limit', params.limit);
+        if (params.status) q.append('status', params.status);
+        if (params.search) q.append('search', params.search);
+        const query = q.toString() ? `?${q.toString()}` : '';
+        return get(`/articles${query}`, { auth: true, tokenKind: 'adminToken' });
+    },
+    getArticle: (idOrSlug) => get(`/articles/${encodeURIComponent(idOrSlug)}`, { auth: true, tokenKind: 'adminToken' }),
+    createArticle: (payload) => post('/articles', payload, { auth: true, tokenKind: 'adminToken' }),
+    updateArticle: (id, payload) => put(`/articles/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
+    deleteArticle: (id) => del(`/articles/${id}`, { auth: true, tokenKind: 'adminToken' }),
 };
 
 export async function signChallengeWithRsaKey(privateKeyPem, challengeText) {
