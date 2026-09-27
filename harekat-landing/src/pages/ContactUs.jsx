@@ -138,8 +138,8 @@ export default function ContactUs() {
         <SmoothScrollProvider>
             <MainLayout title={'تماس با ما'} sectionIds={null} contentMap={null}>
                 <SEOHead
-                    title="تماس با ما | آکادمی حرکت"
-                    description="راه‌های ارتباطی با آکادمی حرکت، مشاوره آموزشی و ثبت‌نام دوره‌های مهارتی و پشتیبانی دانشجویان."
+                    title="تماس با ما | مدرسه حرکت"
+                    description="راه‌های ارتباطی با مدرسه حرکت، مشاوره آموزشی و ثبت‌نام دوره‌های مهارتی و پشتیبانی هنرجویان."
                     canonical="/contact-us"
                 />
                 <TopBarLayout />

@@ -60,7 +60,7 @@ export class PaymentGateway {
         order.paymentId = payment.id;
         await order.save();
 
-        const defaultDescription = `پرداخت سفارش #${order.id.slice(0, 8)} در آکادمی حرکت`;
+        const defaultDescription = `پرداخت سفارش #${order.id.slice(0, 8)} در مدرسه حرکت`;
 
         // Request payment from gateway driver
         const gatewayResult = await activeGateway.createPayment({

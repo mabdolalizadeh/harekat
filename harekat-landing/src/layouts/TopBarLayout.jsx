@@ -1,7 +1,7 @@
 import Logo from "../components/ui/Logo.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { SecondaryButton } from "../components/ui/Buttons.jsx";
+import { PrimaryButton, SecondaryButton } from "../components/ui/Buttons.jsx";
 import {
     Menu,
     X,
@@ -252,11 +252,11 @@ export default function TopBarLayout() {
                         transition={{ duration: 0.2, ease: 'easeInOut', delay: 0.08 }}
                         className="hidden md:flex items-center gap-3"
                     >
-                        {/* Theme Toggle Button */}
+                        {/* Theme Toggle Button (Outline) */}
                         <button
                             type="button"
                             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                            className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 bg-surface-muted hover:bg-border text-muted hover:text-foreground hover:rotate-45"
+                            className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 border border-border/80 hover:border-primary/60 bg-transparent text-muted hover:text-foreground hover:bg-surface-muted/40 hover:rotate-45 cursor-pointer shadow-sm"
                             title={theme === 'dark' ? 'حالت روشن' : 'حالت تاریک'}
                         >
                             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
@@ -368,24 +368,24 @@ export default function TopBarLayout() {
                                 </div>
                             </>
                         ) : (
-                            <SecondaryButton
-                                className="text-[16px] px-4 py-1.5 font-medium"
+                            <PrimaryButton
+                                className="text-[15px] px-5 py-2 font-bold shadow-md shadow-primary/20 hover:shadow-primary/30"
                                 onClick={() => {
                                     window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
                                 }}
                             >
-                                ورود
-                            </SecondaryButton>
+                                ورود | ثبت‌نام
+                            </PrimaryButton>
                         )}
                     </motion.div>
 
                     {/* Mobile Menu & Theme Button */}
                     <div className="flex md:hidden items-center gap-2">
-                        {/* Theme Toggle Button - always visible in mobile topbar */}
+                        {/* Theme Toggle Button (Outline) - always visible in mobile topbar */}
                         <button
                             type="button"
                             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                            className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 bg-surface-muted hover:bg-border text-muted hover:text-foreground cursor-pointer"
+                            className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 border border-border/80 hover:border-primary/60 bg-transparent text-muted hover:text-foreground hover:bg-surface-muted/40 cursor-pointer shadow-sm"
                             title={theme === 'dark' ? 'حالت روشن' : 'حالت تاریک'}
                         >
                             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
@@ -473,12 +473,15 @@ export default function TopBarLayout() {
                                     </button>
                                 </div>
                             ) : (
-                                <SecondaryButton onClick={() => {
-                                    setMobileOpen(false);
-                                    window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
-                                }}>
-                                    ورود
-                                </SecondaryButton>
+                                <PrimaryButton
+                                    className="w-full text-center py-2.5 font-bold shadow-md shadow-primary/20"
+                                    onClick={() => {
+                                        setMobileOpen(false);
+                                        window.location.href = getDashboardUrl('/login?redirect=' + encodeURIComponent(window.location.href));
+                                    }}
+                                >
+                                    ورود | ثبت‌نام
+                                </PrimaryButton>
                             )}
                         </div>
                     </motion.div>

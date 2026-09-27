@@ -18,22 +18,36 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main() {
-    // Parse arguments
-    const args = process.argv.slice(2).reduce((acc, curr) => {
-        if (curr.startsWith('--')) {
-            const [k, v] = curr.replace(/^--/, '').split('=');
-            acc[k] = v || true;
-        }
-        return acc;
-    }, {});
+    const rawArgs = process.argv.slice(2);
+    const args = {};
+    const positionals = [];
 
-    if (args.help) {
+    for (const arg of rawArgs) {
+        if (arg.startsWith('--')) {
+            const [k, ...rest] = arg.replace(/^--/, '').split('=');
+            args[k] = rest.length > 0 ? rest.join('=') : true;
+        } else if (arg.startsWith('-')) {
+            const k = arg.replace(/^-+/, '');
+            args[k] = true;
+        } else {
+            positionals.push(arg);
+        }
+    }
+
+    if (args.help || args.h) {
         console.log(`
 Harekat LMS — Super Admin Provisioning Tool
 
 Usage:
-  node scripts/create-superadmin.js [options]
-  npm run create-superadmin -- [options]
+  # Option 1: Positional arguments (Recommended — avoids npm flag conflicts)
+  npm run create-superadmin [username] [password] [name] [outputPath]
+  node scripts/create-superadmin.js [username] [password] [name] [outputPath]
+
+  # Option 2: Direct node with flags
+  node scripts/create-superadmin.js --username=admin --password="MyPass123!" --output=./admin.pem
+
+  # Option 3: npm with flags (Requires double-dash '--' before script flags)
+  npm run create-superadmin -- --username=admin --password="MyPass123!" --output=./admin.pem
 
 Options:
   --username=<name>    Admin username (default: superadmin)
@@ -45,19 +59,22 @@ Options:
   --output=<path>      File path to save the generated private RSA key (.pem)
   --help               Show this help message
 
-Examples:
-  npm run create-superadmin -- --username=admin --password="MySecurePass123!" --output=./admin.pem
+Important npm tip:
+  When passing flags with "npm run", always add an extra "--" before the flags:
+    CORRECT:   npm run create-superadmin -- --username=admin
+    INCORRECT: npm run create-superadmin --username=admin (causes npm EUNKNOWNCONFIG)
 `);
         process.exit(0);
     }
 
-    const username = (args.username || 'superadmin').trim();
-    const name = args.name || 'مدیر ارشد سامانه';
+    const username = (args.username || positionals[0] || 'superadmin').trim();
+    const password = args.password || positionals[1] || 'Admin@Harekat2026!';
+    const name = args.name || positionals[2] || 'مدیر ارشد سامانه';
     const email = args.email || null;
     const phone = args.phone || null;
-    const password = args.password || 'Admin@Harekat2026!';
     const role = args.role && ['superadmin', 'ta'].includes(args.role) ? args.role : 'superadmin';
-    const outputPath = args.output ? path.resolve(process.cwd(), args.output) : null;
+    const outputArg = args.output || positionals[3] || null;
+    const outputPath = outputArg ? path.resolve(process.cwd(), outputArg) : null;
 
     // Validate password complexity
     if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
@@ -79,7 +96,8 @@ Examples:
             console.log('[*] Regenerating RSA-2048 keypair for existing admin...');
 
             const { publicKey, privateKey, fingerprint } = generateRsaKeyPair();
-            if (args.password) {
+            const passwordProvided = Boolean(args.password || positionals[1]);
+            if (passwordProvided) {
                 existing.password = password;
             }
             existing.publicKey = publicKey;
@@ -91,6 +109,9 @@ Examples:
             console.log('\n[✔] RSA Key Pair regenerated and assigned successfully!');
             console.log(`- Username: ${existing.username}`);
             console.log(`- Role: ${existing.role}`);
+            if (passwordProvided) {
+                console.log(`- Password: ${password}`);
+            }
             console.log(`- Public Key Fingerprint (SHA-256): ${fingerprint}`);
 
             if (outputPath) {

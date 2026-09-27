@@ -123,9 +123,9 @@ export default function LandingLoader({ isReady, onComplete }) {
                         />
                     </div>
 
-                    <div className="flex items-center justify-between w-full text-[11px] font-mono text-muted/80 px-0.5">
+                    <div className="flex items-center justify-between w-full text-xs font-sans text-muted/80 px-0.5">
                         <span>آماده‌سازی</span>
-                        <span className="font-bold text-foreground/90">
+                        <span className="font-bold text-foreground">
                             {toPersianDigits(roundedProgress)}٪
                         </span>
                     </div>

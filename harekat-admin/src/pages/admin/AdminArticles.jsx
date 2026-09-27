@@ -47,7 +47,7 @@ const EMPTY_ARTICLE = {
   content: '',
   featuredImage: '',
   category: 'مهارت‌آموزی',
-  authorName: 'آکادمی حرکت',
+  authorName: 'مدرسه حرکت',
   tags: '',
   seoTitle: '',
   seoDescription: '',
@@ -89,7 +89,7 @@ function ArticleModal({ open, initial, onClose, onSaved }) {
         content: form.content,
         featuredImage: form.featuredImage || null,
         category: form.category?.trim() || 'عمومی',
-        authorName: form.authorName?.trim() || 'آکادمی حرکت',
+        authorName: form.authorName?.trim() || 'مدرسه حرکت',
         tags: parsedTags,
         seoTitle: form.seoTitle?.trim() || form.title.trim(),
         seoDescription: form.seoDescription?.trim() || form.excerpt?.trim() || null,
@@ -177,7 +177,7 @@ function ArticleModal({ open, initial, onClose, onSaved }) {
                 label="نام نویسنده"
                 value={form.authorName}
                 onChange={(e) => set('authorName', e.target.value)}
-                placeholder="آکادمی حرکت"
+                placeholder="مدرسه حرکت"
               />
             </Grid>
 

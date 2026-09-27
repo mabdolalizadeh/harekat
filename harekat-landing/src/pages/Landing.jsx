@@ -248,10 +248,10 @@ export default function Landing() {
             {
                 '@type': 'Organization',
                 '@id': 'https://schoolharekat.ir/#organization',
-                'name': 'آکادمی حرکت',
+                'name': 'مدرسه حرکت',
                 'url': 'https://schoolharekat.ir/',
                 'logo': 'https://schoolharekat.ir/logo-light.svg',
-                'description': 'مدرسه و آکادمی تخصصی آموزش مهارت‌های فردی، تفکر نقادانه و انضباط شخصی ویژه نوجوانان و دانش‌آموزان.',
+                'description': 'مدرسه هنر و مهارت حرکت؛ آموزش تخصصی عکاسی، طراحی، تدوین، برنامه‌نویسی و طراحی سایت.',
                 'sameAs': [
                     'https://instagram.com/schoolharekat',
                     'https://t.me/schoolharekat'
@@ -261,7 +261,7 @@ export default function Landing() {
                 '@type': 'WebSite',
                 '@id': 'https://schoolharekat.ir/#website',
                 'url': 'https://schoolharekat.ir/',
-                'name': 'آکادمی حرکت',
+                'name': 'مدرسه حرکت',
                 'publisher': {
                     '@id': 'https://schoolharekat.ir/#organization'
                 },
@@ -277,8 +277,8 @@ export default function Landing() {
     return (
         <SmoothScrollProvider>
             <SEOHead
-                title="آکادمی حرکت | آموزش مهارت‌های فردی و کاربردی نوجوانان"
-                description="مدرسه و آکادمی مهارت‌آموزی حرکت؛ دوره‌های تخصصی آموزش مهارت‌های فردی، خلاقیت، حل مسئله، هوش مالی و انضباط شخصی ویژه نوجوانان و دانش‌آموزان."
+                title="مدرسه حرکت | مدرسه هنر و مهارت"
+                description="مدرسه حرکت جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی."
                 canonical="https://schoolharekat.ir/"
                 schemaJson={homeSchema}
             />

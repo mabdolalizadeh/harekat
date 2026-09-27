@@ -186,7 +186,7 @@ export default class ArticlesController {
                 excerpt: excerpt || (content.replace(/<[^>]*>?/gm, '').slice(0, 200) + '...'),
                 content,
                 featuredImage: featuredImage || null,
-                authorName: authorName || 'آکادمی حرکت',
+                authorName: authorName || 'مدرسه حرکت',
                 category: category || 'عمومی',
                 tags: tags || [],
                 seoTitle: seoTitle || title,

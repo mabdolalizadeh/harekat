@@ -289,8 +289,8 @@ export default function AboutUs() {
         <SmoothScrollProvider>
             <MainLayout title={'درباره ما'} sectionIds={sectionIds} contentMap={contentMap}>
                 <SEOHead
-                    title="درباره آکادمی حرکت | رسالت و چشم‌انداز ما"
-                    description="داستان شکل‌گیری، مانیفست و ارزش‌های آکادمی مهارت‌آموزی حرکت؛ پیوند میان یادگیری عملی، تفکر نقادانه و استانداردهای حرفه‌ای."
+                    title="درباره مدرسه حرکت | رسالت و چشم‌انداز ما"
+                    description="داستان شکل‌گیری، مانیفست و ارزش‌های مدرسه مهارت‌آموزی حرکت؛ پیوند میان یادگیری عملی، تفکر نقادانه و استانداردهای حرفه‌ای."
                     canonical="/about-us"
                 />
                 <TopBarLayout />

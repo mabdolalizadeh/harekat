@@ -111,10 +111,10 @@ export default function ProductDetail({ type }) {
         '@context': 'https://schema.org',
         '@type': 'Course',
         'name': course.name,
-        'description': course.description ? course.description.slice(0, 200) : 'دوره آموزشی آکادمی حرکت',
+        'description': course.description ? course.description.slice(0, 200) : 'دوره آموزشی مدرسه حرکت',
         'provider': {
             '@type': 'Organization',
-            'name': 'آکادمی حرکت',
+            'name': 'مدرسه حرکت',
             'sameAs': 'https://schoolharekat.ir'
         },
         'image': course.image,
@@ -130,7 +130,7 @@ export default function ProductDetail({ type }) {
         <MainLayout title={course.name} sectionIds={null} contentMap={null}>
             <SEOHead
                 title={`${course.name} | ${kindInfo.label}`}
-                description={course.description ? course.description.slice(0, 160) : `مشخصات، سرفصل‌ها و ثبت‌نام در ${course.name} در آکادمی حرکت.`}
+                description={course.description ? course.description.slice(0, 160) : `مشخصات، سرفصل‌ها و ثبت‌نام در ${course.name} در مدرسه حرکت.`}
                 canonical={location.pathname}
                 ogImage={course.image}
                 schemaJson={courseSchema}

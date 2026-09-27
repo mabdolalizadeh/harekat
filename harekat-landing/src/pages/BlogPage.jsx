@@ -4,6 +4,8 @@ import { storeApi } from '../services/api';
 import Img from '../components/ui/Img';
 import { BlogCardSkeleton } from '../components/ui/Skeleton';
 import SEOHead from '../components/ui/SEOHead';
+import TopBarLayout from '../layouts/TopBarLayout';
+import Footer from '../components/ui/Footer';
 
 export default function BlogPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -73,8 +75,13 @@ export default function BlogPage() {
         setSearchParams(next);
     };
 
-    const featuredArticle = !currentTag && !currentSearch && articles.length > 0 ? articles[0] : null;
-    const listArticles = featuredArticle ? articles.slice(1) : articles;
+    const clearFilters = () => {
+        setSearchInput('');
+        setSearchParams({});
+    };
+
+    const featuredArticle = articles.length > 0 && !currentTag && !currentSearch ? articles[0] : null;
+    const remainingArticles = featuredArticle ? articles.slice(1) : articles;
 
     const breadcrumbSchema = {
         '@context': 'https://schema.org',
@@ -83,7 +90,7 @@ export default function BlogPage() {
             {
                 '@type': 'ListItem',
                 'position': 1,
-                'name': 'صفحه اصلی',
+                'name': 'خانه',
                 'item': 'https://schoolharekat.ir/'
             },
             {
@@ -96,42 +103,44 @@ export default function BlogPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white font-sans pt-28 pb-20 px-4 md:px-8">
+        <div className="min-h-screen bg-background text-foreground font-sans flex flex-col justify-between transition-colors duration-300">
             <SEOHead
                 title="وبلاگ و مقالات آموزشی"
-                description="مجموعه مقالات تخصصی آکادمی حرکت در زمینه آموزش مهارت‌های فردی، تفکر نقادانه، انضباط شخصی و رشد تحصیلی نوجوانان."
+                description="مجموعه مقالات تخصصی مدرسه حرکت در زمینه آموزش مهارت‌های فردی، هنر، رسانه و تکنولوژی."
                 canonical="/blog"
                 schemaJson={breadcrumbSchema}
             />
 
-            <div className="max-w-7xl mx-auto">
+            <TopBarLayout />
+
+            <div className="w-full max-w-7xl mx-auto px-4 md:px-8 pt-28 sm:pt-36 pb-20 flex-1">
                 {/* Header Section */}
                 <div className="text-center max-w-3xl mx-auto mb-12">
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-orange-500/10 text-orange-400 text-sm font-medium mb-4 border border-orange-500/20">
+                    <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs sm:text-sm font-semibold mb-4 border border-primary/20">
                         دانش و مهارت
                     </span>
-                    <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tight leading-tight text-white">
-                        وبلاگ و مقالات آکادمی حرکت
+                    <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tight leading-tight text-foreground">
+                        وبلاگ و مقالات مدرسه حرکت
                     </h1>
-                    <p className="text-slate-400 text-base md:text-lg leading-relaxed">
-                        تازه‌ترین مقالات، راهنماهای کاربردی و تجربیات آموزشی برای توسعه فردی و تحصیلی نوجوانان و دانش‌آموزان
+                    <p className="text-muted text-base md:text-lg leading-relaxed">
+                        تازه‌ترین مقالات، راهنماهای کاربردی و تجربیات آموزشی برای توسعه فردی و مهارت‌آموزی در مرز هنر، رسانه و فناوری
                     </p>
                 </div>
 
                 {/* Search & Tag Filter Bar */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-800">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-border/70">
                     <form onSubmit={handleSearchSubmit} className="w-full md:w-96 relative">
                         <input
                             type="text"
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             placeholder="جستجو در مقالات..."
-                            className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition-colors"
+                            className="w-full bg-surface-muted border border-border/80 rounded-xl px-4 py-2.5 pr-10 text-sm text-foreground placeholder-muted focus:outline-none focus:border-primary transition-colors"
                         />
                         <button
                             type="submit"
                             aria-label="جستجو"
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -139,32 +148,32 @@ export default function BlogPage() {
                         </button>
                     </form>
 
-                    {/* Tag Filters */}
+                    {/* Tag Filter Pills */}
                     {allTags.length > 0 && (
-                        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
-                            <span className="text-xs text-slate-400 whitespace-nowrap ml-2">برچسب‌ها:</span>
+                        <div className="flex flex-wrap items-center gap-2 max-w-2xl justify-end">
+                            <span className="text-xs text-muted ml-2">دسته‌بندی‌ها:</span>
                             {allTags.map((tag) => {
-                                const isActive = currentTag === tag;
+                                const active = currentTag === tag;
                                 return (
                                     <button
                                         key={tag}
                                         onClick={() => handleTagClick(tag)}
-                                        className={`px-3 py-1 rounded-lg text-xs whitespace-nowrap transition-colors ${
-                                            isActive
-                                                ? 'bg-orange-500 text-white font-medium shadow-md shadow-orange-500/20'
-                                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/50'
+                                        className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 border ${
+                                            active
+                                                ? 'bg-primary text-primary-foreground border-primary font-bold shadow-md shadow-primary/20'
+                                                : 'bg-surface-muted text-muted border-border/60 hover:border-primary/50 hover:text-foreground'
                                         }`}
                                     >
                                         #{tag}
                                     </button>
                                 );
                             })}
-                            {currentTag && (
+                            {(currentTag || currentSearch) && (
                                 <button
-                                    onClick={() => handleTagClick(currentTag)}
-                                    className="text-xs text-red-400 hover:text-red-300 underline mr-2 whitespace-nowrap"
+                                    onClick={clearFilters}
+                                    className="text-xs text-muted hover:text-danger-500 mr-2 transition-colors underline"
                                 >
-                                    حذف فیلتر
+                                    حذف فیلترها
                                 </button>
                             )}
                         </div>
@@ -173,71 +182,96 @@ export default function BlogPage() {
 
                 {/* Loading State */}
                 {loading && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <BlogCardSkeleton key={i} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                        {Array.from({ length: 6 }).map((_, idx) => (
+                            <BlogCardSkeleton key={idx} />
                         ))}
                     </div>
                 )}
 
                 {/* Error State */}
-                {!loading && error && (
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center text-red-400 max-w-lg mx-auto">
-                        <p className="text-base font-medium">{error}</p>
+                {error && !loading && (
+                    <div className="text-center py-16 bg-card rounded-2xl border border-border/70 my-8">
+                        <p className="text-danger-500 font-semibold mb-4">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+                        >
+                            تلاش مجدد
+                        </button>
                     </div>
                 )}
 
                 {/* Empty State */}
                 {!loading && !error && articles.length === 0 && (
-                    <div className="bg-slate-800/40 border border-slate-700/40 rounded-2xl p-12 text-center max-w-md mx-auto">
-                        <svg className="w-12 h-12 text-slate-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="text-center py-20 bg-card rounded-2xl border border-border/70 my-8">
+                        <svg className="w-16 h-16 mx-auto mb-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                         </svg>
-                        <p className="text-slate-300 font-medium text-lg mb-2">مقاله‌ای یافت نشد</p>
-                        <p className="text-slate-500 text-sm">لطفاً عبارت دیگری را جستجو کنید یا فیلترها را بردارید.</p>
+                        <h3 className="text-xl font-bold text-foreground mb-2">مقاله‌ای یافت نشد</h3>
+                        <p className="text-muted text-sm max-w-md mx-auto mb-6">
+                            با فیلترها یا عبارت جستجوی انتخاب‌شده مقاله‌ای موجود نیست.
+                        </p>
+                        {(currentTag || currentSearch) && (
+                            <button
+                                onClick={clearFilters}
+                                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
+                            >
+                                مشاهده همه مقالات
+                            </button>
+                        )}
                     </div>
                 )}
 
-                {/* Featured Article Card */}
+                {/* Featured Article Section */}
                 {!loading && !error && featuredArticle && (
-                    <div className="mb-12">
+                    <div className="mb-14">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+                            <h2 className="text-lg font-bold text-foreground">مقاله ویژه</h2>
+                        </div>
                         <Link
                             to={`/blog/${featuredArticle.slug}`}
-                            className="group block relative bg-gradient-to-br from-slate-800/90 to-slate-800/40 border border-slate-700/60 rounded-3xl overflow-hidden hover:border-orange-500/50 transition-all duration-300 shadow-xl"
+                            className="group block bg-card rounded-3xl border border-border/70 hover:border-primary/50 overflow-hidden shadow-xl hover:shadow-primary/5 transition-all duration-300"
                         >
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                                <div className="lg:col-span-7 h-64 sm:h-80 lg:h-96 w-full overflow-hidden relative">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
+                                <div className="lg:col-span-7 overflow-hidden relative min-h-[260px] sm:min-h-[380px]">
                                     <Img
-                                        src={featuredArticle.featuredImage || '/logo-light.svg'}
+                                        src={featuredArticle.featuredImage || '/favicon.svg'}
                                         alt={featuredArticle.title}
-                                        priority={true}
                                         aspectRatio="16/9"
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent lg:hidden" />
-                                </div>
-                                <div className="p-6 lg:p-8 lg:col-span-5 flex flex-col justify-center">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs font-semibold border border-orange-500/30">
-                                            {featuredArticle.category || 'مقاله برگزیده'}
+                                    {featuredArticle.category && (
+                                        <span className="absolute top-4 right-4 bg-background/90 backdrop-blur-md text-foreground text-xs font-semibold px-3 py-1.5 rounded-full border border-border/40">
+                                            {featuredArticle.category}
                                         </span>
-                                        {featuredArticle.publishedAt && (
-                                            <span className="text-xs text-slate-400">
-                                                {new Date(featuredArticle.publishedAt).toLocaleDateString('fa-IR')}
-                                            </span>
+                                    )}
+                                </div>
+                                <div className="lg:col-span-5 p-6 sm:p-10 flex flex-col justify-between">
+                                    <div>
+                                        {featuredArticle.tags && featuredArticle.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1.5 mb-4">
+                                                {featuredArticle.tags.slice(0, 3).map((tag) => (
+                                                    <span key={tag} className="text-[11px] text-primary bg-primary/10 px-2.5 py-0.5 rounded-full font-medium">
+                                                        #{tag}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         )}
+                                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-foreground group-hover:text-primary transition-colors leading-tight mb-4">
+                                            {featuredArticle.title}
+                                        </h3>
+                                        <p className="text-muted text-sm sm:text-base leading-relaxed line-clamp-3 mb-6">
+                                            {featuredArticle.excerpt}
+                                        </p>
                                     </div>
-                                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white group-hover:text-orange-400 transition-colors leading-snug mb-4">
-                                        {featuredArticle.title}
-                                    </h2>
-                                    <p className="text-slate-300 text-sm sm:text-base leading-relaxed line-clamp-3 mb-6">
-                                        {featuredArticle.excerpt}
-                                    </p>
-                                    <div className="flex items-center justify-between pt-4 border-t border-slate-700/60 text-xs text-slate-400">
-                                        <span>نویسنده: {featuredArticle.authorName || 'آکادمی حرکت'}</span>
-                                        <span className="text-orange-400 font-semibold group-hover:translate-x-[-4px] transition-transform inline-flex items-center gap-1">
-                                            مطالعه مقاله
-                                            <svg className="w-3.5 h-3.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                    <div className="pt-6 border-t border-border/60 flex items-center justify-between text-xs text-muted">
+                                        <span>نویسنده: {featuredArticle.authorName || 'مدرسه حرکت'}</span>
+                                        <span className="text-primary font-bold inline-flex items-center gap-1 group-hover:translate-x-[-4px] transition-transform">
+                                            مطالعه کامل
+                                            <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                             </svg>
                                         </span>
@@ -248,42 +282,42 @@ export default function BlogPage() {
                     </div>
                 )}
 
-                {/* Articles Grid */}
-                {!loading && !error && listArticles.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {listArticles.map((article) => (
+                {/* Article Grid */}
+                {!loading && !error && remainingArticles.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                        {remainingArticles.map((article) => (
                             <Link
-                                key={article.id}
+                                key={article.id || article.slug}
                                 to={`/blog/${article.slug}`}
-                                className="group flex flex-col bg-slate-800/60 border border-slate-700/60 rounded-2xl overflow-hidden hover:border-orange-500/50 hover:bg-slate-800/90 transition-all duration-300 shadow-lg"
+                                className="group flex flex-col bg-card rounded-2xl border border-border/70 hover:border-primary/50 overflow-hidden shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1.5"
                             >
-                                <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
+                                <div className="aspect-[16/10] overflow-hidden relative bg-surface-muted">
                                     <Img
-                                        src={article.featuredImage || '/logo-light.svg'}
+                                        src={article.featuredImage || '/favicon.svg'}
                                         alt={article.title}
                                         aspectRatio="16/10"
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                     {article.category && (
-                                        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-sm text-orange-400 text-xs font-medium border border-white/10">
+                                        <span className="absolute top-3 right-3 bg-background/85 backdrop-blur-md text-foreground text-xs font-semibold px-2.5 py-1 rounded-full border border-border/40">
                                             {article.category}
                                         </span>
                                     )}
                                 </div>
                                 <div className="p-5 flex-1 flex flex-col justify-between">
                                     <div>
-                                        <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors line-clamp-2 mb-2 leading-snug">
+                                        <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2 leading-snug">
                                             {article.title}
                                         </h3>
-                                        <p className="text-slate-400 text-xs sm:text-sm line-clamp-3 leading-relaxed mb-4">
+                                        <p className="text-muted text-xs sm:text-sm line-clamp-3 leading-relaxed mb-4">
                                             {article.excerpt}
                                         </p>
                                     </div>
-                                    <div className="pt-4 border-t border-slate-700/50 flex items-center justify-between text-xs text-slate-400">
+                                    <div className="pt-4 border-t border-border/60 flex items-center justify-between text-xs text-muted">
                                         <span>
-                                            {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('fa-IR') : 'آکادمی حرکت'}
+                                            {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('fa-IR') : 'مدرسه حرکت'}
                                         </span>
-                                        <span className="text-orange-400 font-semibold group-hover:translate-x-[-3px] transition-transform inline-flex items-center gap-1">
+                                        <span className="text-primary font-semibold group-hover:translate-x-[-3px] transition-transform inline-flex items-center gap-1">
                                             ادامه مطلب
                                             <svg className="w-3 h-3 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -296,6 +330,8 @@ export default function BlogPage() {
                     </div>
                 )}
             </div>
+
+            <Footer />
         </div>
     );
 }

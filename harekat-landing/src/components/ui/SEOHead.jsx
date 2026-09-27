@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
 const BASE_URL = 'https://schoolharekat.ir';
-const DEFAULT_TITLE = 'آکادمی حرکت | آموزش مهارت‌های فردی و کاربردی نوجوانان';
-const DEFAULT_DESCRIPTION = 'مدرسه و آکادمی مهارت‌آموزی حرکت؛ دوره‌های تخصصی پرورش خلاقیت، مهارت‌های فردی، تفکر نقادانه و حل مسئله برای دانش‌آموزان و نوجوانان.';
+const DEFAULT_TITLE = 'مدرسه حرکت | مدرسه هنر و مهارت';
+const DEFAULT_DESCRIPTION = 'مدرسه حرکت؛ مدرسه هنر و مهارت برای یادگیری، تجربه و حرکت بین رسانه‌ها؛ از عکاسی، طراحی و تدوین تا برنامه‌نویسی و طراحی وب.';
 const DEFAULT_OG_IMAGE = `${BASE_URL}/logo-light.svg`;
 
 export default function SEOHead({
@@ -12,12 +12,12 @@ export default function SEOHead({
     ogImage,
     ogType = 'website',
     publishedTime,
-    author = 'آکادمی حرکت',
+    author = 'مدرسه حرکت',
     schemaJson,
     noIndex = false
 }) {
     useEffect(() => {
-        const fullTitle = title ? `${title} | آکادمی حرکت` : DEFAULT_TITLE;
+        const fullTitle = title ? `${title} | مدرسه حرکت` : DEFAULT_TITLE;
         const metaDesc = description || DEFAULT_DESCRIPTION;
         const currentUrl = canonical
             ? (canonical.startsWith('http') ? canonical : `${BASE_URL}${canonical.startsWith('/') ? '' : '/'}${canonical}`)
@@ -49,7 +49,7 @@ export default function SEOHead({
         setMeta('property', 'og:url', currentUrl);
         setMeta('property', 'og:image', image);
         setMeta('property', 'og:type', ogType);
-        setMeta('property', 'og:site_name', 'آکادمی حرکت');
+        setMeta('property', 'og:site_name', 'مدرسه حرکت');
         setMeta('property', 'og:locale', 'fa_IR');
 
         if (publishedTime) {

@@ -48,6 +48,7 @@ const BlogPage = lazy(() => import("./pages/BlogPage.jsx"));
 const BlogDetailPage = lazy(() => import("./pages/BlogDetailPage.jsx"));
 const CartPage = lazy(() => import("./pages/CartPage.jsx"));
 import CartDrawer from "./components/cart/CartDrawer.jsx";
+import CustomCursor from "./components/ui/CustomCursor.jsx";
 import { getDashboardUrl } from "./utils/dashboardUrl.js";
 
 function ExternalDashboardRedirect() {
@@ -67,6 +68,7 @@ function ExternalLoginRedirect() {
 export default function App() {
     return (
         <>
+            <CustomCursor />
             <ScrollToTop />
             <CartDrawer />
             <Suspense fallback={<div className="min-h-screen bg-background" />}>

@@ -4,6 +4,8 @@ import { storeApi } from '../services/api';
 import Img from '../components/ui/Img';
 import { BlogDetailSkeleton } from '../components/ui/Skeleton';
 import SEOHead from '../components/ui/SEOHead';
+import TopBarLayout from '../layouts/TopBarLayout';
+import Footer from '../components/ui/Footer';
 
 export default function BlogDetailPage() {
     const { slug } = useParams();
@@ -48,45 +50,55 @@ export default function BlogDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-900 text-white pt-28 pb-20 px-4 md:px-8">
-                <BlogDetailSkeleton />
+            <div className="min-h-screen bg-background text-foreground font-sans flex flex-col justify-between">
+                <TopBarLayout />
+                <div className="pt-28 sm:pt-36 pb-24 px-4 md:px-8 max-w-4xl mx-auto w-full flex-1">
+                    <BlogDetailSkeleton />
+                </div>
+                <Footer />
             </div>
         );
     }
 
     if (error || !article) {
         return (
-            <div className="min-h-screen bg-slate-900 text-white pt-36 pb-20 px-4 text-center">
-                <div className="max-w-md mx-auto bg-slate-800/60 border border-slate-700/60 rounded-3xl p-8">
-                    <h1 className="text-xl font-bold mb-4 text-red-400">مقاله مورد نظر یافت نشد</h1>
-                    <p className="text-slate-400 text-sm mb-6">احتمال دارد آدرس مقاله تغییر کرده یا موقتاً در دسترس نباشد.</p>
-                    <Link
-                        to="/blog"
-                        className="inline-block px-6 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium text-sm transition-colors"
-                    >
-                        بازگشت به مقالات وبلاگ
-                    </Link>
+            <div className="min-h-screen bg-background text-foreground font-sans flex flex-col justify-between">
+                <TopBarLayout />
+                <div className="pt-28 sm:pt-36 pb-24 px-4 md:px-8 max-w-4xl mx-auto w-full flex-1 flex flex-col items-center justify-center text-center">
+                    <div className="p-8 bg-card border border-border/70 rounded-3xl max-w-md w-full shadow-xl">
+                        <svg className="w-14 h-14 mx-auto mb-4 text-danger-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <h2 className="text-xl font-bold text-foreground mb-2">مقاله یافت نشد</h2>
+                        <p className="text-muted text-sm mb-6">
+                            {error || 'متأسفانه این مقاله حذف شده یا آدرس وارد شده صحیح نمی‌باشد.'}
+                        </p>
+                        <Link
+                            to="/blog"
+                            className="inline-block px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
+                        >
+                            بازگشت به وبلاگ
+                        </Link>
+                    </div>
                 </div>
+                <Footer />
             </div>
         );
     }
 
-    const tags = Array.isArray(article.tags) ? article.tags : [];
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://schoolharekat.ir/blog/${article.slug}`;
-
     const articleSchema = {
         '@context': 'https://schema.org',
-        '@type': 'Article',
+        '@type': 'BlogPosting',
         'headline': article.seoTitle || article.title,
         'description': article.seoDescription || article.excerpt,
-        'image': article.ogImage || article.featuredImage || 'https://schoolharekat.ir/logo-light.svg',
+        'image': article.featuredImage ? [article.featuredImage] : undefined,
         'author': {
             '@type': 'Person',
-            'name': article.authorName || 'آکادمی حرکت'
+            'name': article.authorName || 'مدرسه حرکت'
         },
         'publisher': {
             '@type': 'Organization',
-            'name': 'آکادمی حرکت',
+            'name': 'مدرسه حرکت',
             'logo': {
                 '@type': 'ImageObject',
                 'url': 'https://schoolharekat.ir/logo-light.svg'
@@ -100,7 +112,7 @@ export default function BlogDetailPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white font-sans pt-28 pb-24 px-4 md:px-8">
+        <div className="min-h-screen bg-background text-foreground font-sans flex flex-col justify-between transition-colors duration-300">
             <SEOHead
                 title={article.seoTitle || article.title}
                 description={article.seoDescription || article.excerpt}
@@ -112,175 +124,153 @@ export default function BlogDetailPage() {
                 schemaJson={articleSchema}
             />
 
-            <article className="max-w-4xl mx-auto">
-                {/* Breadcrumbs */}
-                <nav className="flex items-center gap-2 text-xs md:text-sm text-slate-400 mb-8 overflow-x-auto whitespace-nowrap">
-                    <Link to="/" className="hover:text-white transition-colors">خانه</Link>
-                    <span>/</span>
-                    <Link to="/blog" className="hover:text-white transition-colors">وبلاگ</Link>
-                    <span>/</span>
-                    {article.category && (
-                        <>
-                            <span className="text-slate-500">{article.category}</span>
-                            <span>/</span>
-                        </>
-                    )}
-                    <span className="text-orange-400 font-medium truncate max-w-xs">{article.title}</span>
-                </nav>
+            <TopBarLayout />
 
-                {/* Article Header */}
-                <header className="mb-8">
-                    {article.category && (
-                        <span className="inline-block px-3 py-1 rounded-full bg-orange-500/10 text-orange-400 text-xs font-semibold border border-orange-500/20 mb-4">
-                            {article.category}
-                        </span>
-                    )}
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight md:leading-tight mb-6">
-                        {article.title}
-                    </h1>
+            <div className="w-full max-w-4xl mx-auto pt-28 sm:pt-36 pb-24 px-4 md:px-8 flex-1">
+                <article>
+                    {/* Breadcrumbs */}
+                    <nav className="flex items-center gap-2 text-xs md:text-sm text-muted mb-8 overflow-x-auto whitespace-nowrap">
+                        <Link to="/" className="hover:text-foreground transition-colors">خانه</Link>
+                        <span>/</span>
+                        <Link to="/blog" className="hover:text-foreground transition-colors">وبلاگ</Link>
+                        <span>/</span>
+                        {article.category && (
+                            <>
+                                <span className="text-muted/70">{article.category}</span>
+                                <span>/</span>
+                            </>
+                        )}
+                        <span className="text-primary font-medium truncate max-w-xs">{article.title}</span>
+                    </nav>
 
-                    {/* Metadata & Author Bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-slate-800 text-xs sm:text-sm text-slate-400">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs border border-orange-500/30">
-                                    {(article.authorName || 'ح')[0]}
-                                </div>
-                                <span className="font-medium text-slate-200">{article.authorName || 'آکادمی حرکت'}</span>
-                            </div>
-                            {article.publishedAt && (
-                                <time dateTime={article.publishedAt} className="text-slate-400">
-                                    {new Date(article.publishedAt).toLocaleDateString('fa-IR', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    })}
-                                </time>
-                            )}
-                        </div>
+                    {/* Article Header */}
+                    <header className="mb-8">
+                        {article.category && (
+                            <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold border border-primary/20 mb-4">
+                                {article.category}
+                            </span>
+                        )}
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground leading-tight md:leading-tight mb-6">
+                            {article.title}
+                        </h1>
 
-                        {/* Social Share & Copy */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-slate-500 ml-1">اشتراک‌گذاری:</span>
-                            <a
-                                href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(article.title)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-                                title="اشتراک‌گذاری در تلگرام"
-                            >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
-                                </svg>
-                            </a>
-                            <a
-                                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(article.title + ' ' + shareUrl)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-                                title="اشتراک‌گذاری در واتساپ"
-                            >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zm0 18.15c-1.49 0-2.95-.4-4.23-1.16l-.3-.18-3.12.82.83-3.04-.2-.31c-.83-1.33-1.28-2.88-1.28-4.47 0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 012.41 5.83c.01 4.54-3.68 8.23-8.22 8.23z" />
-                                </svg>
-                            </a>
-                            <button
-                                onClick={handleCopyLink}
-                                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors relative"
-                                title="کپی لینک مقاله"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                                {copied && (
-                                    <span className="absolute -top-8 right-1/2 translate-x-1/2 px-2 py-0.5 rounded bg-orange-500 text-white text-[10px] whitespace-nowrap">
-                                        کپی شد!
+                        {/* Author & Meta Row */}
+                        <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-border/70 text-xs sm:text-sm text-muted">
+                            <div className="flex items-center gap-4">
+                                <span className="flex items-center gap-1.5">
+                                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <span className="font-medium text-foreground">{article.authorName || 'مدرسه حرکت'}</span>
+                                </span>
+                                {article.publishedAt && (
+                                    <span className="flex items-center gap-1.5">
+                                        <svg className="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span>{new Date(article.publishedAt).toLocaleDateString('fa-IR')}</span>
                                     </span>
                                 )}
+                            </div>
+
+                            {/* Share / Copy link button */}
+                            <button
+                                onClick={handleCopyLink}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-muted hover:bg-border text-foreground transition-colors text-xs cursor-pointer"
+                                title="کپی لینک مقاله"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                                <span>{copied ? 'لینک کپی شد!' : 'اشتراک‌گذاری'}</span>
                             </button>
                         </div>
-                    </div>
-                </header>
+                    </header>
 
-                {/* Featured Image */}
-                {article.featuredImage && (
-                    <div className="mb-10 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl aspect-[16/9] bg-slate-950">
-                        <Img
-                            src={article.featuredImage}
-                            alt={article.title}
-                            priority={true}
-                            aspectRatio="16/9"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                )}
-
-                {/* Lead Excerpt */}
-                {article.excerpt && (
-                    <div className="bg-slate-800/40 border-r-4 border-orange-500 rounded-2xl p-6 mb-10 text-slate-200 text-base md:text-lg leading-relaxed font-medium">
-                        {article.excerpt}
-                    </div>
-                )}
-
-                {/* Article Body Content */}
-                <div
-                    className="prose prose-invert prose-orange max-w-none text-slate-300 leading-loose text-base md:text-lg font-normal space-y-6"
-                    dangerouslySetInnerHTML={{
-                        __html: article.content
-                            ? article.content
-                                .replace(/### (.*)/g, '<h3 class="text-xl md:text-2xl font-bold text-white mt-8 mb-4">$1</h3>')
-                                .replace(/## (.*)/g, '<h2 class="text-2xl md:text-3xl font-bold text-orange-400 mt-10 mb-5 pb-2 border-b border-slate-800">$1</h2>')
-                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
-                                .replace(/^- (.*)/gm, '<li class="mr-4 list-disc text-slate-300">$1</li>')
-                                .replace(/\n\n/g, '<p class="mb-4 leading-relaxed"></p>')
-                            : ''
-                    }}
-                />
-
-                {/* Tags Footer */}
-                {tags.length > 0 && (
-                    <div className="mt-12 pt-8 border-t border-slate-800">
-                        <h4 className="text-sm font-semibold text-slate-400 mb-3">برچسب‌های این مطلب:</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {tags.map((tag) => (
-                                <Link
-                                    key={tag}
-                                    to={`/blog?tag=${encodeURIComponent(tag)}`}
-                                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-orange-500 text-slate-300 hover:text-white text-xs transition-colors border border-slate-700/60"
-                                >
-                                    #{tag}
-                                </Link>
-                            ))}
+                    {/* Featured Image */}
+                    {article.featuredImage && (
+                        <div className="mb-10 rounded-3xl overflow-hidden border border-border/70 shadow-2xl bg-surface-muted">
+                            <Img
+                                src={article.featuredImage}
+                                alt={article.title}
+                                priority={true}
+                                aspectRatio="16/9"
+                                className="w-full h-auto object-cover max-h-[500px]"
+                            />
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Related Articles */}
+                    {/* Article Excerpt */}
+                    {article.excerpt && (
+                        <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20 text-foreground/90 font-medium text-base sm:text-lg leading-relaxed mb-8">
+                            {article.excerpt}
+                        </div>
+                    )}
+
+                    {/* Article Body Content */}
+                    <div
+                        className="prose prose-invert max-w-none text-foreground leading-loose text-base sm:text-lg mb-12
+                                   prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight
+                                   prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-b prose-h2:border-border/60 prose-h2:pb-3
+                                   prose-h3:text-xl sm:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
+                                   prose-p:text-muted prose-p:mb-6 prose-p:leading-relaxed
+                                   prose-a:text-primary prose-a:underline hover:prose-a:opacity-80
+                                   prose-strong:text-foreground prose-strong:font-bold
+                                   prose-ul:list-disc prose-ul:pr-6 prose-ul:mb-6 prose-li:text-muted prose-li:mb-2
+                                   prose-ol:list-decimal prose-ol:pr-6 prose-ol:mb-6 prose-li:text-muted prose-li:mb-2
+                                   prose-blockquote:border-r-4 prose-blockquote:border-primary prose-blockquote:pr-4 prose-blockquote:italic prose-blockquote:text-foreground/90
+                                   prose-code:text-primary prose-code:bg-surface-muted prose-code:px-2 prose-code:py-0.5 prose-code:rounded-md
+                                   prose-img:rounded-2xl prose-img:border prose-img:border-border/70 prose-img:my-8"
+                        dangerouslySetInnerHTML={{ __html: article.content || '<p>محتوایی ثبت نشده است.</p>' }}
+                    />
+
+                    {/* Tags */}
+                    {article.tags && article.tags.length > 0 && (
+                        <div className="pt-8 border-t border-border/70 mb-12">
+                            <h4 className="text-xs text-muted mb-3 font-medium">برچسب‌ها:</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {article.tags.map((tag) => (
+                                    <Link
+                                        key={tag}
+                                        to={`/blog?tag=${encodeURIComponent(tag)}`}
+                                        className="text-xs px-3.5 py-1.5 rounded-full bg-surface-muted border border-border/80 text-muted hover:text-foreground hover:border-primary/50 transition-colors"
+                                    >
+                                        #{tag}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </article>
+
+                {/* Related Articles Section */}
                 {related.length > 0 && (
-                    <section className="mt-20 pt-12 border-t border-slate-800">
-                        <h2 className="text-2xl font-bold text-white mb-8">مطالب مرتبط پیشنهادی</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <section className="pt-12 border-t border-border/70">
+                        <h2 className="text-xl sm:text-2xl font-black text-foreground mb-6">
+                            مقالات مرتبط
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                             {related.map((rel) => (
                                 <Link
-                                    key={rel.id}
+                                    key={rel.id || rel.slug}
                                     to={`/blog/${rel.slug}`}
-                                    className="group bg-slate-800/60 border border-slate-700/60 rounded-2xl overflow-hidden hover:border-orange-500/50 transition-all flex flex-col justify-between"
+                                    className="group flex flex-col bg-card rounded-2xl border border-border/70 hover:border-primary/50 overflow-hidden shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
                                 >
-                                    <div className="aspect-[16/10] overflow-hidden bg-slate-900">
+                                    <div className="aspect-[16/10] overflow-hidden bg-surface-muted">
                                         <Img
-                                            src={rel.featuredImage || '/logo-light.svg'}
+                                            src={rel.featuredImage || '/favicon.svg'}
                                             alt={rel.title}
                                             aspectRatio="16/10"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                     </div>
                                     <div className="p-4 flex-1 flex flex-col justify-between">
-                                        <h3 className="text-sm font-bold text-white group-hover:text-orange-400 line-clamp-2 mb-2 leading-snug">
+                                        <h3 className="text-sm font-bold text-foreground group-hover:text-primary line-clamp-2 mb-2 leading-snug">
                                             {rel.title}
                                         </h3>
-                                        <div className="pt-2 text-[11px] text-slate-500 flex items-center justify-between">
-                                            <span>{rel.category || 'آکادمی حرکت'}</span>
-                                            <span className="text-orange-400 font-medium">مشاهده</span>
+                                        <div className="pt-2 text-[11px] text-muted flex items-center justify-between">
+                                            <span>{rel.category || 'مدرسه حرکت'}</span>
+                                            <span className="text-primary font-medium">مشاهده</span>
                                         </div>
                                     </div>
                                 </Link>
@@ -288,7 +278,9 @@ export default function BlogDetailPage() {
                         </div>
                     </section>
                 )}
-            </article>
+            </div>
+
+            <Footer />
         </div>
     );
 }

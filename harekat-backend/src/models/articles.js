@@ -34,7 +34,7 @@ const Articles = sequelize.define('Articles', {
     authorName: {
         type: DataTypes.STRING,
         allowNull: true,
-        defaultValue: 'آکادمی حرکت'
+        defaultValue: 'مدرسه حرکت'
     },
     category: {
         type: DataTypes.STRING,
