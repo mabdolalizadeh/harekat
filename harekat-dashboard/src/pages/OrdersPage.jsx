@@ -63,17 +63,34 @@ export default function OrdersPage() {
 
   const handleOpenPaymentModal = async (payment) => {
     try {
+      setLoading(true);
       const orderId = payment.orderId || payment.id;
       const initRes = await paymentsApi.initiatePayment(orderId, payment.gateway);
       if (initRes?.ok && initRes.data?.requiresGatewayRedirect && initRes.data?.redirectUrl) {
         window.location.href = initRes.data.redirectUrl;
         return;
       }
+      if (initRes?.ok && initRes.data?.gatewayData?.simulated) {
+        setSelectedPayment({ ...payment, ...(initRes?.data || {}) });
+        setModalOpen(true);
+        return;
+      }
+      if (!initRes?.ok) {
+        setFeedbackMessage({
+          type: 'error',
+          text: initRes?.message || 'خطا در ارتباط با درگاه پرداخت'
+        });
+        return;
+      }
       setSelectedPayment({ ...payment, ...(initRes?.data || {}) });
       setModalOpen(true);
     } catch (err) {
-      setSelectedPayment(payment);
-      setModalOpen(true);
+      setFeedbackMessage({
+        type: 'error',
+        text: err.message || 'خطا در اتصال به درگاه پرداخت'
+      });
+    } finally {
+      setLoading(false);
     }
   };
 

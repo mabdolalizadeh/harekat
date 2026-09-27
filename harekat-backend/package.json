@@ -19,8 +19,6 @@
     "pm2:reload": "pm2 reload ecosystem.config.cjs",
     "pm2:stop": "pm2 stop ecosystem.config.cjs"
   },
-
-
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -38,6 +36,7 @@
     "sequelize": "^6.37.8",
     "sharp": "^0.35.4",
     "sqlite3": "^6.0.1",
-    "uuid": "^14.0.1"
+    "uuid": "^14.0.1",
+    "zibal": "^2.0.0"
   }
 }

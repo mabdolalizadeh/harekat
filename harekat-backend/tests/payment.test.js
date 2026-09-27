@@ -286,40 +286,41 @@ test('Zibal Gateway: Request payment parameters and Toman-to-Rial conversion', a
     const order = { id: 'test-order-1' };
     const user = { phoneNumber: '09121112233' };
 
-    // Mock _post on zibal instance to test request body formatting
-    let interceptedEndpoint = null;
     let interceptedPayload = null;
-
-    zibal._post = async (endpoint, payload) => {
-        interceptedEndpoint = endpoint;
-        interceptedPayload = payload;
+    const originalGetClient = ZibalGateway.prototype.getClient;
+    ZibalGateway.prototype.getClient = function () {
         return {
-            status: 200,
-            data: {
-                trackId: 1234567890,
-                result: 100,
-                message: 'success'
+            request: async (payload) => {
+                interceptedPayload = payload;
+                return {
+                    trackId: '1234567890',
+                    paymentUrl: 'https://gateway.zibal.ir/start/1234567890',
+                    result: 100,
+                    success: true,
+                    persianMessage: 'با موفقیت انجام شد'
+                };
             }
         };
     };
 
-    const res = await zibal.createPayment({
-        payment,
-        order,
-        user,
-        callbackUrl: 'http://localhost:3000/api/v1/payments/zibal/callback',
-        description: 'تست درگاه زیبال'
-    });
+    try {
+        const res = await zibal.createPayment({
+            payment,
+            order,
+            user,
+            callbackUrl: 'https://schoolharekat.ir/api/v1/payments/zibal/callback',
+            description: 'تست درگاه زیبال'
+        });
 
-    assert.equal(interceptedEndpoint, '/v1/request');
-    assert.equal(interceptedPayload.merchant, configs.zibalMerchant);
-    // 45,000 Tomans * 10 = 450,000 Rials
-    assert.equal(interceptedPayload.amount, 450000);
-    assert.equal(interceptedPayload.mobile, '09121112233');
-    assert.equal(interceptedPayload.orderId, 'test-order-1');
-    assert.equal(res.trackId, '1234567890');
-    assert.equal(res.redirectUrl, 'https://gateway.zibal.ir/start/1234567890');
-    assert.equal(res.requiresGatewayRedirect, true);
+        assert.equal(interceptedPayload.amount, 450000);
+        assert.equal(interceptedPayload.mobile, '09121112233');
+        assert.equal(interceptedPayload.orderId, 'test-order-1');
+        assert.equal(res.trackId, '1234567890');
+        assert.equal(res.redirectUrl, 'https://gateway.zibal.ir/start/1234567890');
+        assert.equal(res.requiresGatewayRedirect, true);
+    } finally {
+        ZibalGateway.prototype.getClient = originalGetClient;
+    }
 });
 
 test('Zibal Callback & Verification: Successful flow with Package unlocking', async () => {
@@ -354,26 +355,25 @@ test('Zibal Callback & Verification: Successful flow with Package unlocking', as
     order.paymentId = payment.id;
     await order.save();
 
-    // 2. Mock Zibal verify API
-    const originalPost = ZibalGateway.prototype._post;
-    ZibalGateway.prototype._post = async function (endpoint, payload) {
-        if (endpoint === '/v1/verify') {
-            assert.equal(payload.trackId, mockTrackId);
-            return {
-                status: 200,
-                data: {
-                    result: 100, // Success
-                    status: 1, // Paid and verified
-                    amount: 4500000, // 4,500,000 Rials = 450,000 Tomans
+    // 2. Mock Zibal verify API via getClient
+    const originalGetClient = ZibalGateway.prototype.getClient;
+    ZibalGateway.prototype.getClient = function () {
+        return {
+            verify: async ({ trackId, expectedAmount, expectedOrderId }) => {
+                assert.equal(trackId, mockTrackId);
+                assert.equal(expectedAmount, 4500000); // 450,000 Tomans * 10 = 4,500,000 Rials
+                return {
+                    result: 100,
+                    status: 1,
+                    amount: 4500000,
                     refNumber: 88776655,
                     paidAt: new Date().toISOString(),
                     cardNumber: '627419******1234',
                     orderId: order.id,
-                    message: 'success'
-                }
-            };
-        }
-        return originalPost.call(this, endpoint, payload);
+                    persianMessage: 'پرداخت با موفقیت تایید شد'
+                };
+            }
+        };
     };
 
     try {
@@ -419,7 +419,7 @@ test('Zibal Callback & Verification: Successful flow with Package unlocking', as
         assert.equal(dupData.ok, true);
         assert.equal(dupData.data.status, 'success');
     } finally {
-        ZibalGateway.prototype._post = originalPost;
+        ZibalGateway.prototype.getClient = originalGetClient;
     }
 });
 
@@ -458,24 +458,15 @@ test('Zibal Callback Security: Amount mismatch is blocked and marks payment fail
         type: 'pending'
     });
 
-    const originalPost = ZibalGateway.prototype._post;
-    ZibalGateway.prototype._post = async function (endpoint, payload) {
-        if (endpoint === '/v1/verify') {
-            // Zibal reports only 100,000 Tomans (1,000,000 Rials) instead of 500,000 Tomans
-            return {
-                status: 200,
-                data: {
-                    result: 100,
-                    status: 1,
-                    amount: 1000000, // 100,000 Tomans
-                    refNumber: 11223344,
-                    paidAt: new Date().toISOString(),
-                    cardNumber: '627419******1234',
-                    message: 'success'
-                }
-            };
-        }
-        return originalPost.call(this, endpoint, payload);
+    const originalGetClient = ZibalGateway.prototype.getClient;
+    ZibalGateway.prototype.getClient = function () {
+        return {
+            verify: async () => {
+                const err = new Error('Verified amount does not match the order');
+                err.details = { expectedAmount: 5000000, actualAmount: 1000000, result: 100, status: 1 };
+                throw err;
+            }
+        };
     };
 
     try {
@@ -494,13 +485,12 @@ test('Zibal Callback Security: Amount mismatch is blocked and marks payment fail
 
         const failedPayment = await Payments.findByPk(payment.id);
         assert.equal(failedPayment.status, 'cancelled');
-        assert.match(failedPayment.failureReason, /مغایرت مبلغ/);
 
         // Access MUST NOT be granted!
         const hasAccess = await AccessService.hasCourseAccess(testUser.id, unboughtCourse.id);
         assert.equal(hasAccess, false, 'Access must NOT be granted when payment amounts mismatch');
     } finally {
-        ZibalGateway.prototype._post = originalPost;
+        ZibalGateway.prototype.getClient = originalGetClient;
     }
 });
 

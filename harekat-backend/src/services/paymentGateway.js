@@ -1,4 +1,4 @@
-import { Orders, OrderItems, Payments, Courses, Coupon, sequelize } from '../models/index.js';
+import { Users, Orders, OrderItems, Payments, Courses, Coupon, sequelize } from '../models/index.js';
 import { AccessService } from './accessService.js';
 import { FakeGateway } from './gateways/FakeGateway.js';
 import { ZibalGateway } from './gateways/ZibalGateway.js';
@@ -8,11 +8,13 @@ import { logSecurityEvent } from '../utils/logger.js';
 export class PaymentGateway {
     /**
      * Resolve gateway adapter instance by name or default config
+     * Supports both PAYMENT_MODE ('zibal' | 'fake') and PAYMENT_GATEWAY ('zibal' | 'mock')
      * @param {string} [gatewayName]
      * @returns {BaseGateway}
      */
     static getGateway(gatewayName) {
-        const normalized = String(gatewayName || configs.paymentGateway || 'mock').trim().toLowerCase();
+        const configured = String(process.env.PAYMENT_MODE || process.env.PAYMENT_GATEWAY || configs.paymentMode || configs.paymentGateway || 'fake').trim().toLowerCase();
+        const normalized = String(gatewayName || configured).trim().toLowerCase();
         if (normalized === 'zibal') {
             return new ZibalGateway();
         }
@@ -60,13 +62,22 @@ export class PaymentGateway {
         order.paymentId = payment.id;
         await order.save();
 
+        logSecurityEvent('payment created', {
+            paymentId: payment.id,
+            orderId: order.id,
+            userId,
+            gateway: resolvedGatewayName,
+            amount: finalAmountStr
+        });
+
+        const user = await Users.findByPk(userId, { attributes: ['id', 'phoneNumber', 'firstName', 'lastName'] });
         const defaultDescription = `پرداخت سفارش #${order.id.slice(0, 8)} در مدرسه حرکت`;
 
         // Request payment from gateway driver
         const gatewayResult = await activeGateway.createPayment({
             payment,
             order,
-            user: { id: userId },
+            user: { id: userId, phoneNumber: user?.phoneNumber },
             callbackUrl,
             description: description || defaultDescription
         });
@@ -105,6 +116,8 @@ export class PaymentGateway {
      * and performs idempotent status transition.
      */
     static async verifyZibalCallback({ trackId, success, status, orderId }) {
+        logSecurityEvent('callback received', { trackId, success, status, orderId });
+
         if (!trackId) {
             throw new Error('پارامتر trackId در کال‌بک الزامی است');
         }
@@ -161,6 +174,11 @@ export class PaymentGateway {
 
         // Call Zibal verify endpoint
         const zibalGateway = new ZibalGateway();
+        logSecurityEvent('verification started', {
+            paymentId: payment.id,
+            trackId: cleanTrackId,
+            orderId: payment.orderId
+        });
         const verifyResult = await zibalGateway.verifyPayment({
             payment,
             trackId: cleanTrackId,
@@ -284,6 +302,13 @@ export class PaymentGateway {
             order.status = 'paid';
             await order.save({ transaction: t });
 
+            logSecurityEvent('payment finalized', {
+                paymentId: payment.id,
+                orderId: order.id,
+                transactionId: payment.transactionId,
+                amount: payment.amount
+            });
+
             // Increment coupon usage count if applied
             if (order.couponCode) {
                 try {
@@ -332,6 +357,13 @@ export class PaymentGateway {
                     }, { transaction: t });
                 }
             }
+
+            logSecurityEvent('product unlocked', {
+                paymentId: payment.id,
+                orderId: order.id,
+                userId,
+                itemsCount: order.items?.length || 0
+            });
 
             logSecurityEvent('payment_success', {
                 paymentId: payment.id,

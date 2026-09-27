@@ -91,6 +91,21 @@ export default function CartDrawer() {
         return;
       }
 
+      if (initiateRes?.ok && initiateRes.data?.gatewayData?.simulated) {
+        setPendingPayment({
+          id: initiateRes.data.paymentId || order.paymentId || order.payment?.id,
+          amount: initiateRes.data.amount || order.finalAmount,
+          orderId: order.id
+        });
+        setPaymentModalOpen(true);
+        return;
+      }
+
+      if (!initiateRes?.ok) {
+        setCheckoutError(initiateRes?.message || 'خطا در ارتباط با درگاه پرداخت');
+        return;
+      }
+
       if (order?.paymentId || order?.payment?.id || initiateRes?.data?.paymentId) {
         setPendingPayment({
           id: initiateRes?.data?.paymentId || order.paymentId || order.payment?.id,
