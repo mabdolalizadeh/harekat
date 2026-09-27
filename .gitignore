@@ -44,3 +44,8 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# Markdown files
+*.md
+**/*.md
+
