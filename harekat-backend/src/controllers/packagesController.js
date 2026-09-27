@@ -1,6 +1,20 @@
-import { Courses, PackageCourses } from '../models/index.js';
+import { Courses, PackageCourses, Teachers, Categories } from '../models/index.js';
 import { AccessService } from '../services/accessService.js';
 import { logSecurityEvent } from '../utils/logger.js';
+
+function packageAssociations() {
+    return [
+        {
+            model: Courses,
+            as: 'packageIncludedCourses',
+            through: { attributes: [] },
+            attributes: ['id', 'name', 'image', 'duration', 'level', 'typeOfAttendence', 'price', 'salePrice']
+        },
+        { model: Teachers, as: 'teacher' },
+        { model: Teachers, as: 'teachers', through: { attributes: [] } },
+        { model: Categories, as: 'categories', through: { attributes: [] } }
+    ];
+}
 
 export default class PackagesController {
     /**
@@ -10,14 +24,7 @@ export default class PackagesController {
         try {
             const packages = await Courses.findAll({
                 where: { kind: 'skill', isActive: true },
-                include: [
-                    {
-                        model: Courses,
-                        as: 'packageIncludedCourses',
-                        through: { attributes: [] },
-                        attributes: ['id', 'name', 'image', 'duration', 'level', 'typeOfAttendence']
-                    }
-                ],
+                include: packageAssociations(),
                 order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']]
             });
             return res.status(200).json({ ok: true, data: packages });
@@ -40,14 +47,7 @@ export default class PackagesController {
                     id: activeCourseIds,
                     kind: 'skill'
                 },
-                include: [
-                    {
-                        model: Courses,
-                        as: 'packageIncludedCourses',
-                        through: { attributes: [] },
-                        attributes: ['id', 'name', 'image', 'duration', 'level', 'typeOfAttendence']
-                    }
-                ]
+                include: packageAssociations()
             });
 
             return res.status(200).json({ ok: true, data: packages });
@@ -63,14 +63,7 @@ export default class PackagesController {
         try {
             const packages = await Courses.findAll({
                 where: { kind: 'skill' },
-                include: [
-                    {
-                        model: Courses,
-                        as: 'packageIncludedCourses',
-                        through: { attributes: [] },
-                        attributes: ['id', 'name', 'image', 'duration', 'level']
-                    }
-                ],
+                include: packageAssociations(),
                 order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']]
             });
             return res.status(200).json({ ok: true, data: packages });
