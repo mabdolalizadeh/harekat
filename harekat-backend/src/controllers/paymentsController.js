@@ -26,6 +26,7 @@ export default class PaymentsController {
             });
             return res.status(200).json({ ok: true, data: result });
         } catch (err) {
+            console.error('[initiatePayment ERROR]:', err);
             return res.status(500).json({ ok: false, message: err.message });
         }
     }
@@ -213,6 +214,7 @@ export default class PaymentsController {
                 return res.status(400).json({ ok: false, message: 'عملیات نامعتبر است (pay یا cancel مجاز است)' });
             }
         } catch (err) {
+            console.error('[processFakePayment ERROR]:', err);
             return res.status(500).json({ ok: false, message: err.message });
         }
     }
