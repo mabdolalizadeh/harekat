@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /payments/
+Disallow: /cart
+Disallow: /login
+Disallow: /auth
+
+Sitemap: https://schoolharekat.ir/sitemap.xml

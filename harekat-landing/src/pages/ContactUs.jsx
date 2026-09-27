@@ -8,6 +8,7 @@ import SectionTag from "../components/ui/SectionTag.jsx";
 import { Mail, MapPin, Phone, Clock, Send, Sparkles, CheckCircle2, MessageSquare, AlertCircle } from "lucide-react";
 import { TextField } from "@mui/material";
 import { storeApi } from "../services/api.js";
+import SEOHead from "../components/ui/SEOHead.jsx";
 
 const muiInputSx = {
     width: '100%',
@@ -136,6 +137,11 @@ export default function ContactUs() {
     return (
         <SmoothScrollProvider>
             <MainLayout title={'تماس با ما'} sectionIds={null} contentMap={null}>
+                <SEOHead
+                    title="تماس با ما | آکادمی حرکت"
+                    description="راه‌های ارتباطی با آکادمی حرکت، مشاوره آموزشی و ثبت‌نام دوره‌های مهارتی و پشتیبانی دانشجویان."
+                    canonical="/contact-us"
+                />
                 <TopBarLayout />
 
                 <div ref={pageRef} className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-32 sm:pt-40 pb-28 flex flex-col items-center gap-14">

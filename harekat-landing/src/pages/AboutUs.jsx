@@ -10,6 +10,7 @@ import SectionTag from "../components/ui/SectionTag.jsx";
 import { ArrowButton } from "../components/ui/Buttons.jsx";
 import { Sparkles, Compass, Lightbulb, Users, Award, Layers, ArrowLeft } from "lucide-react";
 import { storeApi } from "../services/api.js";
+import SEOHead from "../components/ui/SEOHead.jsx";
 
 gsap.registerPlugin(ScrollTrigger, Draggable);
 
@@ -287,6 +288,11 @@ export default function AboutUs() {
     return (
         <SmoothScrollProvider>
             <MainLayout title={'درباره ما'} sectionIds={sectionIds} contentMap={contentMap}>
+                <SEOHead
+                    title="درباره آکادمی حرکت | رسالت و چشم‌انداز ما"
+                    description="داستان شکل‌گیری، مانیفست و ارزش‌های آکادمی مهارت‌آموزی حرکت؛ پیوند میان یادگیری عملی، تفکر نقادانه و استانداردهای حرفه‌ای."
+                    canonical="/about-us"
+                />
                 <TopBarLayout />
 
                 <div ref={pageRef} className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-32 sm:pt-40 pb-28 flex flex-col items-center gap-20">

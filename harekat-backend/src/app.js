@@ -12,6 +12,7 @@ import { configs } from './config/config.js';
 import { auth } from './middleware/auth.js';
 import { adminOnly } from './middleware/ownerCheck.js';
 import sharp from 'sharp';
+import { Courses, Articles } from './models/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -213,6 +214,92 @@ app.use('/api/v1/admins/register', strictAuthLimiter);
 
 app.use('/api/v1', routes);
 app.use('/api', routes);
+
+// Public SEO: robots.txt
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send(`User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /payments/
+Disallow: /cart
+Disallow: /login
+Disallow: /auth
+
+Sitemap: https://schoolharekat.ir/sitemap.xml
+`);
+});
+
+// Public SEO: Dynamic XML Sitemap
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const baseUrl = 'https://schoolharekat.ir';
+        const staticRoutes = [
+            { path: '/', priority: '1.0', changefreq: 'daily' },
+            { path: '/courses', priority: '0.9', changefreq: 'weekly' },
+            { path: '/packages', priority: '0.9', changefreq: 'weekly' },
+            { path: '/capsules', priority: '0.8', changefreq: 'weekly' },
+            { path: '/blog', priority: '0.9', changefreq: 'daily' },
+            { path: '/about-us', priority: '0.7', changefreq: 'monthly' },
+            { path: '/contact-us', priority: '0.7', changefreq: 'monthly' },
+        ];
+
+        const [courses, articles] = await Promise.all([
+            Courses.findAll({
+                where: { isActive: true },
+                attributes: ['id', 'kind', 'updatedAt']
+            }).catch(() => []),
+            Articles.findAll({
+                where: { status: 'published' },
+                attributes: ['slug', 'updatedAt', 'publishedAt']
+            }).catch(() => [])
+        ]);
+
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+        for (const route of staticRoutes) {
+            xml += `  <url>\n`;
+            xml += `    <loc>${baseUrl}${route.path}</loc>\n`;
+            xml += `    <changefreq>${route.changefreq}</changefreq>\n`;
+            xml += `    <priority>${route.priority}</priority>\n`;
+            xml += `  </url>\n`;
+        }
+
+        for (const course of courses) {
+            const prefix = course.kind === 'skill' ? '/packages' : course.kind === 'capsule' ? '/capsules' : '/courses';
+            const lastmod = course.updatedAt ? new Date(course.updatedAt).toISOString().split('T')[0] : '';
+            xml += `  <url>\n`;
+            xml += `    <loc>${baseUrl}${prefix}/${course.id}</loc>\n`;
+            if (lastmod) xml += `    <lastmod>${lastmod}</lastmod>\n`;
+            xml += `    <changefreq>weekly</changefreq>\n`;
+            xml += `    <priority>0.8</priority>\n`;
+            xml += `  </url>\n`;
+        }
+
+        for (const article of articles) {
+            const lastmod = (article.updatedAt || article.publishedAt)
+                ? new Date(article.updatedAt || article.publishedAt).toISOString().split('T')[0]
+                : '';
+            xml += `  <url>\n`;
+            xml += `    <loc>${baseUrl}/blog/${encodeURIComponent(article.slug)}</loc>\n`;
+            if (lastmod) xml += `    <lastmod>${lastmod}</lastmod>\n`;
+            xml += `    <changefreq>monthly</changefreq>\n`;
+            xml += `    <priority>0.8</priority>\n`;
+            xml += `  </url>\n`;
+        }
+
+        xml += `</urlset>`;
+
+        res.header('Content-Type', 'application/xml');
+        return res.send(xml);
+    } catch (err) {
+        return res.status(500).send('Error generating sitemap');
+    }
+});
 
 // Serve the admin SPA from the admin hostname at its root. The hostname is
 // configured with ADMIN_HOSTNAME (for example admin.domain.tld); the

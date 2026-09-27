@@ -11,6 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { BookOpen, Clock, User, Video, ShoppingCart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext.jsx';
+import SEOHead from '../components/ui/SEOHead.jsx';
 
 function price(value) {
     if (value === null || value === undefined || value === '') return 'رایگان';
@@ -106,8 +107,34 @@ export default function ProductDetail({ type }) {
         }
     };
 
+    const courseSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Course',
+        'name': course.name,
+        'description': course.description ? course.description.slice(0, 200) : 'دوره آموزشی آکادمی حرکت',
+        'provider': {
+            '@type': 'Organization',
+            'name': 'آکادمی حرکت',
+            'sameAs': 'https://schoolharekat.ir'
+        },
+        'image': course.image,
+        'offers': {
+            '@type': 'Offer',
+            'price': String(course.salePrice || course.price || 0),
+            'priceCurrency': 'IRR',
+            'category': kindInfo.label
+        }
+    };
+
     return (
         <MainLayout title={course.name} sectionIds={null} contentMap={null}>
+            <SEOHead
+                title={`${course.name} | ${kindInfo.label}`}
+                description={course.description ? course.description.slice(0, 160) : `مشخصات، سرفصل‌ها و ثبت‌نام در ${course.name} در آکادمی حرکت.`}
+                canonical={location.pathname}
+                ogImage={course.image}
+                schemaJson={courseSchema}
+            />
             <TopBarLayout />
             <Box className="w-full max-w-6xl gap-8 pb-24 pt-28 sm:pt-36 mx-auto px-4 sm:px-6">
                 {/* Breadcrumbs */}

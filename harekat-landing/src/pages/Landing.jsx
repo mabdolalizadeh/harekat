@@ -24,6 +24,7 @@ import LandingFAQ from "../components/landing/LandingFAQ.jsx";
 import LandingCTA from "../components/landing/LandingCTA.jsx";
 import DragToCartDropZone from "../components/ui/DragToCartDropZone.jsx";
 import LandingLoader from "../components/ui/LandingLoader.jsx";
+import SEOHead from "../components/ui/SEOHead.jsx";
 
 const fallbackHeroSlides = [
     { image: '', alt: '' },
@@ -218,8 +219,47 @@ export default function Landing() {
         }
     };
 
+    const homeSchema = {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': 'Organization',
+                '@id': 'https://schoolharekat.ir/#organization',
+                'name': 'آکادمی حرکت',
+                'url': 'https://schoolharekat.ir/',
+                'logo': 'https://schoolharekat.ir/logo-light.svg',
+                'description': 'مدرسه و آکادمی تخصصی آموزش مهارت‌های فردی، تفکر نقادانه و انضباط شخصی ویژه نوجوانان و دانش‌آموزان.',
+                'sameAs': [
+                    'https://instagram.com/schoolharekat',
+                    'https://t.me/schoolharekat'
+                ]
+            },
+            {
+                '@type': 'WebSite',
+                '@id': 'https://schoolharekat.ir/#website',
+                'url': 'https://schoolharekat.ir/',
+                'name': 'آکادمی حرکت',
+                'publisher': {
+                    '@id': 'https://schoolharekat.ir/#organization'
+                },
+                'potentialAction': {
+                    '@type': 'SearchAction',
+                    'target': 'https://schoolharekat.ir/blog?q={search_term_string}',
+                    'query-input': 'required name=search_term_string'
+                }
+            }
+        ]
+    };
+
     return (
         <SmoothScrollProvider>
+            <SEOHead
+                title="آکادمی حرکت | آموزش مهارت‌های فردی و کاربردی نوجوانان"
+                description="مدرسه و آکادمی مهارت‌آموزی حرکت؛ دوره‌های تخصصی آموزش مهارت‌های فردی، خلاقیت، حل مسئله، هوش مالی و انضباط شخصی ویژه نوجوانان و دانش‌آموزان."
+                canonical="https://schoolharekat.ir/"
+                schemaJson={homeSchema}
+            />
+
             {/* Custom Initial Loading Screen */}
             <LandingLoader
                 isReady={!isLoading}

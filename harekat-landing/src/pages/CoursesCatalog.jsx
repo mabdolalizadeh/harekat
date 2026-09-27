@@ -8,6 +8,7 @@ import { CourseCard } from '../components/contents/Cards.jsx';
 import { CourseCardSkeleton } from '../components/ui/Skeleton.jsx';
 import { storeApi } from '../services/api.js';
 import { Search, BookOpen } from 'lucide-react';
+import SEOHead from '../components/ui/SEOHead.jsx';
 
 function mapApiCourse(course) {
     const teacher = course.teacher ? `${course.teacher.firstName ?? ''} ${course.teacher.lastName ?? ''}`.trim() : '';
@@ -85,8 +86,35 @@ export default function CoursesCatalog({
         { id: 'پیشرفته', label: 'پیشرفته' },
     ];
 
+    const canonicalPath = kind === 'skill' ? '/packages' : kind === 'capsule' ? '/capsules' : '/courses';
+
+    const breadcrumbSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+            {
+                '@type': 'ListItem',
+                'position': 1,
+                'name': 'صفحه اصلی',
+                'item': 'https://schoolharekat.ir/'
+            },
+            {
+                '@type': 'ListItem',
+                'position': 2,
+                'name': title,
+                'item': `https://schoolharekat.ir${canonicalPath}`
+            }
+        ]
+    };
+
     return (
         <MainLayout title={title} sectionIds={null} contentMap={null}>
+            <SEOHead
+                title={title}
+                description={description}
+                canonical={canonicalPath}
+                schemaJson={breadcrumbSchema}
+            />
             <TopBarLayout />
 
             {/* Hero Header */}
