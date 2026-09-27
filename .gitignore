@@ -1,6 +1,7 @@
 # Dependencies — any directory at any level
 node_modules/
 
+.agents/
 *.zip
 
 *.db*
