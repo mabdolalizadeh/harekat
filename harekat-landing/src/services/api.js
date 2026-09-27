@@ -157,6 +157,7 @@ export const storeApi = {
         };
     },
     validateCoupon: (code, orderAmount) => post('/coupons/validate', { code, orderAmount }),
+    sendContactMessage: (data) => post('/contact-messages', data),
 };
 
 export const customerApi = {

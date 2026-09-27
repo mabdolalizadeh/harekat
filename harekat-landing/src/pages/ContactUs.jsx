@@ -5,8 +5,9 @@ import TopBarLayout from "../layouts/TopBarLayout.jsx";
 import SmoothScrollProvider from "../components/landing/SmoothScrollProvider.jsx";
 import SectionTag from "../components/ui/SectionTag.jsx";
 
-import { Mail, MapPin, Phone, Clock, Send, Sparkles, CheckCircle2, MessageSquare } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, Send, Sparkles, CheckCircle2, MessageSquare, AlertCircle } from "lucide-react";
 import { TextField } from "@mui/material";
+import { storeApi } from "../services/api.js";
 
 const muiInputSx = {
     width: '100%',
@@ -72,6 +73,8 @@ export default function ContactUs() {
     const pageRef = useRef(null);
     const [formState, setFormState] = useState({ name: '', email: '', subject: '', message: '' });
     const [sent, setSent] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         const el = pageRef.current;
@@ -96,16 +99,38 @@ export default function ContactUs() {
 
     const handleChange = (e) => {
         setFormState(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        if (errorMessage) setErrorMessage('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formState.name || !formState.email || !formState.message) return;
-        setSent(true);
-        setTimeout(() => {
-            setSent(false);
-            setFormState({ name: '', email: '', subject: '', message: '' });
-        }, 4000);
+        if (!formState.name.trim() || !formState.email.trim() || !formState.message.trim()) return;
+
+        try {
+            setIsSubmitting(true);
+            setErrorMessage('');
+            const res = await storeApi.sendContactMessage({
+                name: formState.name,
+                email: formState.email,
+                subject: formState.subject || null,
+                message: formState.message
+            });
+
+            if (res?.ok) {
+                setSent(true);
+                setFormState({ name: '', email: '', subject: '', message: '' });
+                setTimeout(() => {
+                    setSent(false);
+                }, 6000);
+            } else {
+                setErrorMessage(res?.message || 'خطا در ثبت پیام. لطفاً دوباره تلاش کنید.');
+            }
+        } catch (err) {
+            console.error('Contact submit error:', err);
+            setErrorMessage(err.message || 'خطا در برقراری ارتباط با سرور.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -274,14 +299,24 @@ export default function ContactUs() {
                                         sx={muiInputSx}
                                     />
 
+                                    {errorMessage && (
+                                        <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs sm:text-sm">
+                                            <AlertCircle size={18} className="shrink-0" />
+                                            <span>{errorMessage}</span>
+                                        </div>
+                                    )}
+
                                     <div className="pt-3">
                                         <button
                                             type="submit"
-                                            className="group relative w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-gradient-to-l from-primary via-primary to-amber-500 text-primary-foreground font-extrabold text-base tracking-wide shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden"
+                                            disabled={isSubmitting}
+                                            className="group relative w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-gradient-to-l from-primary via-primary to-amber-500 text-primary-foreground font-extrabold text-base tracking-wide shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {/* Shine sweep on hover */}
                                             <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                                            <span className="relative leading-none font-title text-[1.05rem]">ارسال پیام به حرکت</span>
+                                            <span className="relative leading-none font-title text-[1.05rem]">
+                                                {isSubmitting ? 'در حال ارسال پیام...' : 'ارسال پیام به حرکت'}
+                                            </span>
                                             <Send size={18} className="relative shrink-0 transition-transform duration-300 group-hover:-translate-x-1 group-hover:-translate-y-0.5" />
                                         </button>
                                     </div>

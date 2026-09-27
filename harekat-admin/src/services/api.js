@@ -298,6 +298,18 @@ export const adminApi = {
         ]);
         return { courses, categories, coupons, menu, content, teachers, orders, payments, students, subscriptions, tickets };
     },
+
+    // Contact Messages
+    listContactMessages: (params = {}) => {
+        const q = new URLSearchParams();
+        if (params.isRead !== undefined) q.append('isRead', params.isRead);
+        const query = q.toString() ? `?${q.toString()}` : '';
+        return get(`/contact-messages${query}`, { auth: true, tokenKind: 'adminToken' });
+    },
+    markContactMessageRead: (id, isRead = true) =>
+        put(`/contact-messages/${id}/read`, { isRead }, { auth: true, tokenKind: 'adminToken' }),
+    deleteContactMessage: (id) =>
+        del(`/contact-messages/${id}`, { auth: true, tokenKind: 'adminToken' }),
 };
 
 export async function signChallengeWithRsaKey(privateKeyPem, challengeText) {

@@ -27,6 +27,7 @@ const AdminNotifications = lazy(() => import('./pages/admin/AdminNotifications.j
 const AdminAssignments = lazy(() => import('./pages/admin/AdminAssignments.jsx'));
 const AdminQuizzes = lazy(() => import('./pages/admin/AdminQuizzes.jsx'));
 const AdminEvaluations = lazy(() => import('./pages/admin/AdminEvaluations.jsx'));
+const AdminContactMessages = lazy(() => import('./pages/admin/AdminContactMessages.jsx'));
 
 function PageLoader() {
   return (
@@ -141,6 +142,14 @@ export default function App({ mode, onToggleTheme }) {
           element={
             <Suspense fallback={<PageLoader />}>
               <AdminTickets />
+            </Suspense>
+          }
+        />
+        <Route
+          path="contact-messages"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AdminContactMessages />
             </Suspense>
           }
         />

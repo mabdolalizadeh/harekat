@@ -23,6 +23,7 @@ import notificationsRouter from './notifications.js';
 import assignmentsRouter from './assignments.js';
 import quizzesRouter from './quizzes.js';
 import evaluationsRouter from './evaluations.js';
+import contactMessagesRouter from './contactMessages.js';
 
 const router = Router();
 
@@ -50,5 +51,6 @@ router.use('/notifications', notificationsRouter);
 router.use('/assignments', assignmentsRouter);
 router.use('/quizzes', quizzesRouter);
 router.use('/evaluations', evaluationsRouter);
+router.use('/contact-messages', contactMessagesRouter);
 
 export default router;
