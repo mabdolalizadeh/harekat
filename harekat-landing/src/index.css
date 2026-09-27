@@ -329,13 +329,6 @@
         -webkit-font-smoothing: antialiased;
     }
 
-    @media (hover: hover) and (pointer: fine) {
-        html.custom-cursor-active,
-        html.custom-cursor-active * {
-            cursor: none !important;
-        }
-    }
-
     ::selection {
         background: var(--selection);
         color: var(--foreground);

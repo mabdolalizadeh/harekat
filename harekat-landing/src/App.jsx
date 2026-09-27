@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import CustomCursor from './components/ui/CustomCursor.jsx';
 
 function ScrollToTop() {
     const { pathname, search } = useLocation();
@@ -63,7 +62,6 @@ function ExternalLoginRedirect() {
 export default function App() {
     return (
         <>
-            <CustomCursor />
             <ScrollToTop />
             <CartDrawer />
             <Routes>
