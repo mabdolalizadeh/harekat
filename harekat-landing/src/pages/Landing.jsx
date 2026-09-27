@@ -196,6 +196,29 @@ export default function Landing() {
         return () => { cancelled = true; };
     }, []);
 
+    const [isLoaderDone, setIsLoaderDone] = useState(false);
+
+    useEffect(() => {
+        // Keep ScrollTrigger and Lenis continuously synchronized with any DOM layout changes
+        const mainEl = document.querySelector('main');
+        if (!mainEl || typeof ResizeObserver === 'undefined') return undefined;
+
+        let timeout;
+        const ro = new ResizeObserver(() => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                window.__lenis?.resize();
+                ScrollTrigger.refresh();
+            }, 150);
+        });
+
+        ro.observe(mainEl);
+        return () => {
+            clearTimeout(timeout);
+            ro.disconnect();
+        };
+    }, []);
+
     const isLoading = apiCourses === null;
     const heroSlides = banners.length > 0 ? banners : fallbackHeroSlides;
     const displayCourses = apiCourses?.length ? apiCourses.map(mapApiCourse) : (isLoading ? [] : fallbackCourses);
@@ -264,7 +287,13 @@ export default function Landing() {
             <LandingLoader
                 isReady={!isLoading}
                 onComplete={() => {
-                    setTimeout(() => ScrollTrigger.refresh(), 100);
+                    setIsLoaderDone(true);
+                    window.__lenis?.resize();
+                    ScrollTrigger.refresh(true);
+                    setTimeout(() => {
+                        window.__lenis?.resize();
+                        ScrollTrigger.refresh(true);
+                    }, 200);
                 }}
             />
 
@@ -284,6 +313,7 @@ export default function Landing() {
                         heroSubtitle={heroSubtitle}
                         images={images}
                         onCtaClick={handleCtaClick}
+                        isPageReady={isLoaderDone}
                     />
 
                     {/* ============ MANIFESTO ============ */}

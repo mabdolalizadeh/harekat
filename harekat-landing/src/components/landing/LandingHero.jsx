@@ -15,6 +15,7 @@ export default function LandingHero({
     heroSubtitle = 'مدرسه حرکت جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی.',
     images = [],
     onCtaClick,
+    isPageReady = true,
 }) {
     const heroRef = useRef(null);
     const bannerWrapperRef = useRef(null);
@@ -29,7 +30,7 @@ export default function LandingHero({
 
     useEffect(() => {
         const heroEl = heroRef.current;
-        if (!heroEl) return;
+        if (!heroEl || !isPageReady) return;
 
         const ctx = gsap.context(() => {
             const mm = gsap.matchMedia();
@@ -136,7 +137,7 @@ export default function LandingHero({
         }, heroRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [isPageReady]);
 
     return (
         <section
