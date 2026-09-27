@@ -189,3 +189,85 @@ export function DashboardSkeleton() {
         </div>
     );
 }
+
+export function PackageCardSkeleton({ className }) {
+    return (
+        <div className={cn("bg-card border border-border/10 flex flex-col rounded-2xl overflow-hidden shadow-xs", className)}>
+            <div className="relative aspect-video w-full bg-surface-muted/60">
+                <Skeleton className="h-full w-full rounded-none" />
+                <Skeleton className="absolute top-3 right-3 h-5 w-20 rounded-full" />
+            </div>
+            <div className="flex flex-col gap-3 p-4 flex-1">
+                <Skeleton className="h-6 w-3/4 rounded-md" />
+                <Skeleton className="h-4 w-full rounded-md" />
+                <Skeleton className="h-4 w-4/5 rounded-md" />
+                <div className="p-3 bg-surface-muted/40 rounded-xl my-2 flex flex-col gap-2">
+                    <Skeleton className="h-3 w-1/3 rounded" />
+                    <Skeleton className="h-3 w-2/3 rounded" />
+                    <Skeleton className="h-3 w-1/2 rounded" />
+                </div>
+                <div className="mt-auto flex items-center justify-between pt-3 border-t border-border/10">
+                    <Skeleton className="h-5 w-24 rounded-md" />
+                    <Skeleton className="h-9 w-28 rounded-xl" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function BlogCardSkeleton({ className }) {
+    return (
+        <div className={cn("bg-card border border-border/20 flex flex-col rounded-2xl overflow-hidden shadow-xs", className)}>
+            <div className="relative aspect-[16/10] w-full bg-surface-muted/60">
+                <Skeleton className="h-full w-full rounded-none" />
+                <Skeleton className="absolute top-3 right-3 h-5 w-16 rounded-full" />
+            </div>
+            <div className="flex flex-col gap-3 p-5 flex-1">
+                <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-20 rounded-md" />
+                    <Skeleton className="h-3 w-3 rounded-full" />
+                    <Skeleton className="h-4 w-16 rounded-md" />
+                </div>
+                <Skeleton className="h-6 w-4/5 rounded-md" />
+                <Skeleton className="h-4 w-full rounded-md" />
+                <Skeleton className="h-4 w-5/6 rounded-md" />
+                <div className="mt-auto flex items-center justify-between pt-4 border-t border-border/10">
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="h-7 w-7 rounded-full" />
+                        <Skeleton className="h-4 w-20 rounded-md" />
+                    </div>
+                    <Skeleton className="h-4 w-16 rounded-md" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function BlogDetailSkeleton({ className }) {
+    return (
+        <div className={cn("w-full max-w-4xl mx-auto px-4 pt-32 pb-24 flex flex-col gap-8", className)}>
+            <div className="flex flex-col gap-4 text-center items-center">
+                <Skeleton className="h-6 w-28 rounded-full" />
+                <Skeleton className="h-10 sm:h-12 w-4/5 rounded-xl" />
+                <div className="flex items-center gap-4 mt-2">
+                    <Skeleton className="h-5 w-24 rounded-md" />
+                    <Skeleton className="h-5 w-20 rounded-md" />
+                    <Skeleton className="h-5 w-16 rounded-md" />
+                </div>
+            </div>
+            <div className="w-full aspect-[16/9] rounded-3xl overflow-hidden bg-surface-muted/60 border border-border/20">
+                <Skeleton className="h-full w-full rounded-none" />
+            </div>
+            <div className="flex flex-col gap-4 mt-4">
+                <Skeleton className="h-4 w-full rounded-md" />
+                <Skeleton className="h-4 w-11/12 rounded-md" />
+                <Skeleton className="h-4 w-4/5 rounded-md" />
+                <Skeleton className="h-7 w-1/3 rounded-lg mt-4" />
+                <Skeleton className="h-4 w-full rounded-md" />
+                <Skeleton className="h-4 w-10/12 rounded-md" />
+                <Skeleton className="h-4 w-9/12 rounded-md" />
+            </div>
+        </div>
+    );
+}
+

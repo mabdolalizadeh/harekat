@@ -11,6 +11,7 @@ import {
   Chip,
   Avatar,
   CircularProgress,
+  Skeleton
 } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -51,8 +52,29 @@ export default function MyCoursesPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-        <CircularProgress />
+      <Box>
+        <Box sx={{ mb: 3.5 }}>
+          <Skeleton variant="text" width={180} height={40} />
+          <Skeleton variant="text" width={260} height={24} />
+        </Box>
+        <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+          {[1, 2, 3].map((n) => (
+            <Grid item xs={12} sm={6} md={4} key={n}>
+              <Card sx={{ borderRadius: '24px', overflow: 'hidden' }}>
+                <Skeleton variant="rectangular" height={190} />
+                <CardContent sx={{ p: 2.5 }}>
+                  <Skeleton variant="text" width="70%" height={26} />
+                  <Skeleton variant="text" width="40%" height={20} />
+                  <Skeleton variant="rectangular" height={8} sx={{ my: 2, borderRadius: 1 }} />
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Skeleton variant="circular" width={28} height={28} />
+                    <Skeleton variant="rounded" width={110} height={36} sx={{ borderRadius: '12px' }} />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
     );
   }

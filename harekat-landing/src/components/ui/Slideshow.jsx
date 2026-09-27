@@ -105,6 +105,9 @@ export default function Slideshow({
             <img
                 src={slide.image || slide.mobileImage || slide.tabletImage || null}
                 alt={slide.alt || 'اسلاید بنر'}
+                loading={current === 0 ? 'eager' : 'lazy'}
+                fetchPriority={current === 0 ? 'high' : 'auto'}
+                decoding="async"
                 className="h-full w-full object-cover sm:object-contain bg-black/5"
                 draggable={false}
             />

@@ -13,7 +13,8 @@ import {
   CircularProgress,
   Divider,
   Alert,
-  Avatar
+  Avatar,
+  Skeleton
 } from '@mui/material';
 import { NavLink, useNavigate } from 'react-router-dom';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
@@ -90,8 +91,27 @@ export default function PackagesPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-        <CircularProgress />
+      <Box>
+        <Box sx={{ mb: 3.5 }}>
+          <Skeleton variant="text" width={220} height={40} />
+          <Skeleton variant="text" width={380} height={24} />
+        </Box>
+        <Grid container spacing={3}>
+          {[1, 2, 3].map((n) => (
+            <Grid item xs={12} sm={6} md={4} key={n}>
+              <Card sx={{ borderRadius: '24px', overflow: 'hidden' }}>
+                <Skeleton variant="rectangular" height={180} />
+                <CardContent sx={{ p: 2.5 }}>
+                  <Skeleton variant="text" width="60%" height={28} />
+                  <Skeleton variant="text" width="90%" height={20} />
+                  <Skeleton variant="text" width="80%" height={20} />
+                  <Skeleton variant="rectangular" height={50} sx={{ my: 2, borderRadius: '12px' }} />
+                  <Skeleton variant="rounded" height={44} sx={{ borderRadius: '14px' }} />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
     );
   }
