@@ -27,12 +27,43 @@ async function main() {
         return acc;
     }, {});
 
-    const username = args.username || 'superadmin';
+    if (args.help) {
+        console.log(`
+Harekat LMS — Super Admin Provisioning Tool
+
+Usage:
+  node scripts/create-superadmin.js [options]
+  npm run create-superadmin -- [options]
+
+Options:
+  --username=<name>    Admin username (default: superadmin)
+  --name=<name>        Display name (default: "مدیر ارشد سامانه")
+  --password=<pass>    Password (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char)
+  --email=<email>      Admin email address
+  --phone=<phone>      Admin phone/mobile number
+  --role=<role>        Role: 'superadmin' or 'ta' (default: superadmin)
+  --output=<path>      File path to save the generated private RSA key (.pem)
+  --help               Show this help message
+
+Examples:
+  npm run create-superadmin -- --username=admin --password="MySecurePass123!" --output=./admin.pem
+`);
+        process.exit(0);
+    }
+
+    const username = (args.username || 'superadmin').trim();
     const name = args.name || 'مدیر ارشد سامانه';
     const email = args.email || null;
     const phone = args.phone || null;
     const password = args.password || 'Admin@Harekat2026!';
+    const role = args.role && ['superadmin', 'ta'].includes(args.role) ? args.role : 'superadmin';
     const outputPath = args.output ? path.resolve(process.cwd(), args.output) : null;
+
+    // Validate password complexity
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+        console.error('[x] Password validation error: Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
+        process.exit(1);
+    }
 
     console.log('====================================================');
     console.log('Harekat LMS — Super Admin RSA Provisioning Tool');
@@ -53,7 +84,7 @@ async function main() {
             }
             existing.publicKey = publicKey;
             existing.keyFingerprint = fingerprint;
-            existing.role = 'superadmin';
+            existing.role = role;
             existing.status = 'active';
             await existing.save();
 
@@ -80,7 +111,7 @@ async function main() {
         const admin = await Admins.create({
             username,
             password,
-            role: 'superadmin',
+            role,
             name,
             email,
             phoneNumber: phone,

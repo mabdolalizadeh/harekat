@@ -4,13 +4,17 @@ import { SmsIrProvider } from './SmsIrProvider.js';
 
 export class SmsService {
     /**
-     * Resolve provider instance based on configured OTP_MODE or explicit parameter
+     * Resolve provider instance based on configured SMSIR_MOCK / OTP_MODE or explicit parameter
      * @param {'mock'|'smsir'} [mode]
      * @returns {BaseSmsProvider}
      */
-    static getProvider(mode = configs.otpMode) {
-        const normalizedMode = String(mode || 'mock').toLowerCase();
-        if (normalizedMode === 'smsir') {
+    static getProvider(mode) {
+        let isMock = configs.smsirMock;
+        if (mode !== undefined) {
+            isMock = String(mode).toLowerCase() === 'mock';
+        }
+
+        if (!isMock) {
             return new SmsIrProvider({
                 apiKey: configs.smsirApiKey,
                 templateId: configs.smsirTemplateId,
@@ -39,4 +43,19 @@ export class SmsService {
             paramName
         });
     }
+
+    /**
+     * Helper to send verification code to mobile
+     * @param {string} mobile
+     * @param {string} code
+     */
+    static async sendVerificationCode(mobile, code) {
+        return await this.sendOtp({ phoneNumber: mobile, otp: code });
+    }
 }
+
+export async function sendVerificationCode(mobile, code) {
+    return await SmsService.sendVerificationCode(mobile, code);
+}
+
+export default SmsService;

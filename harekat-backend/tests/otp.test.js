@@ -6,15 +6,16 @@ import { sequelize } from '../src/models/database.config.js';
 import { Users } from '../src/models/index.js';
 import { migrateLmsSchema } from '../src/models/migrateLms.js';
 import { configs } from '../src/config/config.js';
-import { SmsService } from '../src/services/sms/SmsService.js';
+import { SmsService, sendVerificationCode } from '../src/services/sms/SmsService.js';
 import { MockSmsProvider } from '../src/services/sms/MockSmsProvider.js';
-import { SmsIrProvider } from '../src/services/sms/SmsIrProvider.js';
+import { SmsIrProvider, buildVerifyUrl } from '../src/services/sms/SmsIrProvider.js';
 
 let server;
 let baseUrl;
 
 test.before(async () => {
-    // Set to mock mode for unit and integration testing of mock OTP behaviors
+    // Set to mock mode for integration tests
+    configs.smsirMock = true;
     configs.otpMode = 'mock';
 
     await sequelize.sync();
@@ -33,15 +34,18 @@ test.after(async () => {
 });
 
 test('1. SMS Service & Provider Architecture', async () => {
-    // Default provider in development/test should be mock
-    const defaultProvider = SmsService.getProvider('mock');
-    assert.equal(defaultProvider.getName(), 'mock');
-    assert.ok(defaultProvider instanceof MockSmsProvider);
+    // Mock mode resolution
+    const mockProvider = SmsService.getProvider('mock');
+    assert.equal(mockProvider.getName(), 'mock');
+    assert.ok(mockProvider instanceof MockSmsProvider);
 
     // Explicit smsir provider
     const smsirProvider = SmsService.getProvider('smsir');
     assert.equal(smsirProvider.getName(), 'smsir');
     assert.ok(smsirProvider instanceof SmsIrProvider);
+
+    // Helper export test
+    assert.equal(typeof sendVerificationCode, 'function');
 });
 
 test('2. Phone Number Normalization', () => {
@@ -52,9 +56,11 @@ test('2. Phone Number Normalization', () => {
     assert.equal(SmsIrProvider.normalizeMobile('9121234567'), '09121234567');
     // Persian digits: ۰۹۱۲۱۲۳۴۵۶۷
     assert.equal(SmsIrProvider.normalizeMobile('۰۹۱۲۱۲۳۴۵۶۷'), '09121234567');
+    // Whitespace and dash formatting
+    assert.equal(SmsIrProvider.normalizeMobile(' 0912-123-4567 '), '09121234567');
 });
 
-test('3. Mock SMS Provider output and execution', async () => {
+test('3. Mock SMS Provider: Console logging format [OTP MOCK]', async () => {
     const mock = new MockSmsProvider();
     let logged = '';
     const originalLog = console.log;
@@ -62,26 +68,38 @@ test('3. Mock SMS Provider output and execution', async () => {
 
     try {
         const res = await mock.sendOtp({
-            phoneNumber: '09121234567',
-            otp: '654321'
+            phoneNumber: '09120000000',
+            otp: '12345'
         });
         assert.equal(res.success, true);
         assert.equal(res.provider, 'mock');
-        assert.ok(logged.includes('[OTP][MOCK] 09121234567 → 654321'));
+        assert.ok(logged.includes('[OTP MOCK] 09120000000 -> 12345'));
     } finally {
         console.log = originalLog;
     }
 });
 
-test('4. SMS.ir Provider: Request formatting & Response handling', async () => {
+test('4. Safe URL Construction: Avoid duplicate /v1/v1/send/verify', () => {
+    assert.equal(buildVerifyUrl('https://api.sms.ir'), 'https://api.sms.ir/v1/send/verify');
+    assert.equal(buildVerifyUrl('https://api.sms.ir/'), 'https://api.sms.ir/v1/send/verify');
+    assert.equal(buildVerifyUrl('https://api.sms.ir/v1'), 'https://api.sms.ir/v1/send/verify');
+    assert.equal(buildVerifyUrl('https://api.sms.ir/v1/'), 'https://api.sms.ir/v1/send/verify');
+    assert.equal(buildVerifyUrl('http://localhost:8080/v1'), 'http://localhost:8080/v1/send/verify');
+});
+
+test('5. SMS.ir Provider: Request formatting & Response handling without OTP logging', async () => {
     const originalFetch = globalThis.fetch;
+    const originalLog = console.log;
     let interceptedUrl = null;
     let interceptedOptions = null;
+    let consoleOutput = '';
+
+    console.log = (msg) => { consoleOutput += msg + '\n'; };
 
     const provider = new SmsIrProvider({
         apiKey: 'test-smsir-api-key-12345',
         templateId: 998877,
-        paramName: 'Code',
+        paramName: 'OTP',
         baseUrl: 'https://api.sms.ir'
     });
 
@@ -102,7 +120,7 @@ test('4. SMS.ir Provider: Request formatting & Response handling', async () => {
     try {
         const res = await provider.sendOtp({
             phoneNumber: '09123334455',
-            otp: '987654'
+            otp: '98765'
         });
 
         assert.equal(interceptedUrl, 'https://api.sms.ir/v1/send/verify');
@@ -113,21 +131,26 @@ test('4. SMS.ir Provider: Request formatting & Response handling', async () => {
         const body = JSON.parse(interceptedOptions.body);
         assert.equal(body.mobile, '09123334455');
         assert.equal(body.templateId, 998877);
-        assert.deepEqual(body.parameters, [{ name: 'Code', value: '987654' }]);
+        assert.deepEqual(body.parameters, [{ name: 'OTP', value: '98765' }]);
 
         assert.equal(res.success, true);
         assert.equal(res.provider, 'smsir');
         assert.equal(res.messageId, 445566);
+
+        // Security requirement: OTP MUST NOT be logged to console in real SMS mode
+        assert.ok(!consoleOutput.includes('98765'), 'Real OTP must NEVER be logged to console');
+        assert.ok(consoleOutput.includes('[OTP][SMSIR]'));
     } finally {
         globalThis.fetch = originalFetch;
+        console.log = originalLog;
     }
 });
 
-test('5. SMS.ir Provider: Error rejection without credential leakage', async () => {
+test('6. SMS.ir Provider: Error rejection without credential leakage', async () => {
     const originalFetch = globalThis.fetch;
 
     const provider = new SmsIrProvider({
-        apiKey: 'secret-api-key',
+        apiKey: 'secret-api-key-do-not-leak',
         templateId: 12345,
         paramName: 'Code'
     });
@@ -144,10 +167,10 @@ test('5. SMS.ir Provider: Error rejection without credential leakage', async () 
     try {
         await assert.rejects(
             async () => {
-                await provider.sendOtp({ phoneNumber: '09120000000', otp: '111222' });
+                await provider.sendOtp({ phoneNumber: '09120000000', otp: '11122' });
             },
             (err) => {
-                assert.ok(!err.message.includes('secret-api-key'));
+                assert.ok(!err.message.includes('secret-api-key-do-not-leak'));
                 assert.ok(err.message.includes('کلید وب سرویس نامعتبر است'));
                 return true;
             }
@@ -157,7 +180,7 @@ test('5. SMS.ir Provider: Error rejection without credential leakage', async () 
     }
 });
 
-test('6. Mock Mode Flow: End-to-End OTP Generation, Cooldown, and Verification', async () => {
+test('7. Mock Mode Flow: 5-digit OTP Generation, Cooldown, and Verification', async () => {
     const testPhone = '09128881122';
     await Users.destroy({ where: { phoneNumber: testPhone } });
 
@@ -187,17 +210,18 @@ test('6. Mock Mode Flow: End-to-End OTP Generation, Cooldown, and Verification',
     assert.equal(secondReqData.ok, false);
     assert.ok(secondReqData.data.retryAfterSeconds > 0);
 
-    // 3. Inspect DB for generated OTP
+    // 3. Inspect DB for generated 5-digit OTP
     const user = await Users.findOne({ where: { phoneNumber: testPhone } });
     assert.ok(user);
     assert.ok(user.otp);
+    assert.equal(user.otp.length, 5, 'Generated OTP must be 5 digits');
     const validOtp = user.otp;
 
     // 4. Validate with WRONG OTP -> fails 401
     const wrongRes = await fetch(`${baseUrl}/auth/validate-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: testPhone, otp: '000000' })
+        body: JSON.stringify({ phoneNumber: testPhone, otp: '00000' })
     });
     assert.equal(wrongRes.status, 401);
     const wrongData = await wrongRes.json();
@@ -223,13 +247,13 @@ test('6. Mock Mode Flow: End-to-End OTP Generation, Cooldown, and Verification',
     assert.equal(replayRes.status, 400);
 });
 
-test('7. Brute-Force Defense: Max failed attempts invalidates OTP', async () => {
+test('8. Brute-Force Defense: Max failed attempts invalidates OTP', async () => {
     const testPhone = '09127773344';
     await Users.destroy({ where: { phoneNumber: testPhone } });
 
     // Create user with known OTP
     let user = await Users.create({ phoneNumber: testPhone });
-    user.otp = '456789';
+    user.otp = '45678';
     user.otpExpiresAt = new Date(Date.now() + 120000);
     user.otpAttempts = 0;
     user.otpLastRequestedAt = null;
@@ -242,7 +266,7 @@ test('7. Brute-Force Defense: Max failed attempts invalidates OTP', async () => 
         const failRes = await fetch(`${baseUrl}/auth/validate-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phoneNumber: testPhone, otp: '111111' })
+            body: JSON.stringify({ phoneNumber: testPhone, otp: '11111' })
         });
         assert.equal(failRes.status, 401);
     }
@@ -251,7 +275,7 @@ test('7. Brute-Force Defense: Max failed attempts invalidates OTP', async () => 
     const blockedRes = await fetch(`${baseUrl}/auth/validate-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: testPhone, otp: '111111' })
+        body: JSON.stringify({ phoneNumber: testPhone, otp: '11111' })
     });
     assert.equal(blockedRes.status, 429);
 
@@ -259,12 +283,12 @@ test('7. Brute-Force Defense: Max failed attempts invalidates OTP', async () => 
     assert.equal(reloaded.otp, null, 'OTP should be cleared after max attempts exceeded');
 });
 
-test('8. Expired OTP Rejection', async () => {
+test('9. Expired OTP Rejection', async () => {
     const testPhone = '09126665544';
     await Users.destroy({ where: { phoneNumber: testPhone } });
 
     let user = await Users.create({ phoneNumber: testPhone });
-    user.otp = '334455';
+    user.otp = '33445';
     user.otpExpiresAt = new Date(Date.now() - 5000); // 5 seconds in past
     user.otpAttempts = 0;
     await user.save();
@@ -272,7 +296,7 @@ test('8. Expired OTP Rejection', async () => {
     const expiredRes = await fetch(`${baseUrl}/auth/validate-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: testPhone, otp: '334455' })
+        body: JSON.stringify({ phoneNumber: testPhone, otp: '33445' })
     });
 
     assert.equal(expiredRes.status, 401);
@@ -283,7 +307,7 @@ test('8. Expired OTP Rejection', async () => {
     assert.equal(reloaded.otp, null, 'Expired OTP should be cleared');
 });
 
-test('9. SMS Delivery Failure Behavior', async () => {
+test('10. SMS Delivery Failure Behavior', async () => {
     const testPhone = '09125556677';
     await Users.destroy({ where: { phoneNumber: testPhone } });
 

@@ -9,8 +9,8 @@ export class MockSmsProvider extends BaseSmsProvider {
      * Mock OTP delivery: prints to console for development and testing
      */
     async sendOtp({ phoneNumber, otp }) {
-        // Output format required by spec:
-        console.log(`[OTP][MOCK] ${phoneNumber} → ${otp}`);
+        // Output format required by spec: [OTP MOCK] 09120000000 -> 12345
+        console.log(`[OTP MOCK] ${phoneNumber} -> ${otp}`);
         
         return {
             success: true,

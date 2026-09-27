@@ -1,12 +1,21 @@
 import { BaseSmsProvider } from './BaseSmsProvider.js';
 
+export function buildVerifyUrl(baseUrl) {
+    const clean = String(baseUrl || 'https://api.sms.ir').trim().replace(/\/+$/, '');
+    if (clean.endsWith('/v1')) {
+        return `${clean}/send/verify`;
+    }
+    return `${clean}/v1/send/verify`;
+}
+
 export class SmsIrProvider extends BaseSmsProvider {
     constructor({ apiKey, templateId, paramName = 'Code', baseUrl = 'https://api.sms.ir' } = {}) {
         super();
         this.apiKey = apiKey;
         this.templateId = templateId ? Number(templateId) : null;
         this.paramName = paramName || 'Code';
-        this.baseUrl = (baseUrl || 'https://api.sms.ir').replace(/\/+$/, '');
+        this.baseUrl = baseUrl || 'https://api.sms.ir';
+        this.verifyUrl = buildVerifyUrl(this.baseUrl);
     }
 
     getName() {
@@ -39,7 +48,7 @@ export class SmsIrProvider extends BaseSmsProvider {
 
     /**
      * Sends OTP using the official SMS.ir REST API v1 verify endpoint:
-     * POST https://api.sms.ir/v1/send/verify
+     * POST ${SMSIR_BASE_URL}/v1/send/verify
      */
     async sendOtp({ phoneNumber, otp, templateId = null, paramName = null }) {
         if (!this.apiKey) {
@@ -54,7 +63,7 @@ export class SmsIrProvider extends BaseSmsProvider {
         const effectiveParamName = String(paramName || this.paramName || 'Code');
         const mobile = SmsIrProvider.normalizeMobile(phoneNumber);
 
-        const url = `${this.baseUrl}/v1/send/verify`;
+        const url = this.verifyUrl;
         const payload = {
             mobile,
             templateId: effectiveTemplateId,
@@ -74,7 +83,7 @@ export class SmsIrProvider extends BaseSmsProvider {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'text/plain',
+                    'Accept': 'application/json, text/plain, */*',
                     'x-api-key': this.apiKey
                 },
                 body: JSON.stringify(payload),
@@ -88,19 +97,18 @@ export class SmsIrProvider extends BaseSmsProvider {
             if (!response.ok || !result || result.status !== 1) {
                 const statusCode = result?.status ?? response.status;
                 const errorMsg = result?.message || `HTTP ${response.status}`;
-                
-                // Safe technical logging: NO API KEY, NO OTP, NO FULL USER CREDENTIALS
+
+                // Safe technical logging: NEVER log API key or OTP
                 console.error(`[OTP][SMSIR][ERROR] Failed to send OTP. status=${statusCode}, message="${errorMsg}"`);
-                
-                const err = new Error(`ارسال پیامک با درگاه SMS.ir ناموفق بود: ${errorMsg}`);
+
+                const err = new Error(result?.message ? `ارسال پیامک با درگاه SMS.ir ناموفق بود: ${result.message}` : `ارسال پیامک با درگاه SMS.ir ناموفق بود: HTTP ${response.status}`);
                 err.status = statusCode;
                 err.provider = 'smsir';
                 throw err;
             }
 
-            // Success logging format: print notification and OTP to console as requested
+            // Real mode success log: inform request was sent WITHOUT logging the OTP
             console.log(`[OTP][SMSIR] OTP request sent for ${mobile}`);
-            console.log(`[OTP] ${mobile} → ${otp}`);
 
             return {
                 success: true,
@@ -128,3 +136,13 @@ export class SmsIrProvider extends BaseSmsProvider {
         }
     }
 }
+
+/**
+ * Dedicated helper function for sending verification codes via SMS.ir
+ */
+export async function sendVerificationCode(mobile, code, options = {}) {
+    const provider = new SmsIrProvider(options);
+    return await provider.sendOtp({ phoneNumber: mobile, otp: code });
+}
+
+export default SmsIrProvider;

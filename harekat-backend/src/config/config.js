@@ -20,11 +20,17 @@ const configs = {
     zibalBaseUrl: process.env.ZIBAL_BASE_URL || 'https://gateway.zibal.ir',
     dashboardUrl: process.env.DASHBOARD_URL || 'http://localhost:5173',
     backendBaseUrl: process.env.BACKEND_BASE_URL || 'http://localhost:3000',
-    otpMode: String(process.env.OTP_MODE || 'mock').toLowerCase(),
-    smsirApiKey: process.env.SMSIR_API_KEY || '',
-    smsirTemplateId: process.env.SMSIR_TEMPLATE_ID || '',
-    smsirTemplateParamName: process.env.SMSIR_TEMPLATE_PARAM_NAME || 'Code',
-    smsirBaseUrl: process.env.SMSIR_BASE_URL || 'https://api.sms.ir',
+    smsirMock: process.env.SMSIR_MOCK !== undefined
+        ? (String(process.env.SMSIR_MOCK).trim().toLowerCase() === 'true' || process.env.SMSIR_MOCK === '1')
+        : (String(process.env.OTP_MODE || 'mock').toLowerCase() === 'mock'),
+    otpMode: (process.env.SMSIR_MOCK !== undefined
+        ? ((String(process.env.SMSIR_MOCK).trim().toLowerCase() === 'true' || process.env.SMSIR_MOCK === '1') ? 'mock' : 'smsir')
+        : String(process.env.OTP_MODE || 'mock').toLowerCase()),
+    smsirApiKey: (process.env.SMSIR_API_KEY || '').trim(),
+    smsirTemplateId: (process.env.SMSIR_TEMPLATE_ID || '').trim(),
+    smsirTemplateParamName: (process.env.SMSIR_TEMPLATE_PARAM_NAME || 'Code').trim(),
+    smsirBaseUrl: (process.env.SMSIR_BASE_URL || 'https://api.sms.ir').trim(),
+    otpLength: Number(process.env.OTP_LENGTH) || 5,
     otpExpiresInSeconds: Number(process.env.OTP_EXPIRES_IN_SECONDS) || 120,
     otpResendCooldownSeconds: Number(process.env.OTP_RESEND_COOLDOWN_SECONDS) || 60,
     otpMaxVerifyAttempts: Number(process.env.OTP_MAX_VERIFY_ATTEMPTS) || 5
@@ -35,12 +41,18 @@ const validateConfig = () => {
     if (!configs.jwtKey || configs.jwtKey.length < 32) {
         errors.push('JWT_KEY must be set and at least 32 characters long');
     }
-    if (configs.otpMode === 'smsir') {
+    if (!configs.smsirMock) {
         if (!configs.smsirApiKey) {
-            errors.push('SMSIR_API_KEY must be set when OTP_MODE is smsir');
+            errors.push('SMSIR_API_KEY must be set when SMSIR_MOCK is false');
         }
         if (!configs.smsirTemplateId) {
-            errors.push('SMSIR_TEMPLATE_ID must be set when OTP_MODE is smsir');
+            errors.push('SMSIR_TEMPLATE_ID must be set when SMSIR_MOCK is false');
+        }
+        if (!configs.smsirTemplateParamName) {
+            errors.push('SMSIR_TEMPLATE_PARAM_NAME must be set when SMSIR_MOCK is false');
+        }
+        if (!configs.smsirBaseUrl) {
+            errors.push('SMSIR_BASE_URL must be set when SMSIR_MOCK is false');
         }
     }
     if (errors.length > 0) {

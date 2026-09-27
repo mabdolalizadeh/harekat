@@ -209,14 +209,14 @@ export default function LoginPage() {
         ) : (
           <Box component="form" onSubmit={handleValidateOtp} sx={{ textAlign: 'right' }}>
             <Typography variant="caption" sx={{ fontWeight: 700, color: '#334155', display: 'block', mb: 0.8 }}>
-              کد ۶ رقمی تایید:
+              کد تایید پیامک‌شده:
             </Typography>
             <TextField
               fullWidth
               size="medium"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              placeholder="۱۲۳۴۵۶"
+              placeholder="۱۲۳۴۵"
               autoFocus
               InputProps={{
                 startAdornment: <KeyOutlinedIcon sx={{ color: '#94a3b8', mr: 1, ml: -0.5 }} />

@@ -6,7 +6,12 @@ import { logSecurityEvent } from '../utils/logger.js';
 import { SmsService } from '../services/sms/SmsService.js';
 import { SmsIrProvider } from '../services/sms/SmsIrProvider.js';
 
-const generateOTP = () => crypto.randomInt(100000, 1000000).toString();
+const generateOTP = () => {
+    const len = configs.otpLength || 5;
+    const min = Math.pow(10, len - 1);
+    const max = Math.pow(10, len);
+    return crypto.randomInt(min, max).toString();
+};
 
 export default class AuthController {
     static async authUser(req, res) {
@@ -48,9 +53,6 @@ export default class AuthController {
             user.otpAttempts = 0;
             user.otpLastRequestedAt = new Date();
             await user.save();
-
-            // Always log OTP to terminal console for monitoring
-            console.log(`[AUTH][OTP] Generated OTP for ${phoneNumber} (${user.id}): ${otp}`);
 
             // Deliver OTP via configured SMS service (mock or smsir)
             try {
