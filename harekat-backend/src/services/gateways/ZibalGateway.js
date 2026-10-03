@@ -101,12 +101,26 @@ export class ZibalGateway extends BaseGateway {
                 }
             };
         } catch (err) {
-            logSecurityEvent('verification failed', {
+            const rawMsg = err.message || '';
+            const resultCode = err.details?.result;
+
+            let formattedReason = rawMsg;
+            if (resultCode === 104 || resultCode === 102 || rawMsg.toLowerCase().includes('invalid merchant')) {
+                formattedReason = `شناسه درگاه زیبال (ZIBAL_MERCHANT) نامعتبر است یا در پنل زیبال یافت نشد (${rawMsg}). لطفاً مرچنت کد صحیح را در تنظیمات .env وارد نمایید.`;
+            } else if (resultCode === 115 || rawMsg.toLowerCase().includes('invalid ip')) {
+                formattedReason = `آدرس IP سرور در پنل زیبال ثبت نشده است (${rawMsg}). لطفاً IP سرور را در پنل کاربری زیبال در بخش تنظیمات درگاه وارد و مجاز کنید.`;
+            } else if (resultCode === 103) {
+                formattedReason = `درگاه پرداخت زیبال غیرفعال است (${rawMsg}). لطفاً با پشتیبانی زیبال تماس حاصل فرمایید.`;
+            }
+
+            logSecurityEvent('zibal_request_failed', {
                 paymentId: payment.id,
                 orderId: safeOrderId,
-                reason: err.message
+                reason: rawMsg,
+                resultCode,
+                formattedReason
             });
-            throw new Error(err.message || 'خطا در ایجاد تراکنش با درگاه زیبال');
+            throw new Error(formattedReason);
         }
     }
 
