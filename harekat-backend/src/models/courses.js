@@ -73,7 +73,7 @@ const Courses = sequelize.define('Courses', {
     statusOfRegistration: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: { isIn: [['open', 'closed', 'soon', 'completed', 'در حال ثبت‌نام', 'به اتمام رسیده', 'به زودی', 'تکمیل ظرفیت']] }
+        validate: { isIn: [['open', 'closed', 'soon', 'completed', 'در حال ثبت‌نام', 'در حال ثبت نام', 'به اتمام رسیده', 'به زودی', 'تکمیل ظرفیت']] }
     },
     videoUrl: {
         type: DataTypes.STRING,

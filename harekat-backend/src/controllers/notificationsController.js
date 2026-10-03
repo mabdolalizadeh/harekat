@@ -228,6 +228,16 @@ export default class NotificationsController {
         if (!userId) return res.status(401).json({ ok: false, message: 'authentication required' });
 
         try {
+            const user = await Users.findByPk(userId);
+            if (!user) {
+                return res.status(403).json({ ok: false, message: 'student user account required' });
+            }
+
+            const notif = await Notifications.findByPk(id);
+            if (!notif) {
+                return res.status(404).json({ ok: false, message: 'اعلان یافت نشد' });
+            }
+
             await UserNotificationRead.findOrCreate({
                 where: { notificationId: id, userId },
                 defaults: { notificationId: id, userId, isRead: true, readAt: new Date() }
@@ -246,6 +256,11 @@ export default class NotificationsController {
         if (!userId) return res.status(401).json({ ok: false, message: 'authentication required' });
 
         try {
+            const user = await Users.findByPk(userId);
+            if (!user) {
+                return res.status(403).json({ ok: false, message: 'student user account required' });
+            }
+
             const enrollments = await CourseAccess.findAll({
                 where: { userId, status: 'active' },
                 attributes: ['courseId']

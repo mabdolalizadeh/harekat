@@ -105,7 +105,7 @@ export default class PackagesController {
                 duration: duration || '۴۰ ساعت',
                 typeOfAttendence: typeOfAttendence || 'آنلاین',
                 kind: 'skill',
-                statusOfRegistration: statusOfRegistration || 'در حال ثبت نام',
+                statusOfRegistration: statusOfRegistration || 'open',
                 isActive: isActive !== false,
                 sortOrder: Number(sortOrder) || 0
             });

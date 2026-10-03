@@ -197,6 +197,10 @@ app.use('/api/v1', (req, res, next) => {
         return next();
     }
 
+    if (req.body === undefined) {
+        req.body = {};
+    }
+
     if (['POST', 'PUT', 'PATCH'].includes(req.method) &&
         (req.body === null || typeof req.body !== 'object' || Array.isArray(req.body))) {
         return res.status(400).json({
@@ -205,6 +209,7 @@ app.use('/api/v1', (req, res, next) => {
         });
     }
     next();
+
 });
 
 app.use('/api/v1/auth', authLimiter);

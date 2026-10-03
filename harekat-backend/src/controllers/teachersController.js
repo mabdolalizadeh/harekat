@@ -11,6 +11,10 @@ export default class TeachersController {
     static async createTeacher(req, res) {
         const { firstName, lastName, email, resume, resumeFile, avatar, categoryIds, showOnLanding } = req.body;
 
+        if (!resume) {
+            return res.status(400).json({ ok: false, message: 'resume is required' });
+        }
+
         try {
             const teacher = await Teachers.create({ firstName, lastName, email, resume, resumeFile: resumeFile || null, avatar, showOnLanding: showOnLanding ?? false });
             if (Array.isArray(categoryIds) && categoryIds.length) {

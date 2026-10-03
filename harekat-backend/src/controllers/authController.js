@@ -194,12 +194,14 @@ export default class AuthController {
     static async getMe(req, res) {
         try {
             const user = await Users.findByPk(req.user.id, {
-                attributes: ['id', 'phoneNumber', 'firstName', 'lastName', 'nationalId', 'avatar', 'bio', 'jobTitle', 'education', 'role', 'status', 'createdAt']
+                attributes: ['id', 'phoneNumber', 'firstName', 'lastName', 'nationalId', 'avatar', 'bio', 'jobTitle', 'education', 'rubies', 'createdAt']
             });
             if (!user) {
                 return res.status(404).json({ ok: false, message: 'User not found' });
             }
-            return res.status(200).json({ ok: true, data: { user } });
+            const userData = user.toJSON();
+            userData.role = req.user?.role || 'user';
+            return res.status(200).json({ ok: true, data: { user: userData } });
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
         }

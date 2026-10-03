@@ -137,6 +137,14 @@ export default class TicketsController {
                 senderName = 'پشتیبان سیستم';
                 ticket.status = 'answered';
             } else if (role === 'ta') {
+                if (ticket.courseId) {
+                    const isAssigned = await TACourses.findOne({
+                        where: { adminId: userId, courseId: ticket.courseId }
+                    });
+                    if (!isAssigned) {
+                        return res.status(403).json({ ok: false, message: 'دسترسی به این تیکت برای شما مجاز نیست' });
+                    }
+                }
                 senderType = 'ta';
                 senderName = 'دستیار آموزشی';
                 ticket.status = 'answered';
@@ -206,6 +214,15 @@ export default class TicketsController {
         try {
             const ticket = await Tickets.findByPk(id);
             if (!ticket) return res.status(404).json({ ok: false, message: 'تیکت یافت نشد' });
+
+            if (req.user?.role === 'ta' && ticket.courseId) {
+                const isAssigned = await TACourses.findOne({
+                    where: { adminId: req.user.id, courseId: ticket.courseId }
+                });
+                if (!isAssigned) {
+                    return res.status(403).json({ ok: false, message: 'دسترسی به این تیکت برای شما مجاز نیست' });
+                }
+            }
 
             if (status !== undefined) ticket.status = status;
             if (priority !== undefined) ticket.priority = priority;

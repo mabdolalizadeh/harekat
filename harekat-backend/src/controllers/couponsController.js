@@ -200,7 +200,7 @@ export default class CouponsController {
                     {
                         model: Courses,
                         as: 'targetCourse',
-                        attributes: ['id', 'name', 'slug'],
+                        attributes: ['id', 'name'],
                         required: false
                     }
                 ],
@@ -226,7 +226,7 @@ export default class CouponsController {
                     {
                         model: Courses,
                         as: 'targetCourse',
-                        attributes: ['id', 'name', 'slug'],
+                        attributes: ['id', 'name'],
                         required: false
                     }
                 ]

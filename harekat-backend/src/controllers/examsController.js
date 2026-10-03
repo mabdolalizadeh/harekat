@@ -143,6 +143,17 @@ export default class ExamsController {
             });
             if (!result) return res.status(404).json({ ok: false, message: 'نتیجه آزمون یافت نشد' });
 
+            // Verify TA access to course
+            if (req.user?.role === 'ta') {
+                const { TACourses } = await import('../models/index.js');
+                const assignment = await TACourses.findOne({
+                    where: { adminId: req.user.id, courseId: result.courseId }
+                });
+                if (!assignment) {
+                    return res.status(403).json({ ok: false, message: 'دسترسی به آزمون این دوره برای حساب شما مجاز نیست' });
+                }
+            }
+
             const passed = numScore >= (result.exam?.minPassingScore || 70);
 
             result.score = Math.round(numScore);
