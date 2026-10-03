@@ -330,6 +330,30 @@
     }
 
     @media (hover: hover) and (pointer: fine) {
+        [data-cursor="shop"],
+        [data-cursor="course"],
+        [data-cursor="scroll"],
+        [data-cursor="slider"],
+        [data-cursor="arrow"],
+        .landing-course-card,
+        .capsule-card-item,
+        .package-card-item,
+        .subscription-card-item,
+        .slideshow-drag-area {
+            cursor: none;
+        }
+
+        [data-cursor="shop"] button,
+        [data-cursor="shop"] a,
+        [data-cursor="scroll"] button,
+        [data-cursor="scroll"] a,
+        [data-cursor="slider"] button,
+        [data-cursor="slider"] a,
+        .slideshow-drag-area button,
+        .slideshow-drag-area a {
+            cursor: pointer !important;
+        }
+
         html.custom-cursor-active,
         html.custom-cursor-active * {
             cursor: none !important;
@@ -891,6 +915,36 @@
 
 .animate-mouse-wheel {
     animation: mouse-wheel 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes drag-hint-left {
+    0%, 100% {
+        transform: translateX(0);
+        opacity: 0.85;
+    }
+    50% {
+        transform: translateX(-4px);
+        opacity: 1;
+    }
+}
+
+@keyframes drag-hint-right {
+    0%, 100% {
+        transform: translateX(0);
+        opacity: 0.85;
+    }
+    50% {
+        transform: translateX(4px);
+        opacity: 1;
+    }
+}
+
+.animate-drag-hint-left {
+    animation: drag-hint-left 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-drag-hint-right {
+    animation: drag-hint-right 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 

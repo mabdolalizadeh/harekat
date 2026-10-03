@@ -109,6 +109,7 @@ export default function LandingTestimonials({ testimonials = defaultTestimonials
             {/* Embla Carousel Viewport with shadow bleed headroom */}
             <div className="w-full max-w-[1300px] relative px-2 sm:px-6">
                 <div
+                    data-cursor="slider"
                     className="overflow-hidden py-10 -my-10 px-4 -mx-4 cursor-grab active:cursor-grabbing select-none"
                     ref={emblaRef}
                 >
