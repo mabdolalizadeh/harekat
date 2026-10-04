@@ -116,16 +116,32 @@ export default function TopBarLayout() {
             }
         };
 
+        const onAuthLogout = () => {
+            setIsLoggedIn(false);
+            setUser(null);
+            setProfileOpen(false);
+            setMobileOpen(false);
+        };
+
+        const onVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                if (token()) {
+                    authApi.getMe().catch(() => {
+                        onAuthLogout();
+                    });
+                } else {
+                    onAuthLogout();
+                }
+            }
+        };
+
         let authChannel = null;
         if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
             try {
                 authChannel = new BroadcastChannel('harekat_auth_channel');
                 authChannel.onmessage = (event) => {
                     if (event?.data?.type === 'LOGOUT') {
-                        setIsLoggedIn(false);
-                        setUser(null);
-                        setProfileOpen(false);
-                        setMobileOpen(false);
+                        onAuthLogout();
                         navigate('/');
                     } else if (event?.data?.type === 'LOGIN') {
                         syncAuth();
@@ -135,33 +151,28 @@ export default function TopBarLayout() {
         }
 
         window.addEventListener('storage', onStorage);
+        window.addEventListener('auth:logout', onAuthLogout);
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        window.addEventListener('focus', onVisibilityChange);
+
         return () => {
             window.removeEventListener('storage', onStorage);
+            window.removeEventListener('auth:logout', onAuthLogout);
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+            window.removeEventListener('focus', onVisibilityChange);
             if (authChannel) {
                 authChannel.close();
             }
         };
     }, []);
 
-    const handleLogout = () => {
-        authApi.logout();
+    const handleLogout = async () => {
         setIsLoggedIn(false);
         setUser(null);
         setProfileOpen(false);
         setMobileOpen(false);
 
-        // Notify other tabs and apps via BroadcastChannel and localStorage
-        if (typeof window !== 'undefined') {
-            try {
-                const bc = new BroadcastChannel('harekat_auth_channel');
-                bc.postMessage({ type: 'LOGOUT', timestamp: Date.now() });
-                bc.close();
-            } catch {}
-            try {
-                localStorage.setItem('auth_sync_event', JSON.stringify({ type: 'LOGOUT', time: Date.now() }));
-            } catch {}
-        }
-
+        await authApi.logout();
         navigate('/');
     };
 

@@ -67,6 +67,15 @@ const Users = sequelize.define('Users', {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
+    },
+    tokenVersion: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1
+    },
+    tokensRevokedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 }, {
     updatedAt: true,

@@ -264,8 +264,9 @@ export default function LoginPage() {
             component="a"
             href={LANDING_URL}
             size="small"
-            endIcon={<ArrowBackIcon size={18} />}
+            endIcon={<ArrowBackIcon size={16} />}
             sx={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600 }}
+            onClick={() => window.location.href = 'https://schoolharekat.ir'}
           >
             بازگشت به وب‌سایت اصلی حرکت
           </Button>

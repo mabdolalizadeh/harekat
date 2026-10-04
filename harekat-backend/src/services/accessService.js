@@ -51,11 +51,18 @@ export class AccessService {
         const activeCourseIds = [...new Set(activeAccesses.map((a) => a.courseId))];
 
         const user = await Users.findByPk(userId, { transaction });
-        if (user && activeCourseIds.length > 0) {
-            const courses = await Courses.findAll({ where: { id: activeCourseIds }, transaction });
-            await user.setCourses(courses, { transaction });
-        } else if (user) {
-            await user.setCourses([], { transaction });
+        try {
+            if (user && activeCourseIds.length > 0) {
+                const courses = await Courses.findAll({ where: { id: activeCourseIds }, transaction });
+                await user.setCourses(courses, { transaction });
+            } else if (user) {
+                await user.setCourses([], { transaction });
+            }
+        } catch (err) {
+            console.error('[syncUserAccess] Warning: Failed to sync UserCourses legacy join table:', err.message);
+            if (err.name !== 'SequelizeUniqueConstraintError') {
+                throw err;
+            }
         }
 
         return activeCourseIds;

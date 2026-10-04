@@ -12,6 +12,8 @@ export async function migrateLmsSchema() {
         if (!existing.has('rubies')) await sequelize.query("ALTER TABLE Users ADD COLUMN rubies INTEGER DEFAULT 0");
         if (!existing.has('otpAttempts')) await sequelize.query("ALTER TABLE Users ADD COLUMN otpAttempts INTEGER DEFAULT 0");
         if (!existing.has('otpLastRequestedAt')) await sequelize.query("ALTER TABLE Users ADD COLUMN otpLastRequestedAt DATETIME");
+        if (!existing.has('tokenVersion')) await sequelize.query("ALTER TABLE Users ADD COLUMN tokenVersion INTEGER DEFAULT 1");
+        if (!existing.has('tokensRevokedAt')) await sequelize.query("ALTER TABLE Users ADD COLUMN tokensRevokedAt DATETIME");
     }
 
     // 2. Admins new columns
@@ -77,4 +79,21 @@ export async function migrateLmsSchema() {
         if (!existing.has('targetCourseId')) await sequelize.query("ALTER TABLE Coupons ADD COLUMN targetCourseId UUID");
         if (!existing.has('targetUserIds')) await sequelize.query("ALTER TABLE Coupons ADD COLUMN targetUserIds TEXT");
     }
+
+    // 7. RevokedTokens table for JWT invalidation
+    await sequelize.query(`
+        CREATE TABLE IF NOT EXISTS RevokedTokens (
+            id UUID PRIMARY KEY,
+            token TEXT NOT NULL,
+            tokenHash VARCHAR(64) NOT NULL UNIQUE,
+            userId UUID,
+            expiresAt DATETIME NOT NULL,
+            revokedAt DATETIME NOT NULL,
+            reason VARCHAR(255),
+            createdAt DATETIME NOT NULL,
+            updatedAt DATETIME NOT NULL
+        )
+    `);
+    await sequelize.query("CREATE INDEX IF NOT EXISTS idx_revoked_tokens_hash ON RevokedTokens (tokenHash)");
+    await sequelize.query("CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires ON RevokedTokens (expiresAt)");
 }

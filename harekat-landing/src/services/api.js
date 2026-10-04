@@ -96,6 +96,22 @@ async function request(path, { method = 'GET', body, auth = false, tokenKind = '
 
     const data = await response.json().catch(() => null);
     if (!response.ok || data?.ok === false) {
+        if (response.status === 401 && (auth || jwt)) {
+            setToken(null);
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            if (typeof window !== 'undefined') {
+                try {
+                    const bc = new BroadcastChannel('harekat_auth_channel');
+                    bc.postMessage({ type: 'LOGOUT', timestamp: Date.now() });
+                    bc.close();
+                } catch {}
+                try {
+                    localStorage.setItem('auth_sync_event', JSON.stringify({ type: 'LOGOUT', time: Date.now() }));
+                } catch {}
+                window.dispatchEvent(new CustomEvent('auth:logout'));
+            }
+        }
         throw new Error(data?.message || `خطای سرور (${response.status})`);
     }
     return data;
@@ -205,9 +221,24 @@ export const authApi = {
     requestOtp: (phoneNumber) => post('/auth', { phoneNumber }),
     validateOtp: (phoneNumber, otp) => post('/auth/validate-otp', { phoneNumber, otp }),
     getMe: () => get('/auth/me', { auth: true }),
-    logout: () => {
+    logout: async () => {
+        try {
+            await post('/auth/logout', {}, { auth: true }).catch(() => {});
+        } catch {}
         setToken(null);
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        if (typeof window !== 'undefined') {
+            try {
+                const bc = new BroadcastChannel('harekat_auth_channel');
+                bc.postMessage({ type: 'LOGOUT', timestamp: Date.now() });
+                bc.close();
+            } catch {}
+            try {
+                localStorage.setItem('auth_sync_event', JSON.stringify({ type: 'LOGOUT', time: Date.now() }));
+            } catch {}
+            window.dispatchEvent(new CustomEvent('auth:logout'));
+        }
     }
 };
 

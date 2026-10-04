@@ -178,8 +178,33 @@ export function AuthProvider({ children }) {
     }
 
     window.addEventListener('storage', handleStorage);
+
+    const handleUnauthorized = () => {
+      logout(true);
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        const currentToken = localStorage.getItem('token') || getCookie('auth_token') || getCookie('token');
+        if (!currentToken) {
+          logout(true);
+        } else {
+          const payload = parseJwt(currentToken);
+          if (payload?.id) {
+            refreshUser(payload.id, currentToken);
+          }
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
     return () => {
       window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
       if (authChannel) {
         authChannel.close();
       }
@@ -236,7 +261,10 @@ export function AuthProvider({ children }) {
     throw new Error(res?.message || 'خطا در ویرایش اطلاعات');
   };
 
-  const logout = (redirect = true) => {
+  const logout = async (redirect = true) => {
+    try {
+      await authApi.logout().catch(() => {});
+    } catch {}
     setToken(null);
     setUser(null);
     try {

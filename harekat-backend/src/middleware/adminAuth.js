@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { configs } from '../config/config.js';
-import { logSecurityEvent } from '../utils/logger.js';
+import { tokenRevocationService } from '../services/tokenRevocationService.js';
 
-export default function adminAuth(req, res, next) {
+export default async function adminAuth(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         logSecurityEvent('admin_auth_missing_header', { path: req.path, ip: req.ip });
@@ -11,6 +11,12 @@ export default function adminAuth(req, res, next) {
 
     const token = authHeader.split(' ')[1];
     try {
+        const isRevoked = await tokenRevocationService.isTokenRevoked(token);
+        if (isRevoked) {
+            logSecurityEvent('admin_auth_revoked_token', { path: req.path, ip: req.ip });
+            return res.status(401).json({ ok: false, message: 'invalid or expired token' });
+        }
+
         const decoded = jwt.verify(token, configs.jwtKey);
         if (decoded.role !== 'admin' && decoded.role !== 'superadmin' && decoded.role !== 'ta') {
             logSecurityEvent('admin_auth_forbidden', { path: req.path, ip: req.ip, userId: decoded.id });

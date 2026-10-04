@@ -44,6 +44,11 @@ export async function apiClient(path, { method = 'GET', body, auth = true } = {}
   const data = await response.json().catch(() => null);
 
   if (!response.ok || (data && data.ok === false)) {
+    if (response.status === 401 && (auth || path === '/auth/me') && path !== '/auth' && path !== '/auth/validate-otp') {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+      }
+    }
     const errorMsg = data?.message || `خطای سرور (${response.status})`;
     const error = new Error(errorMsg);
     error.status = response.status;

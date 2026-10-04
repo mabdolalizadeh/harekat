@@ -5,6 +5,8 @@ import { configs } from '../config/config.js';
 import { logSecurityEvent } from '../utils/logger.js';
 import { SmsService } from '../services/sms/SmsService.js';
 import { SmsIrProvider } from '../services/sms/SmsIrProvider.js';
+import { tokenRevocationService } from '../services/tokenRevocationService.js';
+import { extractToken } from '../middleware/auth.js';
 
 const generateOTP = () => {
     const len = configs.otpLength || 5;
@@ -166,7 +168,7 @@ export default class AuthController {
             await user.save();
 
             const token = jwt.sign(
-                { id: user.id, role: 'user' },
+                { id: user.id, role: 'user', tokenVersion: user.tokenVersion || 1 },
                 configs.jwtKey,
                 { expiresIn: configs.userJwtExpiry }
             );
@@ -280,5 +282,57 @@ export default class AuthController {
         } catch (err) {
             return res.status(500).json({ ok: false, message: err.message });
         }
+    }
+
+    /**
+     * Complete logout: Invalidates and destroys current JWT and all active sessions for this user.
+     */
+    static async logout(req, res) {
+        const token = extractToken(req);
+        let userId = req.user?.id;
+
+        if (token) {
+            try {
+                const decoded = jwt.decode(token);
+                if (!userId && decoded?.id) {
+                    userId = decoded.id;
+                }
+                const expiresAt = decoded?.exp
+                    ? new Date(decoded.exp * 1000)
+                    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+                await tokenRevocationService.revokeToken(token, {
+                    userId,
+                    expiresAt,
+                    reason: 'user_logout'
+                });
+            } catch (err) {
+                console.warn('[logout] token revocation warning:', err.message);
+            }
+        }
+
+        if (userId) {
+            try {
+                await tokenRevocationService.revokeAllUserTokens(userId, 'user_logout');
+            } catch (err) {
+                console.warn('[logout] revokeAllUserTokens warning:', err.message);
+            }
+        }
+
+        // Clear auth cookies on all subdomains and paths
+        const cookieDomain = req.hostname && req.hostname.includes('.') && !req.hostname.includes('localhost') && !req.hostname.match(/^\d+\.\d+\.\d+\.\d+$/)
+            ? '.' + req.hostname.split('.').slice(-2).join('.')
+            : undefined;
+
+        res.clearCookie('auth_token', { path: '/', domain: cookieDomain });
+        res.clearCookie('token', { path: '/', domain: cookieDomain });
+        res.clearCookie('auth_token', { path: '/' });
+        res.clearCookie('token', { path: '/' });
+
+        logSecurityEvent('user_logout', { userId, ip: req.ip });
+        return res.status(200).json({
+            ok: true,
+            message: 'با موفقیت از تمام نشست‌ها خارج شدید'
+        });
     }
 }

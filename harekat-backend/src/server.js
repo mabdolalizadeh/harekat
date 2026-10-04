@@ -3,31 +3,8 @@ import { sequelize } from './models/database.config.js';
 import app from './app.js';
 import { configs } from './config/config.js';
 import { migrateLmsSchema } from './models/migrateLms.js';
-
-async function repairCourseCategoryJoinTable() {
-    const [rows] = await sequelize.query("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'CourseCategories'");
-    const schema = rows[0]?.sql || '';
-    if (!/courseId[\s`"]+UUID NOT NULL UNIQUE/i.test(schema)) return;
-
-    console.log('repairing CourseCategories join table constraints');
-    await sequelize.transaction(async (transaction) => {
-        await sequelize.query('ALTER TABLE CourseCategories RENAME TO CourseCategories_legacy', { transaction });
-        await sequelize.query(`
-            CREATE TABLE CourseCategories (
-                courseId UUID NOT NULL REFERENCES Courses (id),
-                categoryId INTEGER NOT NULL REFERENCES Categories (id),
-                createdAt DATETIME NOT NULL,
-                updatedAt DATETIME NOT NULL,
-                PRIMARY KEY (courseId, categoryId)
-            )
-        `, { transaction });
-        await sequelize.query(`
-            INSERT OR IGNORE INTO CourseCategories (courseId, categoryId, createdAt, updatedAt)
-            SELECT courseId, categoryId, createdAt, updatedAt FROM CourseCategories_legacy
-        `, { transaction });
-        await sequelize.query('DROP TABLE CourseCategories_legacy', { transaction });
-    });
-}
+import { repairJoinTables } from './models/repairJoinTables.js';
+import { tokenRevocationService } from './services/tokenRevocationService.js';
 
 async function addBannerResponsiveImageColumns() {
     const [columns] = await sequelize.query("PRAGMA table_info('Banners')");
@@ -61,10 +38,11 @@ const gracefulShutdown = (signal) => {
     }, 10000);
 };
 
-repairCourseCategoryJoinTable()
+repairJoinTables()
     .then(() => sequelize.sync())
     .then(() => addBannerResponsiveImageColumns())
     .then(() => migrateLmsSchema())
+    .then(() => tokenRevocationService.init())
     .then(() => {
         console.log('database synced');
         server = app.listen(PORT, () => {

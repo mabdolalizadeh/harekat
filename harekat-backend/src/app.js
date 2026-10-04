@@ -23,6 +23,13 @@ app.set('trust proxy', 1);
 
 app.use(morgan('dev'));
 
+// Iranian ISPs routinely block/drop UDP port 443 (HTTP/3 / QUIC), causing ERR_QUIC_PROTOCOL_ERROR.
+// Tell clients to clear and avoid QUIC alternative services.
+app.use((req, res, next) => {
+    res.setHeader('Alt-Svc', 'clear');
+    next();
+});
+
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -122,14 +129,50 @@ try {
     }
 } catch { /* migration is best-effort */ }
 
+// Cache-Control & Alt-Svc headers helper for Cloudflare & browser caching
+function setStaticHeaders(res, filePath) {
+    res.setHeader('Alt-Svc', 'clear');
+    const normalized = filePath.replace(/\\/g, '/');
+    if (normalized.endsWith('index.html') || normalized.endsWith('.html')) {
+        // SPA entry points: must always revalidate with the origin/Cloudflare
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    } else if (
+        normalized.includes('/assets/') ||
+        /-[a-zA-Z0-9_-]{8,}\.(js|css|woff2?|ttf|eot|svg|png|jpe?g|webp|gif|ico)$/i.test(normalized)
+    ) {
+        // Fingerprinted / content-hashed assets: long-term immutable caching
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else {
+        // Other static files (favicon.ico, manifest.json, logos, etc.)
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    }
+}
+
+function sendHtmlFile(res, htmlPath) {
+    res.setHeader('Alt-Svc', 'clear');
+    res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    return res.sendFile(htmlPath);
+}
+
+const uploadStaticOptions = {
+    setHeaders: (res) => {
+        // Persistent uploads: cached for 30 days with stale-while-revalidate
+        res.setHeader('Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
+    }
+};
+
+const staticOptions = {
+    setHeaders: setStaticHeaders
+};
+
 // Serve persistent uploads at `/uploads` BEFORE the frontend static handler
 // so `/uploads/image-xxx.jpg` resolves even when `frontendDist` is missing
 // or has been rebuilt. Also keep legacy dir as fallback for unmigrated files.
-app.use('/uploads', express.static(UPLOADS_DIR));
+app.use('/uploads', express.static(UPLOADS_DIR, uploadStaticOptions));
 try {
     const legacyUploadDir = path.join(frontendDist, 'uploads');
     if (fs.existsSync(legacyUploadDir)) {
-        app.use('/uploads', express.static(legacyUploadDir));
+        app.use('/uploads', express.static(legacyUploadDir, uploadStaticOptions));
     }
 } catch { /* noop */ }
 
@@ -312,9 +355,11 @@ app.get('/sitemap.xml', async (req, res) => {
 if (fs.existsSync(path.join(adminDist, 'index.html'))) {
     app.use((req, res, next) => {
         if (!isAdminHost(req) || req.path.startsWith('/api') || isLegacyAdminPath(req)) return next();
-        express.static(adminDist)(req, res, (err) => {
+        express.static(adminDist, staticOptions)(req, res, (err) => {
             if (err) return next(err);
-            if (req.method === 'GET') return res.sendFile(path.join(adminDist, 'index.html'));
+            if (req.method === 'GET' && !req.path.startsWith('/assets/') && !path.extname(req.path)) {
+                return sendHtmlFile(res, path.join(adminDist, 'index.html'));
+            }
             next();
         });
     });
@@ -326,9 +371,11 @@ if (fs.existsSync(path.join(adminDist, 'index.html'))) {
 if (fs.existsSync(path.join(dashboardDist, 'index.html'))) {
     app.use((req, res, next) => {
         if (!isDashboardHost(req) || req.path.startsWith('/api')) return next();
-        express.static(dashboardDist)(req, res, (err) => {
+        express.static(dashboardDist, staticOptions)(req, res, (err) => {
             if (err) return next(err);
-            if (req.method === 'GET') return res.sendFile(path.join(dashboardDist, 'index.html'));
+            if (req.method === 'GET' && !req.path.startsWith('/assets/') && !path.extname(req.path)) {
+                return sendHtmlFile(res, path.join(dashboardDist, 'index.html'));
+            }
             next();
         });
     });
@@ -338,19 +385,19 @@ if (fs.existsSync(path.join(dashboardDist, 'index.html'))) {
 // admin-host or dashboard-host request fall through to the public app.
 app.use((req, res, next) => {
     if (isAdminHost(req) || isDashboardHost(req)) return next();
-    express.static(frontendDist)(req, res, next);
+    express.static(frontendDist, staticOptions)(req, res, next);
 });
 
 app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.startsWith('/api') && !isLegacyAdminPath(req)) {
+    if (req.method === 'GET' && !req.path.startsWith('/api') && !isLegacyAdminPath(req) && !req.path.startsWith('/assets/') && !path.extname(req.path)) {
         if (isAdminHost(req) && fs.existsSync(path.join(adminDist, 'index.html'))) {
-            return res.sendFile(path.join(adminDist, 'index.html'));
+            return sendHtmlFile(res, path.join(adminDist, 'index.html'));
         }
         if (isDashboardHost(req) && fs.existsSync(path.join(dashboardDist, 'index.html'))) {
-            return res.sendFile(path.join(dashboardDist, 'index.html'));
+            return sendHtmlFile(res, path.join(dashboardDist, 'index.html'));
         }
         if (fs.existsSync(path.join(frontendDist, 'index.html'))) {
-            return res.sendFile(path.join(frontendDist, 'index.html'));
+            return sendHtmlFile(res, path.join(frontendDist, 'index.html'));
         }
     }
     next();

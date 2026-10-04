@@ -23,8 +23,39 @@ import LandingTestimonials from "../components/landing/LandingTestimonials.jsx";
 import LandingFAQ from "../components/landing/LandingFAQ.jsx";
 import LandingCTA from "../components/landing/LandingCTA.jsx";
 import DragToCartDropZone from "../components/ui/DragToCartDropZone.jsx";
-import LandingLoader from "../components/ui/LandingLoader.jsx";
+import LandingSkeleton from "../components/landing/LandingSkeleton.jsx";
 import SEOHead from "../components/ui/SEOHead.jsx";
+
+function preloadImage(url) {
+    return new Promise((resolve) => {
+        if (!url || typeof url !== 'string' || !url.trim()) {
+            return resolve(null);
+        }
+        const img = new Image();
+        let settled = false;
+        const done = () => {
+            if (!settled) {
+                settled = true;
+                resolve(url);
+            }
+        };
+        img.onload = done;
+        img.onerror = done;
+        img.src = url;
+        if (img.complete) {
+            done();
+        }
+    });
+}
+
+function waitForWindowLoad() {
+    return new Promise((resolve) => {
+        if (typeof document === 'undefined' || document.readyState === 'complete') {
+            return resolve();
+        }
+        window.addEventListener('load', resolve, { once: true });
+    });
+}
 
 const fallbackHeroSlides = [
     { image: '', alt: '' },
@@ -139,6 +170,8 @@ export default function Landing() {
     const [sectionIds, setSectionIds] = useState({ capsule: 'capsule-courses', skill: 'skill-packages', subscriptions: 'subscriptions' });
     const [contentMap, setContentMap] = useState({});
 
+    const [isFullyLoaded, setIsFullyLoaded] = useState(false);
+
     useEffect(() => {
         let cancelled = false;
         Promise.allSettled([
@@ -187,16 +220,50 @@ export default function Landing() {
                 setContentMap(Object.fromEntries((contentResult.value.data ?? []).map((block) => [block.key, block])));
             }
 
-            // Refresh ScrollTrigger calculations after dynamic content renders
-            setTimeout(() => {
-                ScrollTrigger.refresh();
-            }, 100);
+            // Strict display rule: Track all image assets and pre-cache them before revealing page
+            const imageUrls = new Set();
+            imageUrls.add('/assets/logo.png');
+
+            if (bannerResult.status === 'fulfilled') {
+                for (const banner of (bannerResult.value.data ?? [])) {
+                    if (banner.imageUrl) imageUrls.add(banner.imageUrl);
+                    if (banner.tabletImageUrl) imageUrls.add(banner.tabletImageUrl);
+                    if (banner.mobileImageUrl) imageUrls.add(banner.mobileImageUrl);
+                }
+            }
+            if (courseResult.status === 'fulfilled') {
+                for (const course of (courseResult.value.data ?? [])) {
+                    if (course.image) imageUrls.add(course.image);
+                }
+            }
+            if (teacherResult.status === 'fulfilled') {
+                for (const teacher of (teacherResult.value.data ?? [])) {
+                    if (teacher.avatar) imageUrls.add(teacher.avatar);
+                }
+            }
+            for (const t of testimonials) {
+                if (t.avatar) imageUrls.add(t.avatar);
+            }
+
+            const imageLoads = Array.from(imageUrls).map(preloadImage);
+            const windowLoad = waitForWindowLoad();
+
+            // Strict barrier: Wait for all critical image assets and window load
+            const allAssetsLoaded = Promise.all([...imageLoads, windowLoad]);
+            const safetyTimeout = new Promise((resolve) => setTimeout(resolve, 8000));
+
+            Promise.race([allAssetsLoaded, safetyTimeout]).then(() => {
+                if (cancelled) return;
+                setIsFullyLoaded(true);
+                setTimeout(() => {
+                    window.__lenis?.resize();
+                    ScrollTrigger.refresh(true);
+                }, 100);
+            });
         });
 
         return () => { cancelled = true; };
     }, []);
-
-    const [isLoaderDone, setIsLoaderDone] = useState(false);
 
     useEffect(() => {
         // Keep ScrollTrigger and Lenis continuously synchronized with any DOM layout changes
@@ -274,6 +341,20 @@ export default function Landing() {
         ]
     };
 
+    if (!isFullyLoaded) {
+        return (
+            <>
+                <SEOHead
+                    title="مدرسه حرکت | مدرسه هنر و مهارت"
+                    description="مدرسه حرکت جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی."
+                    canonical="https://schoolharekat.ir/"
+                    schemaJson={homeSchema}
+                />
+                <LandingSkeleton />
+            </>
+        );
+    }
+
     return (
         <SmoothScrollProvider>
             <SEOHead
@@ -281,20 +362,6 @@ export default function Landing() {
                 description="مدرسه حرکت جایی برای یادگیری و تجربه در مرز هنر، رسانه و فناوری است؛ از عکاسی و تدوین و طراحی تا برنامه‌نویسی، طراحی سایت و هوش مصنوعی."
                 canonical="https://schoolharekat.ir/"
                 schemaJson={homeSchema}
-            />
-
-            {/* Custom Initial Loading Screen */}
-            <LandingLoader
-                isReady={!isLoading}
-                onComplete={() => {
-                    setIsLoaderDone(true);
-                    window.__lenis?.resize();
-                    ScrollTrigger.refresh(true);
-                    setTimeout(() => {
-                        window.__lenis?.resize();
-                        ScrollTrigger.refresh(true);
-                    }, 200);
-                }}
             />
 
             {/* Top luxury scroll indicator & drag drop zone */}
@@ -308,12 +375,12 @@ export default function Landing() {
                     {/* ============ HERO ============ */}
                     <LandingHero
                         heroSlides={heroSlides}
-                        isLoading={isLoading}
+                        isLoading={false}
                         heroTitle={heroTitle}
                         heroSubtitle={heroSubtitle}
                         images={images}
                         onCtaClick={handleCtaClick}
-                        isPageReady={isLoaderDone}
+                        isPageReady={true}
                     />
 
                     {/* ============ MANIFESTO ============ */}
@@ -327,34 +394,34 @@ export default function Landing() {
                         baseCourses={baseCourses}
                         beginnerCourses={beginnerCourses}
                         advancedCourses={advancedCourses}
-                        isLoading={isLoading}
+                        isLoading={false}
                     />
 
                     {/* ============ CAPSULE COURSES ============ */}
                     <LandingCapsules
                         id={sectionIds.capsule}
                         capsuleCourses={capsuleCourses}
-                        isLoading={isLoading}
+                        isLoading={false}
                     />
 
                     {/* ============ SKILL PACKAGES ============ */}
                     <LandingPackages
                         id={sectionIds.skill}
                         skillPackages={skillPackages}
-                        isLoading={isLoading}
+                        isLoading={false}
                     />
 
                     {/* ============ SUBSCRIPTIONS ============ */}
                     <LandingSubscriptions
                         id={sectionIds.subscriptions}
                         apiSubscriptions={apiSubscriptions}
-                        isLoading={isLoading}
+                        isLoading={false}
                     />
 
                     {/* ============ MENTORS ============ */}
                     <LandingMentors
                         displayTeachers={displayTeachers}
-                        isLoading={isLoading}
+                        isLoading={false}
                         onJoinClick={() => navigate('/contact-us')}
                     />
 
