@@ -1,0 +1,20 @@
+{
+  "name": "harekat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Harekat LMS Platform",
+  "scripts": {
+    "build": "npm run build:all",
+    "build:all": "npm run build:landing && npm run build:admin && npm run build:dashboard",
+    "build:landing": "npm --prefix harekat-landing run build",
+    "build:admin": "npm --prefix harekat-admin run build",
+    "build:dashboard": "npm --prefix harekat-dashboard run build",
+    "dev:landing": "npm --prefix harekat-landing run dev",
+    "dev:admin": "npm --prefix harekat-admin run dev",
+    "dev:dashboard": "npm --prefix harekat-dashboard run dev",
+    "dev:backend": "npm --prefix harekat-backend run dev",
+    "start:backend": "npm --prefix harekat-backend start",
+    "test:backend": "npm --prefix harekat-backend test",
+    "test": "npm --prefix harekat-backend test"
+  }
+}
