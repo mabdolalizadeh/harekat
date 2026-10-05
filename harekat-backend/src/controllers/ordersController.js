@@ -1,4 +1,5 @@
 import { Orders, OrderItems, Cart, CartItem, Users, Courses, Subscriptions, Payments, Coupon } from '../models/index.js';
+import { configs } from '../config/config.js';
 import { logSecurityEvent } from '../utils/logger.js';
 import { checkUsable } from './couponsController.js';
 
@@ -107,13 +108,14 @@ export default class OrdersController {
             }
 
             // Initialize pending payment entry for this order
+            const defaultGateway = configs.paymentGateway || (process.env.PAYMENT_GATEWAY === 'zibal' ? 'zibal' : 'mock');
             const payment = await Payments.create({
                 userId,
                 orderId: order.id,
                 amount: String(finalAmount),
                 status: 'pending',
                 type: 'pending',
-                gateway: 'mock'
+                gateway: defaultGateway
             });
 
             order.paymentId = payment.id;

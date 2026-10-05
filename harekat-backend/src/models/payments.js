@@ -32,7 +32,7 @@ const Payments = sequelize.define("Payments", {
     gateway: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 'mock'
+        defaultValue: 'zibal'
     },
     transactionId: {
         type: DataTypes.STRING,

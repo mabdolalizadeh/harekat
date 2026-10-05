@@ -217,6 +217,12 @@ export const customerApi = {
     getOrder: (id) => get(`/orders/${id}`, { auth: true }),
 };
 
+export const paymentsApi = {
+    initiatePayment: (orderId, gateway, returnUrl = '', description = '') =>
+        post('/payments/initiate', { orderId, gateway, returnUrl, description }, { auth: true }),
+    getPaymentStatus: (id) => get(`/payments/${id}/status`, { auth: true }),
+};
+
 export const authApi = {
     requestOtp: (phoneNumber) => post('/auth', { phoneNumber }),
     validateOtp: (phoneNumber, otp) => post('/auth/validate-otp', { phoneNumber, otp }),

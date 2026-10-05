@@ -46,7 +46,7 @@ export async function migrateLmsSchema() {
         const existing = new Set(payCols.map((c) => c.name));
         if (!existing.has('orderId')) await sequelize.query("ALTER TABLE Payments ADD COLUMN orderId UUID");
         if (!existing.has('amount')) await sequelize.query("ALTER TABLE Payments ADD COLUMN amount VARCHAR(255)");
-        if (!existing.has('gateway')) await sequelize.query("ALTER TABLE Payments ADD COLUMN gateway VARCHAR(50) DEFAULT 'mock'");
+        if (!existing.has('gateway')) await sequelize.query("ALTER TABLE Payments ADD COLUMN gateway VARCHAR(50) DEFAULT 'zibal'");
         if (!existing.has('transactionId')) await sequelize.query("ALTER TABLE Payments ADD COLUMN transactionId VARCHAR(255)");
         if (!existing.has('trackId')) await sequelize.query("ALTER TABLE Payments ADD COLUMN trackId VARCHAR(255)");
         if (!existing.has('cardNumber')) await sequelize.query("ALTER TABLE Payments ADD COLUMN cardNumber VARCHAR(255)");

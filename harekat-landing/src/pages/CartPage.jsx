@@ -6,7 +6,7 @@ import Box from '../components/ui/Box.jsx';
 import { H1, H2, P } from '../components/ui/Headings.jsx';
 import { PrimaryButton, SecondaryButton } from '../components/ui/Buttons.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
-import { storeApi, customerApi, token, assetUrl } from '../services/api.js';
+import { storeApi, customerApi, paymentsApi, token, assetUrl } from '../services/api.js';
 import { getDashboardUrl } from '../utils/dashboardUrl.js';
 import {
     ShoppingCart,
@@ -98,13 +98,17 @@ export default function CartPage() {
             setCheckoutError('');
             const res = await customerApi.createOrder(appliedCoupon?.code || null);
             if (res?.ok && res.data?.id) {
+                const initRes = await paymentsApi.initiatePayment(res.data.id);
+                if (initRes?.ok && initRes.data?.requiresGatewayRedirect && initRes.data?.redirectUrl) {
+                    window.location.href = initRes.data.redirectUrl;
+                    return;
+                }
                 window.location.href = getDashboardUrl('/payments');
             } else {
-                window.location.href = getDashboardUrl('/payments');
+                setCheckoutError(res?.message || 'خطا در ثبت سفارش');
             }
         } catch (err) {
-            setCheckoutError(err.message || 'خطا در ثبت سفارش');
-            window.location.href = getDashboardUrl('/payments');
+            setCheckoutError(err.message || 'خطا در ثبت سفارش یا اتصال به درگاه پرداخت');
         } finally {
             setCheckoutLoading(false);
         }

@@ -65,7 +65,8 @@ export default function OrdersPage() {
     try {
       setLoading(true);
       const orderId = payment.orderId || payment.id;
-      const initRes = await paymentsApi.initiatePayment(orderId, payment.gateway);
+      const gateway = (payment.gateway && payment.gateway !== 'mock') ? payment.gateway : undefined;
+      const initRes = await paymentsApi.initiatePayment(orderId, gateway);
       if (initRes?.ok && initRes.data?.requiresGatewayRedirect && initRes.data?.redirectUrl) {
         window.location.href = initRes.data.redirectUrl;
         return;

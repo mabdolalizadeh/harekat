@@ -16,7 +16,7 @@ import {
     ExternalLink
 } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext.jsx';
-import { storeApi, customerApi, token, assetUrl } from '../../services/api.js';
+import { storeApi, customerApi, paymentsApi, token, assetUrl } from '../../services/api.js';
 import { getDashboardUrl } from '../../utils/dashboardUrl.js';
 import { PrimaryButton, SecondaryButton } from '../ui/Buttons.jsx';
 import { cn } from '../../utils/cn.js';
@@ -86,6 +86,14 @@ export default function CartDrawer() {
         try {
             setCheckoutLoading(true);
             const res = await customerApi.createOrder(appliedCoupon?.code || null);
+            if (res?.ok && res.data?.id) {
+                const initRes = await paymentsApi.initiatePayment(res.data.id);
+                if (initRes?.ok && initRes.data?.requiresGatewayRedirect && initRes.data?.redirectUrl) {
+                    closeCart();
+                    window.location.href = initRes.data.redirectUrl;
+                    return;
+                }
+            }
             closeCart();
             window.location.href = getDashboardUrl('/payments');
         } catch (err) {
