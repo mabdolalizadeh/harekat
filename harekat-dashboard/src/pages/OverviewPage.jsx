@@ -172,9 +172,35 @@ export default function OverviewPage() {
           <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.35rem', sm: '1.5rem', md: '1.75rem' }, color: 'text.primary', mb: 0.5 }}>
             میز کار و جلسات آموزشی من
           </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            دسترسی به دوره‌های فعال (<AnimatedNumber value={accessibleCourses.length} /> دوره) و پیگیری جلسات کلاسی
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              سلام، {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'دانش‌آموز گرامی'}
+            </Typography>
+            {user?.gradeLevel && (
+              <Chip
+                label={`پایه: ${user.gradeLevel}`}
+                size="small"
+                variant="outlined"
+                color="primary"
+                sx={{ height: 22, fontSize: '0.74rem', fontWeight: 700 }}
+              />
+            )}
+            {user?.schoolName && (
+              <Chip
+                label={`مدرسه: ${user.schoolName}`}
+                size="small"
+                variant="outlined"
+                sx={{ height: 22, fontSize: '0.74rem', fontWeight: 600, color: 'text.secondary' }}
+              />
+            )}
+            {user?.nationalId && (
+              <Chip
+                label={`کد ملی: ${user.nationalId}`}
+                size="small"
+                sx={{ height: 22, fontSize: '0.74rem', bgcolor: 'action.hover', color: 'text.secondary' }}
+              />
+            )}
+          </Box>
         </Box>
 
         {/* Superfocus Switch */}

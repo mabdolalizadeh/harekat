@@ -73,7 +73,25 @@ export default class UsersController {
             return res.status(403).json({ ok: false, message: 'forbidden' });
         }
 
-        const { firstName, lastName, phoneNumber, courseIds, paymentIds, avatar, nationalId, bio, jobTitle, education, rubies } = req.body;
+        const {
+            firstName,
+            lastName,
+            phoneNumber,
+            courseIds,
+            paymentIds,
+            avatar,
+            nationalId,
+            gradeLevel,
+            dateOfBirth,
+            schoolName,
+            age,
+            parentPhone,
+            fatherName,
+            bio,
+            jobTitle,
+            education,
+            rubies
+        } = req.body;
 
         try {
             const user = await Users.findByPk(id);
@@ -81,19 +99,57 @@ export default class UsersController {
                 return res.status(404).json({ ok: false, message: 'user not found' });
             }
 
-            if (firstName !== undefined) user.firstName = firstName;
-            if (lastName !== undefined) user.lastName = lastName;
+            // Field validation
+            if (nationalId !== undefined && nationalId !== null && nationalId !== '') {
+                const cleanNationalId = String(nationalId).trim();
+                if (!/^\d{10}$/.test(cleanNationalId)) {
+                    return res.status(400).json({ ok: false, message: 'nationalId must be exactly 10 digits' });
+                }
+                user.nationalId = cleanNationalId;
+            } else if (nationalId === '' || nationalId === null) {
+                user.nationalId = null;
+            }
+
+            if (parentPhone !== undefined && parentPhone !== null && parentPhone !== '') {
+                const cleanParentPhone = String(parentPhone).trim();
+                if (!/^09\d{9}$/.test(cleanParentPhone)) {
+                    return res.status(400).json({ ok: false, message: 'parentPhone must be a valid Iranian phone number (e.g. 09123456789)' });
+                }
+                user.parentPhone = cleanParentPhone;
+            } else if (parentPhone === '' || parentPhone === null) {
+                user.parentPhone = null;
+            }
+
+            if (age !== undefined && age !== null && age !== '') {
+                const numAge = parseInt(age, 10);
+                if (isNaN(numAge) || numAge < 3 || numAge > 120) {
+                    return res.status(400).json({ ok: false, message: 'age must be a valid integer between 3 and 120' });
+                }
+                user.age = numAge;
+            } else if (age === null || age === '') {
+                user.age = null;
+            }
+
+            if (firstName !== undefined) user.firstName = firstName ? String(firstName).trim() : null;
+            if (lastName !== undefined) user.lastName = lastName ? String(lastName).trim() : null;
+            if (gradeLevel !== undefined) user.gradeLevel = gradeLevel ? String(gradeLevel).trim() : null;
+            if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth ? String(dateOfBirth).trim() : null;
+            if (schoolName !== undefined) user.schoolName = schoolName ? String(schoolName).trim() : null;
+            if (fatherName !== undefined) user.fatherName = fatherName ? String(fatherName).trim() : null;
             if (avatar !== undefined) user.avatar = avatar;
-            if (nationalId !== undefined) user.nationalId = nationalId;
             if (bio !== undefined) user.bio = bio;
             if (jobTitle !== undefined) user.jobTitle = jobTitle;
             if (education !== undefined) user.education = education;
             if (phoneNumber !== undefined && phoneNumber !== user.phoneNumber) {
-                const existing = await Users.findOne({ where: { phoneNumber } });
+                const cleanPhone = String(phoneNumber).trim();
+                if (!/^09\d{9}$/.test(cleanPhone)) {
+                    return res.status(400).json({ ok: false, message: 'phoneNumber must be a valid Iranian phone number' });
+                }
+                const existing = await Users.findOne({ where: { phoneNumber: cleanPhone } });
                 if (existing && existing.id !== id) {
                     return res.status(409).json({ ok: false, message: 'phone number already in use' });
                 }
-                user.phoneNumber = phoneNumber;
+                user.phoneNumber = cleanPhone;
             }
 
             // Only administrative roles can update rubies, course grants, or payment relations

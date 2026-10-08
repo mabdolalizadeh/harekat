@@ -51,6 +51,30 @@ const Users = sequelize.define('Users', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    gradeLevel: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    dateOfBirth: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    schoolName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    age: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    parentPhone: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    fatherName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     bio: {
         type: DataTypes.TEXT,
         allowNull: true

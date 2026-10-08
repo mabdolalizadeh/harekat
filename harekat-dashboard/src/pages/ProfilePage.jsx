@@ -47,6 +47,12 @@ export default function ProfilePage() {
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
   const [nationalId, setNationalId] = useState(user?.nationalId || '');
+  const [gradeLevel, setGradeLevel] = useState(user?.gradeLevel || '');
+  const [dateOfBirth, setDateOfBirth] = useState(user?.dateOfBirth || '');
+  const [schoolName, setSchoolName] = useState(user?.schoolName || '');
+  const [age, setAge] = useState(user?.age !== undefined && user?.age !== null ? String(user.age) : '');
+  const [parentPhone, setParentPhone] = useState(user?.parentPhone || '');
+  const [fatherName, setFatherName] = useState(user?.fatherName || '');
   const [bio, setBio] = useState(user?.bio || '');
   const [jobTitle, setJobTitle] = useState(user?.jobTitle || '');
   const [education, setEducation] = useState(user?.education || '');
@@ -56,6 +62,26 @@ export default function ProfilePage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [message, setMessage] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Sync state if user context changes
+  useEffect(() => {
+    if (user) {
+      if (user.firstName !== undefined) setFirstName(user.firstName || '');
+      if (user.lastName !== undefined) setLastName(user.lastName || '');
+      if (user.phoneNumber !== undefined) setPhoneNumber(user.phoneNumber || '');
+      if (user.nationalId !== undefined) setNationalId(user.nationalId || '');
+      if (user.gradeLevel !== undefined) setGradeLevel(user.gradeLevel || '');
+      if (user.dateOfBirth !== undefined) setDateOfBirth(user.dateOfBirth || '');
+      if (user.schoolName !== undefined) setSchoolName(user.schoolName || '');
+      if (user.age !== undefined && user.age !== null) setAge(String(user.age));
+      if (user.parentPhone !== undefined) setParentPhone(user.parentPhone || '');
+      if (user.fatherName !== undefined) setFatherName(user.fatherName || '');
+      if (user.bio !== undefined) setBio(user.bio || '');
+      if (user.jobTitle !== undefined) setJobTitle(user.jobTitle || '');
+      if (user.education !== undefined) setEducation(user.education || '');
+      if (user.avatar !== undefined) setAvatar(user.avatar || '');
+    }
+  }, [user]);
 
   // Sync avatar if user context changes
   useEffect(() => {
@@ -135,16 +161,20 @@ export default function ProfilePage() {
     loadSubscription();
   }, []);
 
-  // Profile completion calculation
+  // Profile completion calculation (10 core student fields)
   const fields = [
     { name: 'نام', val: firstName },
     { name: 'نام خانوادگی', val: lastName },
-    { name: 'شماره همراه', val: phoneNumber },
+    { name: 'پایه تحصیلی', val: gradeLevel },
+    { name: 'تاریخ تولد', val: dateOfBirth },
+    { name: 'نام مدرسه', val: schoolName },
+    { name: 'سن', val: age },
+    { name: 'شماره همراه دانش‌آموز', val: phoneNumber },
+    { name: 'شماره همراه والد', val: parentPhone },
     { name: 'کد ملی', val: nationalId },
-    { name: 'درباره من', val: bio },
-    { name: 'تحصیلات', val: education }
+    { name: 'نام پدر', val: fatherName }
   ];
-  const filledCount = fields.filter((f) => Boolean(f.val && f.val.trim())).length;
+  const filledCount = fields.filter((f) => Boolean(f.val && String(f.val).trim())).length;
   const completionPercentage = Math.round((filledCount / fields.length) * 100);
 
   const handleSubmit = async (e) => {
@@ -152,11 +182,30 @@ export default function ProfilePage() {
     try {
       setSaving(true);
       setMessage(null);
+
+      if (nationalId && !/^\d{10}$/.test(nationalId.trim())) {
+        setMessage({ type: 'error', text: 'کد ملی باید دقیقا ۱۰ رقم باشد.' });
+        setSaving(false);
+        return;
+      }
+
+      if (parentPhone && !/^09\d{9}$/.test(parentPhone.trim())) {
+        setMessage({ type: 'error', text: 'شماره همراه والد باید با ۰۹ شروع شده و ۱۱ رقم باشد.' });
+        setSaving(false);
+        return;
+      }
+
       await updateProfile({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         phoneNumber: phoneNumber.trim(),
         nationalId: nationalId.trim(),
+        gradeLevel: gradeLevel.trim(),
+        dateOfBirth: dateOfBirth.trim(),
+        schoolName: schoolName.trim(),
+        age: age ? parseInt(age, 10) : null,
+        parentPhone: parentPhone.trim(),
+        fatherName: fatherName.trim(),
         bio: bio.trim(),
         jobTitle: jobTitle.trim(),
         education: education.trim(),
@@ -625,7 +674,7 @@ export default function ProfilePage() {
                 {/* National ID (کد ملی) */}
                 <Grid item xs={12} sm={6}>
                   <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
-                    کد ملی (جهت صدور گواهینامه):
+                    کد ملی (۱۰ رقم):
                   </Typography>
                   <TextField
                     fullWidth
@@ -633,20 +682,108 @@ export default function ProfilePage() {
                     value={nationalId}
                     onChange={(e) => setNationalId(e.target.value)}
                     placeholder="۰۰۱۲۳۴۵۶۷۸"
+                    slotProps={{ htmlInput: { dir: 'ltr', maxLength: 10 } }}
+                  />
+                </Grid>
+
+                {/* Father's Name */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                    نام پدر:
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={fatherName}
+                    onChange={(e) => setFatherName(e.target.value)}
+                    placeholder="مثال: رضا"
+                  />
+                </Grid>
+
+                {/* Grade / Educational Level */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                    پایه / مقطع تحصیلی:
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={gradeLevel}
+                    onChange={(e) => setGradeLevel(e.target.value)}
+                    placeholder="مثال: دهم تجربی / نهم"
+                  />
+                </Grid>
+
+                {/* School Name */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                    نام مدرسه:
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={schoolName}
+                    onChange={(e) => setSchoolName(e.target.value)}
+                    placeholder="مثال: دبیرستان علامه حلی"
+                  />
+                </Grid>
+
+                {/* Date of Birth */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                    تاریخ تولد:
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    placeholder="مثال: 1388/05/12"
                     slotProps={{ htmlInput: { dir: 'ltr' } }}
                   />
                 </Grid>
 
-                {/* Phone Number */}
+                {/* Age */}
                 <Grid item xs={12} sm={6}>
                   <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
-                    شماره همراه:
+                    سن:
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="مثال: 16"
+                    slotProps={{ htmlInput: { dir: 'ltr', min: 3, max: 120 } }}
+                  />
+                </Grid>
+
+                {/* Student Phone Number */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                    شماره همراه دانش‌آموز:
                   </Typography>
                   <TextField
                     fullWidth
                     size="small"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                    slotProps={{ htmlInput: { dir: 'ltr' } }}
+                  />
+                </Grid>
+
+                {/* Parent Phone Number */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                    شماره همراه والد / سرپرست:
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={parentPhone}
+                    onChange={(e) => setParentPhone(e.target.value)}
                     placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                     slotProps={{ htmlInput: { dir: 'ltr' } }}
                   />

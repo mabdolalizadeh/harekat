@@ -262,6 +262,7 @@ export const adminApi = {
     getTaProfile: () => get('/tas/me', { auth: true, tokenKind: 'adminToken' }),
     // Students & Access
     listStudents: () => get('/users', { auth: true, tokenKind: 'adminToken' }),
+    updateStudent: (id, payload) => put(`/users/${id}`, payload, { auth: true, tokenKind: 'adminToken' }),
     inspectStudentAccess: (userId) => get(`/access/student/${userId}`, { auth: true, tokenKind: 'adminToken' }),
     grantAccess: (payload) => post('/access/grant', payload, { auth: true, tokenKind: 'adminToken' }),
     revokeAccess: (payload) => post('/access/revoke', payload, { auth: true, tokenKind: 'adminToken' }),

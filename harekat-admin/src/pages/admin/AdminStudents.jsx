@@ -36,6 +36,8 @@ import {
   Star as StarIcon,
   Security as AccessIcon,
   CheckCircle as ActiveIcon,
+  Edit as EditIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 import { adminApi, isSuperAdmin } from '../../services/api.js';
 import { useApi } from '../../hooks/useApi.js';
@@ -333,10 +335,211 @@ function StudentAccessModal({ open, student, courses, onClose, onUpdated }) {
   );
 }
 
+function StudentEditModal({ open, student, onClose, onUpdated }) {
+  const { showSuccess, showError } = useNotification();
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    nationalId: '',
+    gradeLevel: '',
+    dateOfBirth: '',
+    schoolName: '',
+    age: '',
+    parentPhone: '',
+    fatherName: '',
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (student) {
+      setFormData({
+        firstName: student.firstName || '',
+        lastName: student.lastName || '',
+        phoneNumber: student.phoneNumber || '',
+        nationalId: student.nationalId || '',
+        gradeLevel: student.gradeLevel || '',
+        dateOfBirth: student.dateOfBirth || '',
+        schoolName: student.schoolName || '',
+        age: student.age !== undefined && student.age !== null ? String(student.age) : '',
+        parentPhone: student.parentPhone || '',
+        fatherName: student.fatherName || '',
+      });
+    }
+  }, [student]);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (formData.nationalId && !/^\d{10}$/.test(formData.nationalId.trim())) {
+        showError('کد ملی باید دقیقا ۱۰ رقم باشد.');
+        setSaving(false);
+        return;
+      }
+      if (formData.parentPhone && !/^09\d{9}$/.test(formData.parentPhone.trim())) {
+        showError('شماره همراه والد باید با ۰۹ شروع شده و ۱۱ رقم باشد.');
+        setSaving(false);
+        return;
+      }
+
+      await adminApi.updateStudent(student.id, {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
+        nationalId: formData.nationalId.trim(),
+        gradeLevel: formData.gradeLevel.trim(),
+        dateOfBirth: formData.dateOfBirth.trim(),
+        schoolName: formData.schoolName.trim(),
+        age: formData.age ? parseInt(formData.age, 10) : null,
+        parentPhone: formData.parentPhone.trim(),
+        fatherName: formData.fatherName.trim(),
+      });
+      showSuccess('مشخصات دانش‌آموز با موفقیت ذخیره و ثبت گردید.');
+      onUpdated();
+      onClose();
+    } catch (err) {
+      showError(err.message || 'خطا در ذخیره مشخصات دانش‌آموز');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ fontWeight: 800 }}>
+        ویرایش و ثبت پرونده هویتی دانش‌آموز: {student?.firstName} {student?.lastName}
+      </DialogTitle>
+      <DialogContent dividers>
+        <Box component="form" onSubmit={handleSave} sx={{ pt: 1 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="نام"
+                value={formData.firstName}
+                onChange={handleChange('firstName')}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="نام خانوادگی"
+                value={formData.lastName}
+                onChange={handleChange('lastName')}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="کد ملی (۱۰ رقم)"
+                value={formData.nationalId}
+                onChange={handleChange('nationalId')}
+                slotProps={{ htmlInput: { dir: 'ltr', maxLength: 10 } }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="نام پدر"
+                value={formData.fatherName}
+                onChange={handleChange('fatherName')}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="پایه / مقطع تحصیلی"
+                value={formData.gradeLevel}
+                onChange={handleChange('gradeLevel')}
+                placeholder="مثال: دهم تجربی"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="نام مدرسه"
+                value={formData.schoolName}
+                onChange={handleChange('schoolName')}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="تاریخ تولد (YYYY/MM/DD)"
+                value={formData.dateOfBirth}
+                onChange={handleChange('dateOfBirth')}
+                slotProps={{ htmlInput: { dir: 'ltr' } }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="سن"
+                value={formData.age}
+                onChange={handleChange('age')}
+                slotProps={{ htmlInput: { dir: 'ltr' } }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="شماره موبایل دانش‌آموز"
+                value={formData.phoneNumber}
+                onChange={handleChange('phoneNumber')}
+                slotProps={{ htmlInput: { dir: 'ltr' } }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="شماره موبایل والد / سرپرست"
+                value={formData.parentPhone}
+                onChange={handleChange('parentPhone')}
+                slotProps={{ htmlInput: { dir: 'ltr' } }}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+      </DialogContent>
+      <DialogActions sx={{ p: 2 }}>
+        <Button onClick={onClose} variant="outlined" color="inherit">
+          انصراف
+        </Button>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          disabled={saving}
+          startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
+        >
+          {saving ? 'در حال ثبت...' : 'ذخیره پرونده'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export default function AdminStudents() {
   const { showSuccess, showError } = useNotification();
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editStudent, setEditStudent] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   // Recommended course state
   const [recommendedCourseOverride, setRecommendedCourseOverride] = useState(null);
@@ -386,12 +589,28 @@ export default function AdminStudents() {
       },
     },
     {
-      id: 'phoneNumber',
-      label: 'شماره موبایل',
+      id: 'fatherName',
+      label: 'نام پدر',
       render: (row) => (
-        <Typography dir="ltr" sx={{ fontFamily: 'monospace', fontWeight: 500, fontSize: '0.84rem' }}>
-          {row.phoneNumber || '—'}
+        <Typography fontSize="0.84rem">
+          {row.fatherName || '—'}
         </Typography>
+      ),
+    },
+    {
+      id: 'gradeLevel',
+      label: 'پایه تحصیلی / مدرسه',
+      render: (row) => (
+        <Box>
+          <Typography fontSize="0.84rem" fontWeight={600}>
+            {row.gradeLevel || '—'}
+          </Typography>
+          {row.schoolName && (
+            <Typography variant="caption" color="text.secondary" display="block">
+              {row.schoolName}
+            </Typography>
+          )}
+        </Box>
       ),
     },
     {
@@ -401,6 +620,22 @@ export default function AdminStudents() {
         <Typography dir="ltr" sx={{ fontFamily: 'monospace', fontSize: '0.84rem' }}>
           {row.nationalId || '—'}
         </Typography>
+      ),
+    },
+    {
+      id: 'phoneNumber',
+      label: 'شماره دانش‌آموز / والد',
+      render: (row) => (
+        <Box>
+          <Typography dir="ltr" sx={{ fontFamily: 'monospace', fontWeight: 500, fontSize: '0.84rem' }}>
+            {row.phoneNumber || '—'}
+          </Typography>
+          {row.parentPhone && (
+            <Typography dir="ltr" variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace', display: 'block' }}>
+              والد: {row.parentPhone}
+            </Typography>
+          )}
+        </Box>
       ),
     },
     {
@@ -419,32 +654,37 @@ export default function AdminStudents() {
       },
     },
     {
-      id: 'createdAt',
-      label: 'تاریخ عضویت',
-      render: (row) => (
-        <Typography variant="caption" color="text.secondary">
-          {row.createdAt ? new Date(row.createdAt).toLocaleDateString('fa-IR') : '—'}
-        </Typography>
-      ),
-    },
-    {
       id: 'actions',
-      label: 'مدیریت دسترسی',
+      label: 'عملیات و پرونده',
       sortable: false,
       align: 'left',
       render: (row) => (
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<AccessIcon fontSize="small" />}
-          onClick={() => {
-            setSelectedStudent(row);
-            setModalOpen(true);
-          }}
-          sx={{ borderRadius: 2 }}
-        >
-          مدیریت دسترسی‌ها
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="ویرایش پرونده دانش‌آموز">
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => {
+                setEditStudent(row);
+                setEditModalOpen(true);
+              }}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<AccessIcon fontSize="small" />}
+            onClick={() => {
+              setSelectedStudent(row);
+              setModalOpen(true);
+            }}
+            sx={{ borderRadius: 2 }}
+          >
+            دسترسی‌ها
+          </Button>
+        </Stack>
       ),
     },
   ], []);
@@ -528,6 +768,21 @@ export default function AdminStudents() {
           student={selectedStudent}
           courses={courses.data || []}
           onClose={() => setModalOpen(false)}
+          onUpdated={() => {
+            students.reload();
+          }}
+        />
+      )}
+
+      {/* Modal for student profile editor */}
+      {editModalOpen && editStudent && (
+        <StudentEditModal
+          open={editModalOpen}
+          student={editStudent}
+          onClose={() => {
+            setEditModalOpen(false);
+            setEditStudent(null);
+          }}
           onUpdated={() => {
             students.reload();
           }}
